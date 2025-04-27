@@ -43,8 +43,10 @@ target_include_directories(qiti_lib PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/source
 )
 
-target_compile_options(qiti_lib INTERFACE
+target_compile_options(qiti_lib 
+INTERFACE
     "-finstrument-functions"
+    "-fno-omit-frame-pointer"
 )
 
 # =========================
