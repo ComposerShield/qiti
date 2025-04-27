@@ -1,65 +1,83 @@
-import json
+#!/usr/bin/env python3
 import subprocess
+import re
+import sys
 from pathlib import Path
+
+# Only include functions from your real source tree
+SOURCE_PREFIX = "/Users/Shared/Jenkins/antares/antdev/auto-tune-core/Source"
 
 def extract_function_signatures(obj_path):
     """
-    Extract function linkage names, return types, and parameter types
-    from a Mach-O object file's DWARF debug info (JSON via dwarfdump).
+    Returns a set of strings like:
+      <return_type> <mangled_symbol>(<param_type1>, <param_type2>, …)
+    for every DW_TAG_subprogram in the .o that comes from SOURCE_PREFIX.
     """
-    # Run dwarfdump to get JSON of debug info
+    # 1) run dwarfdump
     proc = subprocess.run(
-        ["xcrun", "dwarfdump", "--debug-info", "--json", str(obj_path)],
-        stdout=subprocess.PIPE,
-        check=True
+        ["xcrun", "dwarfdump", "--debug-info", str(obj_path)],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        check=True, text=True
     )
-    dwarfd = json.loads(proc.stdout)
+    dump = proc.stdout
 
-    signatures = []
-    for cu in dwarfd.get("CU", []):
-        for die in cu.get("abbrev", []):
-            if die.get("tag") != "DW_TAG_subprogram":
-                continue
+    functions = set()
 
-            # Location filter: only functions from "Source/" files
-            file_attr = die.get("attributes", {}).get("DW_AT_decl_file", {})
-            if "Source/" not in file_attr.get("value", ""):
-                continue
+    # 2) split at each function DIE
+    segments = re.split(r'(?=0x[0-9a-f]+:\s+DW_TAG_subprogram)', dump)
 
-            # Linkage name (mangled)
-            linkage = die.get("attributes", {}).get("DW_AT_linkage_name", {})
-            mname = linkage.get("value")
-            if not mname:
-                continue
+    for seg in segments[1:]:
+        # a) filter by source file path
+        m_file = re.search(r'DW_AT_decl_file\s+\("([^"]+)"\)', seg)
+        if not m_file or not m_file.group(1).startswith(SOURCE_PREFIX):
+            continue
 
-            # Return type DIE reference
-            ret_attr = die.get("attributes", {}).get("DW_AT_type", {})
-            ret_die_ref = ret_attr.get("value")
+        # b) demangled name (for fallback/readability)
+        m_name = re.search(r'DW_AT_name\s+\("([^"]+)"\)', seg)
+        if not m_name:
+            continue
+        demangled = m_name.group(1)
 
-            # Collect parameter type DIE references
-            param_refs = []
-            for child in die.get("children", []):
-                if child.get("tag") == "DW_TAG_formal_parameter":
-                    p_attr = child.get("attributes", {}).get("DW_AT_type", {})
-                    if p_attr.get("value"):
-                        param_refs.append(p_attr["value"])
+        # c) mangled symbol name (this is what the linker sees)
+        m_link = re.search(r'DW_AT_linkage_name\s+\("([^"]+)"\)', seg)
+        mangled = m_link.group(1) if m_link else demangled
 
-            signatures.append({
-                "mangled": mname,
-                "ret_die": ret_die_ref,
-                "param_dies": param_refs,
-                "die_offset": die.get("offset")
-            })
-    return signatures
+        # d) collect all the DW_AT_type entries in this segment:
+        #    first = return type, rest = parameters
+        #    this pulls the *human* type strings, e.g. "int", "float*", etc.
+        type_matches = re.findall(r'DW_AT_type\s+\([^"]*"([^"]+)"\)', seg)
+        if type_matches:
+            ret = type_matches[0]
+            params = type_matches[1:]
+        else:
+            ret = "void"
+            params = []
 
-# Example usage: scan all .o files under Source/
-source_dir = Path("build/ATCore_Project.build/Debug/Objects-normal/x86_64")
-all_signatures = []
-for obj in source_dir.glob("*.o"):
-    sigs = extract_function_signatures(obj)
-    all_signatures.extend(sigs)
+        sig = f"{ret} {mangled}({', '.join(params)})"
+        functions.add(sig)
 
-# Display the collected signatures
-import pandas as pd
-df = pd.DataFrame(all_signatures)
-import ace_tools as tools; tools.display_dataframe_to_user("Extracted DWARF Signatures", df)
+    return functions
+
+def main():
+    source_dir = Path(
+        "/Users/Shared/Jenkins/antares/antdev/auto-tune-core/"
+        "build/ATCore_Project.build/Debug/Objects-normal/x86_64"
+    )
+
+    all_signatures = set()
+
+    for obj in source_dir.glob("*.o"):
+        try:
+            all_signatures |= extract_function_signatures(obj)
+        except subprocess.CalledProcessError as e:
+            print(f"Warning: dwarfdump failed on {obj.name}: {e}", file=sys.stderr)
+
+    output_path = "function_signatures.txt"
+    with open(output_path, "w") as f:
+        for sig in sorted(all_signatures):
+            f.write(sig + "\n")
+
+    print(f"Wrote {len(all_signatures)} functions to {output_path}")
+
+if __name__ == "__main__":
+    main()
