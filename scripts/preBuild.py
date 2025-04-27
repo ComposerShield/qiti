@@ -10,7 +10,7 @@ SOURCE_PREFIX = "/Users/Shared/Jenkins/antares/antdev/auto-tune-core/Source"
 def extract_function_signatures(obj_path):
     """
     Returns a set of strings like:
-      <return_type> <mangled_symbol>(<param_type1>, <param_type2>, …)
+      <return_type> <mangled_symbol>(<param1_type>, <param2_type>, …)
     for every DW_TAG_subprogram in the .o that comes from SOURCE_PREFIX.
     """
     # 1) run dwarfdump
@@ -32,17 +32,14 @@ def extract_function_signatures(obj_path):
         if not m_file or not m_file.group(1).startswith(SOURCE_PREFIX):
             continue
 
-        # b) demangled name (for fallback/readability)
-        m_name = re.search(r'DW_AT_name\s+\("([^"]+)"\)', seg)
-        if not m_name:
-            continue
-        demangled = m_name.group(1)
-
-        # c) mangled symbol name (this is what the linker sees)
+        # b) grab the true mangled name
         m_link = re.search(r'DW_AT_linkage_name\s+\("([^"]+)"\)', seg)
-        mangled = m_link.group(1) if m_link else demangled
+        if not m_link:
+            # no linkage_name? skip (unlikely for C++ functions)
+            continue
+        mangled = m_link.group(1)
 
-        # d) collect all the DW_AT_type entries in this segment:
+        # c) collect all the DW_AT_type entries in this segment:
         #    first = return type, rest = parameters
         #    this pulls the *human* type strings, e.g. "int", "float*", etc.
         type_matches = re.findall(r'DW_AT_type\s+\([^"]*"([^"]+)"\)', seg)
