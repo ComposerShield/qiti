@@ -15,6 +15,6 @@ struct FunctionData
 /** demangle a GCC/Clang‐mangled name into a std::string */
 [[nodiscard]] std::string demangle(const char* mangledName);
 
-FunctionData& createAndRegisterFunctionData(const std::string& demangledFunctionName);
+[[nodiscard]] FunctionData& createAndRegisterFunctionData(const std::string& demangledFunctionName);
 
 } // namespace qiti
