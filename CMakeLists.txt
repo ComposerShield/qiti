@@ -32,7 +32,8 @@ set(SOURCES
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/source PREFIX "Source" FILES ${SOURCES})
 
-add_library(qiti_lib STATIC ${SOURCES})
+# add_library(qiti_lib STATIC ${SOURCES})
+add_library(qiti_lib SHARED ${SOURCES})
 
 set_target_properties(qiti_lib PROPERTIES
     OSX_ARCHITECTURES "${ARCHS}"
@@ -44,9 +45,17 @@ target_include_directories(qiti_lib PUBLIC
 )
 
 target_compile_options(qiti_lib 
+PRIVATE
+    "-fvisibility=hidden"
+    "-fvisibility-inlines-hidden"
 INTERFACE
     "-finstrument-functions"
     "-fno-omit-frame-pointer"
+)
+
+target_compile_definitions(qiti_lib
+PRIVATE
+    QITI_DYLIB=1
 )
 
 # =========================

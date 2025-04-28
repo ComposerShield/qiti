@@ -41,6 +41,8 @@ TEST_CASE("qiti::demangle() on valid Itanium‐ABI mangled names", "[qiti::deman
         // _ZN2ns3fooIiEET_S0_ → ns::foo<int>(int)
         QITI_REQUIRE( demangleFunc("_ZN2ns3fooIiEET_S0_") == "int ns::foo<int>(ns::foo)" );
     }
+    
+    qiti::shutdown();
 }
 
 TEST_CASE("qiti::demangle() falls back on non-mangled input", "[qiti::demangle]")
@@ -62,4 +64,6 @@ TEST_CASE("qiti::demangle() falls back on non-mangled input", "[qiti::demangle]"
         const char* empty = "";
         QITI_REQUIRE( demangleFunc(empty) == "" );
     }
+    
+    qiti::shutdown();
 }

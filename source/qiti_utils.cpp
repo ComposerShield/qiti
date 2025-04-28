@@ -6,8 +6,7 @@
 #include <cxxabi.h>
 #include <dlfcn.h>
 #include <map>
-
-#include <iostream>
+#include <string>
 
 /** */
 [[nodiscard]] static std::map<void*, qiti::FunctionData>& getFunctionMap()
@@ -15,6 +14,31 @@
     static std::map<void*, qiti::FunctionData> map;
     return map;
 }
+
+namespace qiti
+{
+class FunctionData::FunctionDataImpl
+{
+public:
+    QITI_API_INTERNAL FunctionDataImpl() = default;
+    QITI_API_INTERNAL ~FunctionDataImpl() = default;
+    
+    std::string functionNameMangled;
+    std::string functionNameReal;
+    int64_t numTimesCalled = 0;
+    int64_t averageTimeSpentInFunctionNanoseconds = 0;
+
+    struct LastCallData
+    {
+        std::chrono::steady_clock::time_point begin_time;
+        std::chrono::steady_clock::time_point end_time;
+        int64_t timeSpentInFunctionNanoseconds = 0;
+
+        int32_t numHeapAllocations = 0;
+    };
+    LastCallData lastCallData;
+};
+} // namespace qiti
 
 /** */
 extern "C" [[nodiscard]] qiti::FunctionData& __attribute__((no_instrument_function))
@@ -25,26 +49,29 @@ getFunctionData(void* functionAddress)
     auto it = g_functionMap.find(functionAddress);
     if (it == g_functionMap.end()) // not yet added to map
     {
-        Dl_info info;
-        if (dladdr(functionAddress, &info))
-        {
-            qiti::FunctionData data;
-//            data.functionNameMangled = info.dli_sname;
-//            data.functionNameReal = qiti::demangle(info.dli_sname);
-            
-            auto [insertedIt, success] = g_functionMap.emplace(functionAddress, std::move(data));
-            return insertedIt->second;
-        }
-        else
-        {
-            std::terminate();
-            // Handle the rare case where dladdr fails: still must insert something.
-            auto [insertedIt, success] = g_functionMap.emplace(functionAddress, qiti::FunctionData{});
-            return insertedIt->second;
-        }
+        qiti::FunctionData data(functionAddress);
+        
+        auto [insertedIt, success] = g_functionMap.emplace(functionAddress, std::move(data));
+        return insertedIt->second;
     }
     
     return it->second;
+}
+
+[[nodiscard]] const qiti::FunctionData* QITI_API_INTERNAL getFunctionData(const char* demangledFunctionName)
+{
+    auto& g_functionMap = getFunctionMap();
+    
+    auto it = std::find_if(g_functionMap.begin(), g_functionMap.end(),
+        [demangledFunctionName](const std::pair<void*, qiti::FunctionData>& pair)
+        {
+            return pair.second.getFunctionName() == std::string(demangledFunctionName);
+        });
+    
+    if (it == g_functionMap.end()) // function not found
+        return nullptr;
+    
+    return &(it->second);
 }
 
 // Mark “no-instrument” to prevent recursing into itself
@@ -54,9 +81,10 @@ __cyg_profile_func_enter(void* this_fn, void* call_site)
     static int recursionCheck = 0;
     assert(++recursionCheck == 1);
     
-    [[maybe_unused]] auto& functionData = getFunctionData(this_fn);
-//    ++functionData.numTimesCalled;
-//    functionData.lastCallData.begin_time = std::chrono::steady_clock::now();
+    auto& functionData = getFunctionData(this_fn);
+    auto* impl = functionData.getImpl();
+    ++impl->numTimesCalled;
+    impl->lastCallData.begin_time = std::chrono::steady_clock::now();
     
     --recursionCheck;
 }
@@ -65,28 +93,51 @@ __cyg_profile_func_enter(void* this_fn, void* call_site)
 extern "C" void QITI_API
 __cyg_profile_func_exit(void * this_fn, void* call_site)
 {
-//    auto& functionData = getFunctionData(this_fn);
-//    auto end_time = std::chrono::steady_clock::now();
-//    auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - functionData.lastCallData.begin_time);
-//
-//    functionData.lastCallData.end_time = end_time;
-//    functionData.lastCallData.timeSpentInFunction = static_cast<qiti::time_ns>(elapsed_ns.count());
+    auto& functionData = getFunctionData(this_fn);
+    auto* impl = functionData.getImpl();
+    
+    auto end_time = std::chrono::steady_clock::now();
+    auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - impl->lastCallData.begin_time);
+
+    impl->lastCallData.end_time = end_time;
+    impl->lastCallData.timeSpentInFunctionNanoseconds = static_cast<int64_t>(elapsed_ns.count());
 }
 
 namespace qiti
 {
-//std::string demangle(const char* mangledName)
-//{
-//    int status = 0;
-//    // abi::__cxa_demangle allocates with malloc; we wrap it in unique_ptr so it frees automatically
-//    std::unique_ptr<char, void(*)(void*)> result
-//    {
-//        abi::__cxa_demangle(mangledName, nullptr, nullptr, &status),
-//        std::free
-//    };
-//    // on success, result.get() is our demangled C-string; otherwise fall back
-//    return (status == 0 && result) ? result.get() : mangledName;
-//}
+
+FunctionData::FunctionData(void* functionAddress)
+{
+    impl = new FunctionDataImpl;
+    
+    Dl_info info;
+    if (dladdr(functionAddress, &info))
+    {
+        impl->functionNameMangled = info.dli_sname;
+        char functionNameDemangled[256];
+        qiti::demangle(info.dli_sname, functionNameDemangled, sizeof(functionNameDemangled));
+        impl->functionNameReal = functionNameDemangled;
+    }
+    else
+    {
+        std::terminate(); // TODO: will this ever happen?
+    }
+}
+
+FunctionData::~FunctionData()
+{
+//    delete impl; // TODO: Causes crash...
+}
+
+FunctionData::FunctionDataImpl* FunctionData::getImpl() const
+{
+    return impl;
+}
+
+const char* FunctionData::getFunctionName() const noexcept
+{
+    return impl->functionNameReal.c_str();
+}
 
 void demangle(const char* mangled_name, char* demangled_name, unsigned long long demangled_size)
 {
@@ -106,5 +157,10 @@ void demangle(const char* mangled_name, char* demangled_name, unsigned long long
         std::strncpy(demangled_name, mangled_name, demangled_size - 1);
         demangled_name[demangled_size - 1] = '\0'; // always null-terminate
     }
+}
+
+void shutdown()
+{
+    getFunctionMap().clear();
 }
 } // namespace qiti
