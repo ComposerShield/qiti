@@ -34,9 +34,21 @@ public:
         
         class Impl;
         /** Internal */
-        Impl* QITI_API_INTERNAL getImpl() const;
+        Impl* QITI_API_INTERNAL getImpl() const noexcept;
+        
+        /** Internal */
+        void QITI_API_INTERNAL reset() noexcept;
+        
+        /** Internal Move Constructor */
+        QITI_API_INTERNAL FunctionCallData(FunctionCallData&& other);
+        /** Internal Move Operator */
+        FunctionCallData& QITI_API_INTERNAL operator=(FunctionCallData&& other) noexcept;
+        
     private:
         Impl* impl;
+        
+        FunctionCallData(const FunctionCallData&) = delete;
+        FunctionCallData& operator=(const FunctionCallData&) = delete;
     };
     
     const char* QITI_API getFunctionName() const noexcept;
@@ -49,12 +61,19 @@ public:
     QITI_API_INTERNAL ~FunctionData();
     
     class Impl;
-    
     /** Internal */
-    Impl* QITI_API_INTERNAL getImpl() const;
+    Impl* QITI_API_INTERNAL getImpl() const noexcept;
+    
+    /** Internal Move Constructor */
+    QITI_API_INTERNAL FunctionData(FunctionData&& other);
+    /** Internal Move Operator */
+    FunctionData& QITI_API_INTERNAL operator=(FunctionData&& other) noexcept;
     
 private:
     Impl* impl;
+    
+    FunctionData(const FunctionData&) = delete;
+    FunctionData& operator=(const FunctionData&) = delete;
 };
 
 /** demangle a GCC/Clang‐mangled name into a std::string */

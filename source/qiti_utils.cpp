@@ -58,6 +58,7 @@ getFunctionData(void* functionAddress)
         qiti::FunctionData data(functionAddress);
         
         auto [insertedIt, success] = g_functionMap.emplace(functionAddress, std::move(data));
+
         return insertedIt->second;
     }
     
@@ -69,7 +70,7 @@ getFunctionData(void* functionAddress)
     auto& g_functionMap = getFunctionMap();
     
     auto it = std::find_if(g_functionMap.begin(), g_functionMap.end(),
-        [demangledFunctionName](const std::pair<void*, qiti::FunctionData>& pair)
+        [demangledFunctionName](const std::pair<void*, const qiti::FunctionData&>& pair)
         {
             return pair.second.getFunctionName() == std::string(demangledFunctionName);
         });
@@ -90,7 +91,7 @@ __cyg_profile_func_enter(void* this_fn, void* call_site)
     auto& functionData = getFunctionData(this_fn);
     auto* impl = functionData.getImpl();
     ++impl->numTimesCalled;
-    impl->lastCallData = {}; // reset
+    impl->lastCallData.reset();
     impl->lastCallData.getImpl()->begin_time = std::chrono::steady_clock::now();
 #ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
     impl->lastCallData.getImpl()->numHeapAllocationsBeforeFunctionCall = numHeapAllocationsOnCurrentThread;
@@ -149,10 +150,21 @@ FunctionData::FunctionData(void* functionAddress)
 
 FunctionData::~FunctionData()
 {
-//    delete impl; // TODO: Causes crash...
+    delete impl;
 }
 
-FunctionData::Impl* FunctionData::getImpl() const
+FunctionData::FunctionData(FunctionData&& other)
+{
+    impl = other.impl;
+    other.impl = nullptr;
+}
+
+FunctionData& FunctionData::operator=(FunctionData&& other) noexcept
+{
+    assert(false);
+}
+
+FunctionData::Impl* FunctionData::getImpl() const noexcept
 {
     return impl;
 }
@@ -169,12 +181,30 @@ FunctionData::FunctionCallData::FunctionCallData()
 
 FunctionData::FunctionCallData::~FunctionCallData()
 {
-//    delete impl; // TODO: Causes crash...
+    delete impl;
 }
 
-FunctionData::FunctionCallData::Impl* FunctionData::FunctionCallData::getImpl() const
+FunctionData::FunctionCallData::FunctionCallData(FunctionData::FunctionCallData&& other)
+{
+    impl = other.impl;
+    other.impl = nullptr;
+}
+
+FunctionData::FunctionCallData& FunctionData::FunctionCallData::operator=(FunctionData::FunctionCallData&& other) noexcept
+{
+    impl = other.impl;
+    other.impl = nullptr;
+}
+
+FunctionData::FunctionCallData::Impl* FunctionData::FunctionCallData::getImpl() const noexcept
 {
     return impl;
+}
+
+void FunctionData::FunctionCallData::reset() noexcept
+{
+    delete impl;
+    impl = new Impl;
 }
 
 unsigned long long FunctionData::FunctionCallData::getNumHeapAllocations() const noexcept
