@@ -85,10 +85,10 @@ void QITI_API demangle(const char* mangled_name,
 /** */
 void QITI_API shutdown();
 
-// User
+/** */
 [[nodiscard]] const qiti::FunctionData* QITI_API getFunctionData(const char* demangledFunctionName);
 
-// Internal
+/** Internal */
 [[nodiscard]] qiti::FunctionData& QITI_API getFunctionData(void* functionAddress);
 
 } // namespace qiti

@@ -46,9 +46,7 @@ public:
 };
 } // namespace qiti
 
-/** */
-extern "C" [[nodiscard]] qiti::FunctionData& __attribute__((no_instrument_function))
-getFunctionData(void* functionAddress)
+[[nodiscard]] qiti::FunctionData& getFunctionData(void* functionAddress)
 {
     auto& g_functionMap = getFunctionMap();
     
@@ -65,7 +63,7 @@ getFunctionData(void* functionAddress)
     return it->second;
 }
 
-[[nodiscard]] const qiti::FunctionData* QITI_API_INTERNAL getFunctionData(const char* demangledFunctionName)
+[[nodiscard]] const qiti::FunctionData* getFunctionData(const char* demangledFunctionName)
 {
     auto& g_functionMap = getFunctionMap();
     
@@ -81,8 +79,7 @@ getFunctionData(void* functionAddress)
     return &(it->second);
 }
 
-// Mark “no-instrument” to prevent recursing into itself
-extern "C" void QITI_API
+extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
 __cyg_profile_func_enter(void* this_fn, void* call_site)
 {
     static int recursionCheck = 0;
@@ -100,8 +97,7 @@ __cyg_profile_func_enter(void* this_fn, void* call_site)
     --recursionCheck;
 }
 
-// Mark “no-instrument” to prevent recursing into itself
-extern "C" void QITI_API
+extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
 __cyg_profile_func_exit(void * this_fn, void* call_site)
 {
     auto& functionData = getFunctionData(this_fn);
