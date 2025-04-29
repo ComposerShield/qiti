@@ -8,6 +8,10 @@
 #include <map>
 #include <string>
 
+#ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
+inline static thread_local uint64_t numHeapAllocationsOnCurrentThread = 0;
+#endif
+
 /** */
 [[nodiscard]] static std::map<void*, qiti::FunctionData>& getFunctionMap()
 {
@@ -17,26 +21,28 @@
 
 namespace qiti
 {
-class FunctionData::FunctionDataImpl
+struct FunctionData::FunctionCallData::Impl
+{
+    std::chrono::steady_clock::time_point begin_time;
+    std::chrono::steady_clock::time_point end_time;
+    int64_t timeSpentInFunctionNanoseconds = 0;
+
+    int64_t numHeapAllocationsBeforeFunctionCall = 0;
+    int64_t numHeapAllocationsAfterFunctionCall  = 0;
+};
+
+class FunctionData::Impl
 {
 public:
-    QITI_API_INTERNAL FunctionDataImpl() = default;
-    QITI_API_INTERNAL ~FunctionDataImpl() = default;
+    QITI_API_INTERNAL Impl() = default;
+    QITI_API_INTERNAL ~Impl() = default;
     
     std::string functionNameMangled;
     std::string functionNameReal;
     int64_t numTimesCalled = 0;
     int64_t averageTimeSpentInFunctionNanoseconds = 0;
 
-    struct LastCallData
-    {
-        std::chrono::steady_clock::time_point begin_time;
-        std::chrono::steady_clock::time_point end_time;
-        int64_t timeSpentInFunctionNanoseconds = 0;
-
-        int32_t numHeapAllocations = 0;
-    };
-    LastCallData lastCallData;
+    FunctionCallData lastCallData;
 };
 } // namespace qiti
 
@@ -84,7 +90,11 @@ __cyg_profile_func_enter(void* this_fn, void* call_site)
     auto& functionData = getFunctionData(this_fn);
     auto* impl = functionData.getImpl();
     ++impl->numTimesCalled;
-    impl->lastCallData.begin_time = std::chrono::steady_clock::now();
+    impl->lastCallData = {}; // reset
+    impl->lastCallData.getImpl()->begin_time = std::chrono::steady_clock::now();
+#ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
+    impl->lastCallData.getImpl()->numHeapAllocationsBeforeFunctionCall = numHeapAllocationsOnCurrentThread;
+#endif
     
     --recursionCheck;
 }
@@ -95,20 +105,33 @@ __cyg_profile_func_exit(void * this_fn, void* call_site)
 {
     auto& functionData = getFunctionData(this_fn);
     auto* impl = functionData.getImpl();
+    auto* callImpl = impl->lastCallData.getImpl();
     
     auto end_time = std::chrono::steady_clock::now();
-    auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - impl->lastCallData.begin_time);
+    auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - callImpl->begin_time);
 
-    impl->lastCallData.end_time = end_time;
-    impl->lastCallData.timeSpentInFunctionNanoseconds = static_cast<int64_t>(elapsed_ns.count());
+    callImpl->end_time = end_time;
+    callImpl->timeSpentInFunctionNanoseconds = static_cast<int64_t>(elapsed_ns.count());
+#ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
+    callImpl->numHeapAllocationsAfterFunctionCall = numHeapAllocationsOnCurrentThread;
+#endif
 }
+
+#ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
+void* operator new(size_t size)
+{
+    ++numHeapAllocationsOnCurrentThread;
+    void* p = malloc(size);
+    return p;
+}
+#endif
 
 namespace qiti
 {
 
 FunctionData::FunctionData(void* functionAddress)
 {
-    impl = new FunctionDataImpl;
+    impl = new Impl;
     
     Dl_info info;
     if (dladdr(functionAddress, &info))
@@ -129,7 +152,7 @@ FunctionData::~FunctionData()
 //    delete impl; // TODO: Causes crash...
 }
 
-FunctionData::FunctionDataImpl* FunctionData::getImpl() const
+FunctionData::Impl* FunctionData::getImpl() const
 {
     return impl;
 }
@@ -137,6 +160,27 @@ FunctionData::FunctionDataImpl* FunctionData::getImpl() const
 const char* FunctionData::getFunctionName() const noexcept
 {
     return impl->functionNameReal.c_str();
+}
+
+FunctionData::FunctionCallData::FunctionCallData()
+{
+    impl = new Impl;
+}
+
+FunctionData::FunctionCallData::~FunctionCallData()
+{
+//    delete impl; // TODO: Causes crash...
+}
+
+FunctionData::FunctionCallData::Impl* FunctionData::FunctionCallData::getImpl() const
+{
+    return impl;
+}
+
+unsigned long long FunctionData::FunctionCallData::getNumHeapAllocations() const noexcept
+{
+    assert(impl->numHeapAllocationsAfterFunctionCall > impl->numHeapAllocationsBeforeFunctionCall);
+    return impl->numHeapAllocationsAfterFunctionCall - impl->numHeapAllocationsBeforeFunctionCall;
 }
 
 void demangle(const char* mangled_name, char* demangled_name, unsigned long long demangled_size)

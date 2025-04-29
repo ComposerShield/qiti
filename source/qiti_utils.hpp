@@ -22,21 +22,39 @@ namespace qiti
 class FunctionData
 {
 public:
+    class FunctionCallData
+    {
+    public:
+        unsigned long long QITI_API getNumHeapAllocations() const noexcept;
+        
+        /** Internal */
+        QITI_API_INTERNAL FunctionCallData();
+        /** Internal */
+        QITI_API_INTERNAL ~FunctionCallData();
+        
+        class Impl;
+        /** Internal */
+        Impl* QITI_API_INTERNAL getImpl() const;
+    private:
+        Impl* impl;
+    };
+    
     const char* QITI_API getFunctionName() const noexcept;
-    
-    
+
+    FunctionCallData QITI_API getLastFunctionCall() const noexcept;
     
     /** Internal */
     QITI_API_INTERNAL FunctionData(void* functionAddress);
     /** Internal */
     QITI_API_INTERNAL ~FunctionData();
     
-    class FunctionDataImpl;
+    class Impl;
+    
     /** Internal */
-    FunctionDataImpl* QITI_API_INTERNAL getImpl() const;
+    Impl* QITI_API_INTERNAL getImpl() const;
     
 private:
-    FunctionDataImpl* impl;
+    Impl* impl;
 };
 
 /** demangle a GCC/Clang‐mangled name into a std::string */
