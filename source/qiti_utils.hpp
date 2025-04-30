@@ -51,9 +51,14 @@ public:
         FunctionCallData& operator=(const FunctionCallData&) = delete;
     };
     
+    /** */
     const char* QITI_API getFunctionName() const noexcept;
+    
+    /** */
+    unsigned long long QITI_API getNumTimesCalled() const noexcept;
 
-    FunctionCallData QITI_API getLastFunctionCall() const noexcept;
+    /** */
+    const FunctionCallData* QITI_API getLastFunctionCall() const noexcept;
     
     /** Internal */
     QITI_API_INTERNAL FunctionData(void* functionAddress);
@@ -84,6 +89,9 @@ void QITI_API demangle(const char* mangled_name,
 
 /** */
 void QITI_API shutdown();
+
+/** */
+void QITI_API printAllKnownFunctions();
 
 /** */
 [[nodiscard]] const qiti::FunctionData* QITI_API getFunctionData(const char* demangledFunctionName);

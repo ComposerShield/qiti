@@ -8,6 +8,8 @@
 #include <map>
 #include <string>
 
+#include <iostream> // TODO: remove
+
 #ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
 inline static thread_local uint64_t numHeapAllocationsOnCurrentThread = 0;
 #endif
@@ -26,7 +28,7 @@ struct FunctionData::FunctionCallData::Impl
     std::chrono::steady_clock::time_point begin_time;
     std::chrono::steady_clock::time_point end_time;
     int64_t timeSpentInFunctionNanoseconds = 0;
-
+    
     int64_t numHeapAllocationsBeforeFunctionCall = 0;
     int64_t numHeapAllocationsAfterFunctionCall  = 0;
 };
@@ -41,10 +43,19 @@ public:
     std::string functionNameReal;
     int64_t numTimesCalled = 0;
     int64_t averageTimeSpentInFunctionNanoseconds = 0;
-
+    
     FunctionCallData lastCallData;
 };
-} // namespace qiti
+
+void printAllKnownFunctions()
+{
+    auto& g_functionMap = getFunctionMap();
+    
+    for (auto& [key, value] : g_functionMap)
+    {
+        std::cout << value.getFunctionName() << "\n";
+    }
+}
 
 [[nodiscard]] qiti::FunctionData& getFunctionData(void* functionAddress)
 {
@@ -56,7 +67,7 @@ public:
         qiti::FunctionData data(functionAddress);
         
         auto [insertedIt, success] = g_functionMap.emplace(functionAddress, std::move(data));
-
+        
         return insertedIt->second;
     }
     
@@ -68,16 +79,17 @@ public:
     auto& g_functionMap = getFunctionMap();
     
     auto it = std::find_if(g_functionMap.begin(), g_functionMap.end(),
-        [demangledFunctionName](const std::pair<void*, const qiti::FunctionData&>& pair)
-        {
-            return pair.second.getFunctionName() == std::string(demangledFunctionName);
-        });
+                           [demangledFunctionName](const std::pair<void*, const qiti::FunctionData&>& pair)
+                           {
+                               return pair.second.getFunctionName() == std::string(demangledFunctionName);
+                           });
     
     if (it == g_functionMap.end()) // function not found
         return nullptr;
     
     return &(it->second);
 }
+} // namespace qiti
 
 extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
 __cyg_profile_func_enter(void* this_fn, void* call_site)
@@ -85,7 +97,7 @@ __cyg_profile_func_enter(void* this_fn, void* call_site)
     static int recursionCheck = 0;
     assert(++recursionCheck == 1);
     
-    auto& functionData = getFunctionData(this_fn);
+    auto& functionData = qiti::getFunctionData(this_fn);
     auto* impl = functionData.getImpl();
     ++impl->numTimesCalled;
     impl->lastCallData.reset();
@@ -100,7 +112,7 @@ __cyg_profile_func_enter(void* this_fn, void* call_site)
 extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
 __cyg_profile_func_exit(void * this_fn, void* call_site)
 {
-    auto& functionData = getFunctionData(this_fn);
+    auto& functionData = qiti::getFunctionData(this_fn);
     auto* impl = functionData.getImpl();
     auto* callImpl = impl->lastCallData.getImpl();
     
@@ -170,6 +182,16 @@ const char* FunctionData::getFunctionName() const noexcept
     return impl->functionNameReal.c_str();
 }
 
+unsigned long long FunctionData::getNumTimesCalled() const noexcept
+{
+    return impl->numTimesCalled;
+}
+
+const FunctionData::FunctionCallData* FunctionData::getLastFunctionCall() const noexcept
+{
+    return &impl->lastCallData;
+}
+
 FunctionData::FunctionCallData::FunctionCallData()
 {
     impl = new Impl;
@@ -205,7 +227,7 @@ void FunctionData::FunctionCallData::reset() noexcept
 
 unsigned long long FunctionData::FunctionCallData::getNumHeapAllocations() const noexcept
 {
-    assert(impl->numHeapAllocationsAfterFunctionCall > impl->numHeapAllocationsBeforeFunctionCall);
+    assert(impl->numHeapAllocationsAfterFunctionCall >= impl->numHeapAllocationsBeforeFunctionCall);
     return impl->numHeapAllocationsAfterFunctionCall - impl->numHeapAllocationsBeforeFunctionCall;
 }
 
