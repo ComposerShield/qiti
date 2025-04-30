@@ -16,7 +16,7 @@ inline static thread_local uint64_t numHeapAllocationsOnCurrentThread = 0;
 #endif
 
 /** */
-[[nodiscard]] static std::map<void*, qiti::FunctionData>& getFunctionMap()
+[[nodiscard]] static std::map<void*, qiti::FunctionData>& getFunctionMap() noexcept
 {
     static std::map<void*, qiti::FunctionData> map;
     return map;
@@ -24,7 +24,7 @@ inline static thread_local uint64_t numHeapAllocationsOnCurrentThread = 0;
 
 namespace qiti
 {
-struct FunctionData::FunctionCallData::Impl
+struct FunctionCallData::Impl
 {
     std::chrono::steady_clock::time_point begin_time;
     std::chrono::steady_clock::time_point end_time;
@@ -217,51 +217,64 @@ qiti::uint FunctionData::getNumTimesCalled() const noexcept
     return impl->numTimesCalled;
 }
 
-const FunctionData::FunctionCallData* FunctionData::getLastFunctionCall() const noexcept
+FunctionCallData FunctionData::getLastFunctionCall() const noexcept
 {
-    return &impl->lastCallData;
+    return impl->lastCallData;
 }
 
-FunctionData::FunctionCallData::FunctionCallData()
+FunctionCallData::FunctionCallData()
 {
     impl = new Impl;
 }
 
-FunctionData::FunctionCallData::~FunctionCallData()
+FunctionCallData::~FunctionCallData()
 {
     delete impl;
 }
 
-FunctionData::FunctionCallData::FunctionCallData(FunctionData::FunctionCallData&& other)
+FunctionCallData::FunctionCallData(FunctionCallData&& other)
 {
     impl = other.impl;
     other.impl = nullptr;
 }
 
-FunctionData::FunctionCallData& FunctionData::FunctionCallData::operator=(FunctionData::FunctionCallData&& other) noexcept
+FunctionCallData& FunctionCallData::operator=(FunctionCallData&& other) noexcept
 {
     impl = other.impl;
     other.impl = nullptr;
+    return *this;
 }
 
-FunctionData::FunctionCallData::Impl* FunctionData::FunctionCallData::getImpl() const noexcept
+FunctionCallData::FunctionCallData(const FunctionCallData& other)
+{
+    impl = new Impl(*other.impl);
+}
+
+FunctionCallData FunctionCallData::operator=(const FunctionCallData& other)
+{
+    FunctionCallData copy;
+    copy.impl = new Impl(*other.impl);
+    return copy;
+}
+
+FunctionCallData::Impl* FunctionCallData::getImpl() const noexcept
 {
     return impl;
 }
 
-void FunctionData::FunctionCallData::reset() noexcept
+void FunctionCallData::reset() noexcept
 {
     delete impl;
     impl = new Impl;
 }
 
-unsigned long long FunctionData::FunctionCallData::getNumHeapAllocations() const noexcept
+uint FunctionCallData::getNumHeapAllocations() const noexcept
 {
     assert(impl->numHeapAllocationsAfterFunctionCall >= impl->numHeapAllocationsBeforeFunctionCall);
     return impl->numHeapAllocationsAfterFunctionCall - impl->numHeapAllocationsBeforeFunctionCall;
 }
 
-void demangle(const char* mangled_name, char* demangled_name, unsigned long long demangled_size)
+void demangle(const char* mangled_name, char* demangled_name, uint demangled_size)
 {
     int status = 0;
     char* result = abi::__cxa_demangle(mangled_name, nullptr, nullptr, &status);

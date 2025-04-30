@@ -98,9 +98,8 @@ TEST_CASE("qiti::FunctionCallData::FunctionCallData::getNumHeapAllocations() ret
         QITI_CHECK(funcData->getNumTimesCalled() == 2);
         
         auto lastFunctionCall = funcData->getLastFunctionCall();
-        QITI_REQUIRE(lastFunctionCall != nullptr);
         
-        QITI_REQUIRE(lastFunctionCall->getNumHeapAllocations() == 1);
+        QITI_REQUIRE(lastFunctionCall.getNumHeapAllocations() == 1);
     }
     
     SECTION("0 heap allocation")
@@ -113,9 +112,8 @@ TEST_CASE("qiti::FunctionCallData::FunctionCallData::getNumHeapAllocations() ret
         QITI_CHECK(funcData->getNumTimesCalled() == 1);
         
         auto lastFunctionCall = funcData->getLastFunctionCall();
-        QITI_REQUIRE(lastFunctionCall != nullptr);
         
-        QITI_REQUIRE(lastFunctionCall->getNumHeapAllocations() == 0);
+        QITI_REQUIRE(lastFunctionCall.getNumHeapAllocations() == 0);
     }
     
     qiti::shutdown();
