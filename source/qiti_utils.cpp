@@ -1,8 +1,10 @@
 
 #include "qiti_utils.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <cstdio>
+#include <cstring>
 #include <cxxabi.h>
 #include <dlfcn.h>
 #include <iostream>
@@ -54,6 +56,29 @@ void printAllKnownFunctions()
     {
         std::cout << value.getFunctionName() << "\n";
     }
+}
+
+size_t getAllKnownFunctions(char* flatBuf,
+                            size_t maxFunctions,
+                            size_t maxNameLen)
+{
+    auto& map = getFunctionMap();
+    size_t count = std::min(map.size(), maxFunctions);
+
+    size_t i = 0;
+    for (auto it = map.begin(); it != map.end() && i < count; ++it, ++i)
+    {
+        const std::string& name = it->second.getFunctionName();
+        // copy up to maxNameLen-1 chars, then force '\0'
+        std::strncpy(
+          flatBuf + i * maxNameLen,
+          name.c_str(),
+          maxNameLen - 1
+        );
+        flatBuf[i * maxNameLen + (maxNameLen - 1)] = '\0';
+    }
+
+    return count;
 }
 
 void* getAddressForMangledFunctionName(const char* mangledName)
@@ -187,7 +212,7 @@ const char* FunctionData::getFunctionName() const noexcept
     return impl->functionNameReal.c_str();
 }
 
-unsigned long long FunctionData::getNumTimesCalled() const noexcept
+qiti::uint FunctionData::getNumTimesCalled() const noexcept
 {
     return impl->numTimesCalled;
 }
