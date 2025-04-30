@@ -21,6 +21,9 @@ namespace qiti
 {
 using uint = unsigned long long;
 
+/**
+ Abtracts a specific call of a specific function
+ */
 class FunctionCallData
 {
 public:
@@ -52,6 +55,9 @@ private:
     Impl* impl;
 };
 
+/**
+ Abtracts a function and its history of use
+ */
 class FunctionData
 {
 public:
