@@ -14,18 +14,13 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG -D_DEBUG")
 
-# add_compile_options(”$<$CONFIG:Debug:-gdwarf-with-dsym>”)
-
-# Generate the function wrapper file
-# add_custom_command(TARGET qiti_lib
-#     PRE_BUILD
-#     COMMAND ${CMAKE_COMMAND} -E echo "Running pre-build Python script for qiti_lib"
-#     # COMMAND /bin/sh ${CMAKE_CURRENT_SOURCE_DIR}/scripts/prebuild.sh
-#     COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/scripts/prebuild.py
-#     COMMENT "Executing pre-build tasks for qiti_lib via Python"
-# )
-
 set(SOURCES
+    "source/qiti_FunctionCallData_Impl.hpp"
+    "source/qiti_FunctionCallData.hpp"
+    "source/qiti_FunctionCallData.cpp"
+    "source/qiti_FunctionData_Impl.hpp"
+    "source/qiti_FunctionData.hpp"
+    "source/qiti_FunctionData.cpp"
     "source/qiti_utils.hpp"
     "source/qiti_utils.cpp"
 )
@@ -73,6 +68,8 @@ FetchContent_MakeAvailable(Catch2)
 add_executable(qiti_tests
     "Tests/qiti_test_macros.hpp"
     "Tests/test_qiti_utils.cpp"
+    "Tests/test_qiti_FunctionCallData.cpp"
+    "Tests/test_qiti_FunctionData.cpp"
 )
 
 set_target_properties(qiti_tests PROPERTIES

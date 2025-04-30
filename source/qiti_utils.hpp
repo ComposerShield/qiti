@@ -1,4 +1,6 @@
 
+#pragma once
+
 #ifndef QITI_API_INTERNAL
   #define QITI_API_INTERNAL __attribute__((no_instrument_function))
 #endif
@@ -17,80 +19,17 @@
   #endif
 #endif
 
+//--------------------------------------------------------------------------
+
 namespace qiti
 {
+//--------------------------------------------------------------------------
+
 using uint = unsigned long long;
 
-/**
- Abtracts a specific call of a specific function
- */
-class FunctionCallData
-{
-public:
-    /** */
-    [[nodiscard]] uint QITI_API getNumHeapAllocations() const noexcept;
-    
-    /** Internal */
-    QITI_API_INTERNAL FunctionCallData();
-    /** */
-    QITI_API ~FunctionCallData();
-    
-    class Impl;
-    /** Internal */
-    [[nodiscard]] Impl* QITI_API_INTERNAL getImpl() const noexcept;
-    
-    /** Internal */
-    void QITI_API_INTERNAL reset() noexcept;
-    
-    /** Internal Move Constructor */
-    QITI_API_INTERNAL FunctionCallData(FunctionCallData&& other);
-    /** Internal Move Operator */
-    [[nodiscard]] FunctionCallData& QITI_API_INTERNAL operator=(FunctionCallData&& other) noexcept;
-    /** Internal Copy Constructor */
-    FunctionCallData(const FunctionCallData&);
-    /** Internal Move Operator */
-    FunctionCallData operator=(const FunctionCallData&);
-    
-private:
-    Impl* impl;
-};
+class FunctionData;
 
-/**
- Abtracts a function and its history of use
- */
-class FunctionData
-{
-public:
-    /** */
-    [[nodiscard]] const char* QITI_API getFunctionName() const noexcept;
-    
-    /** */
-    [[nodiscard]] uint QITI_API getNumTimesCalled() const noexcept;
-
-    /** */
-    [[nodiscard]] FunctionCallData QITI_API getLastFunctionCall() const noexcept;
-    
-    /** Internal */
-    QITI_API_INTERNAL FunctionData(void* functionAddress);
-    /** Internal */
-    QITI_API_INTERNAL ~FunctionData();
-    
-    class Impl;
-    /** Internal */
-    [[nodiscard]] Impl* QITI_API_INTERNAL getImpl() const noexcept;
-    
-    /** Internal Move Constructor */
-    QITI_API_INTERNAL FunctionData(FunctionData&& other);
-    /** Internal Move Operator */
-    [[nodiscard]] FunctionData& QITI_API_INTERNAL operator=(FunctionData&& other) noexcept;
-    
-private:
-    Impl* impl;
-    
-    FunctionData(const FunctionData&) = delete;
-    FunctionData& operator=(const FunctionData&) = delete;
-};
-
+//--------------------------------------------------------------------------
 
 /** demangle a GCC/Clang‐mangled name into a std::string */
 void QITI_API demangle(const char* mangled_name,

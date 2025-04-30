@@ -11,6 +11,13 @@
 #include <map>
 #include <string>
 
+#include "qiti_FunctionCallData_Impl.hpp"
+#include "qiti_FunctionCallData.hpp"
+#include "qiti_FunctionData_Impl.hpp"
+#include "qiti_FunctionData.hpp"
+
+//--------------------------------------------------------------------------
+
 #ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
 inline static thread_local uint64_t numHeapAllocationsOnCurrentThread = 0;
 #endif
@@ -24,40 +31,6 @@ inline static thread_local uint64_t numHeapAllocationsOnCurrentThread = 0;
 
 namespace qiti
 {
-struct FunctionCallData::Impl
-{
-    std::chrono::steady_clock::time_point begin_time;
-    std::chrono::steady_clock::time_point end_time;
-    int64_t timeSpentInFunctionNanoseconds = 0;
-    
-    int64_t numHeapAllocationsBeforeFunctionCall = 0;
-    int64_t numHeapAllocationsAfterFunctionCall  = 0;
-};
-
-class FunctionData::Impl
-{
-public:
-    QITI_API_INTERNAL Impl() = default;
-    QITI_API_INTERNAL ~Impl() = default;
-    
-    std::string functionNameMangled;
-    std::string functionNameReal;
-    int64_t numTimesCalled = 0;
-    int64_t averageTimeSpentInFunctionNanoseconds = 0;
-    
-    FunctionCallData lastCallData;
-};
-
-void printAllKnownFunctions()
-{
-    auto& g_functionMap = getFunctionMap();
-    
-    for (auto& [key, value] : g_functionMap)
-    {
-        std::cout << value.getFunctionName() << "\n";
-    }
-}
-
 size_t getAllKnownFunctions(char* flatBuf,
                             size_t maxFunctions,
                             size_t maxNameLen)
@@ -119,6 +92,31 @@ void* getAddressForMangledFunctionName(const char* mangledName)
     
     return &(it->second);
 }
+
+void demangle(const char* mangled_name, char* demangled_name, uint demangled_size)
+{
+    int status = 0;
+    char* result = abi::__cxa_demangle(mangled_name, nullptr, nullptr, &status);
+
+    if (status == 0 && result != nullptr)
+    {
+        // Safely copy into caller's buffer
+        std::strncpy(demangled_name, result, demangled_size - 1);
+        demangled_name[demangled_size - 1] = '\0'; // always null-terminate
+        std::free(result);
+    }
+    else
+    {
+        // fallback: copy mangled name itself
+        std::strncpy(demangled_name, mangled_name, demangled_size - 1);
+        demangled_name[demangled_size - 1] = '\0'; // always null-terminate
+    }
+}
+
+void shutdown()
+{
+    getFunctionMap().clear();
+}
 } // namespace qiti
 
 extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
@@ -164,138 +162,3 @@ void* operator new(size_t size)
     return p;
 }
 #endif
-
-namespace qiti
-{
-
-FunctionData::FunctionData(void* functionAddress)
-{
-    impl = new Impl;
-    
-    Dl_info info;
-    if (dladdr(functionAddress, &info))
-    {
-        impl->functionNameMangled = info.dli_sname;
-        char functionNameDemangled[256];
-        qiti::demangle(info.dli_sname, functionNameDemangled, sizeof(functionNameDemangled));
-        impl->functionNameReal = functionNameDemangled;
-    }
-    else
-    {
-        std::terminate(); // TODO: will this ever happen?
-    }
-}
-
-FunctionData::~FunctionData()
-{
-    delete impl;
-}
-
-FunctionData::FunctionData(FunctionData&& other)
-{
-    impl = other.impl;
-    other.impl = nullptr;
-}
-
-FunctionData& FunctionData::operator=(FunctionData&& other) noexcept
-{
-    assert(false);
-}
-
-FunctionData::Impl* FunctionData::getImpl() const noexcept
-{
-    return impl;
-}
-
-const char* FunctionData::getFunctionName() const noexcept
-{
-    return impl->functionNameReal.c_str();
-}
-
-qiti::uint FunctionData::getNumTimesCalled() const noexcept
-{
-    return impl->numTimesCalled;
-}
-
-FunctionCallData FunctionData::getLastFunctionCall() const noexcept
-{
-    return impl->lastCallData;
-}
-
-FunctionCallData::FunctionCallData()
-{
-    impl = new Impl;
-}
-
-FunctionCallData::~FunctionCallData()
-{
-    delete impl;
-}
-
-FunctionCallData::FunctionCallData(FunctionCallData&& other)
-{
-    impl = other.impl;
-    other.impl = nullptr;
-}
-
-FunctionCallData& FunctionCallData::operator=(FunctionCallData&& other) noexcept
-{
-    impl = other.impl;
-    other.impl = nullptr;
-    return *this;
-}
-
-FunctionCallData::FunctionCallData(const FunctionCallData& other)
-{
-    impl = new Impl(*other.impl);
-}
-
-FunctionCallData FunctionCallData::operator=(const FunctionCallData& other)
-{
-    FunctionCallData copy;
-    copy.impl = new Impl(*other.impl);
-    return copy;
-}
-
-FunctionCallData::Impl* FunctionCallData::getImpl() const noexcept
-{
-    return impl;
-}
-
-void FunctionCallData::reset() noexcept
-{
-    delete impl;
-    impl = new Impl;
-}
-
-uint FunctionCallData::getNumHeapAllocations() const noexcept
-{
-    assert(impl->numHeapAllocationsAfterFunctionCall >= impl->numHeapAllocationsBeforeFunctionCall);
-    return impl->numHeapAllocationsAfterFunctionCall - impl->numHeapAllocationsBeforeFunctionCall;
-}
-
-void demangle(const char* mangled_name, char* demangled_name, uint demangled_size)
-{
-    int status = 0;
-    char* result = abi::__cxa_demangle(mangled_name, nullptr, nullptr, &status);
-
-    if (status == 0 && result != nullptr)
-    {
-        // Safely copy into caller's buffer
-        std::strncpy(demangled_name, result, demangled_size - 1);
-        demangled_name[demangled_size - 1] = '\0'; // always null-terminate
-        std::free(result);
-    }
-    else
-    {
-        // fallback: copy mangled name itself
-        std::strncpy(demangled_name, mangled_name, demangled_size - 1);
-        demangled_name[demangled_size - 1] = '\0'; // always null-terminate
-    }
-}
-
-void shutdown()
-{
-    getFunctionMap().clear();
-}
-} // namespace qiti
