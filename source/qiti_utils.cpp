@@ -5,10 +5,9 @@
 #include <cstdio>
 #include <cxxabi.h>
 #include <dlfcn.h>
+#include <iostream>
 #include <map>
 #include <string>
-
-#include <iostream> // TODO: remove
 
 #ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
 inline static thread_local uint64_t numHeapAllocationsOnCurrentThread = 0;
@@ -55,6 +54,12 @@ void printAllKnownFunctions()
     {
         std::cout << value.getFunctionName() << "\n";
     }
+}
+
+void* getAddressForMangledFunctionName(const char* mangledName)
+{
+    void* addr = dlsym(RTLD_DEFAULT, mangledName);
+    return addr;
 }
 
 [[nodiscard]] qiti::FunctionData& getFunctionData(void* functionAddress)

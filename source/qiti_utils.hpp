@@ -25,7 +25,8 @@ public:
     class FunctionCallData
     {
     public:
-        unsigned long long QITI_API getNumHeapAllocations() const noexcept;
+        /** */
+        [[nodiscard]] unsigned long long QITI_API getNumHeapAllocations() const noexcept;
         
         /** Internal */
         QITI_API_INTERNAL FunctionCallData();
@@ -34,7 +35,7 @@ public:
         
         class Impl;
         /** Internal */
-        Impl* QITI_API_INTERNAL getImpl() const noexcept;
+        [[nodiscard]] Impl* QITI_API_INTERNAL getImpl() const noexcept;
         
         /** Internal */
         void QITI_API_INTERNAL reset() noexcept;
@@ -42,7 +43,7 @@ public:
         /** Internal Move Constructor */
         QITI_API_INTERNAL FunctionCallData(FunctionCallData&& other);
         /** Internal Move Operator */
-        FunctionCallData& QITI_API_INTERNAL operator=(FunctionCallData&& other) noexcept;
+        [[nodiscard]] FunctionCallData& QITI_API_INTERNAL operator=(FunctionCallData&& other) noexcept;
         
     private:
         Impl* impl;
@@ -52,13 +53,13 @@ public:
     };
     
     /** */
-    const char* QITI_API getFunctionName() const noexcept;
+    [[nodiscard]] const char* QITI_API getFunctionName() const noexcept;
     
     /** */
-    unsigned long long QITI_API getNumTimesCalled() const noexcept;
+    [[nodiscard]] unsigned long long QITI_API getNumTimesCalled() const noexcept;
 
     /** */
-    const FunctionCallData* QITI_API getLastFunctionCall() const noexcept;
+    [[nodiscard]] const FunctionCallData* QITI_API getLastFunctionCall() const noexcept;
     
     /** Internal */
     QITI_API_INTERNAL FunctionData(void* functionAddress);
@@ -67,12 +68,12 @@ public:
     
     class Impl;
     /** Internal */
-    Impl* QITI_API_INTERNAL getImpl() const noexcept;
+    [[nodiscard]] Impl* QITI_API_INTERNAL getImpl() const noexcept;
     
     /** Internal Move Constructor */
     QITI_API_INTERNAL FunctionData(FunctionData&& other);
     /** Internal Move Operator */
-    FunctionData& QITI_API_INTERNAL operator=(FunctionData&& other) noexcept;
+    [[nodiscard]] FunctionData& QITI_API_INTERNAL operator=(FunctionData&& other) noexcept;
     
 private:
     Impl* impl;
@@ -92,6 +93,9 @@ void QITI_API shutdown();
 
 /** */
 void QITI_API printAllKnownFunctions();
+
+/** */
+void* QITI_API getAddressForMangledFunctionName(const char* mangledName);
 
 /** */
 [[nodiscard]] const qiti::FunctionData* QITI_API getFunctionData(const char* demangledFunctionName);
