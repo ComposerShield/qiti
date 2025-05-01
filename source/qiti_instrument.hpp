@@ -3,14 +3,18 @@
 
 #include "qiti_utils.hpp"
 
+//--------------------------------------------------------------------------
+
+#ifndef QITI_DISABLE_INSTRUMENTS
 namespace qiti
 {
-namespace qiti
+namespace instrument
 {
 /* Provide a callback on next heap allocation */
-void QITI_API onNextHeapAllocation(void(*heapAllocCallback)());
+void QITI_API onNextHeapAllocation(void(*heapAllocCallback)()) noexcept;
 /** shortcut for onNextHeapAllocation([]{assert(false);}); */
-void QITI_API assertOnNextHeapAllocation();
+void QITI_API assertOnNextHeapAllocation() noexcept;
 
-} // namespace profile
+} // namespace instrument
 } // namespace qiti
+#endif // ! QITI_DISABLE_INSTRUMENTS

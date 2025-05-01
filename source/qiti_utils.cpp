@@ -20,6 +20,7 @@
 
 #ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
 inline static thread_local uint64_t numHeapAllocationsOnCurrentThread = 0;
+extern thread_local std::function<void()> g_onNextHeapAllocation;
 #endif
 
 /** */
@@ -158,6 +159,10 @@ __cyg_profile_func_exit(void * this_fn, void* call_site)
 void* operator new(size_t size)
 {
     ++numHeapAllocationsOnCurrentThread;
+    if (auto callback = std::exchange(g_onNextHeapAllocation, nullptr))
+        callback();
+    
+    // Original implementation
     void* p = malloc(size);
     return p;
 }
