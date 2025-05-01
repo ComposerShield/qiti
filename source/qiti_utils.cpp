@@ -23,9 +23,9 @@ inline static thread_local uint64_t numHeapAllocationsOnCurrentThread = 0;
 #endif
 
 /** */
-[[nodiscard]] static std::map<void*, qiti::FunctionData>& getFunctionMap() noexcept
+[[nodiscard]] static auto& getFunctionMap() noexcept
 {
-    static std::map<void*, qiti::FunctionData> map;
+    static std::unordered_map<void*, qiti::FunctionData> map;
     return map;
 }
 
