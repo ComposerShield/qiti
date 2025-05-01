@@ -94,7 +94,7 @@ void* QITI_API getAddressForMangledFunctionName(const char* mangledName);
 template <auto FuncPtr>
 [[nodiscard]] constexpr const qiti::FunctionData* getFunctionData()
 {
-    constexpr std::string_view functionName = getFunctionName<FuncPtr>();\
+    constexpr std::string_view functionName = getFunctionName<FuncPtr>();
     return getFunctionData(functionName.data());
 }
 

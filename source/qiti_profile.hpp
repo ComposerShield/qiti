@@ -1,12 +1,27 @@
 
 #pragma once
 
+#include "qiti_utils.hpp"
+
 //--------------------------------------------------------------------------
 
 namespace qiti
 {
 namespace profile
 {
+void QITI_API_INTERNAL beginProfilingFunction(void* functionAddress) noexcept;
 
+void QITI_API_INTERNAL endProfilingFunction(void* functionAddress) noexcept;
+
+template<auto FuncPtr>
+void QITI_API beginProfilingFunction() noexcept { beginProfilingFunction(FuncPtr); }
+
+template <auto FuncPtr>
+void QITI_API endProfilingFunction() noexcept { endProfilingFunction(FuncPtr); }
+
+void QITI_API beginProfilingAllFunctions() noexcept;
+
+void QITI_API endProfilingAllFunctions() noexcept;
+    
 } // namespace profile
 } // namespace qiti
