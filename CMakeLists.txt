@@ -21,6 +21,10 @@ set(SOURCES
     "source/qiti_FunctionData_Impl.hpp"
     "source/qiti_FunctionData.hpp"
     "source/qiti_FunctionData.cpp"
+    "source/qiti_instrument.hpp"
+    "source/qiti_instrument.cpp"
+    "source/qiti_profile.hpp"
+    "source/qiti_profile.cpp"
     "source/qiti_utils.hpp"
     "source/qiti_utils.cpp"
 )
@@ -67,9 +71,11 @@ FetchContent_MakeAvailable(Catch2)
 
 add_executable(qiti_tests
     "Tests/qiti_test_macros.hpp"
-    "Tests/test_qiti_utils.cpp"
     "Tests/test_qiti_FunctionCallData.cpp"
     "Tests/test_qiti_FunctionData.cpp"
+    "Tests/test_qiti_instrument.cpp"
+    "Tests/test_qiti_profile.cpp"
+    "Tests/test_qiti_utils.cpp"
 )
 
 set_target_properties(qiti_tests PROPERTIES
