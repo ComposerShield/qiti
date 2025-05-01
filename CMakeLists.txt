@@ -45,8 +45,24 @@ target_include_directories(qiti_lib PUBLIC
 
 target_compile_options(qiti_lib 
 PRIVATE
+    # dylib symbol visibility
     "-fvisibility=hidden"
     "-fvisibility-inlines-hidden"
+    # warnings/errors
+    "-Werror"
+    "-Wall"
+    "-Wextra"
+    "-Wpedantic"
+    "-Wconversion"
+    "-Wsign-conversion" 
+    "-Wshadow"
+    "-Wold-style-cast"
+    "-Wnon-virtual-dtor"
+    "-Woverloaded-virtual"
+    "-Wnull-dereference"
+    "-Wdouble-promotion"
+    "-Wformat=2"
+    "-Wimplicit-fallthrough"
 INTERFACE
     "-finstrument-functions"
     "-fno-omit-frame-pointer"

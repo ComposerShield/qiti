@@ -15,6 +15,7 @@ namespace qiti
 FunctionData::FunctionData(void* functionAddress)
 {
     impl = new Impl;
+    impl->address = functionAddress;
     
     Dl_info info;
     if (dladdr(functionAddress, &info))
@@ -41,9 +42,12 @@ FunctionData::FunctionData(FunctionData&& other)
     other.impl = nullptr;
 }
 
-FunctionData& FunctionData::operator=(FunctionData&& other) noexcept
+FunctionData FunctionData::operator=(FunctionData&& other) noexcept
 {
-    assert(false);
+    FunctionData moveDestination(other.impl->address);
+    impl = other.impl;
+    other.impl = nullptr;
+    return moveDestination;
 }
 
 FunctionData::Impl* FunctionData::getImpl() const noexcept

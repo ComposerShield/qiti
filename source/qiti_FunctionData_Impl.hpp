@@ -18,8 +18,10 @@ public:
     
     std::string functionNameMangled;
     std::string functionNameReal;
-    int64_t numTimesCalled = 0;
-    int64_t averageTimeSpentInFunctionNanoseconds = 0;
+    void* address;
+    
+    uint numTimesCalled = 0;
+    uint averageTimeSpentInFunctionNanoseconds = 0;
     
     FunctionCallData lastCallData;
 };

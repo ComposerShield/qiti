@@ -12,9 +12,9 @@ struct FunctionCallData::Impl
 {
     std::chrono::steady_clock::time_point begin_time;
     std::chrono::steady_clock::time_point end_time;
-    int64_t timeSpentInFunctionNanoseconds = 0;
+    uint timeSpentInFunctionNanoseconds = 0;
     
-    int64_t numHeapAllocationsBeforeFunctionCall = 0;
-    int64_t numHeapAllocationsAfterFunctionCall  = 0;
+    uint numHeapAllocationsBeforeFunctionCall = 0;
+    uint numHeapAllocationsAfterFunctionCall  = 0;
 };
 } // namespace qiti

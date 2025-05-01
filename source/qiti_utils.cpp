@@ -121,7 +121,7 @@ void shutdown()
 } // namespace qiti
 
 extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
-__cyg_profile_func_enter(void* this_fn, void* call_site)
+__cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site)
 {
     static int recursionCheck = 0;
     assert(++recursionCheck == 1);
@@ -139,7 +139,7 @@ __cyg_profile_func_enter(void* this_fn, void* call_site)
 }
 
 extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
-__cyg_profile_func_exit(void * this_fn, void* call_site)
+__cyg_profile_func_exit(void * this_fn, [[maybe_unused]] void* call_site)
 {
     auto& functionData = qiti::getFunctionDataFromAddress(this_fn);
     auto* impl = functionData.getImpl();
@@ -149,7 +149,7 @@ __cyg_profile_func_exit(void * this_fn, void* call_site)
     auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - callImpl->begin_time);
 
     callImpl->end_time = end_time;
-    callImpl->timeSpentInFunctionNanoseconds = static_cast<int64_t>(elapsed_ns.count());
+    callImpl->timeSpentInFunctionNanoseconds = static_cast<qiti::uint>(elapsed_ns.count());
 #ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
     callImpl->numHeapAllocationsAfterFunctionCall = numHeapAllocationsOnCurrentThread;
 #endif

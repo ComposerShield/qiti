@@ -34,7 +34,7 @@ public:
     /** Internal Move Constructor */
     QITI_API_INTERNAL FunctionData(FunctionData&& other);
     /** Internal Move Operator */
-    [[nodiscard]] FunctionData& QITI_API_INTERNAL operator=(FunctionData&& other) noexcept;
+    [[nodiscard]] FunctionData QITI_API_INTERNAL operator=(FunctionData&& other) noexcept;
     
 private:
     Impl* impl;
