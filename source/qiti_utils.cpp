@@ -19,7 +19,7 @@
 //--------------------------------------------------------------------------
 
 #ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
-inline static thread_local uint64_t numHeapAllocationsOnCurrentThread = 0;
+inline static thread_local uint64_t g_numHeapAllocationsOnCurrentThread = 0;
 extern thread_local std::function<void()> g_onNextHeapAllocation;
 #endif
 
@@ -132,7 +132,7 @@ __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site)
     impl->lastCallData.reset();
     impl->lastCallData.getImpl()->begin_time = std::chrono::steady_clock::now();
 #ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
-    impl->lastCallData.getImpl()->numHeapAllocationsBeforeFunctionCall = numHeapAllocationsOnCurrentThread;
+    impl->lastCallData.getImpl()->numHeapAllocationsBeforeFunctionCall = g_numHeapAllocationsOnCurrentThread;
 #endif
     
     --recursionCheck;
@@ -151,14 +151,14 @@ __cyg_profile_func_exit(void * this_fn, [[maybe_unused]] void* call_site)
     callImpl->end_time = end_time;
     callImpl->timeSpentInFunctionNanoseconds = static_cast<qiti::uint>(elapsed_ns.count());
 #ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
-    callImpl->numHeapAllocationsAfterFunctionCall = numHeapAllocationsOnCurrentThread;
+    callImpl->numHeapAllocationsAfterFunctionCall = g_numHeapAllocationsOnCurrentThread;
 #endif
 }
 
 #ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
 void* operator new(size_t size)
 {
-    ++numHeapAllocationsOnCurrentThread;
+    ++g_numHeapAllocationsOnCurrentThread;
     if (auto callback = std::exchange(g_onNextHeapAllocation, nullptr))
         callback();
     
