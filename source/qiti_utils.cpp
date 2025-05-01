@@ -60,7 +60,7 @@ void* getAddressForMangledFunctionName(const char* mangledName)
     return addr;
 }
 
-[[nodiscard]] qiti::FunctionData& getFunctionData(void* functionAddress)
+[[nodiscard]] qiti::FunctionData& getFunctionDataFromAddress(void* functionAddress)
 {
     auto& g_functionMap = getFunctionMap();
     
@@ -125,7 +125,7 @@ __cyg_profile_func_enter(void* this_fn, void* call_site)
     static int recursionCheck = 0;
     assert(++recursionCheck == 1);
     
-    auto& functionData = qiti::getFunctionData(this_fn);
+    auto& functionData = qiti::getFunctionDataFromAddress(this_fn);
     auto* impl = functionData.getImpl();
     ++impl->numTimesCalled;
     impl->lastCallData.reset();
@@ -140,7 +140,7 @@ __cyg_profile_func_enter(void* this_fn, void* call_site)
 extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
 __cyg_profile_func_exit(void * this_fn, void* call_site)
 {
-    auto& functionData = qiti::getFunctionData(this_fn);
+    auto& functionData = qiti::getFunctionDataFromAddress(this_fn);
     auto* impl = functionData.getImpl();
     auto* callImpl = impl->lastCallData.getImpl();
     

@@ -40,9 +40,6 @@ void QITI_API demangle(const char* mangled_name,
 /** */
 void QITI_API shutdown();
 
-/** */
-char** QITI_API getAllKnownFunctions();
-
 /**
  Copies up to maxFunctions names (each truncated to maxNameLen–1 chars + '\0')
  into a single flat buffer of size maxFunctions * maxNameLen.
@@ -65,6 +62,6 @@ void* QITI_API getAddressForMangledFunctionName(const char* mangledName);
 [[nodiscard]] const qiti::FunctionData* QITI_API getFunctionData(const char* demangledFunctionName);
 
 /** Internal */
-[[nodiscard]] qiti::FunctionData& QITI_API getFunctionData(void* functionAddress);
+[[nodiscard]] qiti::FunctionData& QITI_API getFunctionDataFromAddress(void* functionAddress);
 
 } // namespace qiti
