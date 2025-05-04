@@ -21,6 +21,7 @@
 
 #include <dlfcn.h>
 #include <string>
+#include <string_view>
 
 //--------------------------------------------------------------------------
 
@@ -38,22 +39,25 @@ constexpr std::string_view getFunctionName()
 {
 #if defined(__clang__) || defined(__GNUC__)
     constexpr std::string_view full   = __PRETTY_FUNCTION__;
-    constexpr std::string_view prefix = "FuncPtr = ";
-    auto pos = full.find(prefix);
-    if (pos == std::string_view::npos) return {};
+    // 1) find the last '=' in the "[FuncPtr = …]" part
+    auto eq = full.rfind('=');
+    if (eq == std::string_view::npos) return {};
 
-    auto rest = full.substr(pos + prefix.size());
-    auto end  = rest.find(']');
-    auto label = rest.substr(0, end);
+    // 2) move past '=' then skip spaces and '&'
+    auto start = eq + 1;
+    while (start < full.size() && (full[start] == ' ' || full[start] == '&'))
+        ++start;
 
-    // strip leading '&' if present
-    if (!label.empty() && label.front() == '&')
-        label.remove_prefix(1);
+    // 3) find the last ']' which closes the bracketed section
+    auto end = full.rfind(']');
+    if (end == std::string_view::npos || end < start)
+        return {};     // unexpected format
 
-    return label;
+    // 4) return exactly the characters in between
+    return full.substr(start, end - start);
+
 #elif defined(_MSC_VER)
-    // similar parsing on __FUNCSIG__
-    // ...
+    // similar logic with __FUNCSIG__
 #endif
 
     return {};
@@ -95,7 +99,9 @@ template <auto FuncPtr>
 [[nodiscard]] constexpr const qiti::FunctionData* getFunctionData()
 {
     constexpr std::string_view functionName = getFunctionName<FuncPtr>();
-    return getFunctionData(functionName.data());
+    std::string copy(functionName);
+    copy += "()";
+    return getFunctionData(copy.c_str());
 }
 
 /** Internal */

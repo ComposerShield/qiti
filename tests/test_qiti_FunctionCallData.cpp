@@ -31,7 +31,7 @@ TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations() returns expected valu
         testHeapAllocationFunction();
         testHeapAllocationFunction();
         
-        auto funcData = qiti::getFunctionData("testHeapAllocationFunction()");
+        auto funcData = qiti::getFunctionData<&testHeapAllocationFunction>();
         QITI_REQUIRE(funcData != nullptr);
         
         QITI_CHECK(funcData->getNumTimesCalled() == 2);
@@ -45,7 +45,7 @@ TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations() returns expected valu
     {
         testNoHeapAllocationFunction();
         
-        auto funcData = qiti::getFunctionData("testNoHeapAllocationFunction()");
+        auto funcData = qiti::getFunctionData<&testNoHeapAllocationFunction>();
         QITI_REQUIRE(funcData != nullptr);
         
         QITI_CHECK(funcData->getNumTimesCalled() == 1);
