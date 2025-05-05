@@ -70,4 +70,9 @@ FunctionCallData FunctionData::getLastFunctionCall() const noexcept
     return impl->lastCallData;
 }
 
+bool FunctionData::wasCalledOnThread(std::thread::id thread) const noexcept
+{
+    return impl->threadsCalledOn.contains(thread);
+}
+
 } // namespace qiti

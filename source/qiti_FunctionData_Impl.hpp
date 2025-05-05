@@ -5,6 +5,8 @@
 
 #include <cstdint>
 #include <string>
+#include <thread>
+#include <unordered_set>
 
 //--------------------------------------------------------------------------
 
@@ -22,6 +24,7 @@ public:
     
     uint numTimesCalled = 0;
     uint averageTimeSpentInFunctionNanoseconds = 0;
+    std::unordered_set<std::thread::id> threadsCalledOn;
     
     FunctionCallData lastCallData;
 };

@@ -40,13 +40,13 @@ TEST_CASE("qiti::FunctionData::getNumTimesCalled()")
         QITI_CHECK(funcData->getNumTimesCalled() == 2);
     }
     
-//    SECTION("Not called")
-//    {
-//        auto funcData = qiti::getFunctionData<&testFunc>();
-//        QITI_REQUIRE(funcData != nullptr);
-//        
-//        QITI_CHECK(funcData->getNumTimesCalled() == 0);
-//    }
+    SECTION("Not called")
+    {
+        auto funcData = qiti::getFunctionData<&testFunc>();
+        QITI_REQUIRE(funcData != nullptr);
+        
+        QITI_CHECK(funcData->getNumTimesCalled() == 0);
+    }
     
     qiti::resetAll();
 }

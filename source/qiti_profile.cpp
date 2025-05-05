@@ -60,6 +60,9 @@ void resetProfiling() noexcept
 void beginProfilingFunction(void* functionAddress) noexcept
 {
     g_functionsToProfile.insert(functionAddress);
+    
+    // This adds the function to our function map
+    (void)qiti::getFunctionDataFromAddress(functionAddress);
 }
 
 void endProfilingFunction(void* functionAddress) noexcept
@@ -86,7 +89,11 @@ void updateFunctionDataOnEnter(void* this_fn) noexcept
 {
     auto& functionData = qiti::getFunctionDataFromAddress(this_fn);
     auto* impl = functionData.getImpl();
+    std::thread::id thisThread = std::this_thread::get_id();
+    
     ++impl->numTimesCalled;
+    impl->threadsCalledOn.insert(thisThread);
+    
     impl->lastCallData.reset(); // Deletes previous impl
     
     auto* lastCallImpl = impl->lastCallData.getImpl();
