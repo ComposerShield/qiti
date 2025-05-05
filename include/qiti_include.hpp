@@ -12,10 +12,10 @@
 namespace qiti
 {
 /** */
-void QITI_API resetAll();
+void QITI_API resetAll() noexcept;
 
 /** */
 template <auto FuncPtr>
-[[nodiscard]] const qiti::FunctionData* QITI_API getFunctionData() { return getFunctionDataImpl<FuncPtr>(); }
+[[nodiscard]] const qiti::FunctionData* QITI_API getFunctionData() noexcept { return getFunctionDataImpl<FuncPtr>(); }
 
 } // namespace qiti

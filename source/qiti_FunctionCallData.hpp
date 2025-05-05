@@ -19,9 +19,9 @@ public:
     //--------------------------------------------------------------------------
     
     /** Internal */
-    QITI_API_INTERNAL FunctionCallData();
+    QITI_API_INTERNAL FunctionCallData() noexcept;
     /** */
-    QITI_API ~FunctionCallData();
+    QITI_API ~FunctionCallData() noexcept;
     
     struct Impl;
     /** Internal */
@@ -31,13 +31,13 @@ public:
     void QITI_API_INTERNAL reset() noexcept;
     
     /** Internal Move Constructor */
-    QITI_API_INTERNAL FunctionCallData(FunctionCallData&& other);
+    QITI_API_INTERNAL FunctionCallData(FunctionCallData&& other) noexcept;
     /** Internal Move Operator */
     [[nodiscard]] FunctionCallData& QITI_API_INTERNAL operator=(FunctionCallData&& other) noexcept;
     /** Internal Copy Constructor */
-    FunctionCallData(const FunctionCallData&);
+    FunctionCallData(const FunctionCallData&) noexcept;
     /** Internal Move Operator */
-    [[nodiscard]] FunctionCallData operator=(const FunctionCallData&);
+    [[nodiscard]] FunctionCallData operator=(const FunctionCallData&) noexcept;
     
 private:
     Impl* impl;

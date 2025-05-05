@@ -12,7 +12,7 @@
 namespace qiti
 {
 
-FunctionData::FunctionData(void* functionAddress)
+FunctionData::FunctionData(void* functionAddress) noexcept
 {
     impl = new Impl;
     impl->address = functionAddress;
@@ -31,12 +31,12 @@ FunctionData::FunctionData(void* functionAddress)
     }
 }
 
-FunctionData::~FunctionData()
+FunctionData::~FunctionData() noexcept
 {
     delete impl;
 }
 
-FunctionData::FunctionData(FunctionData&& other)
+FunctionData::FunctionData(FunctionData&& other) noexcept
 {
     impl = other.impl;
     other.impl = nullptr;

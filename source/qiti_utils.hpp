@@ -35,7 +35,7 @@ class FunctionData;
 
 //--------------------------------------------------------------------------
 template <auto FuncPtr>
-constexpr std::string_view getFunctionName()
+constexpr std::string_view getFunctionName() noexcept
 {
 #if defined(__clang__) || defined(__GNUC__)
     constexpr std::string_view full   = __PRETTY_FUNCTION__;
@@ -67,7 +67,7 @@ constexpr std::string_view getFunctionName()
 /** demangle a GCC/Clang‐mangled name into a std::string */
 void QITI_API demangle(const char* mangled_name,
                        char* demangled_name,
-                       uint demangled_size);
+                       uint demangled_size) noexcept;
 
 /**
  Copies up to maxFunctions names (each truncated to maxNameLen–1 chars + '\0')
@@ -82,17 +82,17 @@ void QITI_API demangle(const char* mangled_name,
  */
 uint QITI_API getAllKnownFunctions(char* buffer,
                                    uint maxFunctions,
-                                   uint maxNameLen);
+                                   uint maxNameLen) noexcept;
 
 /** */
-void* QITI_API getAddressForMangledFunctionName(const char* mangledName);
+void* QITI_API getAddressForMangledFunctionName(const char* mangledName) noexcept;
 
 /** */
-[[nodiscard]] const qiti::FunctionData* QITI_API getFunctionData(const char* demangledFunctionName);
+[[nodiscard]] const qiti::FunctionData* QITI_API getFunctionData(const char* demangledFunctionName) noexcept;
 
 /** */
 template <auto FuncPtr>
-[[nodiscard]] const qiti::FunctionData* QITI_API_INTERNAL getFunctionDataImpl()
+[[nodiscard]] const qiti::FunctionData* QITI_API_INTERNAL getFunctionDataImpl() noexcept
 {
     static constexpr std::string_view functionName = getFunctionName<FuncPtr>();
     static constexpr std::string_view appendText = "()";
@@ -113,6 +113,6 @@ template <auto FuncPtr>
 }
 
 /** Internal */
-[[nodiscard]] qiti::FunctionData& QITI_API getFunctionDataFromAddress(void* functionAddress);
+[[nodiscard]] qiti::FunctionData& QITI_API getFunctionDataFromAddress(void* functionAddress) noexcept;
 
 } // namespace qiti

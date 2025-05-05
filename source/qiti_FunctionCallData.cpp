@@ -11,17 +11,17 @@
 
 namespace qiti
 {
-FunctionCallData::FunctionCallData()
+FunctionCallData::FunctionCallData() noexcept
 {
     impl = new Impl;
 }
 
-FunctionCallData::~FunctionCallData()
+FunctionCallData::~FunctionCallData() noexcept
 {
     delete impl;
 }
 
-FunctionCallData::FunctionCallData(FunctionCallData&& other)
+FunctionCallData::FunctionCallData(FunctionCallData&& other) noexcept
 {
     impl = other.impl;
     other.impl = nullptr;
@@ -34,12 +34,12 @@ FunctionCallData& FunctionCallData::operator=(FunctionCallData&& other) noexcept
     return *this;
 }
 
-FunctionCallData::FunctionCallData(const FunctionCallData& other)
+FunctionCallData::FunctionCallData(const FunctionCallData& other) noexcept
 {
     impl = new Impl(*other.impl);
 }
 
-FunctionCallData FunctionCallData::operator=(const FunctionCallData& other)
+FunctionCallData FunctionCallData::operator=(const FunctionCallData& other) noexcept
 {
     FunctionCallData copy;
     copy.impl = new Impl(*other.impl);

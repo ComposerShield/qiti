@@ -12,9 +12,9 @@ namespace instrument
 {
 void QITI_API resetInstrumentation() noexcept;
 
-/* Provide a callback on next heap allocation */
+/** Provide a callback on next heap allocation */
 void QITI_API onNextHeapAllocation(void(*heapAllocCallback)()) noexcept;
-/** shortcut for onNextHeapAllocation([]{assert(false);}); */
+/** Dhortcut for onNextHeapAllocation([]{assert(false);}); */
 void QITI_API assertOnNextHeapAllocation() noexcept;
 
 } // namespace instrument

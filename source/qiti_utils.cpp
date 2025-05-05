@@ -41,7 +41,7 @@ namespace qiti
 {
 size_t getAllKnownFunctions(char* flatBuf,
                             size_t maxFunctions,
-                            size_t maxNameLen)
+                            size_t maxNameLen) noexcept
 {
     auto& map = getFunctionMap();
     size_t count = std::min(map.size(), maxFunctions);
@@ -62,13 +62,13 @@ size_t getAllKnownFunctions(char* flatBuf,
     return count;
 }
 
-void* getAddressForMangledFunctionName(const char* mangledName)
+void* getAddressForMangledFunctionName(const char* mangledName) noexcept
 {
     void* addr = dlsym(RTLD_DEFAULT, mangledName);
     return addr;
 }
 
-[[nodiscard]] qiti::FunctionData& getFunctionDataFromAddress(void* functionAddress)
+[[nodiscard]] qiti::FunctionData& getFunctionDataFromAddress(void* functionAddress) noexcept
 {
     auto& g_functionMap = getFunctionMap();
     
@@ -85,7 +85,7 @@ void* getAddressForMangledFunctionName(const char* mangledName)
     return it->second;
 }
 
-[[nodiscard]] const qiti::FunctionData* getFunctionData(const char* demangledFunctionName)
+[[nodiscard]] const qiti::FunctionData* getFunctionData(const char* demangledFunctionName) noexcept
 {
     auto& g_functionMap = getFunctionMap();
     
@@ -101,7 +101,7 @@ void* getAddressForMangledFunctionName(const char* mangledName)
     return &(it->second);
 }
 
-void demangle(const char* mangled_name, char* demangled_name, uint demangled_size)
+void demangle(const char* mangled_name, char* demangled_name, uint demangled_size) noexcept
 {
     int status = 0;
     char* result = abi::__cxa_demangle(mangled_name, nullptr, nullptr, &status);
@@ -121,7 +121,7 @@ void demangle(const char* mangled_name, char* demangled_name, uint demangled_siz
     }
 }
 
-void resetAll()
+void resetAll() noexcept
 {
     // Prevent any qiti work while we reset everything
     std::scoped_lock<std::recursive_mutex> lock(qiti_global_lock);
@@ -165,7 +165,7 @@ static void QITI_API_INTERNAL updateFunctionDataOnExit(void* this_fn) noexcept
 }
 
 extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
-__cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site)
+__cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site) noexcept
 {
     static int recursionCheck = 0;
     assert(++recursionCheck == 1);
@@ -179,7 +179,7 @@ __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site)
 }
 
 extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
-__cyg_profile_func_exit(void * this_fn, [[maybe_unused]] void* call_site)
+__cyg_profile_func_exit(void * this_fn, [[maybe_unused]] void* call_site) noexcept
 {
     if (qiti::profile::shouldProfileFunction(this_fn))
         updateFunctionDataOnExit(this_fn);

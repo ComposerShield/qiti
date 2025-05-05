@@ -23,16 +23,16 @@ public:
     [[nodiscard]] FunctionCallData QITI_API getLastFunctionCall() const noexcept;
     
     /** Internal */
-    QITI_API_INTERNAL FunctionData(void* functionAddress);
+    QITI_API_INTERNAL FunctionData(void* functionAddress) noexcept;
     /** Internal */
-    QITI_API_INTERNAL ~FunctionData();
+    QITI_API_INTERNAL ~FunctionData() noexcept;
     
     struct Impl;
     /** Internal */
     [[nodiscard]] Impl* QITI_API_INTERNAL getImpl() const noexcept;
     
     /** Internal Move Constructor */
-    QITI_API_INTERNAL FunctionData(FunctionData&& other);
+    QITI_API_INTERNAL FunctionData(FunctionData&& other) noexcept;
     /** Internal Move Operator */
     [[nodiscard]] FunctionData QITI_API_INTERNAL operator=(FunctionData&& other) noexcept;
     
