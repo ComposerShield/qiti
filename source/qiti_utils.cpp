@@ -9,6 +9,7 @@
 #include <dlfcn.h>
 #include <iostream>
 #include <map>
+#include <mutex>
 #include <string>
 
 #include "qiti_include.hpp"
@@ -24,6 +25,9 @@
 inline static thread_local uint64_t g_numHeapAllocationsOnCurrentThread = 0;
 extern thread_local std::function<void()> g_onNextHeapAllocation;
 #endif
+
+/** */
+std::recursive_mutex qiti_global_lock;
 
 /** */
 [[nodiscard]] static auto& getFunctionMap() noexcept
@@ -116,9 +120,15 @@ void demangle(const char* mangled_name, char* demangled_name, uint demangled_siz
     }
 }
 
-void shutdown()
+void resetAll()
 {
+    // Prevent any qiti work while we reset everything
+    std::scoped_lock<std::recursive_mutex> lock(qiti_global_lock);
+    
     getFunctionMap().clear();
+    
+    instrument::resetInstrumentation();
+    profile::resetProfiling();
 }
 } // namespace qiti
 
@@ -143,6 +153,8 @@ __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site)
     static int recursionCheck = 0;
     assert(++recursionCheck == 1);
     
+    qiti_global_lock.lock(); // lock until end of function call in __cyg_profile_func_exit
+    
     updateFunctionData(this_fn);
     
     --recursionCheck;
@@ -163,6 +175,8 @@ __cyg_profile_func_exit(void * this_fn, [[maybe_unused]] void* call_site)
 #ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
     callImpl->numHeapAllocationsAfterFunctionCall = g_numHeapAllocationsOnCurrentThread;
 #endif
+    
+    qiti_global_lock.unlock(); // lock was held since __cyg_profile_func_enter
 }
 
 #ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER

@@ -10,6 +10,8 @@ namespace qiti
 {
 namespace instrument
 {
+void QITI_API resetInstrumentation() noexcept;
+
 /* Provide a callback on next heap allocation */
 void QITI_API onNextHeapAllocation(void(*heapAllocCallback)()) noexcept;
 /** shortcut for onNextHeapAllocation([]{assert(false);}); */
