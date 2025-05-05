@@ -69,10 +69,6 @@ void QITI_API demangle(const char* mangled_name,
                        char* demangled_name,
                        uint demangled_size);
 
-
-/** */
-void QITI_API shutdown();
-
 /**
  Copies up to maxFunctions names (each truncated to maxNameLen–1 chars + '\0')
  into a single flat buffer of size maxFunctions * maxNameLen.
@@ -96,7 +92,7 @@ void* QITI_API getAddressForMangledFunctionName(const char* mangledName);
 
 /** */
 template <auto FuncPtr>
-[[nodiscard]] const qiti::FunctionData* QITI_API getFunctionData()
+[[nodiscard]] const qiti::FunctionData* QITI_API_INTERNAL getFunctionDataImpl()
 {
     static constexpr std::string_view functionName = getFunctionName<FuncPtr>();
     static constexpr std::string_view appendText = "()";

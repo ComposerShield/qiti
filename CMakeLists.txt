@@ -15,6 +15,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG -D_DEBUG")
 
 set(SOURCES
+    "include/qiti_include.hpp"
     "source/qiti_FunctionCallData_Impl.hpp"
     "source/qiti_FunctionCallData.hpp"
     "source/qiti_FunctionCallData.cpp"
@@ -29,9 +30,8 @@ set(SOURCES
     "source/qiti_utils.cpp"
 )
 
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/source PREFIX "Source" FILES ${SOURCES})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "lib" FILES ${SOURCES})
 
-# add_library(qiti_lib STATIC ${SOURCES})
 add_library(qiti_lib SHARED ${SOURCES})
 
 set_target_properties(qiti_lib PROPERTIES
@@ -39,8 +39,11 @@ set_target_properties(qiti_lib PROPERTIES
     XCODE_GENERATE_SCHEME ON
 )
 
-target_include_directories(qiti_lib PUBLIC
+target_include_directories(qiti_lib 
+PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/source
+PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 target_compile_options(qiti_lib 
@@ -122,6 +125,11 @@ set_target_properties(Catch2WithMain PROPERTIES
 set_target_properties(qiti_tests PROPERTIES
     OSX_ARCHITECTURES "${ARCHS}"
     XCODE_GENERATE_SCHEME ON
+)
+
+target_include_directories(qiti_tests 
+PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/source
 )
 
 # add_test(NAME qiti_tests COMMAND qiti_tests)

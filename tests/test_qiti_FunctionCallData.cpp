@@ -1,7 +1,5 @@
 
-#include "qiti_FunctionCallData.hpp"
-#include "qiti_FunctionData.hpp"
-#include "qiti_utils.hpp"
+#include "qiti_include.hpp"
 
 #include "qiti_test_macros.hpp"
 

@@ -1,5 +1,5 @@
 
-#include "qiti_instrument.hpp"
+#include "qiti_include.hpp"
 
 #include "qiti_test_macros.hpp"
 

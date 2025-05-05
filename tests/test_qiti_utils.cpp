@@ -1,5 +1,6 @@
 
-#include "qiti_utils.hpp"
+#include <qiti_include.hpp>
+
 #include "qiti_test_macros.hpp"
 
 #include <catch2/catch_test_macros.hpp>
