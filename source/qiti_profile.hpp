@@ -11,12 +11,12 @@ namespace profile
 {
 void QITI_API resetProfiling() noexcept;
 
-void QITI_API_INTERNAL beginProfilingFunction(void* functionAddress) noexcept;
+void QITI_API beginProfilingFunction(void* functionAddress) noexcept;
 
-void QITI_API_INTERNAL endProfilingFunction(void* functionAddress) noexcept;
+void QITI_API endProfilingFunction(void* functionAddress) noexcept;
 
 template<auto FuncPtr>
-void QITI_API beginProfilingFunction() noexcept { beginProfilingFunction(FuncPtr); }
+void QITI_API beginProfilingFunction() noexcept { beginProfilingFunction( reinterpret_cast<void*>(FuncPtr)); }
 
 template <auto FuncPtr>
 void QITI_API endProfilingFunction() noexcept { endProfilingFunction(FuncPtr); }

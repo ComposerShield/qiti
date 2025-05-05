@@ -12,7 +12,7 @@
 namespace qiti
 {
 /** */
-void QITI_API shutdown();
+void QITI_API resetAll();
 
 /** */
 template <auto FuncPtr>

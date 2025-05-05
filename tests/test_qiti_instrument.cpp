@@ -14,5 +14,5 @@ TEST_CASE("qiti::onNextHeapAllocation() is called on next heap allocation", "[qi
     QITI_CHECK(testValue == 1);
     delete heapAllocation;
     
-    qiti::shutdown();
+    qiti::resetAll();
 }
