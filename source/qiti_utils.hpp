@@ -96,12 +96,24 @@ void* QITI_API getAddressForMangledFunctionName(const char* mangledName);
 
 /** */
 template <auto FuncPtr>
-[[nodiscard]] constexpr const qiti::FunctionData* getFunctionData()
+[[nodiscard]] const qiti::FunctionData* QITI_API getFunctionData()
 {
-    constexpr std::string_view functionName = getFunctionName<FuncPtr>();
-    std::string copy(functionName);
-    copy += "()";
-    return getFunctionData(copy.c_str());
+    static constexpr std::string_view functionName = getFunctionName<FuncPtr>();
+    static constexpr std::string_view appendText = "()";
+    constexpr auto output = []
+    {
+        std::array<char, functionName.size() + appendText.size() + 1> buf{}; // each value initialized to '\0'
+        // copy from functionName
+        for (size_t i = 0; i < functionName.size(); ++i)
+            buf[i] = functionName[i];
+        // copy from appendText
+        for (size_t i = 0; i < appendText.size(); ++i)
+            buf[i + functionName.size()] = appendText[i];
+        // buf[Sv.size()] is already '\0'
+        return buf;
+    }();
+    
+    return getFunctionData(output.data());
 }
 
 /** Internal */
