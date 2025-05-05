@@ -16,6 +16,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG -D_DEBUG")
 
 set(SOURCES
     "include/qiti_include.hpp"
+    "source/qiti_API.hpp"
     "source/qiti_FunctionCallData_Impl.hpp"
     "source/qiti_FunctionCallData.hpp"
     "source/qiti_FunctionCallData.cpp"
@@ -26,6 +27,7 @@ set(SOURCES
     "source/qiti_instrument.cpp"
     "source/qiti_profile.hpp"
     "source/qiti_profile.cpp"
+    "source/qiti_ReentrantSharedMutex.hpp"
     "source/qiti_utils.hpp"
     "source/qiti_utils.cpp"
 )

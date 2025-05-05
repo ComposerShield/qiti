@@ -1,6 +1,10 @@
 
 #include <qiti_utils.hpp>
 
+#include "qiti_include.hpp"
+
+#include "qiti_ReentrantSharedMutex.hpp"
+
 #include <algorithm>
 #include <cassert>
 #include <cstdio>
@@ -13,12 +17,10 @@
 #include <string>
 #include <unordered_set>
 
-#include "qiti_include.hpp"
-
 //--------------------------------------------------------------------------
 
 /** */
-std::recursive_mutex qiti_global_lock;
+qiti::ReentrantSharedMutex qiti_global_lock;
 
 /** */
 [[nodiscard]] static auto& getFunctionMap() noexcept
@@ -114,7 +116,8 @@ void demangle(const char* mangled_name, char* demangled_name, uint demangled_siz
 void resetAll() noexcept
 {
     // Prevent any qiti work while we reset everything
-    std::scoped_lock<std::recursive_mutex> lock(qiti_global_lock);
+    // Demands exclusive lock, not a shared lock
+    std::scoped_lock<qiti::ReentrantSharedMutex> lock(qiti_global_lock);
     
     getFunctionMap().clear();
     
@@ -129,7 +132,7 @@ __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site) noexce
     static int recursionCheck = 0;
     assert(++recursionCheck == 1);
     
-    qiti_global_lock.lock(); // lock until end of function call in __cyg_profile_func_exit
+//    qiti_global_lock.lock_shared(); // lock until end of function call in __cyg_profile_func_exit
     
     if (qiti::profile::shouldProfileFunction(this_fn))
         qiti::profile::updateFunctionDataOnEnter(this_fn);
@@ -143,5 +146,5 @@ __cyg_profile_func_exit(void * this_fn, [[maybe_unused]] void* call_site) noexce
     if (qiti::profile::shouldProfileFunction(this_fn))
         qiti::profile::updateFunctionDataOnExit(this_fn);
     
-    qiti_global_lock.unlock(); // lock was held since __cyg_profile_func_enter
+//    qiti_global_lock.unlock_shared(); // lock was held since __cyg_profile_func_enter
 }
