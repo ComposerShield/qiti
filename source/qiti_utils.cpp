@@ -120,12 +120,8 @@ void shutdown()
 }
 } // namespace qiti
 
-extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
-__cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site)
+static void updateFunctionData(void* this_fn) noexcept
 {
-    static int recursionCheck = 0;
-    assert(++recursionCheck == 1);
-    
     auto& functionData = qiti::getFunctionDataFromAddress(this_fn);
     auto* impl = functionData.getImpl();
     ++impl->numTimesCalled;
@@ -137,6 +133,15 @@ __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site)
 #ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
     impl->lastCallData.getImpl()->numHeapAllocationsBeforeFunctionCall = g_numHeapAllocationsOnCurrentThread;
 #endif
+}
+
+extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
+__cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site)
+{
+    static int recursionCheck = 0;
+    assert(++recursionCheck == 1);
+    
+    updateFunctionData(this_fn);
     
     --recursionCheck;
 }

@@ -100,7 +100,7 @@ template <auto FuncPtr>
 {
     static constexpr std::string_view functionName = getFunctionName<FuncPtr>();
     static constexpr std::string_view appendText = "()";
-    constexpr auto output = []
+    static constexpr auto output = []
     {
         std::array<char, functionName.size() + appendText.size() + 1> buf{}; // each value initialized to '\0'
         // copy from functionName
