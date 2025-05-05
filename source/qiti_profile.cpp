@@ -1,6 +1,11 @@
 
 #include "qiti_profile.hpp"
 
+#include "qiti_FunctionCallData_Impl.hpp"
+#include "qiti_FunctionCallData.hpp"
+#include "qiti_FunctionData_Impl.hpp"
+#include "qiti_FunctionData.hpp"
+
 #include <mutex>
 #include <unordered_set>
 
@@ -18,7 +23,27 @@ struct Init_g_functionsToProfile
 };
 static const Init_g_functionsToProfile init_g_functionsToProfile;
 
+#ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
+inline static thread_local uint64_t g_numHeapAllocationsOnCurrentThread = 0;
+extern thread_local std::function<void()> g_onNextHeapAllocation;
+#endif
+
 extern std::recursive_mutex qiti_global_lock;
+
+//--------------------------------------------------------------------------
+
+#ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
+void* operator new(size_t size)
+{
+    ++g_numHeapAllocationsOnCurrentThread;
+    if (auto callback = std::exchange(g_onNextHeapAllocation, nullptr))
+        callback();
+    
+    // Original implementation
+    void* p = malloc(size);
+    return p;
+}
+#endif
 
 //--------------------------------------------------------------------------
 
@@ -33,6 +58,7 @@ void resetProfiling() noexcept
     
     g_functionsToProfile.clear();
     g_profileAllFunctions = false;
+    g_numHeapAllocationsOnCurrentThread = 0;
 }
 
 void beginProfilingFunction(void* functionAddress) noexcept
@@ -58,6 +84,37 @@ void endProfilingAllFunctions() noexcept
 bool shouldProfileFunction(void* funcAddress) noexcept
 {
     return g_profileAllFunctions || g_functionsToProfile.contains(funcAddress);
+}
+
+void updateFunctionDataOnEnter(void* this_fn) noexcept
+{
+    auto& functionData = qiti::getFunctionDataFromAddress(this_fn);
+    auto* impl = functionData.getImpl();
+    ++impl->numTimesCalled;
+    impl->lastCallData.reset(); // Deletes previous impl
+    
+    auto* lastCallImpl = impl->lastCallData.getImpl();
+    lastCallImpl->begin_time = std::chrono::steady_clock::now();
+    lastCallImpl->callingThread = std::this_thread::get_id();
+#ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
+    impl->lastCallData.getImpl()->numHeapAllocationsBeforeFunctionCall = g_numHeapAllocationsOnCurrentThread;
+#endif
+}
+
+void updateFunctionDataOnExit(void* this_fn) noexcept
+{
+    auto& functionData = qiti::getFunctionDataFromAddress(this_fn);
+    auto* impl = functionData.getImpl();
+    auto* callImpl = impl->lastCallData.getImpl();
+    
+    auto end_time = std::chrono::steady_clock::now();
+    auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - callImpl->begin_time);
+
+    callImpl->end_time = end_time;
+    callImpl->timeSpentInFunctionNanoseconds = static_cast<qiti::uint>(elapsed_ns.count());
+#ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
+    callImpl->numHeapAllocationsAfterFunctionCall = g_numHeapAllocationsOnCurrentThread;
+#endif
 }
 } // namespace profile
 } // namespace qiti

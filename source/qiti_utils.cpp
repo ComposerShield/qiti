@@ -15,17 +15,7 @@
 
 #include "qiti_include.hpp"
 
-#include "qiti_FunctionCallData_Impl.hpp"
-#include "qiti_FunctionCallData.hpp"
-#include "qiti_FunctionData_Impl.hpp"
-#include "qiti_FunctionData.hpp"
-
 //--------------------------------------------------------------------------
-
-#ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
-inline static thread_local uint64_t g_numHeapAllocationsOnCurrentThread = 0;
-extern thread_local std::function<void()> g_onNextHeapAllocation;
-#endif
 
 /** */
 std::recursive_mutex qiti_global_lock;
@@ -133,37 +123,6 @@ void resetAll() noexcept
 }
 } // namespace qiti
 
-static void QITI_API_INTERNAL updateFunctionDataOnEnter(void* this_fn) noexcept
-{
-    auto& functionData = qiti::getFunctionDataFromAddress(this_fn);
-    auto* impl = functionData.getImpl();
-    ++impl->numTimesCalled;
-    impl->lastCallData.reset(); // Deletes previous impl
-    
-    auto* lastCallImpl = impl->lastCallData.getImpl();
-    lastCallImpl->begin_time = std::chrono::steady_clock::now();
-    lastCallImpl->callingThread = std::this_thread::get_id();
-#ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
-    impl->lastCallData.getImpl()->numHeapAllocationsBeforeFunctionCall = g_numHeapAllocationsOnCurrentThread;
-#endif
-}
-
-static void QITI_API_INTERNAL updateFunctionDataOnExit(void* this_fn) noexcept
-{
-    auto& functionData = qiti::getFunctionDataFromAddress(this_fn);
-    auto* impl = functionData.getImpl();
-    auto* callImpl = impl->lastCallData.getImpl();
-    
-    auto end_time = std::chrono::steady_clock::now();
-    auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - callImpl->begin_time);
-
-    callImpl->end_time = end_time;
-    callImpl->timeSpentInFunctionNanoseconds = static_cast<qiti::uint>(elapsed_ns.count());
-#ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
-    callImpl->numHeapAllocationsAfterFunctionCall = g_numHeapAllocationsOnCurrentThread;
-#endif
-}
-
 extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
 __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site) noexcept
 {
@@ -173,7 +132,7 @@ __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site) noexce
     qiti_global_lock.lock(); // lock until end of function call in __cyg_profile_func_exit
     
     if (qiti::profile::shouldProfileFunction(this_fn))
-        updateFunctionDataOnEnter(this_fn);
+        qiti::profile::updateFunctionDataOnEnter(this_fn);
     
     --recursionCheck;
 }
@@ -182,20 +141,7 @@ extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into i
 __cyg_profile_func_exit(void * this_fn, [[maybe_unused]] void* call_site) noexcept
 {
     if (qiti::profile::shouldProfileFunction(this_fn))
-        updateFunctionDataOnExit(this_fn);
+        qiti::profile::updateFunctionDataOnExit(this_fn);
     
     qiti_global_lock.unlock(); // lock was held since __cyg_profile_func_enter
 }
-
-#ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
-void* operator new(size_t size)
-{
-    ++g_numHeapAllocationsOnCurrentThread;
-    if (auto callback = std::exchange(g_onNextHeapAllocation, nullptr))
-        callback();
-    
-    // Original implementation
-    void* p = malloc(size);
-    return p;
-}
-#endif

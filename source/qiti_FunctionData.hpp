@@ -3,6 +3,8 @@
 
 #include "qiti_FunctionCallData.hpp"
 
+#include <thread>
+
 //--------------------------------------------------------------------------
 
 namespace qiti
@@ -18,6 +20,9 @@ public:
     
     /** */
     [[nodiscard]] uint QITI_API getNumTimesCalled() const noexcept;
+    
+    /** */
+    [[nodiscard]] bool QITI_API wasCalledOnThread(std::thread::id) const noexcept;
 
     /** */
     [[nodiscard]] FunctionCallData QITI_API getLastFunctionCall() const noexcept;
