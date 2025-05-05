@@ -23,16 +23,13 @@ struct Init_g_functionsToProfile
 };
 static const Init_g_functionsToProfile init_g_functionsToProfile;
 
-#ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
 inline static thread_local uint64_t g_numHeapAllocationsOnCurrentThread = 0;
-extern thread_local std::function<void()> g_onNextHeapAllocation;
-#endif
 
+extern thread_local std::function<void()> g_onNextHeapAllocation;
 extern std::recursive_mutex qiti_global_lock;
 
 //--------------------------------------------------------------------------
 
-#ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
 void* operator new(size_t size)
 {
     ++g_numHeapAllocationsOnCurrentThread;
@@ -43,7 +40,6 @@ void* operator new(size_t size)
     void* p = malloc(size);
     return p;
 }
-#endif
 
 //--------------------------------------------------------------------------
 
