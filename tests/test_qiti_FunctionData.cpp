@@ -81,14 +81,14 @@ TEST_CASE("qiti::FunctionData::wasCalledOnThread()")
         QITI_CHECK(! funcData->wasCalledOnThread(currentThread));
     }
     
-//    SECTION("Function called on custom thread")
-//    {
-//        std::thread thread([]{ testFunc(); });
-//        auto id = thread.get_id();
-//        thread.join(); // sync with thread to ensure function was called
-//        
-//        QITI_CHECK(funcData->wasCalledOnThread(id));
-//    }
+    SECTION("Function called on custom thread")
+    {
+        std::thread thread([]{ testFunc(); });
+        auto id = thread.get_id();
+        thread.join(); // sync with thread to ensure function was called
+        
+        QITI_CHECK(funcData->wasCalledOnThread(id));
+    }
 
     qiti::resetAll();
 }
