@@ -21,8 +21,13 @@ public:
     /** */
     [[nodiscard]] uint QITI_API getNumTimesCalled() const noexcept;
     
-    /** */
-    [[nodiscard]] bool QITI_API wasCalledOnThread(std::thread::id) const noexcept;
+    /**
+     Returns true if function was called on the provided thread.
+     
+     Call example:
+     
+     */
+    [[nodiscard]] bool QITI_API wasCalledOnThread(std::thread::id thread) const noexcept;
 
     /** */
     [[nodiscard]] FunctionCallData QITI_API getLastFunctionCall() const noexcept;
