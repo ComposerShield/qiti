@@ -54,5 +54,10 @@ void endProfilingAllFunctions() noexcept
 {
     g_profileAllFunctions = false;
 }
+
+bool shouldProfileFunction(void* funcAddress) noexcept
+{
+    return g_profileAllFunctions || g_functionsToProfile.contains(funcAddress);
+}
 } // namespace profile
 } // namespace qiti

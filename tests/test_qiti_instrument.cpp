@@ -7,6 +7,8 @@
 
 TEST_CASE("qiti::onNextHeapAllocation() is called on next heap allocation", "[qiti::onNextHeapAllocation]")
 {
+    qiti::resetAll();
+    
     static int testValue = 0;
     qiti::instrument::onNextHeapAllocation([](){ ++testValue; });
     

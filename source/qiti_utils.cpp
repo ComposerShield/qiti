@@ -11,6 +11,7 @@
 #include <map>
 #include <mutex>
 #include <string>
+#include <unordered_set>
 
 #include "qiti_include.hpp"
 
@@ -132,7 +133,7 @@ void resetAll()
 }
 } // namespace qiti
 
-static void updateFunctionData(void* this_fn) noexcept
+static void QITI_API_INTERNAL updateFunctionDataOnEnter(void* this_fn) noexcept
 {
     auto& functionData = qiti::getFunctionDataFromAddress(this_fn);
     auto* impl = functionData.getImpl();
@@ -147,21 +148,7 @@ static void updateFunctionData(void* this_fn) noexcept
 #endif
 }
 
-extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
-__cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site)
-{
-    static int recursionCheck = 0;
-    assert(++recursionCheck == 1);
-    
-    qiti_global_lock.lock(); // lock until end of function call in __cyg_profile_func_exit
-    
-    updateFunctionData(this_fn);
-    
-    --recursionCheck;
-}
-
-extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
-__cyg_profile_func_exit(void * this_fn, [[maybe_unused]] void* call_site)
+static void QITI_API_INTERNAL updateFunctionDataOnExit(void* this_fn) noexcept
 {
     auto& functionData = qiti::getFunctionDataFromAddress(this_fn);
     auto* impl = functionData.getImpl();
@@ -175,6 +162,27 @@ __cyg_profile_func_exit(void * this_fn, [[maybe_unused]] void* call_site)
 #ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
     callImpl->numHeapAllocationsAfterFunctionCall = g_numHeapAllocationsOnCurrentThread;
 #endif
+}
+
+extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
+__cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site)
+{
+    static int recursionCheck = 0;
+    assert(++recursionCheck == 1);
+    
+    qiti_global_lock.lock(); // lock until end of function call in __cyg_profile_func_exit
+    
+    if (qiti::profile::shouldProfileFunction(this_fn))
+        updateFunctionDataOnEnter(this_fn);
+    
+    --recursionCheck;
+}
+
+extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
+__cyg_profile_func_exit(void * this_fn, [[maybe_unused]] void* call_site)
+{
+    if (qiti::profile::shouldProfileFunction(this_fn))
+        updateFunctionDataOnExit(this_fn);
     
     qiti_global_lock.unlock(); // lock was held since __cyg_profile_func_enter
 }

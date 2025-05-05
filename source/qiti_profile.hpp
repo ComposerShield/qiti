@@ -24,6 +24,8 @@ void QITI_API endProfilingFunction() noexcept { endProfilingFunction(FuncPtr); }
 void QITI_API beginProfilingAllFunctions() noexcept;
 
 void QITI_API endProfilingAllFunctions() noexcept;
+
+[[nodiscard]] bool QITI_API_INTERNAL shouldProfileFunction(void* funcAddress) noexcept;
     
 } // namespace profile
 } // namespace qiti

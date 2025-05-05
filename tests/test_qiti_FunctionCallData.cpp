@@ -23,6 +23,9 @@ int testNoHeapAllocationFunction() noexcept
 
 TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations() returns expected values")
 {
+    qiti::resetAll();
+    qiti::profile::beginProfilingAllFunctions();
+    
     SECTION("1 heap allocation")
     {
         // Call twice
