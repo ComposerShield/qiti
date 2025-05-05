@@ -128,9 +128,11 @@ __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site)
     
     auto& functionData = qiti::getFunctionDataFromAddress(this_fn);
     auto* impl = functionData.getImpl();
+    auto* lastCallImpl = impl->lastCallData.getImpl();
     ++impl->numTimesCalled;
     impl->lastCallData.reset();
-    impl->lastCallData.getImpl()->begin_time = std::chrono::steady_clock::now();
+    lastCallImpl->begin_time = std::chrono::steady_clock::now();
+    lastCallImpl->callingThread = std::this_thread::get_id();
 #ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
     impl->lastCallData.getImpl()->numHeapAllocationsBeforeFunctionCall = g_numHeapAllocationsOnCurrentThread;
 #endif

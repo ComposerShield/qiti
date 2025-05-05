@@ -16,6 +16,8 @@ public:
     /** */
     [[nodiscard]] uint QITI_API getNumHeapAllocations() const noexcept;
     
+    //--------------------------------------------------------------------------
+    
     /** Internal */
     QITI_API_INTERNAL FunctionCallData();
     /** */
@@ -35,7 +37,7 @@ public:
     /** Internal Copy Constructor */
     FunctionCallData(const FunctionCallData&);
     /** Internal Move Operator */
-    FunctionCallData operator=(const FunctionCallData&);
+    [[nodiscard]] FunctionCallData operator=(const FunctionCallData&);
     
 private:
     Impl* impl;
