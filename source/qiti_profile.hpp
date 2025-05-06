@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "qiti_API.hpp"
+#include "qiti_utils.hpp"
 
 //--------------------------------------------------------------------------
 
@@ -31,6 +31,9 @@ void QITI_API beginProfilingAllFunctions() noexcept;
 
 /** */
 void QITI_API endProfilingAllFunctions() noexcept;
+
+/** */
+uint QITI_API getNumHeapAllocations() noexcept;
 
 /** Internal */
 [[nodiscard]] bool QITI_API_INTERNAL shouldProfileFunction(void* funcAddress) noexcept;

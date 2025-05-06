@@ -51,5 +51,7 @@ private:
     
     FunctionData(const FunctionData&) = delete;
     FunctionData& operator=(const FunctionData&) = delete;
+    
+    void* operator new(size_t size);
 };
 } // namespace qiti

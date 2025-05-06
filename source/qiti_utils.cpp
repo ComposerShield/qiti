@@ -22,12 +22,20 @@
 /** */
 qiti::ReentrantSharedMutex qiti_global_lock;
 
+extern thread_local bool insideQiti;
+
 /** */
 [[nodiscard]] static auto& getFunctionMap() noexcept
 {
     static std::unordered_map<void*, qiti::FunctionData> map;
     return map;
 }
+
+struct ScopedQitiAccess
+{
+    ScopedQitiAccess()  noexcept { insideQiti = true; }
+    ~ScopedQitiAccess() noexcept { insideQiti = false; }
+};
 
 namespace qiti
 {
@@ -133,6 +141,7 @@ __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site) noexce
     assert(++recursionCheck == 1);
     
 //    qiti_global_lock.lock_shared(); // lock until end of function call in __cyg_profile_func_exit
+    ScopedQitiAccess scopedAccess;
     
     if (qiti::profile::shouldProfileFunction(this_fn))
         qiti::profile::updateFunctionDataOnEnter(this_fn);
@@ -143,6 +152,8 @@ __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site) noexce
 extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
 __cyg_profile_func_exit(void * this_fn, [[maybe_unused]] void* call_site) noexcept
 {
+    ScopedQitiAccess scopedAccess;
+    
     if (qiti::profile::shouldProfileFunction(this_fn))
         qiti::profile::updateFunctionDataOnExit(this_fn);
     

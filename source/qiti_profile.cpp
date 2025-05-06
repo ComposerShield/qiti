@@ -7,6 +7,7 @@
 #include "qiti_FunctionData.hpp"
 
 #include <mutex>
+#include <regex>
 #include <unordered_set>
 
 //--------------------------------------------------------------------------
@@ -24,6 +25,7 @@ struct Init_g_functionsToProfile
 static const Init_g_functionsToProfile init_g_functionsToProfile;
 
 inline static thread_local uint64_t g_numHeapAllocationsOnCurrentThread = 0;
+thread_local bool insideQiti = false;
 
 extern thread_local std::function<void()> g_onNextHeapAllocation;
 extern std::recursive_mutex qiti_global_lock;
@@ -32,13 +34,32 @@ extern std::recursive_mutex qiti_global_lock;
 
 void* operator new(size_t size)
 {
-    ++g_numHeapAllocationsOnCurrentThread;
-    if (auto callback = std::exchange(g_onNextHeapAllocation, nullptr))
-        callback();
+    if (! insideQiti)
+    {
+        ++g_numHeapAllocationsOnCurrentThread;
+        if (auto callback = std::exchange(g_onNextHeapAllocation, nullptr))
+            callback();
+    }
     
     // Original implementation
     void* p = malloc(size);
     return p;
+}
+
+/** */
+static void updateFunctionType(qiti::FunctionData& functionData) noexcept
+{
+    auto* impl = functionData.getImpl();
+    
+    static const std::regex constructor_regex(R"(^([\w:]+)::\1\()");
+    static const std::regex destructor_regex (R"(^([\w:]+)::~\1\()");
+
+    const auto& name = impl->functionNameReal;
+    std::smatch m;
+    if (std::regex_search(name, m, constructor_regex))
+        impl->functionType = qiti::FunctionType::constructor;
+    else if (std::regex_search(name, m, destructor_regex))
+        impl->functionType = qiti::FunctionType::destructor;
 }
 
 //--------------------------------------------------------------------------
@@ -80,6 +101,11 @@ void endProfilingAllFunctions() noexcept
     g_profileAllFunctions = false;
 }
 
+uint getNumHeapAllocations() noexcept
+{
+    return g_numHeapAllocationsOnCurrentThread;
+}
+
 bool shouldProfileFunction(void* funcAddress) noexcept
 {
     return g_profileAllFunctions || g_functionsToProfile.contains(funcAddress);
@@ -102,6 +128,7 @@ void updateFunctionDataOnEnter(void* this_fn) noexcept
 #ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
     impl->lastCallData.getImpl()->numHeapAllocationsBeforeFunctionCall = g_numHeapAllocationsOnCurrentThread;
 #endif
+    updateFunctionType(functionData);
 }
 
 void updateFunctionDataOnExit(void* this_fn) noexcept

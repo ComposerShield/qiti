@@ -74,29 +74,30 @@ void* QITI_API getAddressForMangledFunctionName(const char* mangledName) noexcep
 /** */
 [[nodiscard]] const qiti::FunctionData* QITI_API getFunctionData(const char* demangledFunctionName) noexcept;
 
+/** Internal */
+[[nodiscard]] qiti::FunctionData& QITI_API getFunctionDataFromAddress(void* functionAddress) noexcept;
+
 /** */
 template <auto FuncPtr>
 [[nodiscard]] const qiti::FunctionData* QITI_API_INTERNAL getFunctionDataImpl() noexcept
 {
-    static constexpr std::string_view functionName = getFunctionName<FuncPtr>();
-    static constexpr std::string_view appendText = "()";
-    static constexpr auto output = []
-    {
-        std::array<char, functionName.size() + appendText.size() + 1> buf{}; // each value initialized to '\0'
-        // copy from functionName
-        for (size_t i = 0; i < functionName.size(); ++i)
-            buf[i] = functionName[i];
-        // copy from appendText
-        for (size_t i = 0; i < appendText.size(); ++i)
-            buf[i + functionName.size()] = appendText[i];
-        // buf[Sv.size()] is already '\0'
-        return buf;
-    }();
-    
-    return getFunctionData(output.data());
+//    static constexpr std::string_view functionName = getFunctionName<FuncPtr>();
+//    static constexpr std::string_view appendText = "()";
+//    static constexpr auto output = []
+//    {
+//        std::array<char, functionName.size() + appendText.size() + 1> buf{}; // each value initialized to '\0'
+//        // copy from functionName
+//        for (size_t i = 0; i < functionName.size(); ++i)
+//            buf[i] = functionName[i];
+//        // copy from appendText
+//        for (size_t i = 0; i < appendText.size(); ++i)
+//            buf[i + functionName.size()] = appendText[i];
+//        // buf[Sv.size()] is already '\0'
+//        return buf;
+//    }();
+//    
+//    return getFunctionData(output.data());
+    return &getFunctionDataFromAddress(reinterpret_cast<void*>(FuncPtr));
 }
-
-/** Internal */
-[[nodiscard]] qiti::FunctionData& QITI_API getFunctionDataFromAddress(void* functionAddress) noexcept;
 
 } // namespace qiti

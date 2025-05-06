@@ -11,7 +11,6 @@
 
 namespace qiti
 {
-
 FunctionData::FunctionData(void* functionAddress) noexcept
 {
     impl = new Impl;

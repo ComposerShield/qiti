@@ -5,12 +5,21 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <iostream>
+
 [[nodiscard]] inline static std::string demangleFunc(const char* mangled)
 {
     char demangled[256] = {};
     qiti::demangle(mangled, demangled, sizeof(demangled));
     return std::string(demangled);
 }
+
+class TestClass
+{
+public:
+    TestClass()  noexcept { std::cout << "TestClass constructor" << "\n"; }
+    ~TestClass() noexcept { std::cout << "TestClass destructor"  << "\n"; }
+};
 
 TEST_CASE("qiti::demangle() on valid Itanium‐ABI mangled names", "[qiti::demangle]")
 {
@@ -65,6 +74,15 @@ TEST_CASE("qiti::demangle() falls back on non-mangled input", "[qiti::demangle]"
         const char* empty = "";
         QITI_REQUIRE( demangleFunc(empty) == "" );
     }
+    
+//    qiti::profile::beginProfilingAllFunctions();
+//    
+//    {
+//        TestClass test;
+//    }
+//    
+//    
+//    [[maybe_unused]]auto foo = new int{0};
     
     qiti::resetAll();
 }
