@@ -5,6 +5,7 @@
 #include "qiti_FunctionCallData.hpp"
 #include "qiti_FunctionData_Impl.hpp"
 #include "qiti_FunctionData.hpp"
+#include "qiti_ScopedNoHeapAllocations.hpp"
 
 #include <cassert>
 #include <mutex>
@@ -25,7 +26,7 @@ struct Init_g_functionsToProfile
 };
 static const Init_g_functionsToProfile init_g_functionsToProfile;
 
-inline static thread_local uint64_t g_numHeapAllocationsOnCurrentThread = 0;
+inline thread_local unsigned long long g_numHeapAllocationsOnCurrentThread = 0;
 
 extern thread_local std::function<void()> g_onNextHeapAllocation;
 extern std::recursive_mutex qiti_global_lock;
@@ -43,30 +44,10 @@ void* operator new(size_t size)
     return p;
 }
 
-struct ScopedNoHeapAllocations
-{
-public:
-    ScopedNoHeapAllocations()  noexcept : numHeapAllocationsBefore(g_numHeapAllocationsOnCurrentThread) {}
-    ~ScopedNoHeapAllocations() noexcept
-    {
-        numHeapAllocationsAfter = g_numHeapAllocationsOnCurrentThread;
-        assert(numHeapAllocationsBefore == numHeapAllocationsAfter);
-    }
-    
-private:
-    qiti::uint numHeapAllocationsBefore;
-    qiti::uint numHeapAllocationsAfter;
-    
-    ScopedNoHeapAllocations(const ScopedNoHeapAllocations&) = delete;
-    ScopedNoHeapAllocations& operator=(const ScopedNoHeapAllocations&) = delete;
-    ScopedNoHeapAllocations(ScopedNoHeapAllocations&&) = delete;
-    ScopedNoHeapAllocations& operator=(ScopedNoHeapAllocations&&) = delete;
-};
-
 /** */
 static void QITI_API_INTERNAL updateFunctionType(qiti::FunctionData& functionData) noexcept
 {
-    ScopedNoHeapAllocations noAlloc;
+    qiti::ScopedNoHeapAllocations noAlloc;
 
     auto* impl = functionData.getImpl();
     const std::string& name = impl->functionNameReal;
@@ -165,7 +146,7 @@ void updateFunctionDataOnEnter(void* this_fn) noexcept
 
 void updateFunctionDataOnExit(void* this_fn) noexcept
 {
-    ScopedNoHeapAllocations noAlloc;
+    qiti::ScopedNoHeapAllocations noAlloc;
     
     auto& functionData = qiti::getFunctionDataFromAddress(this_fn);
     auto* impl = functionData.getImpl();

@@ -28,6 +28,7 @@ set(SOURCES
     "source/qiti_profile.hpp"
     "source/qiti_profile.cpp"
     "source/qiti_ReentrantSharedMutex.hpp"
+    "source/qiti_ScopedNoHeapAllocations.hpp"
     "source/qiti_utils.hpp"
     "source/qiti_utils.cpp"
 )
@@ -96,6 +97,7 @@ add_executable(qiti_tests
     "Tests/test_qiti_FunctionData.cpp"
     "Tests/test_qiti_instrument.cpp"
     "Tests/test_qiti_profile.cpp"
+    "Tests/test_qiti_ScopedNoHeapAllocations.cpp"
     "Tests/test_qiti_utils.cpp"
 )
 
