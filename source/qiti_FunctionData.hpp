@@ -39,15 +39,20 @@ public:
     
     struct Impl;
     /** Internal */
-    [[nodiscard]] Impl* QITI_API_INTERNAL getImpl() const noexcept;
+    [[nodiscard]] Impl* QITI_API_INTERNAL getImpl() noexcept;
+    /** Internal */
+    [[nodiscard]] const Impl* QITI_API_INTERNAL getImpl() const noexcept;
     
     /** Internal Move Constructor */
     QITI_API_INTERNAL FunctionData(FunctionData&& other) noexcept;
     /** Internal Move Operator */
-    [[nodiscard]] FunctionData QITI_API_INTERNAL operator=(FunctionData&& other) noexcept;
+    [[nodiscard]] FunctionData& QITI_API_INTERNAL operator=(FunctionData&& other) noexcept;
     
 private:
-    Impl* impl;
+    // Stack-based pimpl idiom
+    static constexpr std::size_t ImplSize  = 128;
+    static constexpr std::size_t ImplAlign =  8;
+    alignas(ImplAlign) unsigned char implStorage[ImplSize];
     
     FunctionData(const FunctionData&) = delete;
     FunctionData& operator=(const FunctionData&) = delete;

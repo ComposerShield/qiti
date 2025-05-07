@@ -14,7 +14,13 @@ namespace qiti
 
 FunctionData::FunctionData(void* functionAddress) noexcept
 {
-    impl = new Impl;
+    static_assert(sizeof(FunctionData::Impl)  <= FunctionData::ImplSize,  "Impl is too large for FunctionData::implStorage");
+    static_assert(alignof(FunctionData::Impl) == FunctionData::ImplAlign, "Impl alignment stricter than FunctionData::implStorage");
+    
+    // Allocate Impl on the stack instead of the heap
+    new (implStorage) Impl;
+    
+    auto* impl = getImpl();
     impl->address = functionAddress;
     
     Dl_info info;
@@ -33,46 +39,55 @@ FunctionData::FunctionData(void* functionAddress) noexcept
 
 FunctionData::~FunctionData() noexcept
 {
-    delete impl;
+    getImpl()->~Impl();
 }
+
+FunctionData::Impl*       FunctionData::getImpl()       noexcept { return reinterpret_cast<Impl*>(implStorage); }
+const FunctionData::Impl* FunctionData::getImpl() const noexcept { return reinterpret_cast<const Impl*>(implStorage); }
 
 FunctionData::FunctionData(FunctionData&& other) noexcept
 {
-    impl = other.impl;
-    other.impl = nullptr;
+    // move‐construct into our storage
+    new (implStorage) Impl(std::move(*other.getImpl()));
+    // destroy their Impl so we can re‐init it
+    other.getImpl()->~Impl();
+    // default‐construct theirs back into a valid (empty) state
+    new (other.implStorage) Impl();
 }
 
-FunctionData FunctionData::operator=(FunctionData&& other) noexcept
+FunctionData& FunctionData::operator=(FunctionData&& other) noexcept
 {
-    FunctionData moveDestination(other.impl->address);
-    impl = other.impl;
-    other.impl = nullptr;
-    return moveDestination;
-}
-
-FunctionData::Impl* FunctionData::getImpl() const noexcept
-{
-    return impl;
+    if (this != &other) {
+        // destroy our current one
+        getImpl()->~Impl();
+        // move‐construct into our storage
+        new (implStorage) Impl(std::move(*other.getImpl()));
+        // tear down theirs…
+        other.getImpl()->~Impl();
+        // …and put them back into a default‐constructed safe state
+        new (other.implStorage) Impl();
+    }
+    return *this;
 }
 
 const char* FunctionData::getFunctionName() const noexcept
 {
-    return impl->functionNameReal.c_str();
+    return getImpl()->functionNameReal.c_str();
 }
 
 qiti::uint FunctionData::getNumTimesCalled() const noexcept
 {
-    return impl->numTimesCalled;
+    return getImpl()->numTimesCalled;
 }
 
 FunctionCallData FunctionData::getLastFunctionCall() const noexcept
 {
-    return impl->lastCallData;
+    return getImpl()->lastCallData;
 }
 
 bool FunctionData::wasCalledOnThread(std::thread::id thread) const noexcept
 {
-    return impl->threadsCalledOn.contains(thread);
+    return getImpl()->threadsCalledOn.contains(thread);
 }
 
 } // namespace qiti
