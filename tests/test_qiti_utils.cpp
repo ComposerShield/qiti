@@ -1,18 +1,42 @@
 
 #include <qiti_include.hpp>
 
+#include "qiti_FunctionData.hpp"
 #include "qiti_test_macros.hpp"
 
 #include <catch2/catch_test_macros.hpp>
 
-[[nodiscard]] inline static std::string demangleFunc(const char* mangled)
+#include <string>
+
+/** NOT static to purposely allow external linkage and visibility to QITI */
+__attribute__((noinline)) __attribute__((optnone))
+[[nodiscard]] std::string demangleFunc(const char* mangled)
 {
     char demangled[256] = {};
     qiti::demangle(mangled, demangled, sizeof(demangled));
     return std::string(demangled);
 }
 
-TEST_CASE("qiti::demangle() on valid Itanium‐ABI mangled names", "[qiti::demangle]")
+TEST_CASE("qiti::getFunctionName()")
+{
+    qiti::resetAll();
+    
+    SECTION("Simple static function from this translation unit")
+    {
+        auto name = qiti::getFunctionName<&demangleFunc>();
+        QITI_REQUIRE(name == "demangleFunc");
+    }
+    
+    SECTION("Complex, namespaced, templated/typedef, STL function")
+    {
+        auto name = qiti::getFunctionName<&std::string::empty>();
+        QITI_REQUIRE(name == "std::basic_string<char>::empty");
+    }
+    
+    qiti::resetAll();
+}
+
+TEST_CASE("qiti::demangle() on valid Itanium‐ABI mangled names")
 {
     SECTION("simple function with one int parameter")
     {
@@ -46,7 +70,7 @@ TEST_CASE("qiti::demangle() on valid Itanium‐ABI mangled names", "[qiti::deman
     qiti::resetAll();
 }
 
-TEST_CASE("qiti::demangle() falls back on non-mangled input", "[qiti::demangle]")
+TEST_CASE("qiti::demangle() falls back on non-mangled input")
 {
     SECTION("plain identifier")
     {
@@ -69,4 +93,25 @@ TEST_CASE("qiti::demangle() falls back on non-mangled input", "[qiti::demangle]"
     qiti::resetAll();
 }
 
-
+TEST_CASE("qiti::getAddressForMangledFunctionName()")
+{
+    qiti::resetAll();
+    
+    auto* funcAddress = (void*)&demangleFunc;
+    
+    qiti::profile::beginProfilingAllFunctions();
+//    qiti::profile::beginProfilingFunction<&demangleFunc>();
+    
+    // Call function to create FunctionData
+    (void)demangleFunc(""); // TODO: make it so we do not have to call this
+    
+    auto functionData = qiti::getFunctionData<&demangleFunc>();
+    QITI_REQUIRE( functionData != nullptr );
+    
+    auto mangledName = functionData->getMangledFunctionName();
+    auto* address = qiti::getAddressForMangledFunctionName(mangledName);
+    
+    QITI_REQUIRE( address == funcAddress );
+    
+    qiti::resetAll();
+}

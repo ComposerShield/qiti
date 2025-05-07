@@ -19,8 +19,9 @@ FunctionData::FunctionData(void* functionAddress) noexcept
     
     // Allocate Impl on the stack instead of the heap
     new (implStorage) Impl;
-    
+        
     auto* impl = getImpl();
+    
     impl->address = functionAddress;
     
     Dl_info info;
@@ -75,6 +76,11 @@ FunctionData& FunctionData::operator=(FunctionData&& other) noexcept
 const char* FunctionData::getFunctionName() const noexcept
 {
     return getImpl()->functionNameReal.c_str();
+}
+
+const char* FunctionData::getMangledFunctionName() const noexcept
+{
+    return getImpl()->functionNameMangled.c_str();
 }
 
 qiti::uint FunctionData::getNumTimesCalled() const noexcept

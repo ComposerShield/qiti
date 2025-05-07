@@ -134,7 +134,7 @@ __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site) noexce
     
 //    qiti_global_lock.lock_shared(); // lock until end of function call in __cyg_profile_func_exit
     
-    if (qiti::profile::isProfilingFunction(this_fn))
+    if (qiti::profile::isProfilingFunction(this_fn)) // 0x1000110ac
         qiti::profile::updateFunctionDataOnEnter(this_fn);
     
     --recursionCheck;

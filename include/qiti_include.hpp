@@ -16,6 +16,10 @@ void QITI_API resetAll() noexcept;
 
 /** */
 template <auto FuncPtr>
-[[nodiscard]] const qiti::FunctionData* QITI_API getFunctionData() noexcept { return getFunctionDataImpl<FuncPtr>(); }
+[[nodiscard]] const qiti::FunctionData* QITI_API getFunctionData() noexcept
+{
+    static constexpr auto* address = FuncPtr;
+    return &getFunctionDataFromAddress(reinterpret_cast<void*>(address));
+}
 
 } // namespace qiti

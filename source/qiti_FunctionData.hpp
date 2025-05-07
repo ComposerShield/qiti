@@ -19,6 +19,9 @@ public:
     [[nodiscard]] const char* QITI_API getFunctionName() const noexcept;
     
     /** */
+    [[nodiscard]] const char* QITI_API getMangledFunctionName() const noexcept;
+    
+    /** */
     [[nodiscard]] uint QITI_API getNumTimesCalled() const noexcept;
     
     /**

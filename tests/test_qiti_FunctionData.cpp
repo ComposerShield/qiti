@@ -16,9 +16,7 @@
 __attribute__((noinline)) __attribute__((optnone))
 void testFunc() noexcept
 {
-    std::cout << "testFunc start\n";
     volatile int _ = 42;
-    std::cout << "testFunc end\n";
 }
 
 TEST_CASE("qiti::FunctionData::getFunctionName()")
@@ -29,6 +27,18 @@ TEST_CASE("qiti::FunctionData::getFunctionName()")
     auto functionData = qiti::getFunctionData<&testFunc>();
     std::string name = functionData->getFunctionName();
     QITI_CHECK(name == "testFunc()");
+
+    qiti::resetAll();
+}
+
+TEST_CASE("qiti::FunctionData::getMangledFunctionName()")
+{
+    qiti::resetAll();
+    
+    qiti::profile::beginProfilingFunction<&testFunc>();
+    auto functionData = qiti::getFunctionData<&testFunc>();
+    std::string name = functionData->getMangledFunctionName();
+    QITI_CHECK(name == "_Z8testFuncv");
 
     qiti::resetAll();
 }
