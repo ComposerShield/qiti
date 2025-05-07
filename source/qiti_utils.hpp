@@ -97,6 +97,6 @@ template <auto FuncPtr>
 }
 
 /** Internal */
-[[nodiscard]] qiti::FunctionData& QITI_API getFunctionDataFromAddress(void* functionAddress) noexcept;
+[[nodiscard]] qiti::FunctionData& QITI_API getFunctionDataFromAddress(void* functionAddress) noexcept;\
 
 } // namespace qiti

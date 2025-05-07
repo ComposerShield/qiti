@@ -6,7 +6,9 @@
 #include "qiti_FunctionData_Impl.hpp"
 #include "qiti_FunctionData.hpp"
 
+#include <cassert>
 #include <mutex>
+#include <regex>
 #include <unordered_set>
 
 //--------------------------------------------------------------------------
@@ -39,6 +41,61 @@ void* operator new(size_t size)
     // Original implementation
     void* p = malloc(size);
     return p;
+}
+
+struct ScopedNoHeapAllocations
+{
+public:
+    ScopedNoHeapAllocations()  noexcept : numHeapAllocationsBefore(g_numHeapAllocationsOnCurrentThread) {}
+    ~ScopedNoHeapAllocations() noexcept
+    {
+        numHeapAllocationsAfter = g_numHeapAllocationsOnCurrentThread;
+        assert(numHeapAllocationsBefore == numHeapAllocationsAfter);
+    }
+    
+private:
+    qiti::uint numHeapAllocationsBefore;
+    qiti::uint numHeapAllocationsAfter;
+    
+    ScopedNoHeapAllocations(const ScopedNoHeapAllocations&) = delete;
+    ScopedNoHeapAllocations& operator=(const ScopedNoHeapAllocations&) = delete;
+    ScopedNoHeapAllocations(ScopedNoHeapAllocations&&) = delete;
+    ScopedNoHeapAllocations& operator=(ScopedNoHeapAllocations&&) = delete;
+};
+
+/** */
+static void QITI_API_INTERNAL updateFunctionType(qiti::FunctionData& functionData) noexcept
+{
+    ScopedNoHeapAllocations noAlloc;
+
+    auto* impl = functionData.getImpl();
+    const std::string& name = impl->functionNameReal;
+    std::string_view sv{name};
+
+    // find the opening '(' of the parameter list
+    auto paren = sv.find('(');
+    if (paren != std::string_view::npos) {
+        // strip off the "(" and everything after:
+        sv.remove_suffix(sv.size() - paren);
+
+        // now find the last "::" in the prefix:
+        auto colcol = sv.rfind("::");
+        if (colcol != std::string_view::npos) {
+            // [qualifier]::[last]
+            std::string_view qualifier = sv.substr(0, colcol);
+            std::string_view last_part = sv.substr(colcol + 2);
+
+            // constructor: qualifier == last_part
+            if (qualifier == last_part) {
+                impl->functionType = qiti::FunctionType::constructor;
+            }
+            // destructor: last_part begins with '~' and qualifier == last_part.substr(1)
+            else if (!last_part.empty() && last_part[0] == '~'
+                     && qualifier == last_part.substr(1)) {
+                impl->functionType = qiti::FunctionType::destructor;
+            }
+        }
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -88,6 +145,7 @@ bool shouldProfileFunction(void* funcAddress) noexcept
 void updateFunctionDataOnEnter(void* this_fn) noexcept
 {
     auto& functionData = qiti::getFunctionDataFromAddress(this_fn);
+    
     auto* impl = functionData.getImpl();
     std::thread::id thisThread = std::this_thread::get_id();
     
@@ -102,10 +160,13 @@ void updateFunctionDataOnEnter(void* this_fn) noexcept
 #ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
     impl->lastCallData.getImpl()->numHeapAllocationsBeforeFunctionCall = g_numHeapAllocationsOnCurrentThread;
 #endif
+    updateFunctionType(functionData);
 }
 
 void updateFunctionDataOnExit(void* this_fn) noexcept
 {
+    ScopedNoHeapAllocations noAlloc;
+    
     auto& functionData = qiti::getFunctionDataFromAddress(this_fn);
     auto* impl = functionData.getImpl();
     auto* callImpl = impl->lastCallData.getImpl();
