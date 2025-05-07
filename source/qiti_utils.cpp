@@ -134,7 +134,7 @@ __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site) noexce
     
 //    qiti_global_lock.lock_shared(); // lock until end of function call in __cyg_profile_func_exit
     
-    if (qiti::profile::shouldProfileFunction(this_fn))
+    if (qiti::profile::isProfilingFunction(this_fn))
         qiti::profile::updateFunctionDataOnEnter(this_fn);
     
     --recursionCheck;
@@ -143,7 +143,7 @@ __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site) noexce
 extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
 __cyg_profile_func_exit(void * this_fn, [[maybe_unused]] void* call_site) noexcept
 {
-    if (qiti::profile::shouldProfileFunction(this_fn))
+    if (qiti::profile::isProfilingFunction(this_fn))
         qiti::profile::updateFunctionDataOnExit(this_fn);
     
 //    qiti_global_lock.unlock_shared(); // lock was held since __cyg_profile_func_enter

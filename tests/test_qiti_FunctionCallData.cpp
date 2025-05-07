@@ -53,4 +53,3 @@ TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations() returns expected valu
     qiti::resetAll();
 }
 
-

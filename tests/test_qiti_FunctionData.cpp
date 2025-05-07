@@ -14,7 +14,7 @@
 
 /** NOT static to purposely allow external linkage and visibility to QITI */
 __attribute__((noinline)) __attribute__((optnone))
-void testFunc()
+void testFunc() noexcept
 {
     std::cout << "testFunc start\n";
     volatile int _ = 42;
@@ -24,6 +24,11 @@ void testFunc()
 TEST_CASE("qiti::FunctionData::getFunctionName()")
 {
     qiti::resetAll();
+    
+    qiti::profile::beginProfilingFunction<&testFunc>();
+    auto functionData = qiti::getFunctionData<&testFunc>();
+    std::string name = functionData->getFunctionName();
+    QITI_CHECK(name == "testFunc()");
 
     qiti::resetAll();
 }
