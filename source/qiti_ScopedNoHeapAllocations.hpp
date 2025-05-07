@@ -22,5 +22,9 @@ private:
     ScopedNoHeapAllocations& operator=(const ScopedNoHeapAllocations&) = delete;
     ScopedNoHeapAllocations(ScopedNoHeapAllocations&&) = delete;
     ScopedNoHeapAllocations& operator=(ScopedNoHeapAllocations&&) = delete;
+    
+    // Prevent heap allocating this class
+    void* operator new(std::size_t) = delete;
+    void* operator new[](std::size_t) = delete;
 };
 } // namespace qiti

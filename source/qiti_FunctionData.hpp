@@ -56,5 +56,9 @@ private:
     
     FunctionData(const FunctionData&) = delete;
     FunctionData& operator=(const FunctionData&) = delete;
+    
+    // Prevent heap allocating this class
+    void* operator new(std::size_t) = delete;
+    void* operator new[](std::size_t) = delete;
 };
 } // namespace qiti

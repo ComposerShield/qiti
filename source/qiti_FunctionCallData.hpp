@@ -46,5 +46,9 @@ private:
     static constexpr std::size_t ImplSize  = 128;
     static constexpr std::size_t ImplAlign =  8;
     alignas(ImplAlign) unsigned char implStorage[ImplSize];
+    
+    // Prevent heap allocating this class
+    void* operator new(std::size_t) = delete;
+    void* operator new[](std::size_t) = delete;
 };
 } // namespace qiti
