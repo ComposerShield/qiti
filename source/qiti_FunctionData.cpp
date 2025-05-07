@@ -45,6 +45,7 @@ FunctionData::~FunctionData() noexcept
 FunctionData::Impl*       FunctionData::getImpl()       noexcept { return reinterpret_cast<Impl*>(implStorage); }
 const FunctionData::Impl* FunctionData::getImpl() const noexcept { return reinterpret_cast<const Impl*>(implStorage); }
 
+// Move constructor
 FunctionData::FunctionData(FunctionData&& other) noexcept
 {
     // move‐construct into our storage
@@ -55,6 +56,7 @@ FunctionData::FunctionData(FunctionData&& other) noexcept
     new (other.implStorage) Impl();
 }
 
+// Move assignment
 FunctionData& FunctionData::operator=(FunctionData&& other) noexcept
 {
     if (this != &other) {

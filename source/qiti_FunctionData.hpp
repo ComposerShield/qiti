@@ -50,7 +50,7 @@ public:
     
 private:
     // Stack-based pimpl idiom
-    static constexpr std::size_t ImplSize  = 128;
+    static constexpr std::size_t ImplSize  = 248;
     static constexpr std::size_t ImplAlign =  8;
     alignas(ImplAlign) unsigned char implStorage[ImplSize];
     
