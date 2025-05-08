@@ -78,3 +78,17 @@ TEST_CASE("qiti::profile::endProfilingAllFunctions()")
     
     qiti::resetAll();
 }
+
+TEST_CASE("qiti::profile::isProfilingFunction()")
+{
+    // TODO: implement
+}
+
+TEST_CASE("qiti::profile::getNumHeapAllocationsOnCurrentThread()")
+{
+    qiti::resetAll();
+    
+    // TODO: implement (when more internals are guaranteed not to heap allocate)
+    
+    qiti::resetAll();
+}

@@ -12,7 +12,7 @@ namespace qiti
  */
 class FunctionCallData
 {
-public:
+public:    
     /** */
     [[nodiscard]] uint QITI_API getNumHeapAllocations() const noexcept;
     
