@@ -20,6 +20,9 @@ using uint = unsigned long long;
 class FunctionData;
 
 //--------------------------------------------------------------------------
+/** */
+void QITI_API resetAll() noexcept;
+
 /** Returns demangled function name (without parens) */
 template <auto FuncPtr>
 constexpr std::string_view getFunctionName() noexcept
@@ -79,6 +82,15 @@ void* QITI_API getAddressForMangledFunctionName(const char* mangledName) noexcep
 
 /** Internal */
 [[nodiscard]] qiti::FunctionData& QITI_API getFunctionDataFromAddress(void* functionAddress) noexcept;
+
+/** */
+template <auto FuncPtr>
+requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
+[[nodiscard]] const qiti::FunctionData* QITI_API getFunctionData() noexcept
+{
+    static constexpr auto* address = FuncPtr;
+    return &getFunctionDataFromAddress(reinterpret_cast<void*>(address));
+}
 
 /** */
 /*
