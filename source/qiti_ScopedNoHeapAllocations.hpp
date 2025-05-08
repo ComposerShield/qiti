@@ -1,17 +1,21 @@
 
 #include <cassert>
-
-extern thread_local unsigned long long g_numHeapAllocationsOnCurrentThread;
+#include <cstdint>
 
 namespace qiti
 {
+namespace profile
+{
+unsigned long long getNumHeapAllocationsOnCurrentThread() noexcept;
+} // namespace profile
+
 struct ScopedNoHeapAllocations
 {
 public:
-    ScopedNoHeapAllocations()  noexcept : numHeapAllocationsBefore(g_numHeapAllocationsOnCurrentThread) {}
+    ScopedNoHeapAllocations()  noexcept : numHeapAllocationsBefore(profile::getNumHeapAllocationsOnCurrentThread()) {}
     ~ScopedNoHeapAllocations() noexcept
     {
-        auto numHeapAllocationsAfter = g_numHeapAllocationsOnCurrentThread;
+        auto numHeapAllocationsAfter = profile::getNumHeapAllocationsOnCurrentThread();
         assert(numHeapAllocationsBefore == numHeapAllocationsAfter);
     }
     
@@ -24,7 +28,7 @@ private:
     ScopedNoHeapAllocations& operator=(ScopedNoHeapAllocations&&) = delete;
     
     // Prevent heap allocating this class
-    void* operator new(std::size_t) = delete;
-    void* operator new[](std::size_t) = delete;
+    void* operator new(size_t) = delete;
+    void* operator new[](size_t) = delete;
 };
 } // namespace qiti

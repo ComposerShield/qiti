@@ -42,6 +42,9 @@ template<auto FuncPtr>
     return isProfilingFunction( reinterpret_cast<void*>(FuncPtr));
 }
 
+/** */
+[[nodiscard]] unsigned long long QITI_API getNumHeapAllocationsOnCurrentThread() noexcept;
+
 /** Internal */
 void QITI_API_INTERNAL updateFunctionDataOnEnter(void* this_fn) noexcept;
 

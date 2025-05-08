@@ -123,6 +123,11 @@ bool isProfilingFunction(void* funcAddress) noexcept
     return g_profileAllFunctions || g_functionsToProfile.contains(funcAddress);
 }
 
+unsigned long long getNumHeapAllocationsOnCurrentThread() noexcept
+{
+    return g_numHeapAllocationsOnCurrentThread;
+}
+
 void updateFunctionDataOnEnter(void* this_fn) noexcept
 {
     auto& functionData = qiti::getFunctionDataFromAddress(this_fn);
