@@ -55,7 +55,8 @@ static void QITI_API_INTERNAL updateFunctionType(qiti::FunctionData& functionDat
 
     // find the opening '(' of the parameter list
     auto paren = sv.find('(');
-    if (paren != std::string_view::npos) {
+    if (paren != std::string_view::npos)
+    {
         // strip off the "(" and everything after:
         sv.remove_suffix(sv.size() - paren);
 
@@ -67,12 +68,14 @@ static void QITI_API_INTERNAL updateFunctionType(qiti::FunctionData& functionDat
             std::string_view last_part = sv.substr(colcol + 2);
 
             // constructor: qualifier == last_part
-            if (qualifier == last_part) {
+            if (qualifier == last_part)
+            {
                 impl->functionType = qiti::FunctionType::constructor;
             }
             // destructor: last_part begins with '~' and qualifier == last_part.substr(1)
             else if (!last_part.empty() && last_part[0] == '~'
-                     && qualifier == last_part.substr(1)) {
+                     && qualifier == last_part.substr(1))
+            {
                 impl->functionType = qiti::FunctionType::destructor;
             }
         }
