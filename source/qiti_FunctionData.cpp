@@ -3,6 +3,8 @@
 
 #include "qiti_FunctionData_Impl.hpp"
 
+#include "qiti_ScopedNoHeapAllocations.hpp"
+
 #include <cassert>
 #include <cstdint>
 #include <dlfcn.h>
@@ -75,26 +77,36 @@ FunctionData& FunctionData::operator=(FunctionData&& other) noexcept
 
 const char* FunctionData::getFunctionName() const noexcept
 {
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
     return getImpl()->functionNameReal.c_str();
 }
 
 const char* FunctionData::getMangledFunctionName() const noexcept
 {
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
     return getImpl()->functionNameMangled.c_str();
 }
 
 qiti::uint FunctionData::getNumTimesCalled() const noexcept
 {
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
     return getImpl()->numTimesCalled;
 }
 
 FunctionCallData FunctionData::getLastFunctionCall() const noexcept
 {
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
     return getImpl()->lastCallData;
 }
 
 bool FunctionData::wasCalledOnThread(std::thread::id thread) const noexcept
 {
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
     return getImpl()->threadsCalledOn.contains(thread);
 }
 

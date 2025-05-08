@@ -1,6 +1,8 @@
 
 #include "qiti_instrument.hpp"
 
+#include "qiti_ScopedNoHeapAllocations.hpp"
+
 #include <cassert>
 #include <functional>
 
@@ -21,16 +23,22 @@ void resetInstrumentation() noexcept
     // Prevent any qiti work while we clear out instrumenting of functions
     std::scoped_lock<std::recursive_mutex> lock(qiti_global_lock);
     
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
     g_onNextHeapAllocation = nullptr;
 }
 
 void onNextHeapAllocation(void (*heapAllocCallback)()) noexcept
 {
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
     g_onNextHeapAllocation = heapAllocCallback;
 }
 
 void assertOnNextHeapAllocation() noexcept
 {
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
     onNextHeapAllocation([]{ assert(false); });
 }
 } // namespace instrument

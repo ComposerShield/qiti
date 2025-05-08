@@ -89,7 +89,7 @@ void resetProfiling() noexcept
 {
     // Prevent any qiti work while we disable profiling
     std::scoped_lock<std::recursive_mutex> lock(qiti_global_lock);
-    
+        
     g_functionsToProfile.clear();
     g_profileAllFunctions = false;
     g_numHeapAllocationsOnCurrentThread = 0;
@@ -130,6 +130,7 @@ unsigned long long getNumHeapAllocationsOnCurrentThread() noexcept
 
 void updateFunctionDataOnEnter(void* this_fn) noexcept
 {
+    // Update FunctionData
     auto& functionData = qiti::getFunctionDataFromAddress(this_fn);
     
     auto* impl = functionData.getImpl();
@@ -137,6 +138,9 @@ void updateFunctionDataOnEnter(void* this_fn) noexcept
     
     ++impl->numTimesCalled;
     impl->threadsCalledOn.insert(thisThread);
+    
+    // Update FunctionCallData
+    qiti::ScopedNoHeapAllocations noAlloc; // TODO: move this up when possible
     
     impl->lastCallData.reset(); // Deletes previous impl
     

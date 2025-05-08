@@ -3,6 +3,8 @@
 
 #include "qiti_FunctionCallData_Impl.hpp"
 
+#include "qiti_ScopedNoHeapAllocations.hpp"
+
 #include <cassert>
 #include <chrono>
 #include <cstdint>
@@ -13,6 +15,8 @@ namespace qiti
 {
 FunctionCallData::FunctionCallData() noexcept
 {
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
     static_assert(sizeof(FunctionCallData::Impl)  <= FunctionCallData::ImplSize,  "Impl is too large for FunctionData::implStorage");
     static_assert(alignof(FunctionCallData::Impl) == FunctionCallData::ImplAlign, "Impl alignment stricter than FunctionData::implStorage");
     
@@ -22,12 +26,16 @@ FunctionCallData::FunctionCallData() noexcept
 
 FunctionCallData::~FunctionCallData() noexcept
 {
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
     getImpl()->~Impl();
 }
 
 // Move constructor
 FunctionCallData::FunctionCallData(FunctionCallData&& other) noexcept
 {
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
     // move‐construct into our storage
     new (implStorage) Impl(std::move(*other.getImpl()));
     // destroy their Impl so we can re‐init it
@@ -39,6 +47,8 @@ FunctionCallData::FunctionCallData(FunctionCallData&& other) noexcept
 // Move assignment
 FunctionCallData& FunctionCallData::operator=(FunctionCallData&& other) noexcept
 {
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
     if (this != &other) {
         // destroy our current one
         getImpl()->~Impl();
@@ -55,6 +65,8 @@ FunctionCallData& FunctionCallData::operator=(FunctionCallData&& other) noexcept
 // Copy constructor
 FunctionCallData::FunctionCallData(const FunctionCallData& other) noexcept
 {
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
     // placement‐new a copy of their Impl into our storage
     new (implStorage) Impl(*other.getImpl());
 }
@@ -62,6 +74,8 @@ FunctionCallData::FunctionCallData(const FunctionCallData& other) noexcept
 // Copy assignment
 FunctionCallData FunctionCallData::operator=(const FunctionCallData& other) noexcept
 {
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
     if (this != &other)
     {
         // destroy our current Impl
@@ -77,12 +91,16 @@ const FunctionCallData::Impl* FunctionCallData::getImpl() const noexcept { retur
 
 void FunctionCallData::reset() noexcept
 {
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
     getImpl()->~Impl();
     new (implStorage) Impl; // re-initialize
 }
 
 uint FunctionCallData::getNumHeapAllocations() const noexcept
 {
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
     auto impl = getImpl();
     assert(impl->numHeapAllocationsAfterFunctionCall >= impl->numHeapAllocationsBeforeFunctionCall);
     return impl->numHeapAllocationsAfterFunctionCall - impl->numHeapAllocationsBeforeFunctionCall;
