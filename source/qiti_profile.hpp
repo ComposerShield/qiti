@@ -3,6 +3,8 @@
 
 #include "qiti_API.hpp"
 
+#include <type_traits>
+
 //--------------------------------------------------------------------------
 
 namespace qiti
@@ -20,10 +22,12 @@ void QITI_API endProfilingFunction(void* functionAddress) noexcept;
 
 /** */
 template<auto FuncPtr>
+requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
 void QITI_API beginProfilingFunction() noexcept { beginProfilingFunction( reinterpret_cast<void*>(FuncPtr)); }
 
 /** */
 template <auto FuncPtr>
+requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
 void QITI_API endProfilingFunction() noexcept { endProfilingFunction( reinterpret_cast<void*>(FuncPtr)); }
 
 /** */
@@ -37,6 +41,7 @@ void QITI_API endProfilingAllFunctions() noexcept;
 
 /** */
 template<auto FuncPtr>
+requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
 [[nodiscard]] bool QITI_API isProfilingFunction() noexcept
 {
     return isProfilingFunction( reinterpret_cast<void*>(FuncPtr));

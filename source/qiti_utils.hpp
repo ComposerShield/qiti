@@ -7,6 +7,8 @@
 #include <string>
 #include <string_view>
 
+#include <type_traits>
+
 //--------------------------------------------------------------------------
 
 namespace qiti
