@@ -50,7 +50,7 @@ static void QITI_API_INTERNAL updateFunctionType(qiti::FunctionData& functionDat
     qiti::ScopedNoHeapAllocations noAlloc;
 
     auto* impl = functionData.getImpl();
-    const std::string& name = impl->functionNameReal;
+    const char* name = impl->functionNameReal;
     std::string_view sv{name};
 
     // find the opening '(' of the parameter list

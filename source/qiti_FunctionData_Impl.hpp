@@ -25,8 +25,8 @@ public:
     QITI_API_INTERNAL Impl() = default;
     QITI_API_INTERNAL ~Impl() = default;
     
-    std::string functionNameMangled{};
-    std::string functionNameReal{};
+    char functionNameMangled[128];
+    char functionNameReal[128];
     void* address = nullptr;
     
     uint numTimesCalled = 0;

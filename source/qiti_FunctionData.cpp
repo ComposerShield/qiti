@@ -19,6 +19,8 @@ FunctionData::FunctionData(void* functionAddress) noexcept
     static_assert(sizeof(FunctionData::Impl)  <= FunctionData::ImplSize,  "Impl is too large for FunctionData::implStorage");
     static_assert(alignof(FunctionData::Impl) == FunctionData::ImplAlign, "Impl alignment stricter than FunctionData::implStorage");
     
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
     // Allocate Impl on the stack instead of the heap
     new (implStorage) Impl;
         
@@ -29,10 +31,10 @@ FunctionData::FunctionData(void* functionAddress) noexcept
     Dl_info info;
     if (dladdr(functionAddress, &info))
     {
-        impl->functionNameMangled = info.dli_sname;
+        strncpy(impl->functionNameMangled, info.dli_sname, sizeof(impl->functionNameMangled) - 1);
         char functionNameDemangled[256];
         qiti::demangle(info.dli_sname, functionNameDemangled, sizeof(functionNameDemangled));
-        impl->functionNameReal = functionNameDemangled;
+        strncpy(impl->functionNameReal, functionNameDemangled, sizeof(impl->functionNameReal) - 1);
     }
     else
     {
@@ -51,6 +53,8 @@ const FunctionData::Impl* FunctionData::getImpl() const noexcept { return reinte
 // Move constructor
 FunctionData::FunctionData(FunctionData&& other) noexcept
 {
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
     // move‐construct into our storage
     new (implStorage) Impl(std::move(*other.getImpl()));
     // destroy their Impl so we can re‐init it
@@ -62,7 +66,10 @@ FunctionData::FunctionData(FunctionData&& other) noexcept
 // Move assignment
 FunctionData& FunctionData::operator=(FunctionData&& other) noexcept
 {
-    if (this != &other) {
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
+    if (this != &other)
+    {
         // destroy our current one
         getImpl()->~Impl();
         // move‐construct into our storage
@@ -79,14 +86,14 @@ const char* FunctionData::getFunctionName() const noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     
-    return getImpl()->functionNameReal.c_str();
+    return getImpl()->functionNameReal;
 }
 
 const char* FunctionData::getMangledFunctionName() const noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     
-    return getImpl()->functionNameMangled.c_str();
+    return getImpl()->functionNameMangled;
 }
 
 qiti::uint FunctionData::getNumTimesCalled() const noexcept
