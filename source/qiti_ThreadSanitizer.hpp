@@ -35,12 +35,6 @@ public:
     /** IMove Operator */
     [[nodiscard]] ThreadSanitizer& QITI_API operator=(ThreadSanitizer&& other) noexcept;
     
-    struct Impl;
-    /** Internal */
-    [[nodiscard]] Impl* QITI_API_INTERNAL getImpl() noexcept;
-    /** Internal */
-    [[nodiscard]] const Impl* QITI_API_INTERNAL getImpl() const noexcept;
-    
 private:
     /** Internal */
     QITI_API_INTERNAL ThreadSanitizer() noexcept;
@@ -49,17 +43,5 @@ private:
     static ThreadSanitizer QITI_API functionsNotCalledInParallel(void* func0, void* func1);
     
     bool failed = false;
-    
-    // Stack-based pimpl idiom
-    static constexpr size_t ImplSize  = 456;
-    static constexpr size_t ImplAlign =  8;
-    alignas(ImplAlign) unsigned char implStorage[ImplSize];
-    
-    ThreadSanitizer(const ThreadSanitizer&) = delete;
-    ThreadSanitizer& operator=(const ThreadSanitizer&) = delete;
-    
-    // Prevent heap allocating this class
-    void* operator new(size_t) = delete;
-    void* operator new[](size_t) = delete;
 };
 } // namespace qiti
