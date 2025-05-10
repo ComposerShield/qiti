@@ -5,6 +5,7 @@
 
 #include <cassert>
 #include <functional>
+#include <mutex>
 
 //--------------------------------------------------------------------------
 

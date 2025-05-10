@@ -8,9 +8,14 @@
 #include "qiti_ScopedNoHeapAllocations.hpp"
 
 #include <cassert>
+#include <iostream>
 #include <mutex>
 #include <regex>
 #include <unordered_set>
+
+#include <execinfo.h>
+#include <cxxabi.h>
+#include <unistd.h>
 
 //--------------------------------------------------------------------------
 
@@ -43,6 +48,8 @@ void* operator new(size_t size)
     void* p = malloc(size);
     return p;
 }
+
+//--------------------------------------------------------------------------
 
 /** */
 static void QITI_API_INTERNAL updateFunctionType(qiti::FunctionData& functionData) noexcept
@@ -79,6 +86,55 @@ static void QITI_API_INTERNAL updateFunctionType(qiti::FunctionData& functionDat
                 impl->functionType = qiti::FunctionType::destructor;
             }
         }
+    }
+}
+
+[[nodiscard]] static std::string QITI_API_INTERNAL getCallerFunctionName(int skip = 2)
+{
+    constexpr int MAX_FRAMES = 64;
+    void* frames[MAX_FRAMES];
+    // capture up to MAX_FRAMES stack frames
+    int frameCount = backtrace(frames, MAX_FRAMES);
+
+    // get the symbols (strings) for each frame
+    std::unique_ptr<char*, decltype(&free)> symbols(
+        backtrace_symbols(frames, frameCount),
+        &free
+    );
+    if (!symbols) return {};
+
+    int target = skip + 1;
+    if (frameCount <= target) {
+        return {};  // not enough stack depth
+    }
+
+    char* mangled = symbols.get()[target];
+    // backtrace_symbols gives lines like:
+    //   ./myapp(_ZN3Foo3barEv+0x15) [0x4008f5]
+    // We need to extract the mangled name between '(' and '+'.
+
+    std::string line(mangled);
+    std::string funcName;
+    std::size_t begin = line.find('(');
+    std::size_t plus  = line.find('+', begin);
+    if (begin != std::string::npos && plus != std::string::npos) {
+        funcName = line.substr(begin + 1, plus - begin - 1);
+    } else {
+        // fallback: use the whole line
+        funcName = line;
+    }
+
+    // demangle it
+    int status = 0;
+    std::unique_ptr<char, decltype(&free)> demangled{
+        abi::__cxa_demangle(funcName.c_str(), nullptr, nullptr, &status),
+        &free
+    };
+    if (status == 0 && demangled) {
+        return demangled.get();
+    } else {
+        // demangling failed, return original
+        return funcName;
     }
 }
 

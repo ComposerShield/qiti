@@ -27,8 +27,6 @@ public:
     [[nodiscard]] LeakSanitizer& QITI_API operator=(LeakSanitizer&& other) noexcept;
     
 private:
-    bool _failed = false;
-    
     /** Copy Constructor (deleted) */
     LeakSanitizer(const LeakSanitizer&) = delete;
     /** Copy Assignment (deleted) */
