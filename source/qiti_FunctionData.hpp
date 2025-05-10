@@ -48,7 +48,7 @@ public:
     
     /** Internal Move Constructor */
     QITI_API_INTERNAL FunctionData(FunctionData&& other) noexcept;
-    /** Internal Move Operator */
+    /** Internal Move Assignment */
     [[nodiscard]] FunctionData& QITI_API_INTERNAL operator=(FunctionData&& other) noexcept;
     
 private:
@@ -57,7 +57,9 @@ private:
     static constexpr std::size_t ImplAlign =  8;
     alignas(ImplAlign) unsigned char implStorage[ImplSize];
     
+    /** Copy Constructor (deleted) */
     FunctionData(const FunctionData&) = delete;
+    /** Copy Assignment (deleted) */
     FunctionData& operator=(const FunctionData&) = delete;
     
     // Prevent heap allocating this class

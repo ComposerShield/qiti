@@ -15,7 +15,7 @@ ThreadSanitizer::~ThreadSanitizer() noexcept
 
 bool ThreadSanitizer::passed() noexcept
 {
-    return ! failed;  // TODO: implement
+    return ! _failed;  // TODO: implement
 }
 
 ThreadSanitizer ThreadSanitizer::functionsNotCalledInParallel(void* /*func0*/, void* /*func1*/)

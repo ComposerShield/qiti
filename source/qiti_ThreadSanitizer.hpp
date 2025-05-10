@@ -35,16 +35,21 @@ public:
 
     /** Move Constructor */
     QITI_API ThreadSanitizer(ThreadSanitizer&& other) noexcept;
-    /** Move Operator */
+    /** Move Assignment */
     [[nodiscard]] ThreadSanitizer& QITI_API operator=(ThreadSanitizer&& other) noexcept;
     
 private:
+    bool _failed = false;
+    
     /** Internal */
     QITI_API_INTERNAL ThreadSanitizer() noexcept;
     
     /** Internal */
     static ThreadSanitizer QITI_API functionsNotCalledInParallel(void* func0, void* func1);
     
-    bool failed = false;
+    /** Copy Constructor (deleted) */
+    ThreadSanitizer(const ThreadSanitizer&) = delete;
+    /** Copy Assignment (deleted) */
+    ThreadSanitizer& operator=(const ThreadSanitizer&) = delete;
 };
 } // namespace qiti

@@ -40,7 +40,9 @@ private:
     static constexpr size_t ImplAlign =  8;
     alignas(ImplAlign) unsigned char implStorage[ImplSize];
     
+    /** Copy Constructor (deleted) */
     TypeData(const TypeData&) = delete;
+    /** Copy Assignment (deleted) */
     TypeData& operator=(const TypeData&) = delete;
     
     // Prevent heap allocating this class

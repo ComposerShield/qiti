@@ -12,24 +12,26 @@ namespace qiti
 class LeakSanitizer
 {
 public:
+    QITI_API LeakSanitizer() noexcept;
+    QITI_API ~LeakSanitizer() noexcept;
+    
     /** */
     [[nodiscard]] bool QITI_API passed() noexcept;
     
     /** */
     [[nodiscard]] inline bool QITI_API failed() noexcept { return ! passed(); }
-    
-    /** Internal */
-    QITI_API ~LeakSanitizer() noexcept;
 
     /** Move Constructor */
     QITI_API LeakSanitizer(LeakSanitizer&& other) noexcept;
-    /** Move Operator */
+    /** Move Assignment */
     [[nodiscard]] LeakSanitizer& QITI_API operator=(LeakSanitizer&& other) noexcept;
     
 private:
-    /** Internal */
-    QITI_API_INTERNAL LeakSanitizer() noexcept;
+    bool _failed = false;
     
-    bool failed = false;
+    /** Copy Constructor (deleted) */
+    LeakSanitizer(const LeakSanitizer&) = delete;
+    /** Copy Assignment (deleted) */
+    LeakSanitizer& operator=(const LeakSanitizer&) = delete;
 };
 } // namespace qiti

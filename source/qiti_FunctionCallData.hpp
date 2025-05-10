@@ -34,11 +34,11 @@ public:
     
     /** Internal Move Constructor */
     QITI_API_INTERNAL FunctionCallData(FunctionCallData&& other) noexcept;
-    /** Internal Move Operator */
+    /** Internal Move Assignment */
     [[nodiscard]] FunctionCallData& QITI_API_INTERNAL operator=(FunctionCallData&& other) noexcept;
     /** Internal Copy Constructor */
     FunctionCallData(const FunctionCallData&) noexcept;
-    /** Internal Copy Operator */
+    /** Internal Copy Assignment */
     [[nodiscard]] FunctionCallData operator=(const FunctionCallData&) noexcept;
     
 private:

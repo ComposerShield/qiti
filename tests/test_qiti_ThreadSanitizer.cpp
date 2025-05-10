@@ -27,7 +27,7 @@ TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
     
     auto tsan = qiti::ThreadSanitizer::functionsNotCalledInParallel<testFunc_ThreadSanitizer0, testFunc_ThreadSanitizer1>();
     
-    QITI_REQUIRE(tsan.passedTest());
+    QITI_REQUIRE(tsan.passed());
 
     qiti::resetAll();
 }
