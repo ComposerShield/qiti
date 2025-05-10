@@ -12,6 +12,11 @@ void testFuncProfile() noexcept
     volatile int _ = 42;
 }
 
+class ProfileTestType
+{
+    
+};
+
 TEST_CASE("qiti::profile::resetProfiling()")
 {
     qiti::resetAll();
@@ -81,6 +86,14 @@ TEST_CASE("qiti::profile::endProfilingAllFunctions()")
 
 TEST_CASE("qiti::profile::isProfilingFunction()")
 {
+    // TODO: implement
+}
+
+TEST_CASE("qiti::profile::begin/endProfilingType()")
+{
+    qiti::profile::beginProfilingType<ProfileTestType>();
+    
+    qiti::profile::endProfilingType<ProfileTestType>();
     // TODO: implement
 }
 

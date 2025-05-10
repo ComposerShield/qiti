@@ -126,6 +126,16 @@ bool isProfilingFunction(void* funcAddress) noexcept
     return g_profileAllFunctions || g_functionsToProfile.contains(funcAddress);
 }
 
+void beginProfilingType(std::type_index /*functionAddress*/) noexcept
+{
+    
+}
+
+void endProfilingType(std::type_index /*functionAddress*/) noexcept
+{
+    
+}
+
 unsigned long long getNumHeapAllocationsOnCurrentThread() noexcept
 {
     return g_numHeapAllocationsOnCurrentThread;
