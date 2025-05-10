@@ -9,5 +9,13 @@
 
 namespace qiti
 {
+TypeData::Impl*       TypeData::getImpl()       noexcept { return reinterpret_cast<Impl*>(implStorage); }
+const TypeData::Impl* TypeData::getImpl() const noexcept { return reinterpret_cast<const Impl*>(implStorage); }
 
+const char* TypeData::getTypeName() const noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
+    return getImpl()->typeInfo.name();
+}
 } // namespace qiti

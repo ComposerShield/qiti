@@ -29,6 +29,9 @@ set(SOURCES
     "source/qiti_profile.cpp"
     "source/qiti_ReentrantSharedMutex.hpp"
     "source/qiti_ScopedNoHeapAllocations.hpp"
+    "source/qiti_ThreadSanitizer_Impl.hpp"
+    "source/qiti_ThreadSanitizer.hpp"
+    "source/qiti_ThreadSanitizer.cpp"
     "source/qiti_TypeData_Impl.hpp"
     "source/qiti_TypeData.hpp"
     "source/qiti_TypeData.cpp"
@@ -101,6 +104,7 @@ add_executable(qiti_tests
     "Tests/test_qiti_instrument.cpp"
     "Tests/test_qiti_profile.cpp"
     "Tests/test_qiti_ScopedNoHeapAllocations.cpp"
+    "Tests/test_qiti_ThreadSanitizer.cpp"
     "Tests/test_qiti_TypeData.cpp"
     "Tests/test_qiti_utils.cpp"
 )

@@ -3,6 +3,9 @@
 
 #include "qiti_TypeData.hpp"
 
+#include <typeindex>
+#include <typeinfo>
+
 //--------------------------------------------------------------------------
 
 namespace qiti
@@ -17,10 +20,10 @@ enum class FunctionType
 struct TypeData::Impl
 {
 public:
-    QITI_API_INTERNAL Impl() = default;
+    QITI_API_INTERNAL Impl(const std::type_info& info) : typeInfo(info) {}
     QITI_API_INTERNAL ~Impl() = default;
     
-    char name[128];
+    std::type_index typeInfo;
     
     unsigned long long numTimesConstructed = 0;
     unsigned long long numTimesDestructed  = 0;

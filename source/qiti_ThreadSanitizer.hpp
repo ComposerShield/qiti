@@ -1,10 +1,6 @@
 
 #pragma once
 
-#include "qiti_API.hpp"
-
-#include <cstdio>
-
 //--------------------------------------------------------------------------
 
 namespace qiti
@@ -12,16 +8,22 @@ namespace qiti
 /**
  Abtracts a type and its history of use
  */
-class TypeData
+class ThreadSanitizer
 {
 public:
     /** */
-    [[nodiscard]] const char* QITI_API getTypeName() const noexcept;
+    template<auto Func0, auto Func1>
+    requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr0)>>
+    && std::is_function_v<std::remove_pointer_t<decltype(FuncPtr1)>>
+    [[nodiscard]] ThreadSanitizer QITI_API functionsNotCalledInParallel() const noexcept
+    {
+        functionsNotCalledInParallel(reinterpret_cast<void*>(FuncPtr0),
+                                     reinterpret_cast<void*>(FuncPtr1));
+    }
     
-    /** Internal */
-    QITI_API_INTERNAL TypeData(void* functionAddress) noexcept;
-    /** Internal */
-    QITI_API_INTERNAL ~TypeData() noexcept;
+    /** */
+    [[nodiscard]] bool QITI_API passedTest();
+    
     
     struct Impl;
     /** Internal */
@@ -35,6 +37,14 @@ public:
     [[nodiscard]] TypeData& QITI_API_INTERNAL operator=(TypeData&& other) noexcept;
     
 private:
+    /** Internal */
+    QITI_API_INTERNAL ThreadSanitizer() noexcept;
+    /** Internal */
+    QITI_API_INTERNAL ~ThreadSanitizer() noexcept;
+    
+    /** */
+    void functionsNotCalledInParallel(void* func0, void* func1);
+    
     // Stack-based pimpl idiom
     static constexpr size_t ImplSize  = 456;
     static constexpr size_t ImplAlign =  8;
