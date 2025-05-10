@@ -13,7 +13,7 @@ ThreadSanitizer::~ThreadSanitizer() noexcept
     
 }
 
-bool ThreadSanitizer::passedTest() noexcept
+bool ThreadSanitizer::passed() noexcept
 {
     return ! failed;  // TODO: implement
 }

@@ -13,7 +13,7 @@ LeakSanitizer::~LeakSanitizer() noexcept
     
 }
 
-bool LeakSanitizer::passedTest() noexcept
+bool LeakSanitizer::passed() noexcept
 {
     return ! failed;  // TODO: implement
 }

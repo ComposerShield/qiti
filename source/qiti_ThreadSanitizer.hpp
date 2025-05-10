@@ -25,14 +25,17 @@ public:
     }
     
     /** */
-    [[nodiscard]] bool QITI_API passedTest() noexcept;
+    [[nodiscard]] bool QITI_API passed() noexcept;
+    
+    /** */
+    [[nodiscard]] inline bool QITI_API failed() noexcept { return ! passed(); }
     
     /** Internal */
     QITI_API ~ThreadSanitizer() noexcept;
 
     /** Move Constructor */
     QITI_API ThreadSanitizer(ThreadSanitizer&& other) noexcept;
-    /** IMove Operator */
+    /** Move Operator */
     [[nodiscard]] ThreadSanitizer& QITI_API operator=(ThreadSanitizer&& other) noexcept;
     
 private:

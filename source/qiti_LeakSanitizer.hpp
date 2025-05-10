@@ -13,14 +13,17 @@ class LeakSanitizer
 {
 public:
     /** */
-    [[nodiscard]] bool QITI_API passedTest() noexcept;
+    [[nodiscard]] bool QITI_API passed() noexcept;
+    
+    /** */
+    [[nodiscard]] inline bool QITI_API failed() noexcept { return ! passed(); }
     
     /** Internal */
     QITI_API ~LeakSanitizer() noexcept;
 
     /** Move Constructor */
     QITI_API LeakSanitizer(LeakSanitizer&& other) noexcept;
-    /** IMove Operator */
+    /** Move Operator */
     [[nodiscard]] LeakSanitizer& QITI_API operator=(LeakSanitizer&& other) noexcept;
     
 private:
