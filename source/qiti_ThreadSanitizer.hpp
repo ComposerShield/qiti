@@ -1,29 +1,39 @@
 
 #pragma once
 
+#include "qiti_API.hpp"
+
+#include <type_traits>
+
 //--------------------------------------------------------------------------
 
 namespace qiti
 {
 /**
- Abtracts a type and its history of use
  */
 class ThreadSanitizer
 {
 public:
     /** */
-    template<auto Func0, auto Func1>
+    template<auto FuncPtr0, auto FuncPtr1>
     requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr0)>>
     && std::is_function_v<std::remove_pointer_t<decltype(FuncPtr1)>>
-    [[nodiscard]] ThreadSanitizer QITI_API functionsNotCalledInParallel() const noexcept
+    [[nodiscard]] static ThreadSanitizer QITI_API functionsNotCalledInParallel() noexcept
     {
-        functionsNotCalledInParallel(reinterpret_cast<void*>(FuncPtr0),
-                                     reinterpret_cast<void*>(FuncPtr1));
+        return functionsNotCalledInParallel(reinterpret_cast<void*>(FuncPtr0),
+                                            reinterpret_cast<void*>(FuncPtr1));
     }
     
     /** */
-    [[nodiscard]] bool QITI_API passedTest();
+    [[nodiscard]] bool QITI_API passedTest() noexcept;
     
+    /** Internal */
+    QITI_API ~ThreadSanitizer() noexcept;
+
+    /** Move Constructor */
+    QITI_API ThreadSanitizer(ThreadSanitizer&& other) noexcept;
+    /** IMove Operator */
+    [[nodiscard]] ThreadSanitizer& QITI_API operator=(ThreadSanitizer&& other) noexcept;
     
     struct Impl;
     /** Internal */
@@ -31,27 +41,22 @@ public:
     /** Internal */
     [[nodiscard]] const Impl* QITI_API_INTERNAL getImpl() const noexcept;
     
-    /** Internal Move Constructor */
-    QITI_API_INTERNAL TypeData(TypeData&& other) noexcept;
-    /** Internal Move Operator */
-    [[nodiscard]] TypeData& QITI_API_INTERNAL operator=(TypeData&& other) noexcept;
-    
 private:
     /** Internal */
     QITI_API_INTERNAL ThreadSanitizer() noexcept;
-    /** Internal */
-    QITI_API_INTERNAL ~ThreadSanitizer() noexcept;
     
-    /** */
-    void functionsNotCalledInParallel(void* func0, void* func1);
+    /** Internal */
+    static ThreadSanitizer QITI_API functionsNotCalledInParallel(void* func0, void* func1);
+    
+    bool failed = false;
     
     // Stack-based pimpl idiom
     static constexpr size_t ImplSize  = 456;
     static constexpr size_t ImplAlign =  8;
     alignas(ImplAlign) unsigned char implStorage[ImplSize];
     
-    TypeData(const TypeData&) = delete;
-    TypeData& operator=(const TypeData&) = delete;
+    ThreadSanitizer(const ThreadSanitizer&) = delete;
+    ThreadSanitizer& operator=(const ThreadSanitizer&) = delete;
     
     // Prevent heap allocating this class
     void* operator new(size_t) = delete;
