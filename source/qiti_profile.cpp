@@ -89,7 +89,7 @@ static void QITI_API_INTERNAL updateFunctionType(qiti::FunctionData& functionDat
     }
 }
 
-[[nodiscard]] static std::string QITI_API_INTERNAL getCallerFunctionName(int skip = 2)
+[[maybe_unused]] [[nodiscard]] static std::string QITI_API_INTERNAL getCallerFunctionName(int skip = 2)
 {
     constexpr int MAX_FRAMES = 64;
     void* frames[MAX_FRAMES];
