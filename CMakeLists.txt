@@ -79,11 +79,18 @@ PRIVATE
 INTERFACE
     "-finstrument-functions"
     "-fno-omit-frame-pointer"
+    "-fsanitize=thread"
+    $<$<CONFIG:Debug>:-fsanitize=thread -g -O0>
 )
 
 target_compile_definitions(qiti_lib
 PRIVATE
     QITI_DYLIB=1
+)
+
+target_link_options(qiti_lib
+INTERFACE
+    $<$<CONFIG:Debug>:-fsanitize=thread>
 )
 
 # =========================
@@ -145,8 +152,6 @@ target_include_directories(qiti_tests
 PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/source
 )
-
-# add_test(NAME qiti_tests COMMAND qiti_tests)
 
 # Load and use the .cmake file provided by Catch2
 # https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md

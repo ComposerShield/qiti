@@ -5,6 +5,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <iostream>
+
 /** NOT static to purposely allow external linkage and visibility to QITI */
 __attribute__((noinline)) __attribute__((optnone))
 void testFuncProfile() noexcept
