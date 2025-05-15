@@ -34,15 +34,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        
-      # Cache Homebrew download cache so bottles aren’t re-downloaded each run
-      - name: Cache Homebrew downloads
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/Library/Caches/Homebrew
-            /Users/runner/Library/Caches/Homebrew
-          key: ${{ runner.os }}-homebrew-llvm-ninja
   
       - name: Install LLVM 16 & Ninja
         run: |

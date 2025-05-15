@@ -79,8 +79,9 @@ PRIVATE
 INTERFACE
     "-finstrument-functions"
     "-fno-omit-frame-pointer"
-    "-fsanitize=thread"
-    $<$<CONFIG:Debug>:-fsanitize=thread -g -O0>
+    "-fsanitize=thread" # thread sanitizer
+    "-g" 
+    "-O0" # no optimizations
 )
 
 target_compile_definitions(qiti_lib
@@ -90,7 +91,7 @@ PRIVATE
 
 target_link_options(qiti_lib
 INTERFACE
-    $<$<CONFIG:Debug>:-fsanitize=thread>
+    "-fsanitize=thread"
 )
 
 # =========================
