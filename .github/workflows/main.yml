@@ -1,0 +1,24 @@
+
+name: Build Qiti
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure CMake (Xcode generator)
+        run: cmake . -B build -G Xcode
+
+      - name: Build with CMake
+        run: cmake --build build
