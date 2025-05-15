@@ -27,6 +27,11 @@ jobs:
 
       - name: Build
         run: cmake --build build --config Debug --target qiti_tests
+        
+      - name: Run Unit Tests
+        run: |
+          cd build
+          ctest -C Debug
 
   build-clang-ninja:
     runs-on: macos-15
@@ -49,3 +54,8 @@ jobs:
 
       - name: Build
         run: cmake --build build --target qiti_tests
+        
+      - name: Run Unit Tests
+        run: |
+          cd build
+          ctest -C Debug
