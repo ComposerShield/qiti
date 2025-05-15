@@ -1,5 +1,5 @@
 
-#include "qiti_FunctionData.hpp"
+#include "qiti_FunctionCallData.hpp"
 
 #include "qiti_FunctionCallData_Impl.hpp"
 
@@ -17,8 +17,8 @@ FunctionCallData::FunctionCallData() noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     
-    static_assert(sizeof(FunctionCallData::Impl)  <= FunctionCallData::ImplSize,  "Impl is too large for FunctionData::implStorage");
-    static_assert(alignof(FunctionCallData::Impl) == FunctionCallData::ImplAlign, "Impl alignment stricter than FunctionData::implStorage");
+    static_assert(sizeof(FunctionCallData::Impl)  <= FunctionCallData::ImplSize,  "Impl is too large for FunctionCallData::implStorage");
+    static_assert(alignof(FunctionCallData::Impl) == FunctionCallData::ImplAlign, "Impl alignment stricter than FunctionCallData::implStorage");
     
     // Allocate Impl on the stack instead of the heap
     new (implStorage) Impl;
