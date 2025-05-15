@@ -10,7 +10,7 @@ on:
       - main
 
 jobs:
-  build:
+  build-xcode:
     runs-on: macos-15
 
     steps:
@@ -25,5 +25,35 @@ jobs:
       - name: Configure CMake (Xcode generator)
         run: cmake . -B build -G Xcode
 
-      - name: Build with CMake
+      - name: Build
+        run: cmake --build build
+
+  build-clang-ninja:
+    runs-on: macos-15
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      # Cache Homebrew download cache so bottles aren’t re-downloaded each run
+      - name: Cache Homebrew downloads
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/Library/Caches/Homebrew
+            /Users/runner/Library/Caches/Homebrew
+          key: ${{ runner.os }}-homebrew-llvm-ninja
+  
+      - name: Install LLVM 16 & Ninja
+        run: |
+          brew install llvm@16 ninja
+          echo "PATH=$(brew --prefix llvm@16)/bin:$PATH" >> $GITHUB_ENV
+
+      - name: Configure CMake (Ninja, LLVM Clang)
+        run: cmake . -B build \
+             -G Ninja \
+             -DCMAKE_C_COMPILER=clang \
+             -DCMAKE_CXX_COMPILER=clang++
+
+      - name: Build
         run: cmake --build build
