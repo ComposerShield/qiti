@@ -15,12 +15,18 @@
 
 #include "qiti_ThreadSanitizer.hpp"
 
-const char* QITI_API __tsan_default_options()
+//--------------------------------------------------------------------------
+
+#define QITI_TSAN_LOG_PATH "/tmp/tsan.log"
+static constexpr const char TSAN_DEFAULT_OPTS[] =
+    "report_thread_leaks=0:abort_on_error=0:log_path=" QITI_TSAN_LOG_PATH;
+
+extern "C" const char* __tsan_default_options()
 {
-    // no leak-on-exit, no abort on race, write report to tsan.log
-    return "report_thread_leaks=0:abort_on_error=0:log_path=/tmp/tsan.log";
+    return TSAN_DEFAULT_OPTS;
 }
 
+//--------------------------------------------------------------------------
 
 namespace qiti
 {
