@@ -1,7 +1,4 @@
 
-// Copyright (c) 2025 Adam Shield
-// SPDX-License-Identifier: MIT
-
 #pragma once
 
 #ifndef QITI_API_INTERNAL

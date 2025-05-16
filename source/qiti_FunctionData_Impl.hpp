@@ -1,7 +1,4 @@
 
-// Copyright (c) 2025 Adam Shield
-// SPDX-License-Identifier: MIT
-
 #pragma once
 
 #include "qiti_FunctionData.hpp"
