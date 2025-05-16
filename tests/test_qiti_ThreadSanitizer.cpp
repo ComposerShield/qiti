@@ -131,3 +131,24 @@ TEST_CASE("Detect data race via subprocess")
     QITI_REQUIRE(std::regex_search(report, m, rx));
     QITI_CHECK(std::string(m[1]) == "counter");
 }
+
+TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce false positive")
+{
+    auto noDataRace = [](){};
+    auto dataRaceDetector = qiti::ThreadSanitizer::createDataRaceDetector(noDataRace);
+    QITI_REQUIRE(dataRaceDetector->passed());
+    QITI_REQUIRE_FALSE(dataRaceDetector->failed());
+}
+
+TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race")
+{
+    auto dataRace = []()
+    {
+        std::thread t(incrementInThread); // Intentional data race
+        incrementInThread();              // Intentional data race
+        t.join();
+    };
+    auto dataRaceDetector = qiti::ThreadSanitizer::createDataRaceDetector(dataRace);
+    QITI_REQUIRE(dataRaceDetector->failed());
+    QITI_REQUIRE_FALSE(dataRaceDetector->passed());
+}

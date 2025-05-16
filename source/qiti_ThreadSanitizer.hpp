@@ -17,6 +17,8 @@
 
 #include "qiti_API.hpp"
 
+#include <functional>
+#include <memory>
 #include <type_traits>
 
 //--------------------------------------------------------------------------
@@ -32,6 +34,9 @@ namespace qiti
 class ThreadSanitizer
 {
 public:
+    /** Runs the function/lambda and reports if data races were detected. */
+    [[nodiscard]] static std::unique_ptr<ThreadSanitizer> QITI_API createDataRaceDetector(std::function<void()>) noexcept;
+    
     /** */
     template<auto FuncPtr0, auto FuncPtr1>
     requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr0)>>
@@ -43,27 +48,26 @@ public:
     }
     
     /** */
-    [[nodiscard]] bool QITI_API passed() noexcept;
+    [[nodiscard]] virtual bool QITI_API passed() noexcept;
     
     /** */
-    [[nodiscard]] inline bool QITI_API failed() noexcept { return ! passed(); }
+    [[nodiscard]] bool QITI_API failed() noexcept;
     
     /** Internal */
-    QITI_API ~ThreadSanitizer() noexcept;
+    virtual QITI_API ~ThreadSanitizer() noexcept;
 
     /** Move Constructor */
     QITI_API ThreadSanitizer(ThreadSanitizer&& other) noexcept;
     /** Move Assignment */
     [[nodiscard]] ThreadSanitizer& QITI_API operator=(ThreadSanitizer&& other) noexcept;
     
-private:
-    bool _failed = false;
-    
+protected:
     /** Internal */
     QITI_API_INTERNAL ThreadSanitizer() noexcept;
     
+private:
     /** Internal */
-    static ThreadSanitizer QITI_API functionsNotCalledInParallel(void* func0, void* func1);
+    static ThreadSanitizer QITI_API functionsNotCalledInParallel(void* func0, void* func1) noexcept;
     
     /** Copy Constructor (deleted) */
     ThreadSanitizer(const ThreadSanitizer&) = delete;
