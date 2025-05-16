@@ -1,4 +1,18 @@
 
+/******************************************************************************
+ * Qiti — C++ Profiling Library
+ *
+ * @file     qiti_FunctionCallData_Impl.hpp
+ *
+ * @author   Adam Shield
+ * @date     2025-05-16
+ *
+ * @copyright (c) 2025 Adam Shield
+ * SPDX-License-Identifier: MIT
+ *
+ * See LICENSE.txt for license terms.
+ ******************************************************************************/
+
 #pragma once
 
 #include "qiti_FunctionCallData.hpp"
