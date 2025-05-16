@@ -9,9 +9,11 @@
 
 #include <cassert>
 #include <iostream>
+#include <memory>
 #include <mutex>
 #include <regex>
 #include <unordered_set>
+#include <string>
 
 #include <execinfo.h>
 #include <cxxabi.h>

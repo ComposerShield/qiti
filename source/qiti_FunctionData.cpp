@@ -8,6 +8,7 @@
 #include <cassert>
 #include <cstdint>
 #include <dlfcn.h>
+#include <utility>
 
 //--------------------------------------------------------------------------
 
