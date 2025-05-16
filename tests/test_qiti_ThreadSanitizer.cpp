@@ -9,6 +9,8 @@
 #include <fstream>
 #include <regex>
 
+//--------------------------------------------------------------------------
+
 /** NOT static to purposely allow external linkage and visibility to QITI */
 __attribute__((noinline)) __attribute__((optnone))
 void testFunc_ThreadSanitizer0() noexcept
@@ -26,13 +28,26 @@ void testFunc_ThreadSanitizer1() noexcept
 int counter = 0; // Shared global variable
 
 __attribute__((noinline)) __attribute__((optnone))
-static void incrementInThread()
+static void incrementInThread() noexcept
 {
     for (int i = 0; i < 1'000'000; ++i)
-    {
         ++counter; // Unsynchronized write
-    }
 }
+
+class TestClassThreadSanitizer
+{
+public:
+    __attribute__((noinline)) __attribute__((optnone))
+    void incrementInThread() noexcept
+    {
+        for (int i = 0; i < 1'000'000; ++i)
+            ++_counter; // Unsynchronized write
+    }
+private:
+    int _counter = 0;
+};
+
+//--------------------------------------------------------------------------
 
 TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
 {
@@ -140,12 +155,27 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce fals
     QITI_REQUIRE_FALSE(dataRaceDetector->failed());
 }
 
-TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race")
+TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of global variable")
 {
     auto dataRace = []()
     {
         std::thread t(incrementInThread); // Intentional data race
         incrementInThread();              // Intentional data race
+        t.join();
+    };
+    auto dataRaceDetector = qiti::ThreadSanitizer::createDataRaceDetector(dataRace);
+    QITI_REQUIRE(dataRaceDetector->failed());
+    QITI_REQUIRE_FALSE(dataRaceDetector->passed());
+}
+
+TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of member variable")
+{
+    auto dataRace = []()
+    {
+        TestClassThreadSanitizer testClass;
+        
+        std::thread t([&testClass](){ testClass.incrementInThread(); }); // Intentional data race
+        testClass.incrementInThread();                                   // Intentional data race
         t.join();
     };
     auto dataRaceDetector = qiti::ThreadSanitizer::createDataRaceDetector(dataRace);

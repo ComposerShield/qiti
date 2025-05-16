@@ -21,6 +21,8 @@
 #include <filesystem>
 #include <fstream>
 #include <optional>
+#include <regex>
+#include <sstream>
 #include <string>
 
 #include <unistd.h> // for fork()
@@ -120,19 +122,26 @@ public:
         auto logPath = findLatestLog(logPrefix);
         if (logPath.has_value()) // new TSan file was written
         {
-            _passed = false; // Should be nothing
-            
             std::string report = slurpFile(*logPath);
             
-            std::cout << "Data race detected!" << "\n" << "TSan report:" << "\n\n";
-            std::cout << report << "\n";
-            
-            // Report should mention the data race
-//            std::smatch m;
-//            std::regex rx(R"(global '([^']+)')");
-//            assert(std::regex_search(report, m, rx));
-//            assert(std::string(m[1]) == "counter");
+            // Look for “data race” anywhere in the report
+            if (std::regex_search(report, std::regex(R"(data race)")))
+            {
+                _passed = false;
+                
+                std::cout << "Data race detected!\n";
+
+                static const std::regex summary_rx(R"(^.*SUMMARY:.*$)",
+                                                   std::regex_constants::multiline);
+                std::smatch sm;
+                if (std::regex_search(report, sm, summary_rx))
+                    std::cout << sm.str() << "\n";
+                else
+                    std::cout << "no SUMMARY found\n";
+            }
         }
+        else
+            _passed = true; // no TSan output = pass
         
         // cleanup log that was created
         std::system(("rm -f " + std::string(logPrefix) + "*").c_str());
