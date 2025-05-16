@@ -1,4 +1,7 @@
 
+// Copyright (c) 2025 Adam Shield
+// SPDX-License-Identifier: MIT
+
 #include "qiti_profile.hpp"
 
 #include "qiti_FunctionCallData_Impl.hpp"

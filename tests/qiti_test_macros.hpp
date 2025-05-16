@@ -1,4 +1,7 @@
 
+// Copyright (c) 2025 Adam Shield
+// SPDX-License-Identifier: MIT
+
 #include <cassert>
 
 #if defined (DEBUG) || defined (_DEBUG) || ! (defined (NDEBUG) || defined (_NDEBUG))

@@ -5,5 +5,5 @@ cpplint \
   --recursive \
   --verbose=2 \
   --quiet \
-  --filter=-whitespace,-legal,-build/header_guard,-build/include_subdir,-build/include_order,-build/c++11,-readability/todo,-runtime/references,-runtime/printf,-runtime/string,-runtime/int \
+  --filter=-whitespace,-build/header_guard,-build/include_subdir,-build/include_order,-build/c++11,-readability/todo,-runtime/references,-runtime/printf,-runtime/string,-runtime/int \
   source
