@@ -149,7 +149,7 @@ __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site) noexce
 {
     std::scoped_lock<std::mutex> lock(qiti_lock);
     
-    static int recursionCheck = 0;
+    static thread_local int recursionCheck = 0;
     assert(++recursionCheck == 1);
     
     if (qiti::profile::isProfilingFunction(this_fn)) // 0x1000110ac
