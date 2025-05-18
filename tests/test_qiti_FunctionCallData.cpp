@@ -1,25 +1,13 @@
 
+// Example project
+#include "qiti_example_include.hpp"
+// Qiti Public API
 #include "qiti_include.hpp"
-
+// Special unit test include
 #include "qiti_test_macros.hpp"
 
 #include <catch2/catch_test_macros.hpp>
 
-/** NOT static to purposely allow external linkage and visibility to QITI */
-__attribute__((noinline)) __attribute__((optnone))
-void testHeapAllocationFunction() noexcept
-{
-    volatile int* test = new int{0};
-    delete test;
-}
-
-/** NOT static to purposely allow external linkage and visibility to QITI */
-__attribute__((noinline)) __attribute__((optnone))
-int testNoHeapAllocationFunction() noexcept
-{
-    volatile int test{42};
-    return test;
-}
 
 TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations() returns expected values")
 {
@@ -29,10 +17,10 @@ TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations() returns expected valu
     SECTION("1 heap allocation")
     {
         // Call twice
-        testHeapAllocationFunction();
-        testHeapAllocationFunction();
+        qiti::example::testHeapAllocationFunction();
+        qiti::example::testHeapAllocationFunction();
         
-        auto funcData = qiti::getFunctionData<&testHeapAllocationFunction>();
+        auto funcData = qiti::getFunctionData<&qiti::example::testHeapAllocationFunction>();
         QITI_REQUIRE(funcData != nullptr);
         
         auto lastFunctionCall = funcData->getLastFunctionCall();
@@ -41,9 +29,9 @@ TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations() returns expected valu
     
     SECTION("0 heap allocation")
     {
-        testNoHeapAllocationFunction();
+        qiti::example::testNoHeapAllocationFunction();
         
-        auto funcData = qiti::getFunctionData<&testNoHeapAllocationFunction>();
+        auto funcData = qiti::getFunctionData<&qiti::example::testNoHeapAllocationFunction>();
         QITI_REQUIRE(funcData != nullptr);
         
         auto lastFunctionCall = funcData->getLastFunctionCall();

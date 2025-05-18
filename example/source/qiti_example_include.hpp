@@ -20,7 +20,25 @@
 namespace qiti::example
 {
 //--------------------------------------------------------------------------
-// Thread Sanitizer
+// FunctionCallData
+//--------------------------------------------------------------------------
+
+int testHeapAllocationFunction() noexcept;
+int testNoHeapAllocationFunction() noexcept;
+
+//--------------------------------------------------------------------------
+// profile
+//--------------------------------------------------------------------------
+
+void testFuncProfile() noexcept;
+
+class ProfileTestType
+{
+    
+};
+
+//--------------------------------------------------------------------------
+// ThreadSanitizer
 //--------------------------------------------------------------------------
 
 void testFunc_ThreadSanitizer0() noexcept;
@@ -34,16 +52,5 @@ public:
     void incrementInThread() noexcept;
 private:
     int _counter = 0;
-};
-
-//--------------------------------------------------------------------------
-// Profiling
-//--------------------------------------------------------------------------
-
-void testFuncProfile() noexcept;
-
-class ProfileTestType
-{
-    
 };
 } // namespace qiti::example

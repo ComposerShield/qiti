@@ -12,8 +12,6 @@
 #include <fstream>
 #include <regex>
 
-#include <iostream>
-
 //--------------------------------------------------------------------------
 
 TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
@@ -112,7 +110,6 @@ TEST_CASE("Detect data race via subprocess")
     std::smatch m;
     std::regex rx(R"(global '([^']+)')");
     QITI_REQUIRE(std::regex_search(report, m, rx));
-    std::cout << std::string(m[1]) << "\n";
     QITI_CHECK(std::string(m[1]) == "counter");
 }
 
