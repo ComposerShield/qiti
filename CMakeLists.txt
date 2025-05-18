@@ -40,11 +40,30 @@ set(SOURCES
     "source/qiti_utils.cpp"
 )
 
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "lib" FILES ${SOURCES})
+set(EXAMPLE_SOURCES
+    "example/source/qiti_example_include.hpp"
+    "example/source/qiti_example.cpp"
+)
 
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "lib" FILES ${SOURCES} ${EXAMPLE_SOURCES})
+
+# Public Qiti Library
 add_library(qiti_lib SHARED ${SOURCES})
 
+# Internal example app used for testing
+add_library(qiti_example_target SHARED ${EXAMPLE_SOURCES})
+
+target_link_libraries(qiti_example_target
+PRIVATE
+    qiti_lib
+)
+
 set_target_properties(qiti_lib PROPERTIES
+    OSX_ARCHITECTURES "${ARCHS}"
+    XCODE_GENERATE_SCHEME ON
+)
+
+set_target_properties(qiti_example_target PROPERTIES
     OSX_ARCHITECTURES "${ARCHS}"
     XCODE_GENERATE_SCHEME ON
 )
@@ -124,12 +143,15 @@ set_target_properties(qiti_tests PROPERTIES
     XCODE_GENERATE_SCHEME ON
 )
 
-target_link_libraries(qiti_tests PRIVATE
+target_link_libraries(qiti_tests 
+PRIVATE
+    qiti_example_target
     qiti_lib
     Catch2::Catch2WithMain
 )
 
-target_compile_options(qiti_tests PRIVATE
+target_compile_options(qiti_tests 
+PRIVATE
     "-Werror"
     "-Wpedantic"
 )
@@ -152,6 +174,7 @@ set_target_properties(qiti_tests PROPERTIES
 target_include_directories(qiti_tests 
 PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/source
+    ${CMAKE_CURRENT_SOURCE_DIR}/example/source
 )
 
 # Load and use the .cmake file provided by Catch2

@@ -1,6 +1,9 @@
 
+// Example project
+#include "qiti_example_include.hpp"
+// Qiti Public API
 #include "qiti_include.hpp"
-#include "qiti_ThreadSanitizer.hpp"
+// Special unit test include
 #include "qiti_test_macros.hpp"
 
 #include <catch2/catch_test_macros.hpp>
@@ -9,43 +12,7 @@
 #include <fstream>
 #include <regex>
 
-//--------------------------------------------------------------------------
-
-/** NOT static to purposely allow external linkage and visibility to QITI */
-__attribute__((noinline)) __attribute__((optnone))
-void testFunc_ThreadSanitizer0() noexcept
-{
-    volatile int _ = 42;
-}
-
-/** NOT static to purposely allow external linkage and visibility to QITI */
-__attribute__((noinline)) __attribute__((optnone))
-void testFunc_ThreadSanitizer1() noexcept
-{
-    volatile int _ = 42;
-}
-
-int counter = 0; // Shared global variable
-
-__attribute__((noinline)) __attribute__((optnone))
-static void incrementInThread() noexcept
-{
-    for (int i = 0; i < 1'000'000; ++i)
-        ++counter; // Unsynchronized write
-}
-
-class TestClassThreadSanitizer
-{
-public:
-    __attribute__((noinline)) __attribute__((optnone))
-    void incrementInThread() noexcept
-    {
-        for (int i = 0; i < 1'000'000; ++i)
-            ++_counter; // Unsynchronized write
-    }
-private:
-    int _counter = 0;
-};
+#include <iostream>
 
 //--------------------------------------------------------------------------
 
@@ -53,7 +20,8 @@ TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
 {
     qiti::resetAll();
     
-    auto tsan = qiti::ThreadSanitizer::functionsNotCalledInParallel<testFunc_ThreadSanitizer0, testFunc_ThreadSanitizer1>();
+    auto tsan = qiti::ThreadSanitizer::functionsNotCalledInParallel<qiti::example::testFunc_ThreadSanitizer0,
+                                                                    qiti::example::testFunc_ThreadSanitizer1>();
     
     QITI_REQUIRE(tsan.passed());
 
@@ -99,8 +67,8 @@ TEST_CASE("Detect data race via subprocess")
     if (pid == 0)
     {
         // Child: drop into the helper binary (built alongside qiti_tests)
-        std::thread t(incrementInThread); // Intentional data race
-        incrementInThread();              // Intentional data race
+        std::thread t(qiti::example::incrementInThread); // Intentional data race
+        qiti::example::incrementInThread();              // Intentional data race
         t.join();
         _exit(0); // clean exit of child process, may signal due to TSan
     }
@@ -144,6 +112,7 @@ TEST_CASE("Detect data race via subprocess")
     std::smatch m;
     std::regex rx(R"(global '([^']+)')");
     QITI_REQUIRE(std::regex_search(report, m, rx));
+    std::cout << std::string(m[1]) << "\n";
     QITI_CHECK(std::string(m[1]) == "counter");
 }
 
@@ -159,8 +128,8 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of 
 {
     auto dataRace = []()
     {
-        std::thread t(incrementInThread); // Intentional data race
-        incrementInThread();              // Intentional data race
+        std::thread t(qiti::example::incrementInThread); // Intentional data race
+        qiti::example::incrementInThread();              // Intentional data race
         t.join();
     };
     auto dataRaceDetector = qiti::ThreadSanitizer::createDataRaceDetector(dataRace);
@@ -172,7 +141,7 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of 
 {
     auto dataRace = []()
     {
-        TestClassThreadSanitizer testClass;
+        qiti::example::TestClassThreadSanitizer testClass;
         
         std::thread t([&testClass](){ testClass.incrementInThread(); }); // Intentional data race
         testClass.incrementInThread();                                   // Intentional data race
