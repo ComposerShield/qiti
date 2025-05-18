@@ -12,14 +12,16 @@
 #include <fstream>
 #include <regex>
 
+using namespace qiti::example::ThreadSanitizer;
+
 //--------------------------------------------------------------------------
 
 TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
 {
     qiti::resetAll();
     
-    auto tsan = qiti::ThreadSanitizer::functionsNotCalledInParallel<qiti::example::testFunc_ThreadSanitizer0,
-                                                                    qiti::example::testFunc_ThreadSanitizer1>();
+    auto tsan = qiti::ThreadSanitizer::functionsNotCalledInParallel<testFunc_ThreadSanitizer0,
+                                                                    testFunc_ThreadSanitizer1>();
     
     QITI_REQUIRE(tsan.passed());
 
@@ -65,8 +67,8 @@ TEST_CASE("Detect data race via subprocess")
     if (pid == 0)
     {
         // Child: drop into the helper binary (built alongside qiti_tests)
-        std::thread t(qiti::example::incrementInThread); // Intentional data race
-        qiti::example::incrementInThread();              // Intentional data race
+        std::thread t(incrementCounter); // Intentional data race
+        incrementCounter();              // Intentional data race
         t.join();
         _exit(0); // clean exit of child process, may signal due to TSan
     }
@@ -125,8 +127,8 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of 
 {
     auto dataRace = []()
     {
-        std::thread t(qiti::example::incrementInThread); // Intentional data race
-        qiti::example::incrementInThread();              // Intentional data race
+        std::thread t(incrementCounter); // Intentional data race
+        incrementCounter();              // Intentional data race
         t.join();
     };
     auto dataRaceDetector = qiti::ThreadSanitizer::createDataRaceDetector(dataRace);
@@ -138,10 +140,10 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of 
 {
     auto dataRace = []()
     {
-        qiti::example::TestClassThreadSanitizer testClass;
+        TestClassThreadSanitizer testClass;
         
-        std::thread t([&testClass](){ testClass.incrementInThread(); }); // Intentional data race
-        testClass.incrementInThread();                                   // Intentional data race
+        std::thread t([&testClass](){ testClass.incrementCounter(); }); // Intentional data race
+        testClass.incrementCounter();                                   // Intentional data race
         t.join();
     };
     auto dataRaceDetector = qiti::ThreadSanitizer::createDataRaceDetector(dataRace);

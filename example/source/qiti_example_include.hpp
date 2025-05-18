@@ -17,40 +17,48 @@
 
 //--------------------------------------------------------------------------
 
-namespace qiti::example
+namespace qiti
+{
+namespace example
 {
 //--------------------------------------------------------------------------
-// FunctionCallData
-//--------------------------------------------------------------------------
 
+namespace FunctionCallData
+{
 int testHeapAllocationFunction() noexcept;
 int testNoHeapAllocationFunction() noexcept;
+} // namespace FunctionCallData
 
 //--------------------------------------------------------------------------
-// profile
-//--------------------------------------------------------------------------
 
+namespace profile
+{
 void testFuncProfile() noexcept;
 
 class ProfileTestType
 {
     
 };
+} // namespace profile
 
 //--------------------------------------------------------------------------
-// ThreadSanitizer
-//--------------------------------------------------------------------------
 
+namespace ThreadSanitizer
+{
 void testFunc_ThreadSanitizer0() noexcept;
 void testFunc_ThreadSanitizer1() noexcept;
 
-void incrementInThread() noexcept;
+void incrementCounter() noexcept;
 
 class TestClassThreadSanitizer
 {
 public:
-    void incrementInThread() noexcept;
+    void incrementCounter() noexcept;
 private:
     int _counter = 0;
 };
-} // namespace qiti::example
+} // namespace ThreadSanitizer
+
+//--------------------------------------------------------------------------
+} // namespace example
+} // namespace qiti

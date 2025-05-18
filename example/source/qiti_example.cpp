@@ -21,12 +21,13 @@ int counter = 0; // Shared global variable
 
 //--------------------------------------------------------------------------
 
-namespace qiti::example
+namespace qiti
+{
+namespace example
 {
 //--------------------------------------------------------------------------
-// FunctionCallData
-//--------------------------------------------------------------------------
-
+namespace FunctionCallData
+{
 int testHeapAllocationFunction() noexcept
 {
     volatile int* test = new int{0};
@@ -39,20 +40,21 @@ int testNoHeapAllocationFunction() noexcept
     volatile int test{42};
     return test;
 }
+} // namespace FunctionCallData
 
 //--------------------------------------------------------------------------
-// profile
-//--------------------------------------------------------------------------
-
+namespace profile
+{
 void testFuncProfile() noexcept
 {
     volatile int _ = 42;
 }
+} // namespace profile
 
 //--------------------------------------------------------------------------
-// ThreadSanitizer
-//--------------------------------------------------------------------------
 
+namespace ThreadSanitizer
+{
 void testFunc_ThreadSanitizer0() noexcept
 {
     volatile int _ = 42; // dummy code
@@ -63,15 +65,19 @@ void testFunc_ThreadSanitizer1() noexcept
     volatile int _ = 42; // dummy code
 }
 
-void incrementInThread() noexcept
+void incrementCounter() noexcept
 {
     for (int i = 0; i < 1'000'000; ++i)
         ++counter; // Unsynchronized write
 }
 
-void TestClassThreadSanitizer::incrementInThread() noexcept
+void TestClassThreadSanitizer::incrementCounter() noexcept
 {
     for (int i = 0; i < 1'000'000; ++i)
         ++_counter; // Unsynchronized write
 }
-} // namespace qiti::example
+} // namespace ThreadSanitizer
+
+//--------------------------------------------------------------------------
+} // namespace example
+} // namespace qiti

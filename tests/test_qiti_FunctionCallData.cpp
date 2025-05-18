@@ -8,6 +8,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+using namespace qiti::example::FunctionCallData;
 
 TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations() returns expected values")
 {
@@ -17,10 +18,10 @@ TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations() returns expected valu
     SECTION("1 heap allocation")
     {
         // Call twice
-        qiti::example::testHeapAllocationFunction();
-        qiti::example::testHeapAllocationFunction();
+        testHeapAllocationFunction();
+        testHeapAllocationFunction();
         
-        auto funcData = qiti::getFunctionData<&qiti::example::testHeapAllocationFunction>();
+        auto funcData = qiti::getFunctionData<&testHeapAllocationFunction>();
         QITI_REQUIRE(funcData != nullptr);
         
         auto lastFunctionCall = funcData->getLastFunctionCall();
@@ -29,9 +30,9 @@ TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations() returns expected valu
     
     SECTION("0 heap allocation")
     {
-        qiti::example::testNoHeapAllocationFunction();
+        testNoHeapAllocationFunction();
         
-        auto funcData = qiti::getFunctionData<&qiti::example::testNoHeapAllocationFunction>();
+        auto funcData = qiti::getFunctionData<&testNoHeapAllocationFunction>();
         QITI_REQUIRE(funcData != nullptr);
         
         auto lastFunctionCall = funcData->getLastFunctionCall();
