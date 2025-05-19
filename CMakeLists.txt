@@ -185,3 +185,47 @@ include(${Catch2_SOURCE_DIR}/extras/Catch.cmake)
 
 # When running ctest, you must add a configuration flag, e.g. "ctest -C Debug"
 catch_discover_tests(qiti_tests DISCOVERY_MODE PRE_TEST)
+
+# =========================
+#       Documentation
+# =========================
+
+function(Doxygen input output)
+    find_package(Doxygen)
+    if (NOT DOXYGEN_FOUND)
+        add_custom_target(doxygen COMMAND false
+            COMMENT "Doxygen not found")
+        return()
+    endif()
+    set(DOXYGEN_GENERATE_HTML YES)
+    set(DOXYGEN_HTML_OUTPUT
+        ${PROJECT_SOURCE_DIR}/${output}/html
+    )
+    set(DOXYGEN_PREDEFINED ${COMPILE_DEFINITIONS})
+    set(DOXYGEN_EXTRACT_ALL YES)
+    set(DOXYGEN_EXTRACT_PRIVATE YES)
+    set(DOXYGEN_EXTRACT_STATIC YES)
+    set(DOXYGEN_SHOW_FILES NO)
+    set(DOXYGEN_VERBATIM_HEADERS NO)
+    set(DOXYGEN_RECURSIVE YES)
+    set(DOXYGEN_USE_MDFILE_AS_MAINPAGE ${PROJECT_SOURCE_DIR}/README.md)
+    set(DOXYGEN_CALL_GRAPH YES)
+    set(DOXYGEN_CALLER_GRAPH YES)
+    set(DOXYGEN_DOT_GRAPH_MAX_NODES 100)
+    set(DOXYGEN_SHOW_ENUM_VALUES YES)
+    set(DOXYGEN_INCLUDE_PATH ${INCLUDE_DIRECTORIES})
+
+    # ensure the HTML output folder exists
+    file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/${output}/html)
+    
+    doxygen_add_docs(doxygen
+        ${PROJECT_SOURCE_DIR}/${input} ${PROJECT_SOURCE_DIR}/README.md 
+        COMMENT "Generate HTML documentation"
+    )
+
+    set_target_properties(doxygen PROPERTIES
+        XCODE_GENERATE_SCHEME ON
+    )
+endfunction()
+
+Doxygen(source docs)
