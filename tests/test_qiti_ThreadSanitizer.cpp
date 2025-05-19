@@ -20,8 +20,8 @@ TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
 {
     qiti::resetAll();
     
-    auto tsan = qiti::ThreadSanitizer::functionsNotCalledInParallel<testFunc_ThreadSanitizer0,
-                                                                    testFunc_ThreadSanitizer1>();
+    auto tsan = qiti::ThreadSanitizer::functionsNotCalledInParallel<testFunc0,
+                                                                    testFunc1>();
     
     QITI_REQUIRE(tsan.passed());
 
@@ -140,7 +140,7 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of 
 {
     auto dataRace = []()
     {
-        TestClassThreadSanitizer testClass;
+        TestClass testClass;
         
         std::thread t([&testClass](){ testClass.incrementCounter(); }); // Intentional data race
         testClass.incrementCounter();                                   // Intentional data race

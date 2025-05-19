@@ -14,17 +14,17 @@ TEST_CASE("qiti::profile::resetProfiling()")
 {
     qiti::resetAll();
     
-    qiti::profile::beginProfilingFunction<&testFuncProfile>();
-    QITI_REQUIRE(qiti::profile::isProfilingFunction<&testFuncProfile>());
+    qiti::profile::beginProfilingFunction<&testFunc>();
+    QITI_REQUIRE(qiti::profile::isProfilingFunction<&testFunc>());
     
     qiti::profile::resetProfiling();
-    QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&testFuncProfile>());
+    QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&testFunc>());
     
     qiti::profile::beginProfilingAllFunctions();
-    QITI_REQUIRE(qiti::profile::isProfilingFunction<&testFuncProfile>());
+    QITI_REQUIRE(qiti::profile::isProfilingFunction<&testFunc>());
     
     qiti::profile::resetProfiling();
-    QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&testFuncProfile>());
+    QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&testFunc>());
     
     qiti::resetAll();
 }
@@ -33,9 +33,9 @@ TEST_CASE("qiti::profile::beginProfilingFunction()")
 {
     qiti::resetAll();
     
-    QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&testFuncProfile>());
-    qiti::profile::beginProfilingFunction<&testFuncProfile>();
-    QITI_REQUIRE(qiti::profile::isProfilingFunction<&testFuncProfile>());
+    QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&testFunc>());
+    qiti::profile::beginProfilingFunction<&testFunc>();
+    QITI_REQUIRE(qiti::profile::isProfilingFunction<&testFunc>());
     
     qiti::resetAll();
 }
@@ -44,11 +44,11 @@ TEST_CASE("qiti::profile::endProfilingFunction()")
 {
     qiti::resetAll();
     
-    qiti::profile::beginProfilingFunction<&testFuncProfile>();
-    QITI_REQUIRE(qiti::profile::isProfilingFunction<&testFuncProfile>());
+    qiti::profile::beginProfilingFunction<&testFunc>();
+    QITI_REQUIRE(qiti::profile::isProfilingFunction<&testFunc>());
     
-    qiti::profile::endProfilingFunction<&testFuncProfile>();
-    QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&testFuncProfile>());
+    qiti::profile::endProfilingFunction<&testFunc>();
+    QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&testFunc>());
     
     qiti::resetAll();
 }
@@ -57,9 +57,9 @@ TEST_CASE("qiti::profile::beginProfilingAllFunctions()")
 {
     qiti::resetAll();
     
-    QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&testFuncProfile>());
+    QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&testFunc>());
     qiti::profile::beginProfilingAllFunctions();
-    QITI_REQUIRE(qiti::profile::isProfilingFunction<&testFuncProfile>());
+    QITI_REQUIRE(qiti::profile::isProfilingFunction<&testFunc>());
     
     qiti::resetAll();
 }
@@ -69,10 +69,10 @@ TEST_CASE("qiti::profile::endProfilingAllFunctions()")
     qiti::resetAll();
     
     qiti::profile::beginProfilingAllFunctions();
-    QITI_REQUIRE(qiti::profile::isProfilingFunction<&testFuncProfile>());
+    QITI_REQUIRE(qiti::profile::isProfilingFunction<&testFunc>());
     
     qiti::profile::endProfilingAllFunctions();
-    QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&testFuncProfile>());
+    QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&testFunc>());
     
     qiti::resetAll();
 }

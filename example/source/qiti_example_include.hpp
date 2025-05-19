@@ -25,15 +25,15 @@ namespace example
 
 namespace FunctionCallData
 {
-int testHeapAllocationFunction() noexcept;
-int testNoHeapAllocationFunction() noexcept;
+int testHeapAllocation() noexcept;
+int testNoHeapAllocation() noexcept;
 } // namespace FunctionCallData
 
 //--------------------------------------------------------------------------
 
 namespace profile
 {
-void testFuncProfile() noexcept;
+void testFunc() noexcept;
 
 class ProfileTestType
 {
@@ -45,12 +45,12 @@ class ProfileTestType
 
 namespace ThreadSanitizer
 {
-void testFunc_ThreadSanitizer0() noexcept;
-void testFunc_ThreadSanitizer1() noexcept;
+void testFunc0() noexcept;
+void testFunc1() noexcept;
 
 void incrementCounter() noexcept;
 
-class TestClassThreadSanitizer
+class TestClass
 {
 public:
     void incrementCounter() noexcept;

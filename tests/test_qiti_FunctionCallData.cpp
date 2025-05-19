@@ -18,10 +18,10 @@ TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations() returns expected valu
     SECTION("1 heap allocation")
     {
         // Call twice
-        testHeapAllocationFunction();
-        testHeapAllocationFunction();
+        testHeapAllocation();
+        testHeapAllocation();
         
-        auto funcData = qiti::getFunctionData<&testHeapAllocationFunction>();
+        auto funcData = qiti::getFunctionData<&testHeapAllocation>();
         QITI_REQUIRE(funcData != nullptr);
         
         auto lastFunctionCall = funcData->getLastFunctionCall();
@@ -30,9 +30,9 @@ TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations() returns expected valu
     
     SECTION("0 heap allocation")
     {
-        testNoHeapAllocationFunction();
+        testNoHeapAllocation();
         
-        auto funcData = qiti::getFunctionData<&testNoHeapAllocationFunction>();
+        auto funcData = qiti::getFunctionData<&testNoHeapAllocation>();
         QITI_REQUIRE(funcData != nullptr);
         
         auto lastFunctionCall = funcData->getLastFunctionCall();

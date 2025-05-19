@@ -28,14 +28,14 @@ namespace example
 //--------------------------------------------------------------------------
 namespace FunctionCallData
 {
-int testHeapAllocationFunction() noexcept
+int testHeapAllocation() noexcept
 {
     volatile int* test = new int{0};
     delete test;
     return 42;
 }
 
-int testNoHeapAllocationFunction() noexcept
+int testNoHeapAllocation() noexcept
 {
     volatile int test{42};
     return test;
@@ -45,7 +45,7 @@ int testNoHeapAllocationFunction() noexcept
 //--------------------------------------------------------------------------
 namespace profile
 {
-void testFuncProfile() noexcept
+void testFunc() noexcept
 {
     volatile int _ = 42;
 }
@@ -55,12 +55,12 @@ void testFuncProfile() noexcept
 
 namespace ThreadSanitizer
 {
-void testFunc_ThreadSanitizer0() noexcept
+void testFunc0() noexcept
 {
     volatile int _ = 42; // dummy code
 }
 
-void testFunc_ThreadSanitizer1() noexcept
+void testFunc1() noexcept
 {
     volatile int _ = 42; // dummy code
 }
@@ -71,7 +71,7 @@ void incrementCounter() noexcept
         ++counter; // Unsynchronized write
 }
 
-void TestClassThreadSanitizer::incrementCounter() noexcept
+void TestClass::incrementCounter() noexcept
 {
     for (int i = 0; i < 1'000'000; ++i)
         ++_counter; // Unsynchronized write
