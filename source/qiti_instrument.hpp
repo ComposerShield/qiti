@@ -18,6 +18,9 @@
 #include "qiti_API.hpp"
 
 //--------------------------------------------------------------------------
+// Doxygen - Begin Internal Documentation
+/** \cond INTERNAL */
+//--------------------------------------------------------------------------
 
 #ifndef QITI_DISABLE_INSTRUMENTS
 namespace qiti
@@ -34,3 +37,8 @@ void QITI_API assertOnNextHeapAllocation() noexcept;
 } // namespace instrument
 } // namespace qiti
 #endif // ! QITI_DISABLE_INSTRUMENTS
+
+//--------------------------------------------------------------------------
+/** \endcond */
+// Doxygen - End Internal Documentation
+//--------------------------------------------------------------------------

@@ -6,7 +6,8 @@
 // Special unit test include
 #include "qiti_test_macros.hpp"
 
-#include "qiti_FunctionData.hpp"
+// Qiti Private API - not included in qiti_include.hpp
+#include "qiti_utils.hpp"
 
 #include <catch2/catch_test_macros.hpp>
 

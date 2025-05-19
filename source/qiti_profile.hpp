@@ -22,6 +22,9 @@
 #include <typeinfo>
 
 //--------------------------------------------------------------------------
+// Doxygen - Begin Internal Documentation
+/** \cond INTERNAL */
+//--------------------------------------------------------------------------
 
 namespace qiti
 {
@@ -88,3 +91,8 @@ void QITI_API_INTERNAL updateFunctionDataOnExit(void* this_fn) noexcept;
 
 } // namespace profile
 } // namespace qiti
+
+//--------------------------------------------------------------------------
+/** \endcond */
+// Doxygen - End Internal Documentation
+//--------------------------------------------------------------------------

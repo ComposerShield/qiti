@@ -16,6 +16,7 @@
 #include <qiti_utils.hpp>
 
 #include "qiti_include.hpp"
+#include "qiti_instrument.hpp"
 
 #include "qiti_ReentrantSharedMutex.hpp"
 

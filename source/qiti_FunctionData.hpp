@@ -16,6 +16,8 @@
 #pragma once
 
 #include "qiti_FunctionCallData.hpp"
+#include "qiti_profile.hpp"
+#include "qiti_utils.hpp"
 
 #include <thread>
 
@@ -29,6 +31,15 @@ namespace qiti
 class FunctionData
 {
 public:
+    /** */
+    template <auto FuncPtr>
+    requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
+    [[nodiscard]] static const qiti::FunctionData* QITI_API getFunctionData() noexcept
+    {
+        qiti::profile::beginProfilingFunction<FuncPtr>();
+        return qiti::getFunctionData<FuncPtr>();
+    }
+    
     /** */
     [[nodiscard]] const char* QITI_API getFunctionName() const noexcept;
     

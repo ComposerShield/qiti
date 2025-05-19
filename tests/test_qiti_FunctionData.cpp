@@ -52,22 +52,47 @@ TEST_CASE("qiti::FunctionData::getNumTimesCalled()")
     
     qiti::profile::beginProfilingFunction<&testFunc>();
     
+    auto funcData = qiti::getFunctionData<&testFunc>();
+    QITI_REQUIRE(funcData != nullptr);
+    
     SECTION("Called twice")
     {
         testFunc();
         testFunc();
-        
-        auto funcData = qiti::getFunctionData<&testFunc>();
-        QITI_REQUIRE(funcData != nullptr);
-        
         QITI_CHECK(funcData->getNumTimesCalled() == 2);
     }
     
     SECTION("Not called")
     {
-        auto funcData = qiti::getFunctionData<&testFunc>();
-        QITI_REQUIRE(funcData != nullptr);
-        
+        QITI_CHECK(funcData->getNumTimesCalled() == 0);
+    }
+    
+    SECTION("Called twice on two different threads")
+    {
+        std::thread t([]{ testFunc(); });
+        testFunc();
+        t.join();
+        QITI_CHECK(funcData->getNumTimesCalled() == 2);
+    }
+    
+    qiti::resetAll();
+}
+
+TEST_CASE("qiti::FunctionData::getNumTimesCalled(), using static constructor")
+{
+    qiti::resetAll();
+    
+    auto funcData = qiti::FunctionData::getFunctionData<&testFunc>();
+    QITI_REQUIRE(funcData != nullptr);
+    
+    SECTION("Called once")
+    {
+        testFunc();
+        QITI_CHECK(funcData->getNumTimesCalled() == 1);
+    }
+    
+    SECTION("Not called")
+    {
         QITI_CHECK(funcData->getNumTimesCalled() == 0);
     }
     
