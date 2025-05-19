@@ -41,9 +41,19 @@ public:
     [[nodiscard]] LeakSanitizer& QITI_API operator=(LeakSanitizer&& other) noexcept;
     
 private:
+    //--------------------------------------------------------------------------
+    // Doxygen - Begin Internal Documentation
+    /** \cond INTERNAL */
+    //--------------------------------------------------------------------------
+    
     /** Copy Constructor (deleted) */
     LeakSanitizer(const LeakSanitizer&) = delete;
     /** Copy Assignment (deleted) */
     LeakSanitizer& operator=(const LeakSanitizer&) = delete;
+    
+    //--------------------------------------------------------------------------
+    /** \endcond */
+    // Doxygen - End Internal Documentation
+    //--------------------------------------------------------------------------
 };
 } // namespace qiti

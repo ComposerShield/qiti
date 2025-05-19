@@ -23,7 +23,10 @@
 
 //--------------------------------------------------------------------------
 
-/** Internal Settings for Clang ThreadSanitizer */
+/**
+ \internal
+ Settings for Clang ThreadSanitizer
+ */
 extern "C" __attribute__((visibility("default")))
 const char* QITI_API __tsan_default_options();
 
@@ -53,7 +56,12 @@ public:
     /** */
     [[nodiscard]] bool QITI_API failed() noexcept;
     
-    /** Internal */
+    //--------------------------------------------------------------------------
+    // Doxygen - Begin Internal Documentation
+    /** \cond INTERNAL */
+    //--------------------------------------------------------------------------
+    
+    /** */
     virtual QITI_API ~ThreadSanitizer() noexcept;
 
     /** Move Constructor */
@@ -62,16 +70,21 @@ public:
     [[nodiscard]] ThreadSanitizer& QITI_API operator=(ThreadSanitizer&& other) noexcept;
     
 protected:
-    /** Internal */
+    /** */
     QITI_API_INTERNAL ThreadSanitizer() noexcept;
     
 private:
-    /** Internal */
+    /** */
     static ThreadSanitizer QITI_API functionsNotCalledInParallel(void* func0, void* func1) noexcept;
     
     /** Copy Constructor (deleted) */
     ThreadSanitizer(const ThreadSanitizer&) = delete;
     /** Copy Assignment (deleted) */
     ThreadSanitizer& operator=(const ThreadSanitizer&) = delete;
+    
+    //--------------------------------------------------------------------------
+    /** \endcond */
+    // Doxygen - End Internal Documentation
+    //--------------------------------------------------------------------------
 };
 } // namespace qiti

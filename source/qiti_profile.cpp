@@ -42,7 +42,7 @@ struct Init_g_functionsToProfile
 {
     Init_g_functionsToProfile()
     {
-        g_functionsToProfile.reserve(256);
+        g_functionsToProfile.reserve(256); // automatically reserve on startup
     }
 };
 static const Init_g_functionsToProfile init_g_functionsToProfile;

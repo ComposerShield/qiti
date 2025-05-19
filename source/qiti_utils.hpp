@@ -37,7 +37,10 @@ class FunctionData;
 /** */
 void QITI_API resetAll() noexcept;
 
-/** Returns demangled function name (without parens) */
+/**
+ \internal
+ Returns demangled function name (without parens)
+ */
 template <auto FuncPtr>
 constexpr std::string_view getFunctionName() noexcept
 {
@@ -68,7 +71,10 @@ constexpr std::string_view getFunctionName() noexcept
 }
 
 
-/** demangle a GCC/Clang‐mangled name into a std::string */
+/**
+ \internal
+ demangle a GCC/Clang‐mangled name into a std::string
+ */
 void QITI_API demangle(const char* mangled_name,
                        char* demangled_name,
                        uint demangled_size) noexcept;
@@ -94,7 +100,7 @@ void* QITI_API getAddressForMangledFunctionName(const char* mangledName) noexcep
 /** */
 [[nodiscard]] const qiti::FunctionData* QITI_API getFunctionData(const char* demangledFunctionName) noexcept;
 
-/** Internal */
+/** \internal */
 [[nodiscard]] qiti::FunctionData& QITI_API getFunctionDataFromAddress(void* functionAddress) noexcept;
 
 /** */

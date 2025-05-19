@@ -23,6 +23,9 @@
 #include <unordered_set>
 
 //--------------------------------------------------------------------------
+// Doxygen - Begin Internal Documentation
+/** \cond INTERNAL */
+//--------------------------------------------------------------------------
 
 namespace qiti
 {
@@ -52,3 +55,8 @@ public:
     FunctionCallData lastCallData{};
 };
 } // namespace qiti
+
+//--------------------------------------------------------------------------
+/** \endcond */
+// Doxygen - End Internal Documentation
+//--------------------------------------------------------------------------

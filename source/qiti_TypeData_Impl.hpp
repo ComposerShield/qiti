@@ -21,6 +21,9 @@
 #include <typeinfo>
 
 //--------------------------------------------------------------------------
+// Doxygen - Begin Internal Documentation
+/** \cond INTERNAL */
+//--------------------------------------------------------------------------
 
 namespace qiti
 {
@@ -43,3 +46,8 @@ public:
     unsigned long long numTimesDestructed  = 0;
 };
 } // namespace qiti
+
+//--------------------------------------------------------------------------
+/** \endcond */
+// Doxygen - End Internal Documentation
+//--------------------------------------------------------------------------

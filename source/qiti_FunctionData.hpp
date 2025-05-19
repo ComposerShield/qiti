@@ -38,6 +38,11 @@ public:
     /** */
     [[nodiscard]] uint QITI_API getNumTimesCalled() const noexcept;
     
+    //--------------------------------------------------------------------------
+    // Doxygen - Begin Internal Documentation
+    /** \cond INTERNAL */
+    //--------------------------------------------------------------------------
+    
     /**
      Returns true if function was called on the provided thread.
      
@@ -49,20 +54,20 @@ public:
     /** */
     [[nodiscard]] FunctionCallData QITI_API getLastFunctionCall() const noexcept;
     
-    /** Internal */
+    /** */
     QITI_API_INTERNAL FunctionData(void* functionAddress) noexcept;
-    /** Internal */
+    /** */
     QITI_API_INTERNAL ~FunctionData() noexcept;
     
     struct Impl;
-    /** Internal */
+    /** */
     [[nodiscard]] Impl* QITI_API_INTERNAL getImpl() noexcept;
-    /** Internal */
+    /** */
     [[nodiscard]] const Impl* QITI_API_INTERNAL getImpl() const noexcept;
     
-    /** Internal Move Constructor */
+    /** Move Constructor */
     QITI_API_INTERNAL FunctionData(FunctionData&& other) noexcept;
-    /** Internal Move Assignment */
+    /** Move Assignment */
     [[nodiscard]] FunctionData& QITI_API_INTERNAL operator=(FunctionData&& other) noexcept;
     
 private:
@@ -76,8 +81,14 @@ private:
     /** Copy Assignment (deleted) */
     FunctionData& operator=(const FunctionData&) = delete;
     
-    // Prevent heap allocating this class
+    /** Prevent heap allocating this class (deleted) */
     void* operator new(std::size_t) = delete;
+    /** Prevent heap allocating this class (deleted) */
     void* operator new[](std::size_t) = delete;
+    
+    //--------------------------------------------------------------------------
+    /** \endcond */
+    // Doxygen - End Internal Documentation
+    //--------------------------------------------------------------------------
 };
 } // namespace qiti

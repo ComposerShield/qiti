@@ -21,6 +21,11 @@
 #include <cstdint>
 #include <thread>
 
+//--------------------------------------------------------------------------
+// Doxygen - Begin Internal Documentation
+/** \cond INTERNAL */
+//--------------------------------------------------------------------------
+
 namespace qiti
 {
 struct FunctionCallData::Impl
@@ -35,3 +40,8 @@ struct FunctionCallData::Impl
     uint numHeapAllocationsAfterFunctionCall  = 0;
 };
 } // namespace qiti
+
+//--------------------------------------------------------------------------
+/** \endcond */
+// Doxygen - End Internal Documentation
+//--------------------------------------------------------------------------

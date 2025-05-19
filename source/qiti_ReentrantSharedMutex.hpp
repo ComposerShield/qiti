@@ -23,6 +23,11 @@
 #include <atomic>
 #include <stdexcept>
 
+//--------------------------------------------------------------------------
+// Doxygen - Begin Internal Documentation
+/** \cond INTERNAL */
+//--------------------------------------------------------------------------
+
 namespace qiti
 {
 /**
@@ -177,3 +182,8 @@ private:
     inline static thread_local unsigned int shared_recursion_ = 0;
 };
 } // namespace qiti
+
+//--------------------------------------------------------------------------
+/** \endcond */
+// Doxygen - End Internal Documentation
+//--------------------------------------------------------------------------

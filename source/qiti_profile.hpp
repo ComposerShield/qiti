@@ -30,10 +30,10 @@ namespace profile
 /** */
 void QITI_API resetProfiling() noexcept;
 
-/** Internal */
+/** \internal */
 void QITI_API beginProfilingFunction(void* functionAddress) noexcept;
 
-/** Internal */
+/** \internal */
 void QITI_API endProfilingFunction(void* functionAddress) noexcept;
 
 /** */
@@ -63,10 +63,10 @@ requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
     return isProfilingFunction( reinterpret_cast<void*>(FuncPtr));
 }
 
-/** Internal */
+/** \internal */
 void QITI_API beginProfilingType(std::type_index functionAddress) noexcept;
 
-/** Internal */
+/** \internal */
 void QITI_API endProfilingType(std::type_index functionAddress) noexcept;
 
 /** */
@@ -80,10 +80,10 @@ inline void QITI_API endProfilingType() noexcept { endProfilingType( typeid(Type
 /** */
 [[nodiscard]] unsigned long long QITI_API getNumHeapAllocationsOnCurrentThread() noexcept;
 
-/** Internal */
+/** \internal */
 void QITI_API_INTERNAL updateFunctionDataOnEnter(void* this_fn) noexcept;
 
-/** Internal */
+/** \internal */
 void QITI_API_INTERNAL updateFunctionDataOnExit(void* this_fn) noexcept;
 
 } // namespace profile

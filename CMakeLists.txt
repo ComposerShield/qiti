@@ -201,10 +201,16 @@ function(Doxygen input output)
     set(DOXYGEN_HTML_OUTPUT
         ${PROJECT_SOURCE_DIR}/${output}/html
     )
+
+    set(DOXYGEN_FILE_PATTERNS "*.h" "*.hpp") # do not process .cpp files
+
     set(DOXYGEN_PREDEFINED ${COMPILE_DEFINITIONS})
     set(DOXYGEN_EXTRACT_ALL YES)
-    set(DOXYGEN_EXTRACT_PRIVATE YES)
-    set(DOXYGEN_EXTRACT_STATIC YES)
+    set(DOXYGEN_INTERNAL_DOCS NO)
+    set(DOXYGEN_EXTRACT_PRIVATE NO)
+    set(DOXYGEN_EXTRACT_STATIC NO)
+    set(DOXYGEN_HIDE_UNDOC_CLASSES YES)
+    set(DOXYGEN_HIDE_UNDOC_MEMBERS YES)
     set(DOXYGEN_SHOW_FILES NO)
     set(DOXYGEN_VERBATIM_HEADERS NO)
     set(DOXYGEN_RECURSIVE YES)
@@ -215,9 +221,33 @@ function(Doxygen input output)
     set(DOXYGEN_SHOW_ENUM_VALUES YES)
     set(DOXYGEN_INCLUDE_PATH ${INCLUDE_DIRECTORIES})
 
+    # completely mute warnings:
+    set(DOXYGEN_QUIET              YES)
+
+    # specifically turn off “doc-error” warnings (mismatches between your comments
+    # and the actual code)
+    set(DOXYGEN_WARN_IF_DOC_ERROR  NO)
+
+    # if you’ve got stray \param or other tags pointing at non-existent symbols
+    # you can silence those too
+    set(DOXYGEN_WARN_NO_PARAMDOC   NO)
+
+    # turn on preprocessing & macro-expansion
+    set(DOXYGEN_ENABLE_PREPROCESSING YES)
+    set(DOXYGEN_MACRO_EXPANSION    YES)
+    set(DOXYGEN_EXPAND_ONLY_PREDEF YES)
+
+    # force QITI_API* to be “nothing”
+    list(APPEND DOXYGEN_PREDEFINED
+        "QITI_API="
+        "QITI_API_INTERNAL=")
+
+    # if your Doxygen is new enough, also skip them entirely
+    set(DOXYGEN_SKIP_FUNCTION_MACROS YES)
+
     # ensure the HTML output folder exists
     file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/${output}/html)
-    
+
     doxygen_add_docs(doxygen
         ${PROJECT_SOURCE_DIR}/${input} ${PROJECT_SOURCE_DIR}/README.md 
         COMMENT "Generate HTML documentation"

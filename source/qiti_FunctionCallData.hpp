@@ -31,28 +31,31 @@ public:
     [[nodiscard]] uint QITI_API getNumHeapAllocations() const noexcept;
     
     //--------------------------------------------------------------------------
+    // Doxygen - Begin Internal Documentation
+    /** \cond INTERNAL */
+    //--------------------------------------------------------------------------
     
-    /** Internal */
+    /** */
     QITI_API_INTERNAL FunctionCallData() noexcept;
     /** */
     QITI_API ~FunctionCallData() noexcept;
     
     struct Impl;
-    /** Internal */
+    /** */
     [[nodiscard]] Impl* QITI_API_INTERNAL getImpl() noexcept;
-    /** Internal */
+    /** */
     [[nodiscard]] const Impl* QITI_API_INTERNAL getImpl() const noexcept;
     
-    /** Internal */
+    /** */
     void QITI_API_INTERNAL reset() noexcept;
     
-    /** Internal Move Constructor */
+    /** Move Constructor */
     QITI_API_INTERNAL FunctionCallData(FunctionCallData&& other) noexcept;
-    /** Internal Move Assignment */
+    /** Move Assignment */
     [[nodiscard]] FunctionCallData& QITI_API_INTERNAL operator=(FunctionCallData&& other) noexcept;
-    /** Internal Copy Constructor */
+    /** Copy Constructor */
     FunctionCallData(const FunctionCallData&) noexcept;
-    /** Internal Copy Assignment */
+    /** Copy Assignment */
     [[nodiscard]] FunctionCallData operator=(const FunctionCallData&) noexcept;
     
 private:
@@ -61,8 +64,14 @@ private:
     static constexpr std::size_t ImplAlign =  8;
     alignas(ImplAlign) unsigned char implStorage[ImplSize];
     
-    // Prevent heap allocating this class
+    /** Prevent heap allocating this class (deleted) */
     void* operator new(std::size_t) = delete;
+    /** Prevent heap allocating this class (deleted) */
     void* operator new[](std::size_t) = delete;
+    
+    //--------------------------------------------------------------------------
+    /** \endcond */
+    // Doxygen - End Internal Documentation
+    //--------------------------------------------------------------------------
 };
 } // namespace qiti

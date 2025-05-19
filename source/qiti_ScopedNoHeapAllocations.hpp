@@ -16,6 +16,11 @@
 #include <cassert>
 #include <cstdint>
 
+//--------------------------------------------------------------------------
+// Doxygen - Begin Internal Documentation
+/** \cond INTERNAL */
+//--------------------------------------------------------------------------
+
 namespace qiti
 {
 namespace profile
@@ -46,3 +51,8 @@ private:
     void* operator new[](size_t) = delete;
 };
 } // namespace qiti
+
+//--------------------------------------------------------------------------
+/** \endcond */
+// Doxygen - End Internal Documentation
+//--------------------------------------------------------------------------

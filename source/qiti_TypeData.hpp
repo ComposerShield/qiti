@@ -32,20 +32,25 @@ public:
     /** */
     [[nodiscard]] const char* QITI_API getTypeName() const noexcept;
     
-    /** Internal */
+    //--------------------------------------------------------------------------
+    // Doxygen - Begin Internal Documentation
+    /** \cond INTERNAL */
+    //--------------------------------------------------------------------------
+    
+    /** */
     QITI_API_INTERNAL TypeData(void* functionAddress) noexcept;
-    /** Internal */
+    /** */
     QITI_API_INTERNAL ~TypeData() noexcept;
     
     struct Impl;
-    /** Internal */
+    /** */
     [[nodiscard]] Impl* QITI_API_INTERNAL getImpl() noexcept;
-    /** Internal */
+    /** */
     [[nodiscard]] const Impl* QITI_API_INTERNAL getImpl() const noexcept;
     
-    /** Internal Move Constructor */
+    /** Move Constructor */
     QITI_API_INTERNAL TypeData(TypeData&& other) noexcept;
-    /** Internal Move Operator */
+    /** Move Operator */
     [[nodiscard]] TypeData& QITI_API_INTERNAL operator=(TypeData&& other) noexcept;
     
 private:
@@ -59,8 +64,14 @@ private:
     /** Copy Assignment (deleted) */
     TypeData& operator=(const TypeData&) = delete;
     
-    // Prevent heap allocating this class
-    void* operator new(size_t) = delete;
-    void* operator new[](size_t) = delete;
+    /** Prevent heap allocating this class (deleted) */
+    void* operator new(std::size_t) = delete;
+    /** Prevent heap allocating this class (deleted) */
+    void* operator new[](std::size_t) = delete;
+    
+    //--------------------------------------------------------------------------
+    /** \endcond */
+    // Doxygen - End Internal Documentation
+    //--------------------------------------------------------------------------
 };
 } // namespace qiti
