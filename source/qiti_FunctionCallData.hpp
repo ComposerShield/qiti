@@ -28,7 +28,7 @@ class FunctionCallData
 {
 public:    
     /** */
-    [[nodiscard]] uint QITI_API getNumHeapAllocations() const noexcept;
+    [[nodiscard]] uint64_t QITI_API getNumHeapAllocations() const noexcept;
     
     //--------------------------------------------------------------------------
     // Doxygen - Begin Internal Documentation

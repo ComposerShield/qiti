@@ -17,10 +17,10 @@
 
 #include "qiti_API.hpp"
 
+#include <cstdint>
 #include <dlfcn.h>
 #include <string>
 #include <string_view>
-
 #include <type_traits>
 
 //--------------------------------------------------------------------------
@@ -28,8 +28,6 @@
 namespace qiti
 {
 //--------------------------------------------------------------------------
-
-using uint = unsigned long long;
 
 class FunctionData;
 
@@ -77,7 +75,7 @@ constexpr std::string_view getFunctionName() noexcept
  */
 void QITI_API demangle(const char* mangled_name,
                        char* demangled_name,
-                       uint demangled_size) noexcept;
+                       uint64_t demangled_size) noexcept;
 
 /**
  Copies up to maxFunctions names (each truncated to maxNameLen–1 chars + '\0')
@@ -90,9 +88,9 @@ void QITI_API demangle(const char* mangled_name,
  char buffer[MAX_FUNCS * MAX_NAME_LEN];
  getAllKnownFunctions(buffer, MAX_FUNCS, MAX_NAME_LEN);
  */
-uint QITI_API getAllKnownFunctions(char* buffer,
-                                   uint maxFunctions,
-                                   uint maxNameLen) noexcept;
+uint64_t QITI_API getAllKnownFunctions(char* buffer,
+                                       uint64_t maxFunctions,
+                                       uint64_t maxNameLen) noexcept;
 
 /** */
 void* QITI_API getAddressForMangledFunctionName(const char* mangledName) noexcept;

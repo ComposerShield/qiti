@@ -19,6 +19,7 @@
 #include "qiti_profile.hpp"
 #include "qiti_utils.hpp"
 
+#include <cstdint>
 #include <thread>
 
 //--------------------------------------------------------------------------
@@ -47,7 +48,7 @@ public:
     [[nodiscard]] const char* QITI_API getMangledFunctionName() const noexcept;
     
     /** */
-    [[nodiscard]] uint QITI_API getNumTimesCalled() const noexcept;
+    [[nodiscard]] uint64_t QITI_API getNumTimesCalled() const noexcept;
     
     //--------------------------------------------------------------------------
     // Doxygen - Begin Internal Documentation

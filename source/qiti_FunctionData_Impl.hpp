@@ -46,8 +46,8 @@ public:
     char functionNameReal[128];
     void* address = nullptr;
     
-    uint numTimesCalled = 0;
-    uint averageTimeSpentInFunctionNanoseconds = 0;
+    uint64_t numTimesCalled = 0;
+    uint64_t averageTimeSpentInFunctionNanoseconds = 0;
     std::unordered_set<std::thread::id> threadsCalledOn{};
     
     FunctionType functionType = FunctionType::regular;

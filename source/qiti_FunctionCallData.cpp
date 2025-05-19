@@ -112,7 +112,7 @@ void FunctionCallData::reset() noexcept
     new (implStorage) Impl; // re-initialize
 }
 
-uint FunctionCallData::getNumHeapAllocations() const noexcept
+uint64_t FunctionCallData::getNumHeapAllocations() const noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     

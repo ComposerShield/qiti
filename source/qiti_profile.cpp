@@ -22,6 +22,7 @@
 #include "qiti_ScopedNoHeapAllocations.hpp"
 
 #include <cassert>
+#include <cstdint>
 #include <iostream>
 #include <memory>
 #include <mutex>
@@ -250,7 +251,7 @@ void updateFunctionDataOnExit(void* this_fn) noexcept
     auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - callImpl->begin_time);
 
     callImpl->end_time = end_time;
-    callImpl->timeSpentInFunctionNanoseconds = static_cast<qiti::uint>(elapsed_ns.count());
+    callImpl->timeSpentInFunctionNanoseconds = static_cast<uint64_t>(elapsed_ns.count());
 #ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
     callImpl->numHeapAllocationsAfterFunctionCall = g_numHeapAllocationsOnCurrentThread;
 #endif

@@ -111,7 +111,7 @@ const char* FunctionData::getMangledFunctionName() const noexcept
     return getImpl()->functionNameMangled;
 }
 
-qiti::uint FunctionData::getNumTimesCalled() const noexcept
+uint64_t FunctionData::getNumTimesCalled() const noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     

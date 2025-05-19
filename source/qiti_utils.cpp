@@ -112,7 +112,7 @@ void* getAddressForMangledFunctionName(const char* mangledName) noexcept
     return &(it->second);
 }
 
-void demangle(const char* mangled_name, char* demangled_name, uint demangled_size) noexcept
+void demangle(const char* mangled_name, char* demangled_name, uint64_t demangled_size) noexcept
 {
     int status = 0;
     char* result = abi::__cxa_demangle(mangled_name, nullptr, nullptr, &status);
