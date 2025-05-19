@@ -25,7 +25,7 @@ namespace qiti
 {
 namespace profile
 {
-unsigned long long getNumHeapAllocationsOnCurrentThread() noexcept;
+uint64_t getNumHeapAllocationsOnCurrentThread() noexcept;
 } // namespace profile
 
 struct ScopedNoHeapAllocations
@@ -39,7 +39,7 @@ public:
     }
     
 private:
-    const unsigned long long numHeapAllocationsBefore;
+    const uint64_t numHeapAllocationsBefore;
     
     ScopedNoHeapAllocations(const ScopedNoHeapAllocations&) = delete;
     ScopedNoHeapAllocations& operator=(const ScopedNoHeapAllocations&) = delete;

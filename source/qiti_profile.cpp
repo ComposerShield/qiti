@@ -22,7 +22,6 @@
 #include "qiti_ScopedNoHeapAllocations.hpp"
 
 #include <cassert>
-#include <cstdint>
 #include <iostream>
 #include <memory>
 #include <mutex>
@@ -48,7 +47,7 @@ struct Init_g_functionsToProfile
 };
 static const Init_g_functionsToProfile init_g_functionsToProfile;
 
-inline thread_local unsigned long long g_numHeapAllocationsOnCurrentThread = 0;
+inline thread_local uint64_t g_numHeapAllocationsOnCurrentThread = 0;
 
 extern thread_local std::function<void()> g_onNextHeapAllocation;
 extern std::recursive_mutex qiti_global_lock;
@@ -209,7 +208,7 @@ void endProfilingType(std::type_index /*functionAddress*/) noexcept
     
 }
 
-unsigned long long getNumHeapAllocationsOnCurrentThread() noexcept
+uint64_t getNumHeapAllocationsOnCurrentThread() noexcept
 {
     return g_numHeapAllocationsOnCurrentThread;
 }

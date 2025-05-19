@@ -17,6 +17,7 @@
 
 #include "qiti_TypeData.hpp"
 
+#include <cstdint>
 #include <typeindex>
 #include <typeinfo>
 
@@ -42,8 +43,8 @@ public:
     
     std::type_index typeInfo;
     
-    unsigned long long numTimesConstructed = 0;
-    unsigned long long numTimesDestructed  = 0;
+    uint64_t numTimesConstructed = 0;
+    uint64_t numTimesDestructed  = 0;
 };
 } // namespace qiti
 

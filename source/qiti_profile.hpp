@@ -17,6 +17,7 @@
 
 #include "qiti_API.hpp"
 
+#include <cstdint>
 #include <type_traits>
 #include <typeindex>
 #include <typeinfo>
@@ -81,7 +82,7 @@ template <typename Type>
 inline void QITI_API endProfilingType() noexcept { endProfilingType( typeid(Type) ); }
 
 /** */
-[[nodiscard]] unsigned long long QITI_API getNumHeapAllocationsOnCurrentThread() noexcept;
+[[nodiscard]] uint64_t QITI_API getNumHeapAllocationsOnCurrentThread() noexcept;
 
 /** \internal */
 void QITI_API_INTERNAL updateFunctionDataOnEnter(void* this_fn) noexcept;
