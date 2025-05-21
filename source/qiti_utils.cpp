@@ -148,13 +148,14 @@ void resetAll() noexcept
 extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
 __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site) noexcept
 {
-    std::scoped_lock<std::mutex> lock(qiti_lock);
-    
     static thread_local int recursionCheck = 0;
     assert(++recursionCheck == 1);
     
-    if (qiti::profile::isProfilingFunction(this_fn)) // 0x1000110ac
+    if (qiti::profile::isProfilingFunction(this_fn))
+    {
+        std::scoped_lock<std::mutex> lock(qiti_lock);
         qiti::profile::updateFunctionDataOnEnter(this_fn);
+    }
     
     --recursionCheck;
 }
@@ -162,8 +163,9 @@ __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site) noexce
 extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
 __cyg_profile_func_exit(void * this_fn, [[maybe_unused]] void* call_site) noexcept
 {
-    std::scoped_lock<std::mutex> lock(qiti_lock);
-    
     if (qiti::profile::isProfilingFunction(this_fn))
+    {
+        std::scoped_lock<std::mutex> lock(qiti_lock);
         qiti::profile::updateFunctionDataOnExit(this_fn);
+    }
 }
