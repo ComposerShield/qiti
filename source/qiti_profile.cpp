@@ -223,6 +223,9 @@ void updateFunctionDataOnEnter(void* this_fn) noexcept
     auto* impl = functionData.getImpl();
     functionData.functionCalled();
     
+    for (auto* listener : impl->listeners)
+        listener->onFunctionEnter(&functionData);
+    
     // Update FunctionCallData
     impl->lastCallData.reset(); // Deletes previous impl
     
@@ -243,9 +246,13 @@ void updateFunctionDataOnExit(void* this_fn) noexcept
     auto* impl = functionData.getImpl();
     auto* callImpl = impl->lastCallData.getImpl();
     
-    auto end_time = std::chrono::steady_clock::now();
-    auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - callImpl->begin_time);
+    const auto end_time = std::chrono::steady_clock::now();
+    const auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - callImpl->begin_time);
+    
+    for (auto* listener : impl->listeners)
+        listener->onFunctionExit(&functionData);
 
+    // Update FunctionCallData
     callImpl->end_time = end_time;
     callImpl->timeSpentInFunctionNanoseconds = static_cast<uint64_t>(elapsed_ns.count());
 #ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER

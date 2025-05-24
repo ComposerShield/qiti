@@ -46,13 +46,13 @@ inline static size_t threadIdToIndex(const std::thread::id& tid) noexcept
 // record & lookup: if unseen, atomically grab a new slot
 inline static size_t threadIdToIndexOrRegister(const std::thread::id& tid) noexcept
 {
-    // 1) check existing
+    // check existing
     size_t used = g_nextThreadIndex.load(std::memory_order_acquire);
     for (size_t i = 0; i < used; ++i) {
         if (g_threadIds[i] == tid)
             return i;
     }
-    // 2) new thread → register it
+    // new thread -> register it
     size_t idx = g_nextThreadIndex.fetch_add(1, std::memory_order_acq_rel);
     assert(idx < MAX_THREADS && "Exceeded MAX_THREADS threads!");
     g_threadIds[idx] = tid;
@@ -66,8 +66,10 @@ namespace qiti
 
 FunctionData::FunctionData(void* functionAddress) noexcept
 {
-    static_assert(sizeof(FunctionData::Impl)  <= FunctionData::ImplSize,  "Impl is too large for FunctionData::implStorage");
-    static_assert(alignof(FunctionData::Impl) == FunctionData::ImplAlign, "Impl alignment stricter than FunctionData::implStorage");
+    static_assert(sizeof(FunctionData::Impl)  <= FunctionData::ImplSize,
+                  "Impl is too large for FunctionData::implStorage");
+    static_assert(alignof(FunctionData::Impl) == FunctionData::ImplAlign,
+                  "Impl alignment stricter than FunctionData::implStorage");
     
     qiti::ScopedNoHeapAllocations noAlloc;
     
@@ -179,6 +181,16 @@ bool FunctionData::wasCalledOnThread(std::thread::id thread) const noexcept
     auto idx = threadIdToIndex(thread);
     return (idx != THREAD_ID_NOT_FOUND)
            && impl->threadsCalledOn.test(idx);
+}
+
+void FunctionData::addListener(FunctionData::Listener* listener) noexcept
+{
+    getImpl()->listeners.insert(listener);
+}
+
+void FunctionData::removeListener(FunctionData::Listener* listener) noexcept
+{
+    getImpl()->listeners.erase(listener);
 }
 
 } // namespace qiti

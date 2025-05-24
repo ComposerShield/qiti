@@ -37,8 +37,7 @@ public:
     requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
     [[nodiscard]] static const qiti::FunctionData* QITI_API getFunctionData() noexcept
     {
-        qiti::profile::beginProfilingFunction<FuncPtr>();
-        return qiti::getFunctionData<FuncPtr>();
+        return getFunctionDataMutable<FuncPtr>(); // wrap in const
     }
     
     /** */
@@ -72,6 +71,15 @@ public:
     QITI_API_INTERNAL ~FunctionData() noexcept;
     
     /** */
+    template <auto FuncPtr>
+    requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
+    [[nodiscard]] static qiti::FunctionData* QITI_API_INTERNAL getFunctionDataMutable() noexcept
+    {
+        qiti::profile::beginProfilingFunction<FuncPtr>();
+        return &qiti::getFunctionDataFromAddress(reinterpret_cast<void*>(FuncPtr));
+    }
+    
+    /** */
     void QITI_API_INTERNAL functionCalled() noexcept;
     
     struct Impl;
@@ -80,6 +88,19 @@ public:
     /** */
     [[nodiscard]] const Impl* QITI_API_INTERNAL getImpl() const noexcept;
     
+    /** */
+    struct Listener
+    {
+        virtual ~Listener() = default;
+        virtual void QITI_API_INTERNAL onFunctionEnter(const FunctionData*) noexcept = 0;
+        virtual void QITI_API_INTERNAL onFunctionExit (const FunctionData*) noexcept = 0;
+    };
+    
+    /** */
+    void QITI_API_INTERNAL addListener(Listener*) noexcept;
+    /** */
+    void QITI_API_INTERNAL removeListener(Listener*) noexcept;
+    
     /** Move Constructor */
     QITI_API_INTERNAL FunctionData(FunctionData&& other) noexcept;
     /** Move Assignment */
@@ -87,7 +108,7 @@ public:
     
 private:
     // Stack-based pimpl idiom
-    static constexpr std::size_t ImplSize  = 456;
+    static constexpr std::size_t ImplSize  = 488;
     static constexpr std::size_t ImplAlign =  8;
     alignas(ImplAlign) unsigned char implStorage[ImplSize];
     

@@ -24,9 +24,33 @@ TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
     auto tsan = qiti::ThreadSanitizer::functionsNotCalledInParallel<testFunc0,
                                                                     testFunc1>();
     
-    QITI_REQUIRE(tsan->passed());
-
-    qiti::resetAll();
+    // Functions not called at all
+    QITI_CHECK(tsan->passed());
+    QITI_CHECK(! tsan->failed());
+    
+    // Functions called in sequence
+    testFunc0();
+    QITI_CHECK(tsan->passed());
+    QITI_CHECK(! tsan->failed());
+    
+    testFunc1();
+    QITI_CHECK(tsan->passed());
+    QITI_CHECK(! tsan->failed());
+    
+    // Functions called in parallel
+    std::thread t([]
+    {
+        for (auto i=0; i<1'000'000; ++i)
+            testFunc0();
+    });
+    
+    for (auto i=0; i<1'000'000; ++i)
+        testFunc1(); // should race against thread t
+    
+    t.join();
+    
+    QITI_CHECK(! tsan->passed());
+    QITI_CHECK(tsan->failed());
 }
 
 namespace fs = std::filesystem;

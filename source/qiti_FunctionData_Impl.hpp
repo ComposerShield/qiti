@@ -39,21 +39,19 @@ enum class FunctionType
 struct FunctionData::Impl
 {
 public:
-    QITI_API_INTERNAL Impl() = default;
-    QITI_API_INTERNAL ~Impl() = default;
-    
     char functionNameMangled[128];
     char functionNameReal[128];
     void* address = nullptr;
     
     uint64_t numTimesCalled = 0;
     uint64_t averageTimeSpentInFunctionNanoseconds = 0;
-//    std::unordered_set<std::thread::id> threadsCalledOn{};
     
     static constexpr size_t MAX_THREADS = 256;
     std::bitset<MAX_THREADS> threadsCalledOn;
     
     FunctionType functionType = FunctionType::regular;
+    
+    std::unordered_set<FunctionData::Listener*> listeners;
     
     FunctionCallData lastCallData{};
 };

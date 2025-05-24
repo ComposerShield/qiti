@@ -15,6 +15,10 @@
 
 #include "qiti_ThreadSanitizer.hpp"
 
+#include "qiti_FunctionData.hpp"
+#include "qiti_profile.hpp"
+
+#include <atomic>
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
@@ -42,7 +46,6 @@ extern "C" const char* __tsan_default_options()
 namespace fs = std::filesystem;
 
 /**
- \internal
  Finds the most recently modified file matching the prefix.
 
  @param prefix The log file prefix to search for.
@@ -66,7 +69,6 @@ namespace fs = std::filesystem;
 }
 
 /**
- \internal
  Read a file fully into a string.
 
  @param path Path of the file to read.
@@ -83,9 +85,10 @@ namespace fs = std::filesystem;
 namespace qiti
 {
 //--------------------------------------------------------------------------
-class DataRaceDetector : public ThreadSanitizer
+class DataRaceDetector final : public ThreadSanitizer
 {
 public:
+    /** */
     QITI_API DataRaceDetector(std::function<void()> func) noexcept
     {
         constexpr char const* logPrefix = QITI_TSAN_LOG_PATH;
@@ -162,30 +165,69 @@ public:
         std::system(("rm -f " + std::string(logPrefix) + "*").c_str());
     }
     
-    QITI_API ~DataRaceDetector() final = default;
+    /** */
+    QITI_API ~DataRaceDetector() noexcept override = default;
     
 private:
     bool _passed = true;
     
-    [[nodiscard]] bool QITI_API passed() noexcept final { return _passed; }
+    [[nodiscard]] bool QITI_API passed() noexcept override { return _passed; }
 };
 
 //--------------------------------------------------------------------------
 
-class ParallelCallDetector : public ThreadSanitizer
+/** Detects whether two functions ever run in parallel. */
+class ParallelCallDetector final
+: public ThreadSanitizer
+, private FunctionData::Listener
 {
 public:
-    QITI_API ParallelCallDetector() noexcept
+    /** */
+    QITI_API_INTERNAL ParallelCallDetector(FunctionData* _func0,
+                                           FunctionData* _func1) noexcept
+    : func0(_func0)
+    , func1(_func1)
     {
-        
+        func0->addListener(this);
+        func1->addListener(this);
     }
     
-    QITI_API ~ParallelCallDetector() final = default;
+    /** */
+    QITI_API_INTERNAL ~ParallelCallDetector() noexcept override
+    {
+        func0->removeListener(this);
+        func1->removeListener(this);
+    }
     
 private:
-    bool _passed = true;
+    std::atomic<bool> _passed = true;
     
-    [[nodiscard]] bool QITI_API passed() noexcept final { return _passed; }
+    FunctionData* const func0;
+    FunctionData* const func1;
+    
+    std::atomic<int32_t> numConcurrentFunc0 = 0;
+    std::atomic<int32_t> numConcurrentFunc1 = 0;
+    
+    void onFunctionEnter(const FunctionData* func) noexcept override
+    {
+        assert(func == func0 || func == func1);
+        
+        auto& numConcurrent            = (func == func0) ? numConcurrentFunc0 : numConcurrentFunc1;
+        const auto& numConcurrentOther = (func == func0) ? numConcurrentFunc1 : numConcurrentFunc0;
+        
+        if (numConcurrentOther > 0) // other func is currently running
+            _passed = false;
+        
+        ++numConcurrent;
+    }
+    
+    void onFunctionExit (const FunctionData* func) noexcept override
+    {
+        auto& numConcurrent = (func == func0) ? numConcurrentFunc0 : numConcurrentFunc1;
+        --numConcurrent;
+    }
+    
+    [[nodiscard]] bool QITI_API passed() noexcept override { return _passed; }
 };
 
 //--------------------------------------------------------------------------
@@ -196,9 +238,10 @@ ThreadSanitizer::~ThreadSanitizer() noexcept = default;
 bool ThreadSanitizer::passed() noexcept { return true; }
 bool ThreadSanitizer::failed() noexcept { return ! passed(); }
 
-std::unique_ptr<ThreadSanitizer> ThreadSanitizer::functionsNotCalledInParallel(void* /*func0*/, void* /*func1*/) noexcept
+std::unique_ptr<ThreadSanitizer> ThreadSanitizer::functionsNotCalledInParallel(FunctionData* func0,
+                                                                               FunctionData* func1) noexcept
 {
-    return std::make_unique<ParallelCallDetector>();
+    return std::make_unique<ParallelCallDetector>(func0, func1);
 }
 
 std::unique_ptr<ThreadSanitizer> ThreadSanitizer::createDataRaceDetector(std::function<void()> func) noexcept

@@ -17,6 +17,8 @@
 
 #include "qiti_API.hpp"
 
+#include "qiti_FunctionData.hpp"
+
 #include <functional>
 #include <memory>
 #include <type_traits>
@@ -64,8 +66,8 @@ public:
     && std::is_function_v<std::remove_pointer_t<decltype(FuncPtr1)>>
     [[nodiscard]] static std::unique_ptr<ThreadSanitizer> QITI_API functionsNotCalledInParallel() noexcept
     {
-        return functionsNotCalledInParallel(reinterpret_cast<void*>(FuncPtr0),
-                                            reinterpret_cast<void*>(FuncPtr1));
+        return functionsNotCalledInParallel(FunctionData::getFunctionDataMutable<FuncPtr0>(),
+                                            FunctionData::getFunctionDataMutable<FuncPtr1>());
     }
     
     /** Returns true if no errors were detected. */
@@ -93,7 +95,8 @@ protected:
     
 private:
     /** Implementation */
-    static std::unique_ptr<ThreadSanitizer> QITI_API functionsNotCalledInParallel(void* func0, void* func1) noexcept;
+    static std::unique_ptr<ThreadSanitizer> QITI_API functionsNotCalledInParallel(FunctionData* func0,
+                                                                                  FunctionData* func1) noexcept;
     
     /** Copy Constructor (deleted) */
     ThreadSanitizer(const ThreadSanitizer&) = delete;
