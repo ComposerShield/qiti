@@ -29,6 +29,7 @@
 #include <regex>
 #include <sstream>
 #include <string>
+#include <unordered_set>
 
 #include <unistd.h> // for fork()
 
@@ -227,7 +228,122 @@ private:
         --numConcurrent;
     }
     
-    [[nodiscard]] bool QITI_API passed() noexcept override { return _passed; }
+    [[nodiscard]] bool QITI_API passed() noexcept override { return _passed.load(std::memory_order_relaxed); }
+};
+
+//--------------------------------------------------------------------------
+
+/** TODO: implement */
+class LockData
+{
+public:
+    struct Listener
+    {
+        virtual ~Listener() noexcept = default;
+        /** */
+        virtual void onAcquire(const LockData* ld) noexcept = 0;
+        /** */
+        virtual void onRelease(const LockData* ld) noexcept = 0;
+    };
+    
+    /** Register for lock/unlock notifications. */
+    static void addGlobalListener(Listener* listener);
+    /** Unregister for lock/unlock notifications. */
+    static void removeGlobalListener(Listener* listener);
+    
+    /** unique identifier for this lock */
+    [[nodiscard]] const void* key() const noexcept { return reinterpret_cast<const void*>(this); }
+
+    /** notify listeners of a lock acquisition */
+    void notifyAcquire() noexcept;
+    /** notify listeners of a lock release */
+    void notifyRelease() noexcept;
+};
+
+/** Detects potential deadlocks by watching acquire‐order inversions. */
+class LockOrderInversionDetector final
+: public ThreadSanitizer
+, private LockData::Listener
+{
+public:
+    /** */
+    explicit LockOrderInversionDetector(std::function<void()> func) noexcept
+    {
+        LockData::addGlobalListener(this);
+        func();
+    }
+
+    /** */
+    ~LockOrderInversionDetector() noexcept override
+    {
+        LockData::removeGlobalListener(this);
+    }
+
+private:
+    std::atomic<bool> _passed{true};
+
+    // Global lock‐order graph: edge A → B means "A was held when B was acquired".
+    // We only need to detect any cycle.
+    std::mutex _graphLock;
+    std::unordered_map<const void*, std::vector<void*>> _edges;
+
+    // Per-thread stack of held locks:
+    static thread_local std::vector<void*> _heldStack;
+
+    // Listener callbacks:
+    void onAcquire(const LockData* ld) noexcept override
+    {
+        void* key = const_cast<void*>(ld->key());
+        
+        // Check for cycle: if any held H has a path back to itself via key
+        {
+            std::lock_guard _(_graphLock);
+            for (void* H : _heldStack) {
+                // add edge H→key, but first see if key→…→H already exists
+                if (_detectPath(key, H)) {
+                    _passed.store(false, std::memory_order_relaxed);
+                }
+                _edges[H].push_back(key);
+            }
+        }
+        
+        // Push this lock on our held stack
+        _heldStack.push_back(key);
+    }
+
+    void onRelease(const LockData* ld) noexcept override
+    {
+        const void* key = ld->key();
+        
+        // pop the stack (must be last)
+        if (!_heldStack.empty() && _heldStack.back() == key)
+            _heldStack.pop_back();
+        else
+            assert(false && "lock/unlock mismatch in DeadlockDetector");
+    }
+
+    bool passed() noexcept override
+    {
+        return _passed.load(std::memory_order_relaxed);
+    }
+
+    // DFS to see if there's a path from 'from' to 'to' in our lock‐order graph
+    bool _detectPath(const void* from, const void* to)
+    {
+        std::unordered_set<const void*> seen;
+        std::vector<const void*> stack{from};
+        while (!stack.empty())
+        {
+            const void* cur = stack.back(); stack.pop_back();
+            if (cur == to) return true;
+            if (!seen.insert(cur).second) continue;
+            auto it = _edges.find(cur);
+            if (it != _edges.end())
+                for (void* nxt : it->second)
+                    stack.push_back(nxt);
+        }
+        return false;
+    }
 };
 
 //--------------------------------------------------------------------------
@@ -238,15 +354,23 @@ ThreadSanitizer::~ThreadSanitizer() noexcept = default;
 bool ThreadSanitizer::passed() noexcept { return true; }
 bool ThreadSanitizer::failed() noexcept { return ! passed(); }
 
-std::unique_ptr<ThreadSanitizer> ThreadSanitizer::functionsNotCalledInParallel(FunctionData* func0,
-                                                                               FunctionData* func1) noexcept
+std::unique_ptr<ThreadSanitizer>
+ThreadSanitizer::createFunctionsCalledInParallelDetector(FunctionData* func0,
+                                                         FunctionData* func1) noexcept
 {
     return std::make_unique<ParallelCallDetector>(func0, func1);
 }
 
-std::unique_ptr<ThreadSanitizer> ThreadSanitizer::createDataRaceDetector(std::function<void()> func) noexcept
+std::unique_ptr<ThreadSanitizer>
+ThreadSanitizer::createDataRaceDetector(std::function<void()> func) noexcept
 {
     return std::make_unique<DataRaceDetector>(func);
+}
+
+std::unique_ptr<ThreadSanitizer>
+ThreadSanitizer::createPotentialDeadlockDetector(std::function<void()> func) noexcept
+{
+    return std::make_unique<LockOrderInversionDetector>(std::move(func));
 }
 
 //--------------------------------------------------------------------------

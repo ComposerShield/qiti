@@ -60,21 +60,34 @@ public:
 
      @returns a ThreadSanitizer object that can be queried via passed() or failed() to
      determine if the functions were called in parallel.
+     
+     If the functions are ever called in parallel while this object exists, the test will fail.
      */
     template<auto FuncPtr0, auto FuncPtr1>
     requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr0)>>
     && std::is_function_v<std::remove_pointer_t<decltype(FuncPtr1)>>
-    [[nodiscard]] static std::unique_ptr<ThreadSanitizer> QITI_API functionsNotCalledInParallel() noexcept
+    [[nodiscard]] static std::unique_ptr<ThreadSanitizer> QITI_API createFunctionsCalledInParallelDetector() noexcept
     {
-        return functionsNotCalledInParallel(FunctionData::getFunctionDataMutable<FuncPtr0>(),
+        return createFunctionsCalledInParallelDetector(FunctionData::getFunctionDataMutable<FuncPtr0>(),
                                             FunctionData::getFunctionDataMutable<FuncPtr1>());
     }
+    
+    /**
+     Factory to create a lock-order inversion detector.
+    
+     Runs the callable, tracking every mutex‐acquire; if two locks
+     are ever taken in inverted order on different threads, it flags failure.
+    */
+    [[nodiscard]] static std::unique_ptr<ThreadSanitizer> createPotentialDeadlockDetector(std::function<void()> func) noexcept;
     
     /** Returns true if no errors were detected. */
     [[nodiscard]] virtual bool QITI_API passed() noexcept;
     
     /** Convenience inverse of passed(). */
     [[nodiscard]] bool QITI_API failed() noexcept;
+    
+    /** Called immediately when test fails. */
+    std::function<void()> onFail = nullptr;
     
     //--------------------------------------------------------------------------
     // Doxygen - Begin Internal Documentation
@@ -95,8 +108,8 @@ protected:
     
 private:
     /** Implementation */
-    static std::unique_ptr<ThreadSanitizer> QITI_API functionsNotCalledInParallel(FunctionData* func0,
-                                                                                  FunctionData* func1) noexcept;
+    static std::unique_ptr<ThreadSanitizer> QITI_API createFunctionsCalledInParallelDetector(FunctionData* func0,
+                                                                                             FunctionData* func1) noexcept;
     
     /** Copy Constructor (deleted) */
     ThreadSanitizer(const ThreadSanitizer&) = delete;
