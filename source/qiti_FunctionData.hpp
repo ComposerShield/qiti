@@ -97,9 +97,9 @@ public:
     };
     
     /** */
-    void QITI_API_INTERNAL addListener(Listener*) noexcept;
+    void QITI_API_INTERNAL addListener(Listener* listener) noexcept;
     /** */
-    void QITI_API_INTERNAL removeListener(Listener*) noexcept;
+    void QITI_API_INTERNAL removeListener(Listener* listener) noexcept;
     
     /** Move Constructor */
     QITI_API_INTERNAL FunctionData(FunctionData&& other) noexcept;
