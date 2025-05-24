@@ -30,8 +30,6 @@ TEST_CASE("qiti::FunctionData::getFunctionName()")
     auto functionData = qiti::getFunctionData<&testFunc>();
     std::string name = functionData->getFunctionName();
     QITI_CHECK(name == "testFunc()");
-
-    qiti::resetAll();
 }
 
 TEST_CASE("qiti::FunctionData::getMangledFunctionName()")
@@ -42,8 +40,6 @@ TEST_CASE("qiti::FunctionData::getMangledFunctionName()")
     auto functionData = qiti::getFunctionData<&testFunc>();
     std::string name = functionData->getMangledFunctionName();
     QITI_CHECK(name == "_Z8testFuncv");
-
-    qiti::resetAll();
 }
 
 TEST_CASE("qiti::FunctionData::getNumTimesCalled()")
@@ -74,8 +70,6 @@ TEST_CASE("qiti::FunctionData::getNumTimesCalled()")
         t.join();
         QITI_CHECK(funcData->getNumTimesCalled() == 2);
     }
-    
-    qiti::resetAll();
 }
 
 TEST_CASE("qiti::FunctionData::getNumTimesCalled(), using static constructor")
@@ -95,8 +89,6 @@ TEST_CASE("qiti::FunctionData::getNumTimesCalled(), using static constructor")
     {
         QITI_CHECK(funcData->getNumTimesCalled() == 0);
     }
-    
-    qiti::resetAll();
 }
 
 TEST_CASE("qiti::FunctionData::wasCalledOnThread()")
@@ -132,6 +124,4 @@ TEST_CASE("qiti::FunctionData::wasCalledOnThread()")
         
         QITI_CHECK(funcData->wasCalledOnThread(id));
     }
-
-    qiti::resetAll();
 }

@@ -18,6 +18,4 @@ TEST_CASE("qiti::LeakSanitizer::passed")
     qiti::LeakSanitizer lsan;
     // no leaking code
     QITI_REQUIRE(lsan.passed());
-    
-    qiti::resetAll();
 }

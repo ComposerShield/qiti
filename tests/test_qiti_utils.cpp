@@ -37,8 +37,6 @@ TEST_CASE("qiti::getFunctionName()")
         auto name = qiti::getFunctionName<&std::string::empty>();
         QITI_REQUIRE(name == "std::basic_string<char>::empty");
     }
-    
-    qiti::resetAll();
 }
 
 TEST_CASE("qiti::demangle() on valid Itanium‐ABI mangled names")
@@ -71,8 +69,6 @@ TEST_CASE("qiti::demangle() on valid Itanium‐ABI mangled names")
         // _ZN2ns3fooIiEET_S0_ → ns::foo<int>(int)
         QITI_REQUIRE( demangleFunc("_ZN2ns3fooIiEET_S0_") == "int ns::foo<int>(ns::foo)" );
     }
-    
-    qiti::resetAll();
 }
 
 TEST_CASE("qiti::demangle() falls back on non-mangled input")
@@ -94,8 +90,6 @@ TEST_CASE("qiti::demangle() falls back on non-mangled input")
         const char* empty = "";
         QITI_REQUIRE( demangleFunc(empty) == "" );
     }
-    
-    qiti::resetAll();
 }
 
 TEST_CASE("qiti::getAddressForMangledFunctionName()")
@@ -105,7 +99,6 @@ TEST_CASE("qiti::getAddressForMangledFunctionName()")
     auto* funcAddress = (void*)&demangleFunc;
     
     qiti::profile::beginProfilingAllFunctions();
-//    qiti::profile::beginProfilingFunction<&demangleFunc>();
     
     // Call function to create FunctionData
     (void)demangleFunc(""); // TODO: make it so we do not have to call this
@@ -118,5 +111,5 @@ TEST_CASE("qiti::getAddressForMangledFunctionName()")
     
     QITI_REQUIRE( address == funcAddress );
     
-    qiti::resetAll();
+    qiti::profile::endProfilingAllFunctions();
 }

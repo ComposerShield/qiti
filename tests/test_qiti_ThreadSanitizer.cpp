@@ -14,6 +14,31 @@
 #include <regex>
 
 using namespace qiti::example::ThreadSanitizer;
+namespace fs = std::filesystem;
+
+[[nodiscard]] static std::optional<fs::path> findLatestLog(const std::string& prefix)
+{
+    std::optional<fs::path> best;
+    fs::path dir = fs::path(prefix).parent_path();
+    std::string base = fs::path(prefix).filename().string();
+    for (auto& ent : fs::directory_iterator(dir))
+    {
+        auto fn = ent.path().filename().string();
+        if (fn.rfind(base, 0) == 0)
+        {
+            if (!best || fs::last_write_time(ent) > fs::last_write_time(*best))
+                best = ent.path();
+        }
+    }
+    return best;
+}
+
+[[nodiscard]] static std::string slurpFile(const fs::path& p)
+{
+    std::ifstream in(p, std::ios::binary);
+    return { std::istreambuf_iterator<char>(in),
+             std::istreambuf_iterator<char>() };
+}
 
 //--------------------------------------------------------------------------
 
@@ -53,34 +78,10 @@ TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
     QITI_CHECK(tsan->failed());
 }
 
-namespace fs = std::filesystem;
-
-[[nodiscard]] static std::optional<fs::path> findLatestLog(const std::string& prefix)
-{
-    std::optional<fs::path> best;
-    fs::path dir = fs::path(prefix).parent_path();
-    std::string base = fs::path(prefix).filename().string();
-    for (auto& ent : fs::directory_iterator(dir))
-    {
-        auto fn = ent.path().filename().string();
-        if (fn.rfind(base, 0) == 0)
-        {
-            if (!best || fs::last_write_time(ent) > fs::last_write_time(*best))
-                best = ent.path();
-        }
-    }
-    return best;
-}
-
-[[nodiscard]] static std::string slurpFile(const fs::path& p)
-{
-    std::ifstream in(p, std::ios::binary);
-    return { std::istreambuf_iterator<char>(in),
-             std::istreambuf_iterator<char>() };
-}
-
 TEST_CASE("Detect data race via subprocess")
 {
+    qiti::resetAll();
+    
     constexpr char const* logPrefix = "/tmp/tsan.log";
 
     // wipe any old logs
@@ -142,6 +143,8 @@ TEST_CASE("Detect data race via subprocess")
 
 TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce false positive")
 {
+    qiti::resetAll();
+    
     auto noDataRace = [](){};
     auto dataRaceDetector = qiti::ThreadSanitizer::createDataRaceDetector(noDataRace);
     QITI_REQUIRE(dataRaceDetector->passed());
@@ -150,6 +153,8 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce fals
 
 TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of global variable")
 {
+    qiti::resetAll();
+    
     auto dataRace = []()
     {
         std::thread t(incrementCounter); // Intentional data race
@@ -163,6 +168,8 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of 
 
 TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of member variable")
 {
+    qiti::resetAll();
+    
     auto dataRace = []()
     {
         TestClass testClass;

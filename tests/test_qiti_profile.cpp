@@ -28,8 +28,6 @@ TEST_CASE("qiti::profile::resetProfiling()")
     
     qiti::profile::resetProfiling();
     QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&testFunc>());
-    
-    qiti::resetAll();
 }
 
 TEST_CASE("qiti::profile::beginProfilingFunction()")
@@ -39,8 +37,6 @@ TEST_CASE("qiti::profile::beginProfilingFunction()")
     QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&testFunc>());
     qiti::profile::beginProfilingFunction<&testFunc>();
     QITI_REQUIRE(qiti::profile::isProfilingFunction<&testFunc>());
-    
-    qiti::resetAll();
 }
 
 TEST_CASE("qiti::profile::endProfilingFunction()")
@@ -52,8 +48,6 @@ TEST_CASE("qiti::profile::endProfilingFunction()")
     
     qiti::profile::endProfilingFunction<&testFunc>();
     QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&testFunc>());
-    
-    qiti::resetAll();
 }
 
 TEST_CASE("qiti::profile::beginProfilingAllFunctions()")
@@ -63,8 +57,7 @@ TEST_CASE("qiti::profile::beginProfilingAllFunctions()")
     QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&testFunc>());
     qiti::profile::beginProfilingAllFunctions();
     QITI_REQUIRE(qiti::profile::isProfilingFunction<&testFunc>());
-    
-    qiti::resetAll();
+    qiti::profile::endProfilingAllFunctions();
 }
 
 TEST_CASE("qiti::profile::endProfilingAllFunctions()")
@@ -76,8 +69,6 @@ TEST_CASE("qiti::profile::endProfilingAllFunctions()")
     
     qiti::profile::endProfilingAllFunctions();
     QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&testFunc>());
-    
-    qiti::resetAll();
 }
 
 TEST_CASE("qiti::profile::isProfilingFunction()")
@@ -98,6 +89,4 @@ TEST_CASE("qiti::profile::getNumHeapAllocationsOnCurrentThread()")
     qiti::resetAll();
     
     // TODO: implement (when more internals are guaranteed not to heap allocate)
-    
-    qiti::resetAll();
 }

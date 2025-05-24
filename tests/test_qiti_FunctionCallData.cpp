@@ -39,6 +39,6 @@ TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations() returns expected valu
         QITI_REQUIRE(lastFunctionCall.getNumHeapAllocations() == 0);
     }
     
-    qiti::resetAll();
+    qiti::profile::endProfilingAllFunctions();
 }
 
