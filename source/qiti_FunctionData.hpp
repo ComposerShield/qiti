@@ -50,11 +50,6 @@ public:
     /** */
     [[nodiscard]] uint64_t QITI_API getNumTimesCalled() const noexcept;
     
-    //--------------------------------------------------------------------------
-    // Doxygen - Begin Internal Documentation
-    /** \cond INTERNAL */
-    //--------------------------------------------------------------------------
-    
     /**
      Returns true if function was called on the provided thread.
      
@@ -66,10 +61,18 @@ public:
     /** */
     [[nodiscard]] FunctionCallData QITI_API getLastFunctionCall() const noexcept;
     
+    //--------------------------------------------------------------------------
+    // Doxygen - Begin Internal Documentation
+    /** \cond INTERNAL */
+    //--------------------------------------------------------------------------
+    
     /** */
     QITI_API_INTERNAL FunctionData(void* functionAddress) noexcept;
     /** */
     QITI_API_INTERNAL ~FunctionData() noexcept;
+    
+    /** */
+    void QITI_API_INTERNAL functionCalled() noexcept;
     
     struct Impl;
     /** */

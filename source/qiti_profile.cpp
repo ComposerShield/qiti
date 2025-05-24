@@ -218,15 +218,12 @@ void updateFunctionDataOnEnter(void* this_fn) noexcept
     // Update FunctionData
     auto& functionData = qiti::getFunctionDataFromAddress(this_fn);
     
-    auto* impl = functionData.getImpl();
-    std::thread::id thisThread = std::this_thread::get_id();
+    qiti::ScopedNoHeapAllocations noAlloc; // TODO: can we move this up to very top?
     
-    ++impl->numTimesCalled;
-    impl->threadsCalledOn.insert(thisThread);
+    auto* impl = functionData.getImpl();
+    functionData.functionCalled();
     
     // Update FunctionCallData
-    qiti::ScopedNoHeapAllocations noAlloc; // TODO: move this up when possible
-    
     impl->lastCallData.reset(); // Deletes previous impl
     
     auto* lastCallImpl = impl->lastCallData.getImpl();

@@ -26,6 +26,41 @@
 
 //--------------------------------------------------------------------------
 
+static constexpr size_t MAX_THREADS = qiti::FunctionData::Impl::MAX_THREADS;
+static constexpr size_t THREAD_ID_NOT_FOUND   = MAX_THREADS;
+
+// global array + counter for id→small-index mapping
+static std::atomic<size_t>                  g_nextThreadIndex{0};
+static std::array<std::thread::id, MAX_THREADS> g_threadIds;
+
+// lookup only (returns NOT_FOUND if we've never seen this id)
+inline static size_t threadIdToIndex(const std::thread::id& tid) noexcept
+{
+    size_t used = g_nextThreadIndex.load(std::memory_order_acquire);
+    for (size_t i = 0; i < used; ++i)
+        if (g_threadIds[i] == tid)
+            return i;
+    return THREAD_ID_NOT_FOUND;
+}
+
+// record & lookup: if unseen, atomically grab a new slot
+inline static size_t threadIdToIndexOrRegister(const std::thread::id& tid) noexcept
+{
+    // 1) check existing
+    size_t used = g_nextThreadIndex.load(std::memory_order_acquire);
+    for (size_t i = 0; i < used; ++i) {
+        if (g_threadIds[i] == tid)
+            return i;
+    }
+    // 2) new thread → register it
+    size_t idx = g_nextThreadIndex.fetch_add(1, std::memory_order_acq_rel);
+    assert(idx < MAX_THREADS && "Exceeded MAX_THREADS threads!");
+    g_threadIds[idx] = tid;
+    return idx;
+}
+
+//--------------------------------------------------------------------------
+
 namespace qiti
 {
 
@@ -125,11 +160,25 @@ FunctionCallData FunctionData::getLastFunctionCall() const noexcept
     return getImpl()->lastCallData;
 }
 
+void FunctionData::functionCalled() noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
+    auto* impl = getImpl();
+    ++impl->numTimesCalled;
+    
+    auto idx = threadIdToIndexOrRegister(std::this_thread::get_id());
+    impl->threadsCalledOn.set(idx);
+}
+
 bool FunctionData::wasCalledOnThread(std::thread::id thread) const noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     
-    return getImpl()->threadsCalledOn.contains(thread);
+    auto* impl = getImpl();
+    auto idx = threadIdToIndex(thread);
+    return (idx != THREAD_ID_NOT_FOUND)
+           && impl->threadsCalledOn.test(idx);
 }
 
 } // namespace qiti

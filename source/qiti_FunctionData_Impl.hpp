@@ -48,7 +48,10 @@ public:
     
     uint64_t numTimesCalled = 0;
     uint64_t averageTimeSpentInFunctionNanoseconds = 0;
-    std::unordered_set<std::thread::id> threadsCalledOn{};
+//    std::unordered_set<std::thread::id> threadsCalledOn{};
+    
+    static constexpr size_t MAX_THREADS = 256;
+    std::bitset<MAX_THREADS> threadsCalledOn;
     
     FunctionType functionType = FunctionType::regular;
     
@@ -60,3 +63,5 @@ public:
 /** \endcond */
 // Doxygen - End Internal Documentation
 //--------------------------------------------------------------------------
+
+static_assert(sizeof(std::thread::id) == 8, "goose");
