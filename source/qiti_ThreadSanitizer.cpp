@@ -41,6 +41,13 @@ extern "C" const char* __tsan_default_options()
 
 namespace fs = std::filesystem;
 
+/**
+ \internal
+ Finds the most recently modified file matching the prefix.
+
+ @param prefix The log file prefix to search for.
+ @returns an optional containing the latest path, or nullopt if none found.
+*/
 [[nodiscard]] static std::optional<fs::path> findLatestLog(const std::string& prefix) noexcept
 {
     std::optional<fs::path> best;
@@ -58,17 +65,24 @@ namespace fs = std::filesystem;
     return best;
 }
 
-[[nodiscard]] static std::string slurpFile(const fs::path& p) noexcept
+/**
+ \internal
+ Read a file fully into a string.
+
+ @param path Path of the file to read.
+ @returns the file contents; empty string on failure.
+*/
+[[nodiscard]] static std::string slurpFile(const fs::path& path) noexcept
 {
-    std::ifstream in(p, std::ios::binary);
+    std::ifstream in(path, std::ios::binary);
     return { std::istreambuf_iterator<char>(in),
              std::istreambuf_iterator<char>() };
 }
 
 //--------------------------------------------------------------------------
-
 namespace qiti
 {
+//--------------------------------------------------------------------------
 class DataRaceDetector : public ThreadSanitizer
 {
 public:
@@ -156,15 +170,35 @@ private:
     [[nodiscard]] bool QITI_API passed() noexcept final { return _passed; }
 };
 
+//--------------------------------------------------------------------------
+
+class ParallelCallDetector : public ThreadSanitizer
+{
+public:
+    QITI_API ParallelCallDetector() noexcept
+    {
+        
+    }
+    
+    QITI_API ~ParallelCallDetector() final = default;
+    
+private:
+    bool _passed = true;
+    
+    [[nodiscard]] bool QITI_API passed() noexcept final { return _passed; }
+};
+
+//--------------------------------------------------------------------------
+
 ThreadSanitizer::ThreadSanitizer() noexcept = default;
 ThreadSanitizer::~ThreadSanitizer() noexcept = default;
 
 bool ThreadSanitizer::passed() noexcept { return true; }
 bool ThreadSanitizer::failed() noexcept { return ! passed(); }
 
-ThreadSanitizer ThreadSanitizer::functionsNotCalledInParallel(void* /*func0*/, void* /*func1*/) noexcept
+std::unique_ptr<ThreadSanitizer> ThreadSanitizer::functionsNotCalledInParallel(void* /*func0*/, void* /*func1*/) noexcept
 {
-    return {}; // TODO: implement
+    return std::make_unique<ParallelCallDetector>();
 }
 
 std::unique_ptr<ThreadSanitizer> ThreadSanitizer::createDataRaceDetector(std::function<void()> func) noexcept
@@ -172,4 +206,6 @@ std::unique_ptr<ThreadSanitizer> ThreadSanitizer::createDataRaceDetector(std::fu
     return std::make_unique<DataRaceDetector>(func);
 }
 
+//--------------------------------------------------------------------------
 } // namespace qiti
+//--------------------------------------------------------------------------
