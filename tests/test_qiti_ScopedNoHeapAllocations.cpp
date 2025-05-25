@@ -15,6 +15,8 @@
 // so commenting out for now
 //TEST_CASE("ScopedNoHeapAllocations aborts on unexpected heap alloc")
 //{
+//    qiti::ScopedQitiTest test;
+//
 //    QITI_REQUIRE_DEATH
 //    (
 //        qiti::ScopedNoHeapAllocations guard;
@@ -25,7 +27,7 @@
 
 TEST_CASE("ScopedNoHeapAllocations survives no heap alloc")
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
     
     // This should *not* abort.
     QITI_REQUIRE_SURVIVES

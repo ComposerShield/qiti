@@ -15,7 +15,7 @@ using namespace qiti::example::profile;
 
 TEST_CASE("qiti::profile::resetProfiling()")
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
     
     qiti::profile::beginProfilingFunction<&testFunc>();
     QITI_REQUIRE(qiti::profile::isProfilingFunction<&testFunc>());
@@ -32,7 +32,7 @@ TEST_CASE("qiti::profile::resetProfiling()")
 
 TEST_CASE("qiti::profile::beginProfilingFunction()")
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
     
     QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&testFunc>());
     qiti::profile::beginProfilingFunction<&testFunc>();
@@ -41,7 +41,7 @@ TEST_CASE("qiti::profile::beginProfilingFunction()")
 
 TEST_CASE("qiti::profile::endProfilingFunction()")
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
     
     qiti::profile::beginProfilingFunction<&testFunc>();
     QITI_REQUIRE(qiti::profile::isProfilingFunction<&testFunc>());
@@ -52,7 +52,7 @@ TEST_CASE("qiti::profile::endProfilingFunction()")
 
 TEST_CASE("qiti::profile::beginProfilingAllFunctions()")
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
     
     QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&testFunc>());
     qiti::profile::beginProfilingAllFunctions();
@@ -62,7 +62,7 @@ TEST_CASE("qiti::profile::beginProfilingAllFunctions()")
 
 TEST_CASE("qiti::profile::endProfilingAllFunctions()")
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
     
     qiti::profile::beginProfilingAllFunctions();
     QITI_REQUIRE(qiti::profile::isProfilingFunction<&testFunc>());
@@ -73,11 +73,15 @@ TEST_CASE("qiti::profile::endProfilingAllFunctions()")
 
 TEST_CASE("qiti::profile::isProfilingFunction()")
 {
+    qiti::ScopedQitiTest test;
+    
     // TODO: implement
 }
 
 TEST_CASE("qiti::profile::begin/endProfilingType()")
 {
+    qiti::ScopedQitiTest test;
+    
     qiti::profile::beginProfilingType<ProfileTestType>();
     
     qiti::profile::endProfilingType<ProfileTestType>();
@@ -86,7 +90,7 @@ TEST_CASE("qiti::profile::begin/endProfilingType()")
 
 TEST_CASE("qiti::profile::getNumHeapAllocationsOnCurrentThread()")
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
     
     // TODO: implement (when more internals are guaranteed not to heap allocate)
 }

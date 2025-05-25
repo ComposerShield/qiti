@@ -13,7 +13,7 @@
 
 TEST_CASE("qiti::LeakSanitizer::passed")
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
     
     qiti::LeakSanitizer lsan;
     // no leaking code

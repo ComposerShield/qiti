@@ -24,7 +24,7 @@ void testFunc() noexcept
 
 TEST_CASE("qiti::FunctionData::getFunctionName()")
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
     
     qiti::profile::beginProfilingFunction<&testFunc>();
     auto functionData = qiti::getFunctionData<&testFunc>();
@@ -34,7 +34,7 @@ TEST_CASE("qiti::FunctionData::getFunctionName()")
 
 TEST_CASE("qiti::FunctionData::getMangledFunctionName()")
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
     
     qiti::profile::beginProfilingFunction<&testFunc>();
     auto functionData = qiti::getFunctionData<&testFunc>();
@@ -44,7 +44,7 @@ TEST_CASE("qiti::FunctionData::getMangledFunctionName()")
 
 TEST_CASE("qiti::FunctionData::getNumTimesCalled()")
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
     
     qiti::profile::beginProfilingFunction<&testFunc>();
     
@@ -74,7 +74,7 @@ TEST_CASE("qiti::FunctionData::getNumTimesCalled()")
 
 TEST_CASE("qiti::FunctionData::getNumTimesCalled(), using static constructor")
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
     
     auto funcData = qiti::FunctionData::getFunctionData<&testFunc>();
     QITI_REQUIRE(funcData != nullptr);
@@ -93,7 +93,7 @@ TEST_CASE("qiti::FunctionData::getNumTimesCalled(), using static constructor")
 
 TEST_CASE("qiti::FunctionData::wasCalledOnThread()")
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
     
     qiti::profile::beginProfilingFunction<&testFunc>();
     

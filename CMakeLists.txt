@@ -33,6 +33,8 @@ set(SOURCES
     "source/qiti_profile.cpp"
     "source/qiti_ReentrantSharedMutex.hpp"
     "source/qiti_ScopedNoHeapAllocations.hpp"
+    "source/qiti_ScopedQitiTest.hpp"
+    "source/qiti_ScopedQitiTest.cpp"
     "source/qiti_ThreadSanitizer.hpp"
     "source/qiti_ThreadSanitizer.cpp"
     "source/qiti_TypeData_Impl.hpp"

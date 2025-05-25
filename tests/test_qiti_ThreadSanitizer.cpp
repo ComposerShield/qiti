@@ -43,7 +43,7 @@ namespace fs = std::filesystem;
 
 TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
     
     auto tsan = qiti::ThreadSanitizer::createFunctionsCalledInParallelDetector<testFunc0,
                                                                                testFunc1>();
@@ -82,7 +82,7 @@ TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
 
 TEST_CASE("Detect data race via subprocess")
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
     
     constexpr char const* logPrefix = "/tmp/tsan.log";
 
@@ -145,7 +145,7 @@ TEST_CASE("Detect data race via subprocess")
 
 TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce false positive")
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
     
     auto noDataRace = [](){};
     auto dataRaceDetector = qiti::ThreadSanitizer::createDataRaceDetector();
@@ -156,7 +156,7 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce fals
 
 TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of global variable")
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
     
     auto dataRace = []()
     {
@@ -172,7 +172,7 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of 
 
 TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of member variable")
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
     
     auto dataRace = []()
     {

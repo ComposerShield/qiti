@@ -24,7 +24,7 @@ __attribute__((noinline)) __attribute__((optnone))
 
 TEST_CASE("qiti::getFunctionName()")
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
     
     SECTION("Simple static function from this translation unit")
     {
@@ -41,6 +41,8 @@ TEST_CASE("qiti::getFunctionName()")
 
 TEST_CASE("qiti::demangle() on valid Itanium‐ABI mangled names")
 {
+    qiti::ScopedQitiTest test;
+    
     SECTION("simple function with one int parameter")
     {
         QITI_REQUIRE( demangleFunc("_Z3fooi") == "foo(int)" );
@@ -73,6 +75,8 @@ TEST_CASE("qiti::demangle() on valid Itanium‐ABI mangled names")
 
 TEST_CASE("qiti::demangle() falls back on non-mangled input")
 {
+    qiti::ScopedQitiTest test;
+    
     SECTION("plain identifier")
     {
         const char* name = "main";
@@ -94,7 +98,7 @@ TEST_CASE("qiti::demangle() falls back on non-mangled input")
 
 TEST_CASE("qiti::getAddressForMangledFunctionName()")
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
     
     auto* funcAddress = (void*)&demangleFunc;
     

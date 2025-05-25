@@ -30,7 +30,7 @@ public:
 
 TEST_CASE( "LockData delivers acquire and release to a single listener", "[LockData]" )
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
 
     qiti::LockData ld;
     TestListener listener;
@@ -57,7 +57,7 @@ TEST_CASE( "LockData delivers acquire and release to a single listener", "[LockD
 
 TEST_CASE( "LockData can handle multiple listeners", "[LockData]" )
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
 
     qiti::LockData ld;
     TestListener a;
@@ -77,7 +77,7 @@ TEST_CASE( "LockData can handle multiple listeners", "[LockData]" )
 
 TEST_CASE( "LockData::key() returns the object’s own address and is unique", "[LockData]" )
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
 
     qiti::LockData a;
     qiti::LockData b;

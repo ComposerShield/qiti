@@ -12,7 +12,7 @@ using namespace qiti::example::FunctionCallData;
 
 TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations() returns expected values")
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
     qiti::profile::beginProfilingAllFunctions();
     
     SECTION("1 heap allocation")

@@ -13,7 +13,7 @@
 
 TEST_CASE("qiti::FunctionCallData::resetInstrumentation()")
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
     
     static auto val = 0; // static required so that lambda can access it and still be converted to a function pointer
     
@@ -31,12 +31,11 @@ TEST_CASE("qiti::FunctionCallData::resetInstrumentation()")
     
     // Cleanup
     delete testAlloc;
-    qiti::resetAll();
 }
 
 TEST_CASE("qiti::onNextHeapAllocation() is called on next heap allocation", "[qiti::onNextHeapAllocation]")
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
     
     static int testValue = 0;
     qiti::instrument::onNextHeapAllocation([](){ ++testValue; });
@@ -44,14 +43,10 @@ TEST_CASE("qiti::onNextHeapAllocation() is called on next heap allocation", "[qi
     auto* heapAllocation = new int{0};
     QITI_CHECK(testValue == 1);
     delete heapAllocation;
-    
-    qiti::resetAll();
 }
 
 TEST_CASE("qiti::FunctionCallData::assertOnNextHeapAllocation()")
 {
-    qiti::resetAll();
+    qiti::ScopedQitiTest test;
     
-    
-    qiti::resetAll();
 }
