@@ -78,7 +78,7 @@ public:
      @see passed()
      @see failed()
     */
-    [[nodiscard]] static std::unique_ptr<ThreadSanitizer> createPotentialDeadlockDetector() noexcept;
+    [[nodiscard]] static std::unique_ptr<ThreadSanitizer> QITI_API createPotentialDeadlockDetector() noexcept;
     
     /**
      @param func Function pointer or lambda that is immediately run in a forked process with ThreadSanitizer enabled.

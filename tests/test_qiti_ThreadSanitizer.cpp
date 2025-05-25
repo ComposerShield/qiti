@@ -8,8 +8,10 @@
 // Basic Catch2 macros
 #include <catch2/catch_test_macros.hpp>
 
+#include <iostream>
 #include <filesystem>
 #include <fstream>
+#include <mutex>
 #include <regex>
 
 using namespace qiti::example::ThreadSanitizer;
@@ -191,4 +193,50 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of 
     dataRaceDetector->run(dataRace);
     QITI_REQUIRE(dataRaceDetector->failed());
     QITI_REQUIRE_FALSE(dataRaceDetector->passed());
+}
+
+TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() does not produce false positive")
+{
+    qiti::ScopedQitiTest test;
+    
+    auto potentialDeadlockDetector = qiti::ThreadSanitizer::createPotentialDeadlockDetector();
+    
+    SECTION("Run code containing no locks.")
+    {
+        auto noMutexesAtAll = [](){};
+        
+        potentialDeadlockDetector->run(noMutexesAtAll);
+        QITI_REQUIRE(potentialDeadlockDetector->passed());
+        QITI_REQUIRE_FALSE(potentialDeadlockDetector->failed());
+    }
+    
+    SECTION("Run code containing 1 lock that does not deadlock.")
+    {
+        auto singleMutexWithNoDeadlock = []()
+        {
+            std::mutex mutex;
+            
+            // Mutex locked in parallel
+            std::thread t([&mutex]
+            {
+                for (auto i=0; i<1'000; ++i)
+                {
+                    std::scoped_lock<std::mutex> lock(mutex);
+                    testFunc0();
+                }
+            });
+            
+            for (auto i=0; i<1'000; ++i)
+            {
+                std::scoped_lock<std::mutex> lock(mutex);
+                testFunc1(); // should race against thread t
+            }
+            
+            t.join();
+        };
+        
+        potentialDeadlockDetector->run(singleMutexWithNoDeadlock);
+        QITI_REQUIRE(potentialDeadlockDetector->passed());
+        QITI_REQUIRE_FALSE(potentialDeadlockDetector->failed());
+    }
 }
