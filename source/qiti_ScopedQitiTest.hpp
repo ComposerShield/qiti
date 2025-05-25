@@ -33,9 +33,14 @@ public:
     QITI_API ~ScopedQitiTest() noexcept;
     
     /** */
-    uint64_t getLengthOfTest_ms() const noexcept;
+    uint64_t QITI_API getLengthOfTest_ms() const noexcept;
     /** */
-    uint64_t getLengthOfTest_ns() const noexcept;
+    uint64_t QITI_API getLengthOfTest_ns() const noexcept;
+    
+    /** 50 ms by default.*/
+    void QITI_API setMaximumDurationOfTest_ms(uint64_t ms) noexcept;
+    /** */
+    void QITI_API permitLongTest() noexcept;
     
 private:
     struct Impl;

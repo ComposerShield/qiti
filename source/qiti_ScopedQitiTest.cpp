@@ -17,7 +17,9 @@
 
 #include "qiti_utils.hpp"
 
+#include <cassert>
 #include <chrono>
+#include <limits>
 
 //--------------------------------------------------------------------------
 namespace qiti
@@ -26,6 +28,8 @@ namespace qiti
 struct ScopedQitiTest::Impl
 {
     std::chrono::steady_clock::time_point begin_time;
+    
+    uint64_t maxLengthOfTest_ms = 50;
 };
 //--------------------------------------------------------------------------
 
@@ -36,7 +40,11 @@ ScopedQitiTest::ScopedQitiTest() noexcept
     impl->begin_time = std::chrono::steady_clock::now();
 }
 
-ScopedQitiTest::~ScopedQitiTest() noexcept = default;
+ScopedQitiTest::~ScopedQitiTest() noexcept
+{
+    auto ms = getLengthOfTest_ms();
+    assert(ms <= impl->maxLengthOfTest_ms);
+}
 
 uint64_t ScopedQitiTest::getLengthOfTest_ms() const noexcept
 {
@@ -50,6 +58,16 @@ uint64_t ScopedQitiTest::getLengthOfTest_ns() const noexcept
     auto end_time = std::chrono::steady_clock::now();
     auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - impl->begin_time);
     return static_cast<uint64_t>(elapsed_ns.count());
+}
+
+void ScopedQitiTest::setMaximumDurationOfTest_ms(uint64_t ms) noexcept
+{
+    impl->maxLengthOfTest_ms = ms;
+}
+
+void ScopedQitiTest::permitLongTest() noexcept
+{
+    setMaximumDurationOfTest_ms(std::numeric_limits<uint64_t>::max());
 }
 
 //--------------------------------------------------------------------------

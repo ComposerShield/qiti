@@ -28,6 +28,7 @@
 TEST_CASE("ScopedNoHeapAllocations survives no heap alloc")
 {
     qiti::ScopedQitiTest test;
+    test.setMaximumDurationOfTest_ms(500ull);
     
     // This should *not* abort.
     QITI_REQUIRE_SURVIVES

@@ -44,6 +44,7 @@ namespace fs = std::filesystem;
 TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
 {
     qiti::ScopedQitiTest test;
+    test.setMaximumDurationOfTest_ms(1000ull);
     
     auto tsan = qiti::ThreadSanitizer::createFunctionsCalledInParallelDetector<testFunc0,
                                                                                testFunc1>();
@@ -60,19 +61,19 @@ TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
     testFunc1();
     QITI_CHECK(tsan->passed());
     QITI_CHECK(! tsan->failed());
-    
+        
     tsan->run([]
     {
         // Functions called in parallel
         std::thread t([]
-                      {
-            for (auto i=0; i<1'000'000; ++i)
+        {
+            for (auto i=0; i<100'000; ++i)
                 testFunc0();
         });
-    
-        for (auto i=0; i<1'000'000; ++i)
+        
+        for (auto i=0; i<100'000; ++i)
             testFunc1(); // should race against thread t
-    
+        
         t.join();
     });
     
@@ -83,6 +84,7 @@ TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
 TEST_CASE("Detect data race via subprocess")
 {
     qiti::ScopedQitiTest test;
+    test.setMaximumDurationOfTest_ms(1000ull);
     
     constexpr char const* logPrefix = "/tmp/tsan.log";
 
@@ -146,6 +148,7 @@ TEST_CASE("Detect data race via subprocess")
 TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce false positive")
 {
     qiti::ScopedQitiTest test;
+    test.permitLongTest();
     
     auto noDataRace = [](){};
     auto dataRaceDetector = qiti::ThreadSanitizer::createDataRaceDetector();
@@ -157,6 +160,7 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce fals
 TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of global variable")
 {
     qiti::ScopedQitiTest test;
+    test.permitLongTest();
     
     auto dataRace = []()
     {
@@ -173,6 +177,7 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of 
 TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of member variable")
 {
     qiti::ScopedQitiTest test;
+    test.permitLongTest();
     
     auto dataRace = []()
     {
