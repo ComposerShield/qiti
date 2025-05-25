@@ -24,15 +24,6 @@
 #include <type_traits>
 
 //--------------------------------------------------------------------------
-
-/**
- \internal
- Settings for Clang ThreadSanitizer.
- */
-extern "C" __attribute__((visibility("default")))
-const char* QITI_API __tsan_default_options();
-
-//--------------------------------------------------------------------------
 namespace qiti
 {
 //--------------------------------------------------------------------------

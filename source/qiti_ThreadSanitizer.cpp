@@ -38,14 +38,7 @@
 
 //--------------------------------------------------------------------------
 
-#define QITI_TSAN_LOG_PATH "/tmp/tsan.log"
-static constexpr const char TSAN_DEFAULT_OPTS[] =
-    "report_thread_leaks=0:abort_on_error=0:log_path=" QITI_TSAN_LOG_PATH;
-
-extern "C" const char* __tsan_default_options()
-{
-    return TSAN_DEFAULT_OPTS;
-}
+static constexpr const char* QITI_TSAN_LOG_PATH = "/tmp/tsan.log";
 
 namespace fs = std::filesystem;
 
