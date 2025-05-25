@@ -54,6 +54,9 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "lib" FILES ${SOURCES} ${EX
 # Public Qiti Library
 add_library(qiti_lib SHARED ${SOURCES})
 
+# Force client to compile this file
+target_sources(qiti_lib INTERFACE "source/client/qiti_client.cpp")
+
 # Internal example app used for testing
 add_library(qiti_example_target SHARED ${EXAMPLE_SOURCES})
 
