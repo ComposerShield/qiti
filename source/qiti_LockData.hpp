@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include "qiti_API.hpp"
+
 //--------------------------------------------------------------------------
 
 namespace qiti
@@ -26,24 +28,25 @@ class LockData
 public:
     struct Listener
     {
-        virtual ~Listener() noexcept = default;
-        /** */
-        virtual void onAcquire(const LockData* ld) noexcept = 0;
-        /** */
-        virtual void onRelease(const LockData* ld) noexcept = 0;
+        QITI_API Listener() noexcept = default;
+        virtual QITI_API ~Listener() noexcept = default;
+        /** User provided callback. */
+        virtual void QITI_API onAcquire(const LockData* ld) noexcept = 0;
+        /** User provided callback. */
+        virtual void QITI_API onRelease(const LockData* ld) noexcept = 0;
     };
     
     /** Register for lock/unlock notifications. */
-    static void addGlobalListener(Listener* listener) noexcept;
+    static void QITI_API addGlobalListener(Listener* listener) noexcept;
     /** Unregister for lock/unlock notifications. */
-    static void removeGlobalListener(Listener* listener) noexcept;
+    static void QITI_API removeGlobalListener(Listener* listener) noexcept;
     
-    /** unique identifier for this lock */
-    [[nodiscard]] const void* key() const noexcept { return reinterpret_cast<const void*>(this); }
+    /** Unique identifier for this lock */
+    [[nodiscard]] const void* QITI_API key() const noexcept { return reinterpret_cast<const void*>(this); }
 
-    /** notify listeners of a lock acquisition */
-    void notifyAcquire() noexcept;
-    /** notify listeners of a lock release */
-    void notifyRelease() noexcept;
+    /** Notify listeners of a lock acquisition */
+    void QITI_API notifyAcquire() noexcept;
+    /** Notify listeners of a lock release */
+    void QITI_API notifyRelease() noexcept;
 };
 } // namespace qiti

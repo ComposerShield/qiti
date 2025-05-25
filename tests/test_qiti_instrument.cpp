@@ -5,11 +5,11 @@
 #include "qiti_include.hpp"
 // Special unit test include
 #include "qiti_test_macros.hpp"
+// Basic Catch2 macros
+#include <catch2/catch_test_macros.hpp>
 
 // Qiti Private API - not included in qiti_include.hpp
 #include "qiti_instrument.hpp"
-
-#include <catch2/catch_test_macros.hpp>
 
 TEST_CASE("qiti::FunctionCallData::resetInstrumentation()")
 {

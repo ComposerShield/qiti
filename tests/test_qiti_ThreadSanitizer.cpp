@@ -5,8 +5,7 @@
 #include "qiti_include.hpp"
 // Special unit test include
 #include "qiti_test_macros.hpp"
-
-// Qiti Private API - not included in qiti_include.hpp
+// Basic Catch2 macros
 #include <catch2/catch_test_macros.hpp>
 
 #include <filesystem>
