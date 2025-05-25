@@ -11,19 +11,18 @@
 // Qiti Private API - not included in qiti_include.hpp
 #include "qiti_ScopedNoHeapAllocations.hpp"
 
-// Works in Xcode but not in the command line (for CI)
-// so commenting out for now
-//TEST_CASE("ScopedNoHeapAllocations aborts on unexpected heap alloc")
-//{
-//    qiti::ScopedQitiTest test;
-//
-//    QITI_REQUIRE_DEATH
-//    (
-//        qiti::ScopedNoHeapAllocations guard;
-//        (void)new int;
-//        // guard goes out of scope ⇒ assert fires ⇒ abort
-//    );
-//}
+TEST_CASE("ScopedNoHeapAllocations aborts on unexpected heap alloc")
+{
+    qiti::ScopedQitiTest test;
+    test.permitLongTest();
+
+    QITI_REQUIRE_DEATH
+    (
+        qiti::ScopedNoHeapAllocations guard;
+        (void)new int;
+        // guard goes out of scope ⇒ assert fires ⇒ abort
+    );
+}
 
 TEST_CASE("ScopedNoHeapAllocations survives no heap alloc")
 {
