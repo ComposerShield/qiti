@@ -48,20 +48,25 @@ public:
     /**
      Factory to create a detector for data race checking.
      
-     @param func Function pointer or lambda that is immediately run in a forked process with ThreadSanitizer enabled.
-     
      @returns a ThreadSanitizer object that can be queried via passed() or failed() to
-     determine if a data race occured within the funtion/lambda.
+     determine if any data race occured within the funtion/lambda called by run().
+     
+     @see run()
+     @see passed()
+     @see failed()
      */
-    [[nodiscard]] static std::unique_ptr<ThreadSanitizer> QITI_API createDataRaceDetector(std::function<void()> func) noexcept;
+    [[nodiscard]] static std::unique_ptr<ThreadSanitizer> QITI_API createDataRaceDetector() noexcept;
     
     /**
      Factory to create a detector that checks if two functions are called in parallel.
 
      @returns a ThreadSanitizer object that can be queried via passed() or failed() to
-     determine if the functions were called in parallel.
-     
-     If the functions are ever called in parallel while this object exists, the test will fail.
+     determine if the functions were ever called in parallel within the function/lambda
+     called by run().
+          
+     @see run()
+     @see passed()
+     @see failed()
      */
     template<auto FuncPtr0, auto FuncPtr1>
     requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr0)>>
@@ -75,18 +80,38 @@ public:
     /**
      Factory to create a lock-order inversion detector.
     
-     Runs the callable, tracking every mutex‐acquire; if two locks
-     are ever taken in inverted order on different threads, it flags failure.
+     When calling run(), tracks every mutex‐acquire; if two locks are
+     ever taken in inverted order on different threads, it flags failure.
+     
+     @see run()
+     @see passed()
+     @see failed()
     */
-    [[nodiscard]] static std::unique_ptr<ThreadSanitizer> createPotentialDeadlockDetector(std::function<void()> func) noexcept;
+    [[nodiscard]] static std::unique_ptr<ThreadSanitizer> createPotentialDeadlockDetector() noexcept;
     
-    /** Returns true if no errors were detected. */
+    /**
+     @param func Function pointer or lambda that is immediately run in a forked process with ThreadSanitizer enabled.
+     
+     @see passed()
+     @see failed()
+     */
+    virtual void QITI_API run(std::function<void()> func) noexcept = 0;
+    
+    /**
+     Returns true if no errors were detected in the function(s)/lambda(s) called by run() .
+     
+     @see run()
+     */
     [[nodiscard]] virtual bool QITI_API passed() noexcept;
     
     /** Convenience inverse of passed(). */
     [[nodiscard]] bool QITI_API failed() noexcept;
     
-    /** Called immediately when test fails. */
+    /**
+     Optional user-provided callback which is called immediately when a test fails.
+     
+     @see failed()
+     */
     std::function<void()> onFail = nullptr;
     
     //--------------------------------------------------------------------------

@@ -90,7 +90,11 @@ class DataRaceDetector final : public ThreadSanitizer
 {
 public:
     /** */
-    QITI_API DataRaceDetector(std::function<void()> func) noexcept
+    QITI_API_INTERNAL DataRaceDetector() noexcept = default;
+    /** */
+    QITI_API_INTERNAL ~DataRaceDetector() noexcept override = default;
+    
+    void QITI_API run(std::function<void()> func) noexcept override
     {
         constexpr char const* logPrefix = QITI_TSAN_LOG_PATH;
 
@@ -166,9 +170,6 @@ public:
         std::system(("rm -f " + std::string(logPrefix) + "*").c_str());
     }
     
-    /** */
-    QITI_API ~DataRaceDetector() noexcept override = default;
-    
 private:
     bool _passed = true;
     
@@ -189,13 +190,22 @@ public:
     : func0(_func0)
     , func1(_func1)
     {
-        func0->addListener(this);
-        func1->addListener(this);
     }
     
     /** */
     QITI_API_INTERNAL ~ParallelCallDetector() noexcept override
     {
+        func0->removeListener(this);
+        func1->removeListener(this);
+    }
+    
+    void run(std::function<void()> func) noexcept override
+    {
+        func0->addListener(this);
+        func1->addListener(this);
+        
+        func();
+        
         func0->removeListener(this);
         func1->removeListener(this);
     }
@@ -209,7 +219,7 @@ private:
     std::atomic<int32_t> numConcurrentFunc0 = 0;
     std::atomic<int32_t> numConcurrentFunc1 = 0;
     
-    void onFunctionEnter(const FunctionData* func) noexcept override
+    void QITI_API_INTERNAL onFunctionEnter(const FunctionData* func) noexcept override
     {
         assert(func == func0 || func == func1);
         
@@ -222,7 +232,7 @@ private:
         ++numConcurrent;
     }
     
-    void onFunctionExit (const FunctionData* func) noexcept override
+    void QITI_API_INTERNAL onFunctionExit (const FunctionData* func) noexcept override
     {
         auto& numConcurrent = (func == func0) ? numConcurrentFunc0 : numConcurrentFunc1;
         --numConcurrent;
@@ -247,17 +257,17 @@ public:
     };
     
     /** Register for lock/unlock notifications. */
-    static void addGlobalListener(Listener* listener);
+    static void addGlobalListener(Listener* /*listener*/) {}
     /** Unregister for lock/unlock notifications. */
-    static void removeGlobalListener(Listener* listener);
+    static void removeGlobalListener(Listener* /*listener*/) {}
     
     /** unique identifier for this lock */
     [[nodiscard]] const void* key() const noexcept { return reinterpret_cast<const void*>(this); }
 
     /** notify listeners of a lock acquisition */
-    void notifyAcquire() noexcept;
+    void notifyAcquire() noexcept {}
     /** notify listeners of a lock release */
-    void notifyRelease() noexcept;
+    void notifyRelease() noexcept {}
 };
 
 /** Detects potential deadlocks by watching acquire‐order inversions. */
@@ -267,16 +277,20 @@ class LockOrderInversionDetector final
 {
 public:
     /** */
-    explicit LockOrderInversionDetector(std::function<void()> func) noexcept
+    explicit LockOrderInversionDetector() noexcept
     {
         LockData::addGlobalListener(this);
-        func();
     }
 
     /** */
     ~LockOrderInversionDetector() noexcept override
     {
         LockData::removeGlobalListener(this);
+    }
+    
+    void run(std::function<void()> func) noexcept override
+    {
+        func();
     }
 
 private:
@@ -288,7 +302,7 @@ private:
     std::unordered_map<const void*, std::vector<void*>> _edges;
 
     // Per-thread stack of held locks:
-    static thread_local std::vector<void*> _heldStack;
+    inline static thread_local std::vector<void*> _heldStack;
 
     // Listener callbacks:
     void onAcquire(const LockData* ld) noexcept override
@@ -362,15 +376,15 @@ ThreadSanitizer::createFunctionsCalledInParallelDetector(FunctionData* func0,
 }
 
 std::unique_ptr<ThreadSanitizer>
-ThreadSanitizer::createDataRaceDetector(std::function<void()> func) noexcept
+ThreadSanitizer::createDataRaceDetector() noexcept
 {
-    return std::make_unique<DataRaceDetector>(func);
+    return std::make_unique<DataRaceDetector>();
 }
 
 std::unique_ptr<ThreadSanitizer>
-ThreadSanitizer::createPotentialDeadlockDetector(std::function<void()> func) noexcept
+ThreadSanitizer::createPotentialDeadlockDetector() noexcept
 {
-    return std::make_unique<LockOrderInversionDetector>(std::move(func));
+    return std::make_unique<LockOrderInversionDetector>();
 }
 
 //--------------------------------------------------------------------------

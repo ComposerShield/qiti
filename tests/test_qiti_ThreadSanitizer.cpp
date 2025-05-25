@@ -47,7 +47,7 @@ TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
     qiti::resetAll();
     
     auto tsan = qiti::ThreadSanitizer::createFunctionsCalledInParallelDetector<testFunc0,
-                                                                    testFunc1>();
+                                                                               testFunc1>();
     
     // Functions not called at all
     QITI_CHECK(tsan->passed());
@@ -62,17 +62,20 @@ TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
     QITI_CHECK(tsan->passed());
     QITI_CHECK(! tsan->failed());
     
-    // Functions called in parallel
-    std::thread t([]
+    tsan->run([]
     {
+        // Functions called in parallel
+        std::thread t([]
+                      {
+            for (auto i=0; i<1'000'000; ++i)
+                testFunc0();
+        });
+    
         for (auto i=0; i<1'000'000; ++i)
-            testFunc0();
+            testFunc1(); // should race against thread t
+    
+        t.join();
     });
-    
-    for (auto i=0; i<1'000'000; ++i)
-        testFunc1(); // should race against thread t
-    
-    t.join();
     
     QITI_CHECK(! tsan->passed());
     QITI_CHECK(tsan->failed());
@@ -146,7 +149,8 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce fals
     qiti::resetAll();
     
     auto noDataRace = [](){};
-    auto dataRaceDetector = qiti::ThreadSanitizer::createDataRaceDetector(noDataRace);
+    auto dataRaceDetector = qiti::ThreadSanitizer::createDataRaceDetector();
+    dataRaceDetector->run(noDataRace);
     QITI_REQUIRE(dataRaceDetector->passed());
     QITI_REQUIRE_FALSE(dataRaceDetector->failed());
 }
@@ -161,7 +165,8 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of 
         incrementCounter();              // Intentional data race
         t.join();
     };
-    auto dataRaceDetector = qiti::ThreadSanitizer::createDataRaceDetector(dataRace);
+    auto dataRaceDetector = qiti::ThreadSanitizer::createDataRaceDetector();
+    dataRaceDetector->run(dataRace);
     QITI_REQUIRE(dataRaceDetector->failed());
     QITI_REQUIRE_FALSE(dataRaceDetector->passed());
 }
@@ -178,7 +183,8 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of 
         testClass.incrementCounter();                                   // Intentional data race
         t.join();
     };
-    auto dataRaceDetector = qiti::ThreadSanitizer::createDataRaceDetector(dataRace);
+    auto dataRaceDetector = qiti::ThreadSanitizer::createDataRaceDetector();
+    dataRaceDetector->run(dataRace);
     QITI_REQUIRE(dataRaceDetector->failed());
     QITI_REQUIRE_FALSE(dataRaceDetector->passed());
 }
