@@ -16,6 +16,7 @@
 #include "qiti_ThreadSanitizer.hpp"
 
 #include "qiti_FunctionData.hpp"
+#include "qiti_LockData.hpp"
 #include "qiti_profile.hpp"
 
 #include <atomic>
@@ -234,33 +235,6 @@ private:
 };
 
 //--------------------------------------------------------------------------
-
-/** TODO: implement */
-class LockData
-{
-public:
-    struct Listener
-    {
-        virtual ~Listener() noexcept = default;
-        /** */
-        virtual void onAcquire(const LockData* ld) noexcept = 0;
-        /** */
-        virtual void onRelease(const LockData* ld) noexcept = 0;
-    };
-    
-    /** Register for lock/unlock notifications. */
-    static void addGlobalListener(Listener* /*listener*/) {}
-    /** Unregister for lock/unlock notifications. */
-    static void removeGlobalListener(Listener* /*listener*/) {}
-    
-    /** unique identifier for this lock */
-    [[nodiscard]] const void* key() const noexcept { return reinterpret_cast<const void*>(this); }
-
-    /** notify listeners of a lock acquisition */
-    void notifyAcquire() noexcept {}
-    /** notify listeners of a lock release */
-    void notifyRelease() noexcept {}
-};
 
 /** Detects potential deadlocks by watching acquire‐order inversions. */
 class LockOrderInversionDetector final
