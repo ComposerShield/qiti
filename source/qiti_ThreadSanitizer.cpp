@@ -181,15 +181,10 @@ public:
                                            FunctionData* _func1) noexcept
     : func0(_func0)
     , func1(_func1)
-    {
-    }
+    {}
     
     /** */
-    QITI_API_INTERNAL ~ParallelCallDetector() noexcept override
-    {
-        func0->removeListener(this);
-        func1->removeListener(this);
-    }
+    QITI_API_INTERNAL ~ParallelCallDetector() noexcept override = default;
     
     void run(std::function<void()> func) noexcept override
     {
@@ -238,20 +233,15 @@ class LockOrderInversionDetector final
 {
 public:
     /** */
-    explicit LockOrderInversionDetector() noexcept
-    {
-        LockData::addGlobalListener(this);
-    }
-
+    LockOrderInversionDetector() noexcept = default;
     /** */
-    ~LockOrderInversionDetector() noexcept override
-    {
-        LockData::removeGlobalListener(this);
-    }
+    ~LockOrderInversionDetector() noexcept override = default;
     
     void run(std::function<void()> func) noexcept override
     {
+        LockData::addGlobalListener(this);
         func();
+        LockData::removeGlobalListener(this);
     }
 
 private:

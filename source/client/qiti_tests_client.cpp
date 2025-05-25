@@ -26,3 +26,5 @@ const char* __tsan_default_options()
 {
     return TSAN_DEFAULT_OPTS;
 }
+
+#undef QITI_TSAN_LOG_PATH
