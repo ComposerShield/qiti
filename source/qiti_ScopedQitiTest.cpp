@@ -21,6 +21,7 @@
 #include <cassert>
 #include <chrono>
 #include <limits>
+#include <memory>
 
 //--------------------------------------------------------------------------
 std::atomic<bool> qitiTestRunning = false;
