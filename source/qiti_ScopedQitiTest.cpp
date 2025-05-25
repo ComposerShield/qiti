@@ -17,10 +17,13 @@
 
 #include "qiti_utils.hpp"
 
+#include <atomic>
 #include <cassert>
 #include <chrono>
 #include <limits>
 
+//--------------------------------------------------------------------------
+std::atomic<bool> qitiTestRunning = false;
 //--------------------------------------------------------------------------
 namespace qiti
 {
@@ -36,6 +39,10 @@ struct ScopedQitiTest::Impl
 ScopedQitiTest::ScopedQitiTest() noexcept
 {
     qiti::resetAll(); // start test from a blank slate
+    
+    bool qitiTestWasAlreadyRunning = qitiTestRunning.exchange(true, std::memory_order_relaxed);
+    assert(! qitiTestWasAlreadyRunning); // Only one Qiti test permitted at a time
+    
     impl = std::make_unique<Impl>();
     impl->begin_time = std::chrono::steady_clock::now();
 }
@@ -44,6 +51,10 @@ ScopedQitiTest::~ScopedQitiTest() noexcept
 {
     auto ms = getLengthOfTest_ms();
     assert(ms <= impl->maxLengthOfTest_ms);
+    
+    qitiTestRunning.store(false, std::memory_order_relaxed);
+    
+    qiti::resetAll(); // clean up after ourselves
 }
 
 uint64_t ScopedQitiTest::getLengthOfTest_ms() const noexcept

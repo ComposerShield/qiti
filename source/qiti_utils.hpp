@@ -33,7 +33,7 @@ class FunctionData;
 
 //--------------------------------------------------------------------------
 /** */
-void QITI_API resetAll() noexcept;
+void QITI_API_INTERNAL resetAll() noexcept;
 
 /**
  \internal
