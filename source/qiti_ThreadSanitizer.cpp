@@ -150,7 +150,7 @@ public:
             // Look for “data race” anywhere in the report
             if (std::regex_search(report, std::regex(R"(data race)")))
             {
-                _passed = false;
+                flagFailed();
                 
                 std::cout << "Data race detected!\n";
 
@@ -163,17 +163,13 @@ public:
                     std::cout << "no SUMMARY found\n";
             }
         }
-        else
-            _passed = true; // no TSan output = pass
         
         // cleanup log that was created
         std::system(("rm -f " + std::string(logPrefix) + "*").c_str());
     }
     
 private:
-    bool _passed = true;
     
-    [[nodiscard]] bool QITI_API passed() noexcept override { return _passed; }
 };
 
 //--------------------------------------------------------------------------
@@ -211,8 +207,6 @@ public:
     }
     
 private:
-    std::atomic<bool> _passed = true;
-    
     FunctionData* const func0;
     FunctionData* const func1;
     
@@ -227,7 +221,7 @@ private:
         const auto& numConcurrentOther = (func == func0) ? numConcurrentFunc1 : numConcurrentFunc0;
         
         if (numConcurrentOther > 0) // other func is currently running
-            _passed = false;
+            flagFailed();
         
         ++numConcurrent;
     }
@@ -236,9 +230,7 @@ private:
     {
         auto& numConcurrent = (func == func0) ? numConcurrentFunc0 : numConcurrentFunc1;
         --numConcurrent;
-    }
-    
-    [[nodiscard]] bool QITI_API passed() noexcept override { return _passed.load(std::memory_order_relaxed); }
+    }    
 };
 
 //--------------------------------------------------------------------------
@@ -294,8 +286,6 @@ public:
     }
 
 private:
-    std::atomic<bool> _passed{true};
-
     // Global lock‐order graph: edge A → B means "A was held when B was acquired".
     // We only need to detect any cycle.
     std::mutex _graphLock;
@@ -312,10 +302,12 @@ private:
         // Check for cycle: if any held H has a path back to itself via key
         {
             std::lock_guard _(_graphLock);
-            for (void* H : _heldStack) {
+            for (void* H : _heldStack)
+            {
                 // add edge H→key, but first see if key→…→H already exists
-                if (_detectPath(key, H)) {
-                    _passed.store(false, std::memory_order_relaxed);
+                if (_detectPath(key, H))
+                {
+                    flagFailed();
                 }
                 _edges[H].push_back(key);
             }
@@ -334,11 +326,6 @@ private:
             _heldStack.pop_back();
         else
             assert(false && "lock/unlock mismatch in DeadlockDetector");
-    }
-
-    bool passed() noexcept override
-    {
-        return _passed.load(std::memory_order_relaxed);
     }
 
     // DFS to see if there's a path from 'from' to 'to' in our lock‐order graph
@@ -365,8 +352,15 @@ private:
 ThreadSanitizer::ThreadSanitizer() noexcept = default;
 ThreadSanitizer::~ThreadSanitizer() noexcept = default;
 
-bool ThreadSanitizer::passed() noexcept { return true; }
+bool ThreadSanitizer::passed() noexcept { return _passed.load(std::memory_order_relaxed); }
 bool ThreadSanitizer::failed() noexcept { return ! passed(); }
+
+void ThreadSanitizer::flagFailed() noexcept
+{
+    _passed.store(false, std::memory_order_seq_cst);
+    if (onFail != nullptr)
+        onFail();
+}
 
 std::unique_ptr<ThreadSanitizer>
 ThreadSanitizer::createFunctionsCalledInParallelDetector(FunctionData* func0,

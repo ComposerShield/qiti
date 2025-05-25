@@ -102,7 +102,7 @@ public:
      
      @see run()
      */
-    [[nodiscard]] virtual bool QITI_API passed() noexcept;
+    [[nodiscard]] bool QITI_API passed() noexcept;
     
     /** Convenience inverse of passed(). */
     [[nodiscard]] bool QITI_API failed() noexcept;
@@ -131,7 +131,12 @@ protected:
     /** */
     QITI_API_INTERNAL ThreadSanitizer() noexcept;
     
+    /** */
+    void QITI_API_INTERNAL flagFailed() noexcept;
+    
 private:
+    std::atomic<bool> _passed = true;
+    
     /** Implementation */
     static std::unique_ptr<ThreadSanitizer> QITI_API createFunctionsCalledInParallelDetector(FunctionData* func0,
                                                                                              FunctionData* func1) noexcept;
