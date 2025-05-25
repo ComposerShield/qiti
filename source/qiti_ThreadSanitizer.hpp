@@ -27,7 +27,7 @@
 
 /**
  \internal
- Settings for Clang ThreadSanitizer
+ Settings for Clang ThreadSanitizer.
  */
 extern "C" __attribute__((visibility("default")))
 const char* QITI_API __tsan_default_options();
@@ -49,7 +49,7 @@ public:
      Factory to create a detector for data race checking.
      
      @returns a ThreadSanitizer object that can be queried via passed() or failed() to
-     determine if any data race occured within the funtion/lambda called by run().
+     determine if any data race occurred within the function/lambda called by run().
      
      @see run()
      @see passed()
@@ -80,7 +80,7 @@ public:
     /**
      Factory to create a lock-order inversion detector.
     
-     When calling run(), tracks every mutex‐acquire; if two locks are
+     When calling run(), tracks every mutex-acquire; if two locks are
      ever taken in inverted order on different threads, it flags failure.
      
      @see run()
@@ -98,7 +98,7 @@ public:
     virtual void QITI_API run(std::function<void()> func) noexcept = 0;
     
     /**
-     Returns true if no errors were detected in the function(s)/lambda(s) called by run() .
+     Returns true if no errors were detected in the function(s)/lambda(s) called by run().
      
      @see run()
      */
@@ -137,7 +137,7 @@ protected:
 private:
     std::atomic<bool> _passed = true;
     
-    /** Implementation */
+    /** Implementation. */
     static std::unique_ptr<ThreadSanitizer> QITI_API createFunctionsCalledInParallelDetector(FunctionData* func0,
                                                                                              FunctionData* func1) noexcept;
     
