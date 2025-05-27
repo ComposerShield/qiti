@@ -15,10 +15,38 @@
 
 #pragma once
 
+/**
+ \internal
+ Marks functions to be excluded from instrumentation.
+ 
+ When applied, this attribute tells the compiler (e.g., GCC or Clang)
+ not to insert profiling or instrumentation hooks into the annotated
+ functions. This is useful for performance‐critical internal routines
+ or to avoid recursive instrumentation in low‐level utilities.
+ 
+ Usage:
+ \code
+ void QITI_API_INTERNAL myFunc();
+ \endcode
+ 
+ Not intended for use in client code.
+ */
 #ifndef QITI_API_INTERNAL
   #define QITI_API_INTERNAL __attribute__((no_instrument_function))
 #endif
 
+/**
+ \internal
+ Controls symbol export/import and visibility.
+ Always includes QITI_API_INTERNAL.
+ 
+ Usage:
+ \code
+ void QITI_API myFunc();
+ \endcode
+ 
+ Not intended for use in client code.
+ */
 #if defined _WIN32 || defined __CYGWIN__
   #ifdef QITI_DYLIB
     #define QITI_API QITI_API_INTERNAL __declspec(dllexport)

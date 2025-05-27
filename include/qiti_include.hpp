@@ -15,7 +15,10 @@
 
 #pragma once
 
-// Public Qiti API
+// Macros
+#include "qiti_API.hpp"
+
+// Classes
 #include "qiti_FunctionData.hpp"
 #include "qiti_FunctionCallData.hpp"
 #include "qiti_ScopedQitiTest.hpp"
