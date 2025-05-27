@@ -28,7 +28,6 @@ __attribute__((no_sanitize("thread")))
 __attribute__((noinline))
 const char* __tsan_default_options()
 {
-    std::cout << "__tsan_default_options()" << "\n";
     return TSAN_DEFAULT_OPTS;
 }
 
