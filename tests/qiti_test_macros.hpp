@@ -1,5 +1,6 @@
 
 #include <cassert>
+#include <cstring> // for std::strerror
 
 #if defined (DEBUG) || defined (_DEBUG) || ! (defined (NDEBUG) || defined (_NDEBUG))
     #define QITI_DEBUG_ASSERT(expression) assert(expression)
