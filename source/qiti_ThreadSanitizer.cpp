@@ -92,7 +92,7 @@ public:
     /** */
     QITI_API_INTERNAL ~DataRaceDetector() noexcept override = default;
     
-    void QITI_API run(std::function<void()> func) noexcept override
+    void QITI_API run(std::function<void()> /*func*/) noexcept override
     {
 //        constexpr char const* logPrefix = QITI_TSAN_LOG_PATH;
 //
