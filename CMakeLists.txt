@@ -183,7 +183,7 @@ PRIVATE
 
     # Linux Requirements
     Threads::Threads
-    stdc++
+    ${CMAKE_CXX_IMPLICIT_LINK_LIBRARIES}
 )
 
 set_target_properties(qiti_tests PROPERTIES
@@ -302,12 +302,3 @@ function(Doxygen input output)
 endfunction()
 
 Doxygen(source docs)
-
-message(STATUS "CXX compiler:    ${CMAKE_CXX_COMPILER}")
-message(STATUS "CXX linker:      ${CMAKE_CXX_LINKER}")
-message(STATUS "Linker language of qiti_tests:")
-get_target_property(_LL qiti_tests LINKER_LANGUAGE)
-message(STATUS "  -> ${_LL}")
-
-message(STATUS "CMAKE_CXX_STANDARD_LIBRARIES:    ${CMAKE_CXX_STANDARD_LIBRARIES}")
-message(STATUS "CMAKE_CXX_IMPLICIT_LINK_LIBRARIES:${CMAKE_CXX_IMPLICIT_LINK_LIBRARIES}")
