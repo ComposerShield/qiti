@@ -1,4 +1,3 @@
-
 name: Build Qiti
 
 on:
@@ -77,20 +76,21 @@ jobs:
           echo "CXX=clang++-16" >> $GITHUB_ENV
 
       - name: Configure CMake (Ninja, LLVM Clang)
-        run: cmake . -B build \
-             -G Ninja \
-             -DCMAKE_BUILD_TYPE=Debug \
-             -DCMAKE_C_COMPILER=clang-16 \
-             -DCMAKE_CXX_COMPILER=clang++-16 \
+        run: |
+          cmake . -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_C_COMPILER=clang-16 \
+            -DCMAKE_CXX_COMPILER=clang++-16
              
       - name: Dump link line
         run: |
-          cd build
-          ninja -v qiti_tests
+          ls
+          ninja -C build -v qiti_tests
 
 #      - name: Build
 #        run: cmake --build build --target qiti_tests
-#        
+#
 #      - name: Run Unit Tests
 #        run: |
 #          cd build
