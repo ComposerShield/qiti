@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(Qiti LANGUAGES CXX)
+project(Qiti LANGUAGES C CXX)
 
 if(NOT (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"))
     message(FATAL_ERROR "Only Clang or Apple Clang compilers are supported")
@@ -65,15 +65,17 @@ PRIVATE
     qiti_lib
 )
 
-set_target_properties(qiti_lib PROPERTIES
-    OSX_ARCHITECTURES "${ARCHS}"
-    XCODE_GENERATE_SCHEME ON
-)
+if(APPLE)
+    set_target_properties(qiti_lib PROPERTIES
+        OSX_ARCHITECTURES "${ARCHS}"
+        XCODE_GENERATE_SCHEME ON
+    )
 
-set_target_properties(qiti_example_target PROPERTIES
-    OSX_ARCHITECTURES "${ARCHS}"
-    XCODE_GENERATE_SCHEME ON
-)
+    set_target_properties(qiti_example_target PROPERTIES
+        OSX_ARCHITECTURES "${ARCHS}"
+        XCODE_GENERATE_SCHEME ON
+    )
+endif()
 
 target_include_directories(qiti_lib 
 PRIVATE
@@ -111,6 +113,10 @@ INTERFACE
     "-O0" # no optimizations
 )
 
+set_property(TARGET qiti_lib
+             PROPERTY CXX_CLANG_TIDY
+             "clang-tidy;-checks=*,-readability-*,misc-include-cleaner,modernize-*")
+
 target_compile_definitions(qiti_lib
 PRIVATE
     QITI_DYLIB=1
@@ -147,10 +153,12 @@ add_executable(qiti_tests
     "tests/test_qiti_utils.cpp"
 )
 
-set_target_properties(qiti_tests PROPERTIES
-    OSX_ARCHITECTURES "${ARCHS}"
-    XCODE_GENERATE_SCHEME ON
-)
+if(APPLE)
+    set_target_properties(qiti_tests PROPERTIES
+        OSX_ARCHITECTURES "${ARCHS}"
+        XCODE_GENERATE_SCHEME ON
+    )
+endif()
 
 target_link_libraries(qiti_tests 
 PRIVATE
@@ -168,18 +176,20 @@ PRIVATE
 
 enable_testing()
 
-set_target_properties(Catch2 PROPERTIES 
-    OSX_ARCHITECTURES "${ARCHS}"
-)
+if(APPLE)
+    set_target_properties(Catch2 PROPERTIES 
+        OSX_ARCHITECTURES "${ARCHS}"
+    )
 
-set_target_properties(Catch2WithMain PROPERTIES
-    OSX_ARCHITECTURES "${ARCHS}"
-)
+    set_target_properties(Catch2WithMain PROPERTIES
+        OSX_ARCHITECTURES "${ARCHS}"
+    )
 
-set_target_properties(qiti_tests PROPERTIES
-    OSX_ARCHITECTURES "${ARCHS}"
-    XCODE_GENERATE_SCHEME ON
-)
+    set_target_properties(qiti_tests PROPERTIES
+        OSX_ARCHITECTURES "${ARCHS}"
+        XCODE_GENERATE_SCHEME ON
+    )
+endif()
 
 target_include_directories(qiti_tests 
 PRIVATE
