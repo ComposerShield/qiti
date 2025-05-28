@@ -16,6 +16,7 @@
 #include "qiti_LockData.hpp"
 
 #include <mutex>
+#include <ranges>
 #include <vector>
 
 //--------------------------------------------------------------------------
@@ -36,7 +37,7 @@ void LockData::addGlobalListener(LockData::Listener* listener) noexcept
 void LockData::removeGlobalListener(LockData::Listener* listener) noexcept
 {
     std::scoped_lock<std::mutex> guard(s_listenersMutex);
-    auto it = std::find(s_listeners.begin(), s_listeners.end(), listener);
+    auto it = std::ranges::find(s_listeners, listener);
     if (it != s_listeners.end())
         s_listeners.erase(it);
 }
