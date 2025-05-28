@@ -20,13 +20,13 @@
 
 #include "qiti_ReentrantSharedMutex.hpp"
 
+#include <cxxabi.h>
+#include <dlfcn.h>
+
 #include <algorithm>
 #include <cassert>
 #include <cstdio>
 #include <cstring>
-#include <cxxabi.h>
-#include <dlfcn.h>
-#include <iostream>
 #include <map>
 #include <mutex>
 #include <string>

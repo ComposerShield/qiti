@@ -21,6 +21,10 @@
 #include "qiti_FunctionData.hpp"
 #include "qiti_ScopedNoHeapAllocations.hpp"
 
+#include <execinfo.h>
+#include <cxxabi.h>
+#include <unistd.h>
+
 #include <cassert>
 #include <iostream>
 #include <memory>
@@ -28,10 +32,6 @@
 #include <regex>
 #include <unordered_set>
 #include <string>
-
-#include <execinfo.h>
-#include <cxxabi.h>
-#include <unistd.h>
 
 //--------------------------------------------------------------------------
 

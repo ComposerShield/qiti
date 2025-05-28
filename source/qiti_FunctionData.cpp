@@ -19,10 +19,11 @@
 
 #include "qiti_ScopedNoHeapAllocations.hpp"
 
+#include <dlfcn.h>
+
 #include <array>
 #include <cassert>
 #include <cstdint>
-#include <dlfcn.h>
 #include <utility>
 #include <string>
 #include <thread>

@@ -17,8 +17,9 @@
 
 #include "qiti_API.hpp"
 
-#include <cstdint>
 #include <dlfcn.h>
+
+#include <cstdint>
 #include <string>
 #include <string_view>
 #include <type_traits>
