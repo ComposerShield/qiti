@@ -8,19 +8,12 @@
 // Basic Catch2 macros
 #include <catch2/catch_test_macros.hpp>
 
-#include <memory>
-
-[[maybe_unused]] inline static std::allocator<char> fixLinkerError;
-
 using namespace qiti::example::FunctionCallData;
 
 TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations() returns expected values")
 {
     qiti::ScopedQitiTest test;
     qiti::profile::beginProfilingAllFunctions();
-    
-    qiti::profile::beginProfilingFunction<testHeapAllocation>();
-    qiti::profile::beginProfilingFunction<testNoHeapAllocation>();
     
     SECTION("1 heap allocation")
     {
