@@ -133,17 +133,17 @@ include(FetchContent)
 FetchContent_MakeAvailable(Catch2)
 
 add_executable(qiti_tests
-    "Tests/qiti_test_macros.hpp"
-    "Tests/test_qiti_FunctionCallData.cpp"
-    "Tests/test_qiti_FunctionData.cpp"
-    "Tests/test_qiti_instrument.cpp"
-    "Tests/test_qiti_profile.cpp"
-    "Tests/test_qiti_LeakSanitizer.cpp"
-    "Tests/test_qiti_LockData.cpp"
-    "Tests/test_qiti_ScopedNoHeapAllocations.cpp"
-    "Tests/test_qiti_ThreadSanitizer.cpp"
-    "Tests/test_qiti_TypeData.cpp"
-    "Tests/test_qiti_utils.cpp"
+    "tests/qiti_test_macros.hpp"
+    "tests/test_qiti_FunctionCallData.cpp"
+    "tests/test_qiti_FunctionData.cpp"
+    "tests/test_qiti_instrument.cpp"
+    "tests/test_qiti_profile.cpp"
+    "tests/test_qiti_LeakSanitizer.cpp"
+    "tests/test_qiti_LockData.cpp"
+    "tests/test_qiti_ScopedNoHeapAllocations.cpp"
+    "tests/test_qiti_ThreadSanitizer.cpp"
+    "tests/test_qiti_TypeData.cpp"
+    "tests/test_qiti_utils.cpp"
 )
 
 set_target_properties(qiti_tests PROPERTIES
