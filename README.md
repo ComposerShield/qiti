@@ -4,7 +4,7 @@
 
 Qiti is a lightweight C++20 library that brings profiling and instrumentation directly into your unit tests. 
 
-By integrating seamlessly with your test framework of choice, Qiti lets you measure execution times, track custom metrics, and gather performance insights without ever leaving your test suite.
+By integrating seamlessly with your test framework of choice, Qiti lets you track custom metrics and gather performance insights without ever leaving your test suite.
 
 Qiti’s most powerful feature is in it's wrapping of Clang’s Thread Sanitizer: tests can be run in isolation under TSan, automatically detecting data races and other thread-safety issues. You can even enforce custom thread-safety behavior right from your test code, catching concurrency bugs early in CI.
 
@@ -113,8 +113,11 @@ TEST_CASE("Example Test")
     auto funcData = qiti::FunctionData::getFunctionData<&myFunc>();
     REQUIRE(funcData != nullptr);
     
+    // Call twice
     myFunc();
     myFunc();
+
+    // Enforce that it was indeed called twice
     CHECK(funcData->getNumTimesCalled() == 2);
 }
 ```
@@ -138,6 +141,19 @@ TEST_CASE("Example Test")
     REQUIRE(lastFunctionCall.getNumHeapAllocations() == 0);
 }
 ```
+Enforce length of test.
+```c++
+TEST_CASE("Example Test")
+{    
+    qiti::ScopedQitiTest test;
+    
+    // test code here
+
+    // Ensure that the test does not take too long
+    REQUIRE(test.getLengthOfTest_ms() < 10);
+}
+```
+
 ### Thread Sanitizer Tests
 Detect data races.
 ```c++
