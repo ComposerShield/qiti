@@ -14,15 +14,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG -D_DEBUG")
 
-message(STATUS "CXX compiler:    ${CMAKE_CXX_COMPILER}")
-message(STATUS "CXX linker:      ${CMAKE_CXX_LINKER}")
-message(STATUS "Linker language of qiti_tests:")
-get_target_property(_LL qiti_tests LINKER_LANGUAGE)
-message(STATUS "  -> ${_LL}")
-
-message(STATUS "CMAKE_CXX_STANDARD_LIBRARIES:    ${CMAKE_CXX_STANDARD_LIBRARIES}")
-message(STATUS "CMAKE_CXX_IMPLICIT_LINK_LIBRARIES:${CMAKE_CXX_IMPLICIT_LINK_LIBRARIES}")
-
 find_package(Threads REQUIRED)
 
 set(SOURCES
@@ -311,3 +302,12 @@ function(Doxygen input output)
 endfunction()
 
 Doxygen(source docs)
+
+message(STATUS "CXX compiler:    ${CMAKE_CXX_COMPILER}")
+message(STATUS "CXX linker:      ${CMAKE_CXX_LINKER}")
+message(STATUS "Linker language of qiti_tests:")
+get_target_property(_LL qiti_tests LINKER_LANGUAGE)
+message(STATUS "  -> ${_LL}")
+
+message(STATUS "CMAKE_CXX_STANDARD_LIBRARIES:    ${CMAKE_CXX_STANDARD_LIBRARIES}")
+message(STATUS "CMAKE_CXX_IMPLICIT_LINK_LIBRARIES:${CMAKE_CXX_IMPLICIT_LINK_LIBRARIES}")
