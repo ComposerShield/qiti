@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <dlfcn.h>
 #include <utility>
+#include <string>
 #include <thread>
 
 //--------------------------------------------------------------------------
