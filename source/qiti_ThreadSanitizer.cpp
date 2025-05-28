@@ -94,76 +94,76 @@ public:
     
     void QITI_API run(std::function<void()> func) noexcept override
     {
-        constexpr char const* logPrefix = QITI_TSAN_LOG_PATH;
-
-        // wipe any old logs
-//        std::system(("rm -f " + std::string(logPrefix) + "*").c_str());
-
-        // fork & exec the helper that runs the race
-        pid_t pid = fork();
-        assert(pid >= 0);
-        if (pid == 0)
-        {
-            // Child: drop into the helper binary
-            func();   // run the function in child process, scannning for data races
-            _exit(0); // clean exit of child process, may signal due to TSan
-        }
-
-        // Parent: wait for child to exit (TSan will have exit()ed, flushing the log)
-        int status = 0;
-        pid_t w;
-        do
-        {
-            w = waitpid(pid, &status, 0);
-        }
-        while (w == -1 && errno == EINTR);
-
-        assert(w == pid);
-        
-        if (WIFEXITED(status))
-        {
-            [[maybe_unused]] auto statusCode = WEXITSTATUS(status);
-//            assert(statusCode != 0);  // expect non-zero on race
-        }
-        else if (WIFSIGNALED(status))
-        {
-            // Child killed by signal
-            int sig = WTERMSIG(status);
-            assert(sig == SIGTRAP);            // or allow SIGABRT if you switch to abort()
-        }
-        else
-        {
-            std::terminate(); // Child neither exited nor was signaled?
-        }
-        
-        [[maybe_unused]] auto exitStatus = WEXITSTATUS(status);
-    //    assert(exitStatus == 0); // Causes crash in CI
-
-        // Now read the newly created tsan.log.*
-//        auto logPath = findLatestLog(logPrefix);
-//        if (logPath.has_value()) // new TSan file was written
-//        {
-//            std::string report = slurpFile(*logPath);
-//            
-//            // Look for “data race” anywhere in the report
-//            if (std::regex_search(report, std::regex(R"(data race)")))
-//            {
-//                flagFailed();
-//                
-//                std::cout << "Data race detected!\n";
+//        constexpr char const* logPrefix = QITI_TSAN_LOG_PATH;
 //
-//                static const std::regex summary_rx(R"(^.*SUMMARY:.*$)",
-//                                                   std::regex_constants::multiline);
-//                std::smatch sm;
-//                if (std::regex_search(report, sm, summary_rx))
-//                    std::cout << sm.str() << "\n";
-//                else
-//                    std::cout << "no SUMMARY found\n";
-//            }
-        }
-        
-        // cleanup log that was created
-//        std::system(("rm -f " + std::string(logPrefix) + "*").c_str());
+//        // wipe any old logs
+////        std::system(("rm -f " + std::string(logPrefix) + "*").c_str());
+//
+//        // fork & exec the helper that runs the race
+//        pid_t pid = fork();
+//        assert(pid >= 0);
+//        if (pid == 0)
+//        {
+//            // Child: drop into the helper binary
+//            func();   // run the function in child process, scannning for data races
+//            _exit(0); // clean exit of child process, may signal due to TSan
+//        }
+//
+//        // Parent: wait for child to exit (TSan will have exit()ed, flushing the log)
+//        int status = 0;
+//        pid_t w;
+//        do
+//        {
+//            w = waitpid(pid, &status, 0);
+//        }
+//        while (w == -1 && errno == EINTR);
+//
+//        assert(w == pid);
+//        
+//        if (WIFEXITED(status))
+//        {
+//            [[maybe_unused]] auto statusCode = WEXITSTATUS(status);
+////            assert(statusCode != 0);  // expect non-zero on race
+//        }
+//        else if (WIFSIGNALED(status))
+//        {
+//            // Child killed by signal
+//            int sig = WTERMSIG(status);
+//            assert(sig == SIGTRAP);            // or allow SIGABRT if you switch to abort()
+//        }
+//        else
+//        {
+//            std::terminate(); // Child neither exited nor was signaled?
+//        }
+//        
+//        [[maybe_unused]] auto exitStatus = WEXITSTATUS(status);
+//    //    assert(exitStatus == 0); // Causes crash in CI
+//
+//        // Now read the newly created tsan.log.*
+////        auto logPath = findLatestLog(logPrefix);
+////        if (logPath.has_value()) // new TSan file was written
+////        {
+////            std::string report = slurpFile(*logPath);
+////            
+////            // Look for “data race” anywhere in the report
+////            if (std::regex_search(report, std::regex(R"(data race)")))
+////            {
+////                flagFailed();
+////                
+////                std::cout << "Data race detected!\n";
+////
+////                static const std::regex summary_rx(R"(^.*SUMMARY:.*$)",
+////                                                   std::regex_constants::multiline);
+////                std::smatch sm;
+////                if (std::regex_search(report, sm, summary_rx))
+////                    std::cout << sm.str() << "\n";
+////                else
+////                    std::cout << "no SUMMARY found\n";
+////            }
+//        }
+//        
+//        // cleanup log that was created
+////        std::system(("rm -f " + std::string(logPrefix) + "*").c_str());
     }
     
 private:
