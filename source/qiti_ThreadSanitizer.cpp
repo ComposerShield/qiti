@@ -33,7 +33,7 @@
 #include <optional>
 #include <regex>
 #include <sstream>
-#include <string>
+//#include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -50,22 +50,22 @@ namespace fs = std::filesystem;
  @param prefix The log file prefix to search for.
  @returns an optional containing the latest path, or nullopt if none found.
 */
-[[nodiscard]] static std::optional<fs::path> findLatestLog(const std::string& prefix) noexcept
-{
-    std::optional<fs::path> best;
-    fs::path dir = fs::path(prefix).parent_path();
-    std::string base = fs::path(prefix).filename().string();
-    for (auto& ent : fs::directory_iterator(dir))
-    {
-        auto fn = ent.path().filename().string();
-        if (fn.rfind(base, 0) == 0)
-        {
-            if (!best || fs::last_write_time(ent) > fs::last_write_time(*best))
-                best = ent.path();
-        }
-    }
-    return best;
-}
+//[[nodiscard]] static std::optional<fs::path> findLatestLog(const std::string& prefix) noexcept
+//{
+//    std::optional<fs::path> best;
+//    fs::path dir = fs::path(prefix).parent_path();
+//    std::string base = fs::path(prefix).filename().string();
+//    for (auto& ent : fs::directory_iterator(dir))
+//    {
+//        auto fn = ent.path().filename().string();
+//        if (fn.rfind(base, 0) == 0)
+//        {
+//            if (!best || fs::last_write_time(ent) > fs::last_write_time(*best))
+//                best = ent.path();
+//        }
+//    }
+//    return best;
+//}
 
 /**
  Read a file fully into a string.
@@ -97,7 +97,7 @@ public:
         constexpr char const* logPrefix = QITI_TSAN_LOG_PATH;
 
         // wipe any old logs
-        std::system(("rm -f " + std::string(logPrefix) + "*").c_str());
+//        std::system(("rm -f " + std::string(logPrefix) + "*").c_str());
 
         // fork & exec the helper that runs the race
         pid_t pid = fork();
@@ -140,9 +140,9 @@ public:
     //    assert(exitStatus == 0); // Causes crash in CI
 
         // Now read the newly created tsan.log.*
-        auto logPath = findLatestLog(logPrefix);
-        if (logPath.has_value()) // new TSan file was written
-        {
+//        auto logPath = findLatestLog(logPrefix);
+//        if (logPath.has_value()) // new TSan file was written
+//        {
 //            std::string report = slurpFile(*logPath);
 //            
 //            // Look for “data race” anywhere in the report
@@ -163,7 +163,7 @@ public:
         }
         
         // cleanup log that was created
-        std::system(("rm -f " + std::string(logPrefix) + "*").c_str());
+//        std::system(("rm -f " + std::string(logPrefix) + "*").c_str());
     }
     
 private:
