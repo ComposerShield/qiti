@@ -14,6 +14,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG -D_DEBUG")
 
+find_package(Threads REQUIRED)
+
 set(SOURCES
     "include/qiti_include.hpp"
     "source/qiti_API.hpp"
@@ -63,6 +65,17 @@ add_library(qiti_example_target SHARED ${EXAMPLE_SOURCES})
 target_link_libraries(qiti_example_target
 PRIVATE
     qiti_lib
+
+    # Linux Requirements
+    Threads::Threads
+    ${CMAKE_CXX_STANDARD_LIBRARIES}
+)
+
+target_link_libraries(qiti_lib
+PRIVATE
+    # Linux Requirements
+    Threads::Threads
+    ${CMAKE_CXX_STANDARD_LIBRARIES}
 )
 
 if(APPLE)
@@ -166,6 +179,9 @@ PRIVATE
     qiti_lib
     qiti_tests_client
     Catch2::Catch2WithMain
+
+    # Linux Requirements
+    Threads::Threads
     ${CMAKE_CXX_STANDARD_LIBRARIES}
 )
 
