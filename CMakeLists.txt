@@ -72,10 +72,11 @@ PRIVATE
 )
 
 target_link_libraries(qiti_lib
-PRIVATE
-    # Linux Requirements
-    Threads::Threads
+PUBLIC
     stdc++
+PRIVATE
+    # Linux Requirement
+    Threads::Threads
 )
 
 if(APPLE)
