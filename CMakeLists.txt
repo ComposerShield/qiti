@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.14)
 
 project(Qiti LANGUAGES CXX)
 
-if(NOT APPLE)
-    message(FATAL_ERROR “Only macOS builds are supported”)
+if(NOT (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"))
+    message(FATAL_ERROR "Only Clang or Apple Clang compilers are supported")
 endif()
 
 set(ARCHS "arm64;x86_64") # Universal Binary
