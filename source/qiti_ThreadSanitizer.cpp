@@ -19,7 +19,9 @@
 #include "qiti_LockData.hpp"
 #include "qiti_profile.hpp"
 
-#include <unistd.h> // for fork()
+#include <sys/types.h>  // required for wait.h
+#include <sys/wait.h>   // for waitpid
+#include <unistd.h>     // for fork()
 
 #include <atomic>
 #include <cassert>

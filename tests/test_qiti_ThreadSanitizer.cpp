@@ -8,6 +8,10 @@
 // Basic Catch2 macros
 #include <catch2/catch_test_macros.hpp>
 
+#include <sys/types.h>  // required for wait.h
+#include <sys/wait.h>   // for waitpid
+#include <unistd.h>     // for fork()
+
 #include <iostream>
 #include <filesystem>
 #include <fstream>
