@@ -126,9 +126,9 @@ INTERFACE
     "-O0" # no optimizations
 )
 
-set_property(TARGET qiti_lib
-             PROPERTY CXX_CLANG_TIDY
-             "clang-tidy;-checks=*,-readability-*,misc-include-cleaner,modernize-*")
+set_target_properties(qiti_lib PROPERTIES
+  LINKER_LANGUAGE CXX
+)
 
 target_compile_definitions(qiti_lib
 PRIVATE
@@ -183,6 +183,10 @@ PRIVATE
     # Linux Requirements
     Threads::Threads
     ${CMAKE_CXX_STANDARD_LIBRARIES}
+)
+
+set_target_properties(qiti_tests PROPERTIES
+    LINKER_LANGUAGE CXX
 )
 
 target_compile_options(qiti_tests 
