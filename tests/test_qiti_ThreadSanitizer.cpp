@@ -45,6 +45,10 @@ namespace fs = std::filesystem;
 
 TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
 {
+    // Test to see if links
+    auto& loc = std::locale::classic();
+    (void)loc;
+    
     qiti::ScopedQitiTest test;
     test.setMaximumDurationOfTest_ms(1000ull);
     
