@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <stddef.h>  // defines size_t in the global namespace
+
 #include <cassert>
 #include <cstdint>
 
