@@ -68,12 +68,12 @@ PRIVATE
 
     # Linux Requirements
     Threads::Threads
-    stdc++
+    ${CMAKE_CXX_STANDARD_LIBRARIES}
 )
 
 target_link_libraries(qiti_lib
 PUBLIC
-    stdc++
+    ${CMAKE_CXX_STANDARD_LIBRARIES}
 PRIVATE
     # Linux Requirement
     Threads::Threads
@@ -183,7 +183,7 @@ PRIVATE
 
     # Linux Requirements
     Threads::Threads
-    ${CMAKE_CXX_IMPLICIT_LINK_LIBRARIES}
+    ${CMAKE_CXX_STANDARD_LIBRARIES}
 )
 
 set_target_properties(qiti_tests PROPERTIES
