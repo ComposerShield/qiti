@@ -24,8 +24,8 @@
 #include <array>
 #include <cassert>
 #include <cstdint>
+#include <cstring>
 #include <utility>
-#include <string>
 #include <thread>
 
 //--------------------------------------------------------------------------
