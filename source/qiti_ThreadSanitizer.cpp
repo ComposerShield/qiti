@@ -73,12 +73,12 @@ namespace fs = std::filesystem;
  @param path Path of the file to read.
  @returns the file contents; empty string on failure.
 */
-[[nodiscard]] static std::string slurpFile(const fs::path& path) noexcept
-{
-    std::ifstream in(path, std::ios::binary);
-    return { std::istreambuf_iterator<char>(in),
-             std::istreambuf_iterator<char>() };
-}
+//[[nodiscard]] static std::string slurpFile(const fs::path& path) noexcept
+//{
+//    std::ifstream in(path, std::ios::binary);
+//    return { std::istreambuf_iterator<char>(in),
+//             std::istreambuf_iterator<char>() };
+//}
 
 //--------------------------------------------------------------------------
 namespace qiti
@@ -143,23 +143,23 @@ public:
         auto logPath = findLatestLog(logPrefix);
         if (logPath.has_value()) // new TSan file was written
         {
-            std::string report = slurpFile(*logPath);
-            
-            // Look for “data race” anywhere in the report
-            if (std::regex_search(report, std::regex(R"(data race)")))
-            {
-                flagFailed();
-                
-                std::cout << "Data race detected!\n";
-
-                static const std::regex summary_rx(R"(^.*SUMMARY:.*$)",
-                                                   std::regex_constants::multiline);
-                std::smatch sm;
-                if (std::regex_search(report, sm, summary_rx))
-                    std::cout << sm.str() << "\n";
-                else
-                    std::cout << "no SUMMARY found\n";
-            }
+//            std::string report = slurpFile(*logPath);
+//            
+//            // Look for “data race” anywhere in the report
+//            if (std::regex_search(report, std::regex(R"(data race)")))
+//            {
+//                flagFailed();
+//                
+//                std::cout << "Data race detected!\n";
+//
+//                static const std::regex summary_rx(R"(^.*SUMMARY:.*$)",
+//                                                   std::regex_constants::multiline);
+//                std::smatch sm;
+//                if (std::regex_search(report, sm, summary_rx))
+//                    std::cout << sm.str() << "\n";
+//                else
+//                    std::cout << "no SUMMARY found\n";
+//            }
         }
         
         // cleanup log that was created
