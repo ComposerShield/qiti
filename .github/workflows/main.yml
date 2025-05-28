@@ -83,19 +83,14 @@ jobs:
             -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_C_COMPILER=clang-16 \
             -DCMAKE_CXX_COMPILER=clang++-16
-             
-      - name: Dump link line
-        run: |
-          ninja -C build -v qiti_tests |& grep '\-o qiti_tests'
-#          ninja -C build -v qiti_tests
 
-#      - name: Build
-#        run: cmake --build build --target qiti_tests
-#
-#      - name: Run Unit Tests
-#        run: |
-#          cd build
-#          ctest -C Debug
+      - name: Build
+        run: cmake --build build --target qiti_tests
+
+      - name: Run Unit Tests
+        run: |
+          cd build
+          ctest -C Debug
 
   lint:
     runs-on: ubuntu-latest
