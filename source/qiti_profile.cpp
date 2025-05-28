@@ -31,6 +31,7 @@
 #include <mutex>
 #include <regex>
 #include <unordered_set>
+#include <utility>
 #include <string>
 
 //--------------------------------------------------------------------------

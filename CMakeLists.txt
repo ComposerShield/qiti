@@ -93,6 +93,7 @@ PRIVATE
     "-Wextra"
     "-Wpedantic"
     "-Wconversion"
+    "-Wmissing-include-dirs"
     "-Wsign-conversion" 
     "-Wshadow"
     "-Wold-style-cast"
