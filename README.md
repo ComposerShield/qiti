@@ -172,7 +172,7 @@ TEST_CASE("Example Test")
         t.join()
     };
     dataRaceDetector->run(codeToTest);
-    QITI_REQUIRE(dataRaceDetector->passed()); // No data races detected
+    REQUIRE(dataRaceDetector->passed()); // No data races detected
 }
 ```
 
