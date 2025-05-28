@@ -166,6 +166,7 @@ PRIVATE
     qiti_lib
     qiti_tests_client
     Catch2::Catch2WithMain
+    ${CMAKE_CXX_STANDARD_LIBRARIES}
 )
 
 target_compile_options(qiti_tests 
