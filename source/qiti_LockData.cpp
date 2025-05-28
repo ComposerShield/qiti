@@ -16,7 +16,7 @@
 #include "qiti_LockData.hpp"
 
 #include <mutex>
-#include <ranges>
+#include <ranges> // NOLINT - false positive in cpplint
 #include <vector>
 
 //--------------------------------------------------------------------------
