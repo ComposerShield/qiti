@@ -68,14 +68,14 @@ PRIVATE
 
     # Linux Requirements
     Threads::Threads
-    ${CMAKE_CXX_STANDARD_LIBRARIES}
+    stdc++
 )
 
 target_link_libraries(qiti_lib
 PRIVATE
     # Linux Requirements
     Threads::Threads
-    ${CMAKE_CXX_STANDARD_LIBRARIES}
+    stdc++
 )
 
 if(APPLE)
@@ -182,7 +182,7 @@ PRIVATE
 
     # Linux Requirements
     Threads::Threads
-    ${CMAKE_CXX_STANDARD_LIBRARIES}
+    stdc++
 )
 
 set_target_properties(qiti_tests PROPERTIES
