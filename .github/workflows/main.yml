@@ -47,11 +47,12 @@ jobs:
           echo "PATH=$(brew --prefix llvm@16)/bin:$PATH" >> $GITHUB_ENV
 
       - name: Configure CMake (Ninja, LLVM Clang)
-        run: cmake . -B build \
-             -G Ninja \
-             -DCMAKE_BUILD_TYPE=Debug \
-             -DCMAKE_C_COMPILER=clang \
-             -DCMAKE_CXX_COMPILER=clang++
+        run:  |
+          cmake . -B build \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DCMAKE_C_COMPILER=clang \
+          -DCMAKE_CXX_COMPILER=clang++
 
       - name: Build
         run: cmake --build build --target qiti_tests
@@ -85,8 +86,8 @@ jobs:
              
       - name: Dump link line
         run: |
-          ls
-          ninja -C build -v qiti_tests
+          ninja -C build -v qiti_tests |& grep '\-o qiti_tests'
+#          ninja -C build -v qiti_tests
 
 #      - name: Build
 #        run: cmake --build build --target qiti_tests
