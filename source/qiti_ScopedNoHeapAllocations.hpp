@@ -13,6 +13,8 @@
  * See LICENSE.txt for license terms.
  ******************************************************************************/
 
+#pragma once
+
 #include <cassert>
 #include <cstdint>
 
