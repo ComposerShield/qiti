@@ -63,7 +63,6 @@ jobs:
           ctest -C Debug
           
   linux-build-clang-ninja:
-    if: false # temporarily disable to save money
     runs-on: ubuntu-latest
     
     steps:
