@@ -68,12 +68,9 @@ PRIVATE
 
     # Linux Requirements
     Threads::Threads
-    ${CMAKE_CXX_IMPLICIT_LINK_LIBRARIES}
 )
 
 target_link_libraries(qiti_lib
-PUBLIC
-    ${CMAKE_CXX_IMPLICIT_LINK_LIBRARIES}
 PRIVATE
     # Linux Requirement
     Threads::Threads
@@ -179,7 +176,6 @@ PRIVATE
 
     # Linux Requirements
     Threads::Threads
-    ${CMAKE_CXX_IMPLICIT_LINK_LIBRARIES}
 )
 
 target_compile_options(qiti_tests 
@@ -294,6 +290,3 @@ function(Doxygen input output)
 endfunction()
 
 Doxygen(source docs)
-
-
-message(STATUS "CMAKE_CXX_IMPLICIT_LINK_LIBRARIES: ${CMAKE_CXX_IMPLICIT_LINK_LIBRARIES}")
