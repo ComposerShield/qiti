@@ -57,7 +57,7 @@ extern std::recursive_mutex qiti_global_lock;
 
 void* QITI_API operator new(size_t size)
 {
-    ++g_numHeapAllocationsOnCurrentThread;
+//    ++g_numHeapAllocationsOnCurrentThread;
 //    if (auto callback = std::exchange(g_onNextHeapAllocation, nullptr))
 //        callback();
     

@@ -153,13 +153,7 @@ __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site) noexce
 {
     static thread_local int recursionCheck = 0;
     ++recursionCheck;
-    if (recursionCheck != 1)
-    {
-        auto& functionData = qiti::getFunctionDataFromAddress(this_fn);
-        auto functionName = std::string(functionData.getFunctionName());
-        std::cout << "Function Name: " << functionName << "\n";
-        assert(functionName == "");
-    }
+    assert (recursionCheck == 1);
     
     if (qiti::profile::isProfilingFunction(this_fn))
     {
