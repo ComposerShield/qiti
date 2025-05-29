@@ -121,10 +121,10 @@ PRIVATE
     "-Wimplicit-fallthrough"
 INTERFACE
     "-finstrument-functions"
-    "-finstrument-functions-exclude-function-list=malloc,free,calloc,realloc"  # ignore the core allocators
+    "-Xclang -finstrument-functions-exclude-function-list=malloc,free,calloc,realloc"  # ignore the core allocators
     "-fno-omit-frame-pointer"
     "-fsanitize=thread" # thread sanitizer
-    "-g" 
+    "-g"  
     "-O0" # no optimizations
 )
 
