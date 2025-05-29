@@ -57,6 +57,9 @@ static inline QITI_API_INTERNAL bool isFunctionAlwaysIgnoredByProfiling(void* ad
     auto fp = static_cast<void*(*)(std::size_t)>(&::operator new);
     auto operatorNew = reinterpret_cast<void*>(fp);
     
+    assert(address != operatorNew);
+    assert(address != reinterpret_cast<void*>(malloc));
+    
     return (address == operatorNew
             || address == reinterpret_cast<void*>(malloc));
 }
