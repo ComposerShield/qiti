@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(Qiti LANGUAGES CXX)
+project(Qiti LANGUAGES C CXX)
 
-if(NOT APPLE)
-    message(FATAL_ERROR “Only macOS builds are supported”)
+if(NOT (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"))
+    message(FATAL_ERROR "Only Clang or Apple Clang compilers are supported")
 endif()
 
 set(ARCHS "arm64;x86_64") # Universal Binary
@@ -13,6 +13,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG -D_DEBUG")
+
+find_package(Threads REQUIRED)
 
 set(SOURCES
     "include/qiti_include.hpp"
@@ -65,15 +67,17 @@ PRIVATE
     qiti_lib
 )
 
-set_target_properties(qiti_lib PROPERTIES
-    OSX_ARCHITECTURES "${ARCHS}"
-    XCODE_GENERATE_SCHEME ON
-)
+if(APPLE)
+    set_target_properties(qiti_lib PROPERTIES
+        OSX_ARCHITECTURES "${ARCHS}"
+        XCODE_GENERATE_SCHEME ON
+    )
 
-set_target_properties(qiti_example_target PROPERTIES
-    OSX_ARCHITECTURES "${ARCHS}"
-    XCODE_GENERATE_SCHEME ON
-)
+    set_target_properties(qiti_example_target PROPERTIES
+        OSX_ARCHITECTURES "${ARCHS}"
+        XCODE_GENERATE_SCHEME ON
+    )
+endif()
 
 target_include_directories(qiti_lib 
 PRIVATE
@@ -93,6 +97,7 @@ PRIVATE
     "-Wextra"
     "-Wpedantic"
     "-Wconversion"
+    "-Wmissing-include-dirs"
     "-Wsign-conversion" 
     "-Wshadow"
     "-Wold-style-cast"
@@ -133,23 +138,25 @@ include(FetchContent)
 FetchContent_MakeAvailable(Catch2)
 
 add_executable(qiti_tests
-    "Tests/qiti_test_macros.hpp"
-    "Tests/test_qiti_FunctionCallData.cpp"
-    "Tests/test_qiti_FunctionData.cpp"
-    "Tests/test_qiti_instrument.cpp"
-    "Tests/test_qiti_profile.cpp"
-    "Tests/test_qiti_LeakSanitizer.cpp"
-    "Tests/test_qiti_LockData.cpp"
-    "Tests/test_qiti_ScopedNoHeapAllocations.cpp"
-    "Tests/test_qiti_ThreadSanitizer.cpp"
-    "Tests/test_qiti_TypeData.cpp"
-    "Tests/test_qiti_utils.cpp"
+    "tests/qiti_test_macros.hpp"
+    "tests/test_qiti_FunctionCallData.cpp"
+    "tests/test_qiti_FunctionData.cpp"
+    "tests/test_qiti_instrument.cpp"
+    "tests/test_qiti_profile.cpp"
+    "tests/test_qiti_LeakSanitizer.cpp"
+    "tests/test_qiti_LockData.cpp"
+    "tests/test_qiti_ScopedNoHeapAllocations.cpp"
+    "tests/test_qiti_ThreadSanitizer.cpp"
+    "tests/test_qiti_TypeData.cpp"
+    "tests/test_qiti_utils.cpp"
 )
 
-set_target_properties(qiti_tests PROPERTIES
-    OSX_ARCHITECTURES "${ARCHS}"
-    XCODE_GENERATE_SCHEME ON
-)
+if(APPLE)
+    set_target_properties(qiti_tests PROPERTIES
+        OSX_ARCHITECTURES "${ARCHS}"
+        XCODE_GENERATE_SCHEME ON
+    )
+endif()
 
 target_link_libraries(qiti_tests 
 PRIVATE
@@ -167,18 +174,20 @@ PRIVATE
 
 enable_testing()
 
-set_target_properties(Catch2 PROPERTIES 
-    OSX_ARCHITECTURES "${ARCHS}"
-)
+if(APPLE)
+    set_target_properties(Catch2 PROPERTIES 
+        OSX_ARCHITECTURES "${ARCHS}"
+    )
 
-set_target_properties(Catch2WithMain PROPERTIES
-    OSX_ARCHITECTURES "${ARCHS}"
-)
+    set_target_properties(Catch2WithMain PROPERTIES
+        OSX_ARCHITECTURES "${ARCHS}"
+    )
 
-set_target_properties(qiti_tests PROPERTIES
-    OSX_ARCHITECTURES "${ARCHS}"
-    XCODE_GENERATE_SCHEME ON
-)
+    set_target_properties(qiti_tests PROPERTIES
+        OSX_ARCHITECTURES "${ARCHS}"
+        XCODE_GENERATE_SCHEME ON
+    )
+endif()
 
 target_include_directories(qiti_tests 
 PRIVATE
