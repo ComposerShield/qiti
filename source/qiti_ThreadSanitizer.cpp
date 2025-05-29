@@ -19,6 +19,10 @@
 #include "qiti_LockData.hpp"
 #include "qiti_profile.hpp"
 
+#include <sys/types.h>  // required for wait.h
+#include <sys/wait.h>   // for waitpid
+#include <unistd.h>     // for fork()
+
 #include <atomic>
 #include <cassert>
 #include <cstdlib>
@@ -33,8 +37,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-
-#include <unistd.h> // for fork()
 
 //--------------------------------------------------------------------------
 
