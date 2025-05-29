@@ -28,6 +28,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
+#include <iostream>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -152,7 +153,13 @@ __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site) noexce
 {
     static thread_local int recursionCheck = 0;
     ++recursionCheck;
-    assert(recursionCheck == 1);
+    if (recursionCheck != 1)
+    {
+        auto& functionData = qiti::getFunctionDataFromAddress(this_fn);
+        auto functionName = std::string(functionData.getFunctionName());
+        std::cout << "Function Name: " << functionName << "\n";
+        assert(functionName == "");
+    }
     
     if (qiti::profile::isProfilingFunction(this_fn))
     {
