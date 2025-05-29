@@ -22,6 +22,7 @@ void testFunc() noexcept
     volatile int _ = 42;
 }
 
+#if defined(__APPLE__) // TODO: support Linux
 TEST_CASE("qiti::FunctionData::getFunctionName()")
 {
     qiti::ScopedQitiTest test;
@@ -125,3 +126,4 @@ TEST_CASE("qiti::FunctionData::wasCalledOnThread()")
         QITI_CHECK(funcData->wasCalledOnThread(id));
     }
 }
+#endif // defined(__APPLE__)

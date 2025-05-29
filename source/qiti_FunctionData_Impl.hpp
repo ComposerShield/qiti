@@ -17,6 +17,7 @@
 
 #include "qiti_FunctionData.hpp"
 
+#include <bitset>
 #include <cstdint>
 #include <string>
 #include <thread>

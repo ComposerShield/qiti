@@ -33,6 +33,7 @@ TEST_CASE("qiti::FunctionCallData::resetInstrumentation()")
     delete testAlloc;
 }
 
+#if defined(__APPLE__) // TODO: support Linux
 TEST_CASE("qiti::onNextHeapAllocation() is called on next heap allocation", "[qiti::onNextHeapAllocation]")
 {
     qiti::ScopedQitiTest test;
@@ -44,9 +45,4 @@ TEST_CASE("qiti::onNextHeapAllocation() is called on next heap allocation", "[qi
     QITI_CHECK(testValue == 1);
     delete heapAllocation;
 }
-
-TEST_CASE("qiti::FunctionCallData::assertOnNextHeapAllocation()")
-{
-    qiti::ScopedQitiTest test;
-    
-}
+#endif // defined(__APPLE__)

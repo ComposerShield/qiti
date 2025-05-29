@@ -20,14 +20,17 @@
 
 #include "qiti_ReentrantSharedMutex.hpp"
 
-#include <algorithm>
-#include <cassert>
-#include <cstdio>
-#include <cstring>
 #include <cxxabi.h>
 #include <dlfcn.h>
+
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <cstdio>
+#include <cstring>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <unordered_map>
