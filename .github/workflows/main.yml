@@ -1,4 +1,3 @@
-
 name: Build Qiti
 
 on:
@@ -10,7 +9,8 @@ on:
       - '**'
 
 jobs:
-  build-xcode:
+  mac-build-xcode:
+    if: false # temporarily disable to save money
     runs-on: macos-15
 
     steps:
@@ -33,7 +33,8 @@ jobs:
           cd build
           ctest -C Debug
 
-  build-clang-ninja:
+  mac-build-clang-ninja:
+    if: true
     runs-on: macos-15
     
     steps:
@@ -59,6 +60,36 @@ jobs:
         run: |
           cd build
           ctest -C Debug
+          
+  linux-build-clang-ninja:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+  
+      - name: Install LLVM 16 & Ninja
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-16 ninja-build
+          echo "CC=clang-16" >> $GITHUB_ENV
+          echo "CXX=clang++-16" >> $GITHUB_ENV
+
+      - name: Configure CMake (Ninja, LLVM Clang)
+        run: |
+          cmake . -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_C_COMPILER=clang-16 \
+            -DCMAKE_CXX_COMPILER=clang++-16
+
+      - name: Build
+        run: cmake --build build --target qiti_tests
+
+      - name: Run Unit Tests
+        run: |
+          cd build
+          ctest -C Debug --verbose
 
   lint:
     runs-on: ubuntu-latest

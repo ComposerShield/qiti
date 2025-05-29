@@ -28,7 +28,6 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
-#include <iostream>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -152,7 +151,8 @@ extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into i
 __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site) noexcept
 {
     static thread_local int recursionCheck = 0;
-    assert(++recursionCheck == 1);
+    ++recursionCheck;
+    assert(recursionCheck == 1);
     
     if (qiti::profile::isProfilingFunction(this_fn))
     {
@@ -172,3 +172,12 @@ __cyg_profile_func_exit(void * this_fn, [[maybe_unused]] void* call_site) noexce
         qiti::profile::updateFunctionDataOnExit(this_fn);
     }
 }
+
+//--------------------------------------------------------------------------
+
+#if ! defined(__APPLE__)
+// Linux-only:
+// Force‐instantiate the char allocator, to prevent potential linker errors
+// with its some of its function symbols not being resolved.
+template class __attribute__((visibility("default"))) std::allocator<char>;
+#endif // ! defined(__APPLE__)
