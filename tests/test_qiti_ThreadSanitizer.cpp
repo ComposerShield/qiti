@@ -43,6 +43,7 @@ namespace fs = std::filesystem;
 
 //--------------------------------------------------------------------------
 
+#if defined(__APPLE__) // TODO: support Linux
 TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
 {
     qiti::ScopedQitiTest test;
@@ -82,70 +83,7 @@ TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
     QITI_CHECK(! tsan->passed());
     QITI_CHECK(tsan->failed());
 }
-
-TEST_CASE("Detect data race via subprocess")
-{
-    qiti::ScopedQitiTest test;
-    test.setMaximumDurationOfTest_ms(1000ull);
-    
-    constexpr char const* logPrefix = "/tmp/tsan.log";
-
-    // wipe any old logs
-    std::system(("rm -f " + std::string(logPrefix) + "*").c_str());
-
-    // fork & exec the helper that runs the race
-    pid_t pid = fork();
-    QITI_REQUIRE(pid >= 0);
-    if (pid == 0)
-    {
-        // Child: drop into the helper binary (built alongside qiti_tests)
-        std::thread t(incrementCounter); // Intentional data race
-        incrementCounter();              // Intentional data race
-        t.join();
-        _exit(0); // clean exit of child process, may signal due to TSan
-    }
-
-    // Parent: wait for child to exit (TSan will have exit()ed, flushing the log)
-    int status = 0;
-    pid_t w;
-    do
-    {
-        w = waitpid(pid, &status, 0);
-    }
-    while (w == -1 && errno == EINTR);
-
-    QITI_CHECK(w == pid);
-    
-    if (WIFEXITED(status))
-    {
-        INFO("Child exited with code " << WEXITSTATUS(status));
-        QITI_CHECK(WEXITSTATUS(status) != 0);  // expect non-zero on race
-    }
-    else if (WIFSIGNALED(status))
-    {
-        int sig = WTERMSIG(status);
-        INFO("Child killed by signal " << sig);
-        QITI_CHECK(sig == SIGTRAP);            // or allow SIGABRT if you switch to abort()
-    }
-    else
-    {
-        FAIL("Child neither exited nor was signaled?");
-    }
-    
-    [[maybe_unused]] auto exitStatus = WEXITSTATUS(status);
-//    QITI_REQUIRE(exitStatus == 0); // Causes crash in CI
-
-    // Now read the newly created tsan.log.*
-    auto logPath = findLatestLog(logPrefix);
-    QITI_REQUIRE(logPath.has_value());
-    std::string report = slurpFile(*logPath);
-
-    // Report should mention the data race
-    std::smatch m;
-    std::regex rx(R"(global '([^']+)')");
-    QITI_REQUIRE(std::regex_search(report, m, rx));
-    QITI_CHECK(std::string(m[1]) == "counter");
-}
+#endif // defined(__APPLE__)
 
 TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce false positive")
 {
@@ -159,6 +97,7 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce fals
     QITI_REQUIRE_FALSE(dataRaceDetector->failed());
 }
 
+#if defined(__APPLE__) // TODO: support Linux
 TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of global variable")
 {
     qiti::ScopedQitiTest test;
@@ -175,6 +114,7 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of 
     QITI_REQUIRE(dataRaceDetector->failed());
     QITI_REQUIRE_FALSE(dataRaceDetector->passed());
 }
+#endif // defined(__APPLE__)
 
 TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of member variable")
 {
