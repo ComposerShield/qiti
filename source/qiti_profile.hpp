@@ -51,10 +51,10 @@ requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
 void QITI_API inline endProfilingFunction() noexcept { endProfilingFunction( reinterpret_cast<void*>(FuncPtr)); }
 
 /** */
-void QITI_API beginProfilingAllFunctions() noexcept;
+[[deprecated("Results in exceptions on Linux")]] void QITI_API beginProfilingAllFunctions() noexcept;
 
 /** */
-void QITI_API endProfilingAllFunctions() noexcept;
+[[deprecated("Results in exceptions on Linux")]] void QITI_API endProfilingAllFunctions() noexcept;
 
 /** */
 [[nodiscard]] bool QITI_API isProfilingFunction(void* funcAddress) noexcept;

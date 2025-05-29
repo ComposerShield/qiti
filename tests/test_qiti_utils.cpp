@@ -102,18 +102,11 @@ TEST_CASE("qiti::getAddressForMangledFunctionName()")
     
     auto* funcAddress = (void*)&demangleFunc;
     
-    qiti::profile::beginProfilingAllFunctions();
-    
-    // Call function to create FunctionData
-    (void)demangleFunc(""); // TODO: make it so we do not have to call this
-    
-    auto functionData = qiti::getFunctionData<&demangleFunc>();
+    auto functionData = qiti::FunctionData::getFunctionData<&demangleFunc>();
     QITI_REQUIRE( functionData != nullptr );
     
     auto mangledName = functionData->getMangledFunctionName();
     auto* address = qiti::getAddressForMangledFunctionName(mangledName);
     
-    QITI_REQUIRE( address == funcAddress );
-    
-    qiti::profile::endProfilingAllFunctions();
+    QITI_REQUIRE( address == funcAddress );    
 }
