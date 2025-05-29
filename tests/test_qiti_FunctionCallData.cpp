@@ -13,16 +13,15 @@ using namespace qiti::example::FunctionCallData;
 TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations() returns expected values")
 {
     qiti::ScopedQitiTest test;
-    qiti::profile::beginProfilingAllFunctions();
+    
+    auto funcData = qiti::getFunctionData<&testHeapAllocation>();
+    QITI_REQUIRE(funcData != nullptr);
     
     SECTION("1 heap allocation")
     {
         // Call twice
         testHeapAllocation();
         testHeapAllocation();
-        
-        auto funcData = qiti::getFunctionData<&testHeapAllocation>();
-        QITI_REQUIRE(funcData != nullptr);
         
         auto lastFunctionCall = funcData->getLastFunctionCall();
         QITI_REQUIRE(lastFunctionCall.getNumHeapAllocations() == 1);
@@ -32,13 +31,8 @@ TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations() returns expected valu
     {
         testNoHeapAllocation();
         
-        auto funcData = qiti::getFunctionData<&testNoHeapAllocation>();
-        QITI_REQUIRE(funcData != nullptr);
-        
         auto lastFunctionCall = funcData->getLastFunctionCall();
         QITI_REQUIRE(lastFunctionCall.getNumHeapAllocations() == 0);
     }
-    
-    qiti::profile::endProfilingAllFunctions();
 }
 
