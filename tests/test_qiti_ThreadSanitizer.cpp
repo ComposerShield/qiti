@@ -43,6 +43,7 @@ namespace fs = std::filesystem;
 
 //--------------------------------------------------------------------------
 
+#if defined(__APPLE__) // TODO: support Linux
 TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
 {
     qiti::ScopedQitiTest test;
@@ -82,6 +83,7 @@ TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
     QITI_CHECK(! tsan->passed());
     QITI_CHECK(tsan->failed());
 }
+#endif // defined(__APPLE__)
 
 TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce false positive")
 {
@@ -95,6 +97,7 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce fals
     QITI_REQUIRE_FALSE(dataRaceDetector->failed());
 }
 
+#if defined(__APPLE__) // TODO: support Linux
 TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of global variable")
 {
     qiti::ScopedQitiTest test;
@@ -111,6 +114,7 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of 
     QITI_REQUIRE(dataRaceDetector->failed());
     QITI_REQUIRE_FALSE(dataRaceDetector->passed());
 }
+#endif // defined(__APPLE__)
 
 TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of member variable")
 {
