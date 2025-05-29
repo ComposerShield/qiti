@@ -13,8 +13,6 @@
  * See LICENSE.txt for license terms.
  ******************************************************************************/
 
-#define _GLIBCXX_EXTERN_TEMPLATE 0
-
 #include "qiti_instrument.hpp"
 
 #include "qiti_ScopedNoHeapAllocations.hpp"
