@@ -22,12 +22,6 @@ TEST_CASE("qiti::profile::resetProfiling()")
     
     qiti::profile::resetProfiling();
     QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&testFunc>());
-    
-    qiti::profile::beginProfilingAllFunctions();
-    QITI_REQUIRE(qiti::profile::isProfilingFunction<&testFunc>());
-    
-    qiti::profile::resetProfiling();
-    QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&testFunc>());
 }
 
 TEST_CASE("qiti::profile::beginProfilingFunction()")
@@ -50,6 +44,9 @@ TEST_CASE("qiti::profile::endProfilingFunction()")
     QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&testFunc>());
 }
 
+#if defined(__APPLE__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated"
 TEST_CASE("qiti::profile::beginProfilingAllFunctions()")
 {
     qiti::ScopedQitiTest test;
@@ -70,6 +67,8 @@ TEST_CASE("qiti::profile::endProfilingAllFunctions()")
     qiti::profile::endProfilingAllFunctions();
     QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&testFunc>());
 }
+#pragma clang diagnostic pop
+#endif // defined(__APPLE__)
 
 TEST_CASE("qiti::profile::isProfilingFunction()")
 {

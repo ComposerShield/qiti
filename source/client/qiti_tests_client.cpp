@@ -15,8 +15,6 @@
 
 #define QITI_TSAN_LOG_PATH "/tmp/tsan.log"
 
-#include <iostream>
-
 static constexpr const char TSAN_DEFAULT_OPTS[] = "report_thread_leaks=0"
                                                   ":abort_on_error=0"
                                                   ":log_path="
