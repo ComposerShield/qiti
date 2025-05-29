@@ -10,7 +10,8 @@ on:
 
 jobs:
   mac-build-xcode:
-    if: false # temporarily disable to save money
+    # main branch only, or PRs into main
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: macos-15
 
     steps:
@@ -34,7 +35,6 @@ jobs:
           ctest -C Debug
 
   mac-build-clang-ninja:
-    if: true
     runs-on: macos-15
     
     steps:
