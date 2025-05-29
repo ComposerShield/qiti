@@ -181,7 +181,7 @@ __cyg_profile_func_exit(void * this_fn, [[maybe_unused]] void* call_site) noexce
 // Force‐instantiate the char allocator, and its two methods:
 
 // Force‐instantiate the allocator class itself (all members visible):
-template class __attribute__((visibility("default"))) std::allocator<char>;
+//template class __attribute__((visibility("default"))) std::allocator<char>;
 
 // Force‐instantiate and export allocate():
 template char* __attribute__((visibility("default")))
