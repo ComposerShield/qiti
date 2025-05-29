@@ -14,9 +14,6 @@
 #include <iostream>
 #include <string>
 
-#define QITI_REQUIRE_MAC(...) QITI_REQUIRE(__VA_ARGS__)
-#define QITI_REQUIRE_LINUX
-
 using namespace qiti::example::utils;
 
 __attribute__((visibility("default")))
