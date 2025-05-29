@@ -55,6 +55,8 @@ extern std::recursive_mutex qiti_global_lock;
 
 //--------------------------------------------------------------------------
 
+void* QITI_API malloc(size_t __size);
+
 void* QITI_API operator new(size_t size)
 {
 //    ++g_numHeapAllocationsOnCurrentThread;
