@@ -20,8 +20,8 @@
 #include <dlfcn.h>
 
 #include <cstdint>
-#include <string>
-#include <string_view>
+//#include <string>
+//#include <string_view>
 #include <type_traits>
 
 //--------------------------------------------------------------------------
@@ -40,34 +40,34 @@ void QITI_API_INTERNAL resetAll() noexcept;
  \internal
  Returns demangled function name (without parens)
  */
-template <auto FuncPtr>
-constexpr std::string_view getFunctionName() noexcept
-{
-#if defined(__clang__) || defined(__GNUC__)
-    constexpr std::string_view full   = __PRETTY_FUNCTION__;
-    // 1) find the last '=' in the "[FuncPtr = …]" part
-    auto eq = full.rfind('=');
-    if (eq == std::string_view::npos) return {};
-
-    // 2) move past '=' then skip spaces and '&'
-    auto start = eq + 1;
-    while (start < full.size() && (full[start] == ' ' || full[start] == '&'))
-        ++start;
-
-    // 3) find the last ']' which closes the bracketed section
-    auto end = full.rfind(']');
-    if (end == std::string_view::npos || end < start)
-        return {};     // unexpected format
-
-    // 4) return exactly the characters in between
-    return full.substr(start, end - start);
-
-#elif defined(_MSC_VER)
-    // similar logic with __FUNCSIG__
-#endif
-
-    return {};
-}
+//template <auto FuncPtr>
+//constexpr std::string_view getFunctionName() noexcept
+//{
+//#if defined(__clang__) || defined(__GNUC__)
+//    constexpr std::string_view full   = __PRETTY_FUNCTION__;
+//    // 1) find the last '=' in the "[FuncPtr = …]" part
+//    auto eq = full.rfind('=');
+//    if (eq == std::string_view::npos) return {};
+//
+//    // 2) move past '=' then skip spaces and '&'
+//    auto start = eq + 1;
+//    while (start < full.size() && (full[start] == ' ' || full[start] == '&'))
+//        ++start;
+//
+//    // 3) find the last ']' which closes the bracketed section
+//    auto end = full.rfind(']');
+//    if (end == std::string_view::npos || end < start)
+//        return {};     // unexpected format
+//
+//    // 4) return exactly the characters in between
+//    return full.substr(start, end - start);
+//
+//#elif defined(_MSC_VER)
+//    // similar logic with __FUNCSIG__
+//#endif
+//
+//    return {};
+//}
 
 
 /**

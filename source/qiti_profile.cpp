@@ -32,7 +32,7 @@
 #include <regex>
 #include <unordered_set>
 #include <utility>
-#include <string>
+//#include <string>
 
 //--------------------------------------------------------------------------
 
@@ -69,41 +69,41 @@ void* operator new(size_t size)
 //--------------------------------------------------------------------------
 
 /** */
-static void QITI_API_INTERNAL updateFunctionType(qiti::FunctionData& functionData) noexcept
+static void QITI_API_INTERNAL updateFunctionType(qiti::FunctionData& /*functionData*/) noexcept
 {
-    qiti::ScopedNoHeapAllocations noAlloc;
-
-    auto* impl = functionData.getImpl();
-    const char* name = impl->functionNameReal;
-    std::string_view sv{name};
-
-    // find the opening '(' of the parameter list
-    auto paren = sv.find('(');
-    if (paren != std::string_view::npos)
-    {
-        // strip off the "(" and everything after:
-        sv.remove_suffix(sv.size() - paren);
-
-        // now find the last "::" in the prefix:
-        auto colcol = sv.rfind("::");
-        if (colcol != std::string_view::npos) {
-            // [qualifier]::[last]
-            std::string_view qualifier = sv.substr(0, colcol);
-            std::string_view last_part = sv.substr(colcol + 2);
-
-            // constructor: qualifier == last_part
-            if (qualifier == last_part)
-            {
-                impl->functionType = qiti::FunctionType::constructor;
-            }
-            // destructor: last_part begins with '~' and qualifier == last_part.substr(1)
-            else if (!last_part.empty() && last_part[0] == '~'
-                     && qualifier == last_part.substr(1))
-            {
-                impl->functionType = qiti::FunctionType::destructor;
-            }
-        }
-    }
+//    qiti::ScopedNoHeapAllocations noAlloc;
+//
+//    auto* impl = functionData.getImpl();
+//    const char* name = impl->functionNameReal;
+//    std::string_view sv{name};
+//
+//    // find the opening '(' of the parameter list
+//    auto paren = sv.find('(');
+//    if (paren != std::string_view::npos)
+//    {
+//        // strip off the "(" and everything after:
+//        sv.remove_suffix(sv.size() - paren);
+//
+//        // now find the last "::" in the prefix:
+//        auto colcol = sv.rfind("::");
+//        if (colcol != std::string_view::npos) {
+//            // [qualifier]::[last]
+//            std::string_view qualifier = sv.substr(0, colcol);
+//            std::string_view last_part = sv.substr(colcol + 2);
+//
+//            // constructor: qualifier == last_part
+//            if (qualifier == last_part)
+//            {
+//                impl->functionType = qiti::FunctionType::constructor;
+//            }
+//            // destructor: last_part begins with '~' and qualifier == last_part.substr(1)
+//            else if (!last_part.empty() && last_part[0] == '~'
+//                     && qualifier == last_part.substr(1))
+//            {
+//                impl->functionType = qiti::FunctionType::destructor;
+//            }
+//        }
+//    }
 }
 
 //--------------------------------------------------------------------------

@@ -29,7 +29,7 @@
 #include <cstring>
 #include <map>
 #include <mutex>
-#include <string>
+//#include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -50,27 +50,28 @@ std::mutex qiti_lock;
 
 namespace qiti
 {
-size_t getAllKnownFunctions(char* flatBuf,
-                            size_t maxFunctions,
-                            size_t maxNameLen) noexcept
+size_t getAllKnownFunctions(char* /*flatBuf*/,
+                            size_t /*maxFunctions*/,
+                            size_t /*maxNameLen*/) noexcept
 {
-    auto& map = getFunctionMap();
-    size_t count = std::min(map.size(), maxFunctions);
-
-    size_t i = 0;
-    for (auto it = map.begin(); it != map.end() && i < count; ++it, ++i)
-    {
-        const std::string& name = it->second.getFunctionName();
-        // copy up to maxNameLen-1 chars, then force '\0'
-        std::strncpy(
-          flatBuf + i * maxNameLen,
-          name.c_str(),
-          maxNameLen - 1
-        );
-        flatBuf[i * maxNameLen + (maxNameLen - 1)] = '\0';
-    }
-
-    return count;
+    return 0;
+//    auto& map = getFunctionMap();
+//    size_t count = std::min(map.size(), maxFunctions);
+//
+//    size_t i = 0;
+//    for (auto it = map.begin(); it != map.end() && i < count; ++it, ++i)
+//    {
+//        const std::string& name = it->second.getFunctionName();
+//        // copy up to maxNameLen-1 chars, then force '\0'
+//        std::strncpy(
+//          flatBuf + i * maxNameLen,
+//          name.c_str(),
+//          maxNameLen - 1
+//        );
+//        flatBuf[i * maxNameLen + (maxNameLen - 1)] = '\0';
+//    }
+//
+//    return count;
 }
 
 void* getAddressForMangledFunctionName(const char* mangledName) noexcept
@@ -96,20 +97,21 @@ void* getAddressForMangledFunctionName(const char* mangledName) noexcept
     return it->second;
 }
 
-[[nodiscard]] const qiti::FunctionData* getFunctionData(const char* demangledFunctionName) noexcept
+[[nodiscard]] const qiti::FunctionData* getFunctionData(const char* /*demangledFunctionName*/) noexcept
 {
-    auto& g_functionMap = getFunctionMap();
-    
-    auto it = std::find_if(g_functionMap.begin(), g_functionMap.end(),
-                           [demangledFunctionName](const std::pair<void*, const qiti::FunctionData&>& pair)
-                           {
-                               return pair.second.getFunctionName() == std::string(demangledFunctionName);
-                           });
-    
-    if (it == g_functionMap.end()) // function not found
-        return nullptr;
-    
-    return &(it->second);
+    return nullptr;
+//    auto& g_functionMap = getFunctionMap();
+//    
+//    auto it = std::find_if(g_functionMap.begin(), g_functionMap.end(),
+//                           [demangledFunctionName](const std::pair<void*, const qiti::FunctionData&>& pair)
+//                           {
+//                               return pair.second.getFunctionName() == std::string(demangledFunctionName);
+//                           });
+//    
+//    if (it == g_functionMap.end()) // function not found
+//        return nullptr;
+//    
+//    return &(it->second);
 }
 
 void demangle(const char* mangled_name, char* demangled_name, uint64_t demangled_size) noexcept
