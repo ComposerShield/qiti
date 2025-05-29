@@ -127,10 +127,6 @@ INTERFACE
     "-O0" # no optimizations
 )
 
-set_target_properties(qiti_lib PROPERTIES
-  LINKER_LANGUAGE CXX
-)
-
 target_compile_definitions(qiti_lib
 PRIVATE
     QITI_DYLIB=1
@@ -184,10 +180,6 @@ PRIVATE
     # Linux Requirements
     Threads::Threads
     ${CMAKE_CXX_IMPLICIT_LINK_LIBRARIES}
-)
-
-set_target_properties(qiti_tests PROPERTIES
-    LINKER_LANGUAGE CXX
 )
 
 target_compile_options(qiti_tests 
