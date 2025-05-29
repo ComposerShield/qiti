@@ -59,9 +59,12 @@ void* QITI_API malloc(size_t __size);
 
 void* QITI_API operator new(size_t size)
 {
-//    ++g_numHeapAllocationsOnCurrentThread;
-//    if (auto callback = std::exchange(g_onNextHeapAllocation, nullptr))
-//        callback();
+    ++g_numHeapAllocationsOnCurrentThread;
+    if (g_onNextHeapAllocation != nullptr)
+    {
+        g_onNextHeapAllocation();
+        g_onNextHeapAllocation = nullptr
+    }
     
     // Original implementation
     void* p = malloc(size);
