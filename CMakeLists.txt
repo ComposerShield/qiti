@@ -65,15 +65,6 @@ add_library(qiti_example_target SHARED ${EXAMPLE_SOURCES})
 target_link_libraries(qiti_example_target
 PRIVATE
     qiti_lib
-
-    # Linux Requirements
-    Threads::Threads
-)
-
-target_link_libraries(qiti_lib
-PRIVATE
-    # Linux Requirement
-    Threads::Threads
 )
 
 if(APPLE)
@@ -173,9 +164,6 @@ PRIVATE
     qiti_lib
     qiti_tests_client
     Catch2::Catch2WithMain
-
-    # Linux Requirements
-    Threads::Threads
 )
 
 target_compile_options(qiti_tests 
