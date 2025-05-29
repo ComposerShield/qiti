@@ -26,7 +26,7 @@
 #include <array>
 #include <cassert>
 #include <cstdint>
-//#include <cstring>
+#include <cstring>
 #include <utility>
 #include <thread>
 
@@ -86,18 +86,18 @@ FunctionData::FunctionData(void* functionAddress) noexcept
     
     impl->address = functionAddress;
     
-//    Dl_info info;
-//    if (dladdr(functionAddress, &info))
-//    {
-//        strncpy(impl->functionNameMangled, info.dli_sname, sizeof(impl->functionNameMangled) - 1);
-//        char functionNameDemangled[256];
-//        qiti::demangle(info.dli_sname, functionNameDemangled, sizeof(functionNameDemangled));
-//        strncpy(impl->functionNameReal, functionNameDemangled, sizeof(impl->functionNameReal) - 1);
-//    }
-//    else
-//    {
-//        std::terminate(); // TODO: will this ever happen?
-//    }
+    Dl_info info;
+    if (dladdr(functionAddress, &info))
+    {
+        strncpy(impl->functionNameMangled, info.dli_sname, sizeof(impl->functionNameMangled) - 1);
+        char functionNameDemangled[256];
+        qiti::demangle(info.dli_sname, functionNameDemangled, sizeof(functionNameDemangled));
+        strncpy(impl->functionNameReal, functionNameDemangled, sizeof(impl->functionNameReal) - 1);
+    }
+    else
+    {
+        std::terminate(); // TODO: will this ever happen?
+    }
 }
 
 FunctionData::~FunctionData() noexcept

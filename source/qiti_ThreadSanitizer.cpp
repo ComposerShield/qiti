@@ -35,14 +35,14 @@
 #include <optional>
 #include <regex>
 #include <sstream>
-//#include <string>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
 //--------------------------------------------------------------------------
 
-//static constexpr const char* QITI_TSAN_LOG_PATH = "/tmp/tsan.log";
+static constexpr const char* QITI_TSAN_LOG_PATH = "/tmp/tsan.log";
 
 namespace fs = std::filesystem;
 
@@ -52,22 +52,22 @@ namespace fs = std::filesystem;
  @param prefix The log file prefix to search for.
  @returns an optional containing the latest path, or nullopt if none found.
 */
-//[[nodiscard]] static std::optional<fs::path> findLatestLog(const std::string& prefix) noexcept
-//{
-//    std::optional<fs::path> best;
-//    fs::path dir = fs::path(prefix).parent_path();
-//    std::string base = fs::path(prefix).filename().string();
-//    for (auto& ent : fs::directory_iterator(dir))
-//    {
-//        auto fn = ent.path().filename().string();
-//        if (fn.rfind(base, 0) == 0)
-//        {
-//            if (!best || fs::last_write_time(ent) > fs::last_write_time(*best))
-//                best = ent.path();
-//        }
-//    }
-//    return best;
-//}
+[[nodiscard]] static std::optional<fs::path> findLatestLog(const std::string& prefix) noexcept
+{
+    std::optional<fs::path> best;
+    fs::path dir = fs::path(prefix).parent_path();
+    std::string base = fs::path(prefix).filename().string();
+    for (auto& ent : fs::directory_iterator(dir))
+    {
+        auto fn = ent.path().filename().string();
+        if (fn.rfind(base, 0) == 0)
+        {
+            if (!best || fs::last_write_time(ent) > fs::last_write_time(*best))
+                best = ent.path();
+        }
+    }
+    return best;
+}
 
 /**
  Read a file fully into a string.
@@ -75,12 +75,12 @@ namespace fs = std::filesystem;
  @param path Path of the file to read.
  @returns the file contents; empty string on failure.
 */
-//[[nodiscard]] static std::string slurpFile(const fs::path& path) noexcept
-//{
-//    std::ifstream in(path, std::ios::binary);
-//    return { std::istreambuf_iterator<char>(in),
-//             std::istreambuf_iterator<char>() };
-//}
+[[nodiscard]] static std::string slurpFile(const fs::path& path) noexcept
+{
+    std::ifstream in(path, std::ios::binary);
+    return { std::istreambuf_iterator<char>(in),
+             std::istreambuf_iterator<char>() };
+}
 
 //--------------------------------------------------------------------------
 namespace qiti
@@ -94,78 +94,78 @@ public:
     /** */
     QITI_API_INTERNAL ~DataRaceDetector() noexcept override = default;
     
-    void QITI_API run(std::function<void()> /*func*/) noexcept override
+    void QITI_API run(std::function<void()> func) noexcept override
     {
-//        constexpr char const* logPrefix = QITI_TSAN_LOG_PATH;
-//
-//        // wipe any old logs
-////        std::system(("rm -f " + std::string(logPrefix) + "*").c_str());
-//
-//        // fork & exec the helper that runs the race
-//        pid_t pid = fork();
-//        assert(pid >= 0);
-//        if (pid == 0)
-//        {
-//            // Child: drop into the helper binary
-//            func();   // run the function in child process, scannning for data races
-//            _exit(0); // clean exit of child process, may signal due to TSan
-//        }
-//
-//        // Parent: wait for child to exit (TSan will have exit()ed, flushing the log)
-//        int status = 0;
-//        pid_t w;
-//        do
-//        {
-//            w = waitpid(pid, &status, 0);
-//        }
-//        while (w == -1 && errno == EINTR);
-//
-//        assert(w == pid);
-//        
-//        if (WIFEXITED(status))
-//        {
-//            [[maybe_unused]] auto statusCode = WEXITSTATUS(status);
-////            assert(statusCode != 0);  // expect non-zero on race
-//        }
-//        else if (WIFSIGNALED(status))
-//        {
-//            // Child killed by signal
-//            int sig = WTERMSIG(status);
-//            assert(sig == SIGTRAP);            // or allow SIGABRT if you switch to abort()
-//        }
-//        else
-//        {
-//            std::terminate(); // Child neither exited nor was signaled?
-//        }
-//        
-//        [[maybe_unused]] auto exitStatus = WEXITSTATUS(status);
-//    //    assert(exitStatus == 0); // Causes crash in CI
-//
-//        // Now read the newly created tsan.log.*
-////        auto logPath = findLatestLog(logPrefix);
-////        if (logPath.has_value()) // new TSan file was written
-////        {
-////            std::string report = slurpFile(*logPath);
-////            
-////            // Look for “data race” anywhere in the report
-////            if (std::regex_search(report, std::regex(R"(data race)")))
-////            {
-////                flagFailed();
-////                
-////                std::cout << "Data race detected!\n";
-////
-////                static const std::regex summary_rx(R"(^.*SUMMARY:.*$)",
-////                                                   std::regex_constants::multiline);
-////                std::smatch sm;
-////                if (std::regex_search(report, sm, summary_rx))
-////                    std::cout << sm.str() << "\n";
-////                else
-////                    std::cout << "no SUMMARY found\n";
-////            }
-//        }
-//        
-//        // cleanup log that was created
-////        std::system(("rm -f " + std::string(logPrefix) + "*").c_str());
+        constexpr char const* logPrefix = QITI_TSAN_LOG_PATH;
+
+        // wipe any old logs
+        std::system(("rm -f " + std::string(logPrefix) + "*").c_str());
+
+        // fork & exec the helper that runs the race
+        pid_t pid = fork();
+        assert(pid >= 0);
+        if (pid == 0)
+        {
+            // Child: drop into the helper binary
+            func();   // run the function in child process, scannning for data races
+            _exit(0); // clean exit of child process, may signal due to TSan
+        }
+
+        // Parent: wait for child to exit (TSan will have exit()ed, flushing the log)
+        int status = 0;
+        pid_t w;
+        do
+        {
+            w = waitpid(pid, &status, 0);
+        }
+        while (w == -1 && errno == EINTR);
+
+        assert(w == pid);
+        
+        if (WIFEXITED(status))
+        {
+            [[maybe_unused]] auto statusCode = WEXITSTATUS(status);
+//            assert(statusCode != 0);  // expect non-zero on race
+        }
+        else if (WIFSIGNALED(status))
+        {
+            // Child killed by signal
+            int sig = WTERMSIG(status);
+            assert(sig == SIGTRAP);            // or allow SIGABRT if you switch to abort()
+        }
+        else
+        {
+            std::terminate(); // Child neither exited nor was signaled?
+        }
+        
+        [[maybe_unused]] auto exitStatus = WEXITSTATUS(status);
+    //    assert(exitStatus == 0); // Causes crash in CI
+
+        // Now read the newly created tsan.log.*
+        auto logPath = findLatestLog(logPrefix);
+        if (logPath.has_value()) // new TSan file was written
+        {
+            std::string report = slurpFile(*logPath);
+            
+            // Look for “data race” anywhere in the report
+            if (std::regex_search(report, std::regex(R"(data race)")))
+            {
+                flagFailed();
+                
+                std::cout << "Data race detected!\n";
+
+                static const std::regex summary_rx(R"(^.*SUMMARY:.*$)",
+                                                   std::regex_constants::multiline);
+                std::smatch sm;
+                if (std::regex_search(report, sm, summary_rx))
+                    std::cout << sm.str() << "\n";
+                else
+                    std::cout << "no SUMMARY found\n";
+            }
+        }
+        
+        // cleanup log that was created
+        std::system(("rm -f " + std::string(logPrefix) + "*").c_str());
     }
     
 private:
