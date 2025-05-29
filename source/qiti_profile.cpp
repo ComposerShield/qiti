@@ -63,7 +63,7 @@ void* QITI_API operator new(size_t size)
     if (g_onNextHeapAllocation != nullptr)
     {
         g_onNextHeapAllocation();
-        g_onNextHeapAllocation = nullptr
+        g_onNextHeapAllocation = nullptr;
     }
     
     // Original implementation
