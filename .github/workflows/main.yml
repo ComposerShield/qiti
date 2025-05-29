@@ -10,7 +10,8 @@ on:
 
 jobs:
   mac-build-xcode:
-    if: false # temporarily disable to save money
+    # main branch only, or PRs into main
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: macos-15
 
     steps:
@@ -34,8 +35,7 @@ jobs:
           ctest -C Debug
 
   mac-build-clang-ninja:
-    if: false # temporarily disable to save money
-    runs-on: ubuntu-latest
+    runs-on: macos-15
     
     steps:
       - name: Checkout code
@@ -47,12 +47,11 @@ jobs:
           echo "PATH=$(brew --prefix llvm@16)/bin:$PATH" >> $GITHUB_ENV
 
       - name: Configure CMake (Ninja, LLVM Clang)
-        run:  |
-          cmake . -B build \
-          -G Ninja \
-          -DCMAKE_BUILD_TYPE=Debug \
-          -DCMAKE_C_COMPILER=clang \
-          -DCMAKE_CXX_COMPILER=clang++
+        run: cmake . -B build \
+             -G Ninja \
+             -DCMAKE_BUILD_TYPE=Debug \
+             -DCMAKE_C_COMPILER=clang \
+             -DCMAKE_CXX_COMPILER=clang++
 
       - name: Build
         run: cmake --build build --target qiti_tests

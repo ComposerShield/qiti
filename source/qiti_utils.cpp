@@ -179,6 +179,9 @@ __cyg_profile_func_exit(void * this_fn, [[maybe_unused]] void* call_site) noexce
 
 //--------------------------------------------------------------------------
 
+#if ! defined(__APPLE__)
+// Linux-only:
 // Force‐instantiate the char allocator, to prevent potential linker errors
 // with its some of its function symbols not being resolved.
 template class __attribute__((visibility("default"))) std::allocator<char>;
+#endif // ! defined(__APPLE__)

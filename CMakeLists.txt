@@ -65,18 +65,6 @@ add_library(qiti_example_target SHARED ${EXAMPLE_SOURCES})
 target_link_libraries(qiti_example_target
 PRIVATE
     qiti_lib
-
-    # Linux Requirements
-    Threads::Threads
-    ${CMAKE_CXX_IMPLICIT_LINK_LIBRARIES}
-)
-
-target_link_libraries(qiti_lib
-PUBLIC
-    ${CMAKE_CXX_IMPLICIT_LINK_LIBRARIES}
-PRIVATE
-    # Linux Requirement
-    Threads::Threads
 )
 
 if(APPLE)
@@ -125,10 +113,6 @@ INTERFACE
     "-fsanitize=thread" # thread sanitizer
     "-g"  
     "-O0" # no optimizations
-)
-
-set_target_properties(qiti_lib PROPERTIES
-  LINKER_LANGUAGE CXX
 )
 
 target_compile_definitions(qiti_lib
@@ -180,14 +164,6 @@ PRIVATE
     qiti_lib
     qiti_tests_client
     Catch2::Catch2WithMain
-
-    # Linux Requirements
-    Threads::Threads
-    ${CMAKE_CXX_IMPLICIT_LINK_LIBRARIES}
-)
-
-set_target_properties(qiti_tests PROPERTIES
-    LINKER_LANGUAGE CXX
 )
 
 target_compile_options(qiti_tests 
@@ -302,6 +278,3 @@ function(Doxygen input output)
 endfunction()
 
 Doxygen(source docs)
-
-
-message(STATUS "CMAKE_CXX_IMPLICIT_LINK_LIBRARIES: ${CMAKE_CXX_IMPLICIT_LINK_LIBRARIES}")
