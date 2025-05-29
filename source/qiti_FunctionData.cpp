@@ -13,6 +13,8 @@
  * See LICENSE.txt for license terms.
  ******************************************************************************/
 
+#define _GLIBCXX_EXTERN_TEMPLATE 0
+
 #include "qiti_FunctionData.hpp"
 
 #include "qiti_FunctionData_Impl.hpp"

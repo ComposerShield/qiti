@@ -13,6 +13,8 @@
  * See LICENSE.txt for license terms.
  ******************************************************************************/
 
+#define _GLIBCXX_EXTERN_TEMPLATE 0
+
 #include "qiti_ThreadSanitizer.hpp"
 
 #include "qiti_FunctionData.hpp"
