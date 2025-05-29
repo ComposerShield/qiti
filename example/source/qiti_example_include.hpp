@@ -60,5 +60,12 @@ private:
 } // namespace ThreadSanitizer
 
 //--------------------------------------------------------------------------
+
+namespace utils
+{
+void testFunc0() noexcept;
+} // namespace utils
+
+//--------------------------------------------------------------------------
 } // namespace example
 } // namespace qiti

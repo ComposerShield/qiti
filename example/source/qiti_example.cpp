@@ -79,5 +79,15 @@ void TestClass::incrementCounter() noexcept
 } // namespace ThreadSanitizer
 
 //--------------------------------------------------------------------------
+
+namespace utils
+{
+void testFunc0() noexcept
+{
+    volatile int _ = 42;
+}
+} // namespace utils
+
+//--------------------------------------------------------------------------
 } // namespace example
 } // namespace qiti
