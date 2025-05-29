@@ -25,11 +25,13 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <cstdio>
-#include <cstring>
+//#include <cstring>
 #include <map>
+#include <memory>
 #include <mutex>
-//#include <string>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -50,28 +52,27 @@ std::mutex qiti_lock;
 
 namespace qiti
 {
-size_t getAllKnownFunctions(char* /*flatBuf*/,
-                            size_t /*maxFunctions*/,
-                            size_t /*maxNameLen*/) noexcept
+size_t getAllKnownFunctions(char* flatBuf,
+                            size_t maxFunctions,
+                            size_t maxNameLen) noexcept
 {
-    return 0;
-//    auto& map = getFunctionMap();
-//    size_t count = std::min(map.size(), maxFunctions);
-//
-//    size_t i = 0;
-//    for (auto it = map.begin(); it != map.end() && i < count; ++it, ++i)
-//    {
-//        const std::string& name = it->second.getFunctionName();
-//        // copy up to maxNameLen-1 chars, then force '\0'
-//        std::strncpy(
-//          flatBuf + i * maxNameLen,
-//          name.c_str(),
-//          maxNameLen - 1
-//        );
-//        flatBuf[i * maxNameLen + (maxNameLen - 1)] = '\0';
-//    }
-//
-//    return count;
+    auto& map = getFunctionMap();
+    size_t count = std::min(map.size(), maxFunctions);
+
+    size_t i = 0;
+    for (auto it = map.begin(); it != map.end() && i < count; ++it, ++i)
+    {
+        const std::string& name = it->second.getFunctionName();
+        // copy up to maxNameLen-1 chars, then force '\0'
+        std::strncpy(
+          flatBuf + i * maxNameLen,
+          name.c_str(),
+          maxNameLen - 1
+        );
+        flatBuf[i * maxNameLen + (maxNameLen - 1)] = '\0';
+    }
+
+    return count;
 }
 
 void* getAddressForMangledFunctionName(const char* mangledName) noexcept
@@ -172,3 +173,18 @@ __cyg_profile_func_exit(void * this_fn, [[maybe_unused]] void* call_site) noexce
         qiti::profile::updateFunctionDataOnExit(this_fn);
     }
 }
+
+//--------------------------------------------------------------------------
+
+// Force‐instantiate the char allocator, and its two methods:
+
+// Force‐instantiate the allocator class itself (all members visible):
+template class __attribute__((visibility("default"))) std::allocator<char>;
+
+// Force‐instantiate and export allocate():
+template char* __attribute__((visibility("default")))
+std::allocator<char>::allocate(std::size_t n);
+
+// Force‐instantiate and export deallocate():
+template void __attribute__((visibility("default")))
+std::allocator<char>::deallocate(char* ptr, std::size_t n);
