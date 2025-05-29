@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-
 project(Qiti LANGUAGES C CXX)
-# Disable Link Time Optimization to prevent non‑Mach‑O object files in archives
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
 
 if(NOT (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"))
     message(FATAL_ERROR "Only Clang or Apple Clang compilers are supported")
