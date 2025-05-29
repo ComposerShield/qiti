@@ -83,7 +83,6 @@ TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
     QITI_CHECK(! tsan->passed());
     QITI_CHECK(tsan->failed());
 }
-#endif // defined(__APPLE__)
 
 TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce false positive")
 {
@@ -97,7 +96,6 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce fals
     QITI_REQUIRE_FALSE(dataRaceDetector->failed());
 }
 
-#if defined(__APPLE__) // TODO: support Linux
 TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of global variable")
 {
     qiti::ScopedQitiTest test;
