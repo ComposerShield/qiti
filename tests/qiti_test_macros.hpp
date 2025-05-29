@@ -1,5 +1,6 @@
 
 #include <cassert>
+#include <cstring> // for std::strerror
 
 #if defined (DEBUG) || defined (_DEBUG) || ! (defined (NDEBUG) || defined (_NDEBUG))
     #define QITI_DEBUG_ASSERT(expression) assert(expression)
@@ -31,11 +32,12 @@
 
 // "Death Tests"
 
+#include <sys/types.h>  // required for wait.h
+#include <sys/wait.h>   // for waitpid
+#include <unistd.h>     // for fork()
+
 #include <csignal>
 #include <functional>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
 
 /** Return true if f() causes the child to abort with SIGABRT. */
 namespace qiti

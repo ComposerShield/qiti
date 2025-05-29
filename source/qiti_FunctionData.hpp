@@ -108,8 +108,8 @@ public:
     
 private:
     // Stack-based pimpl idiom
-    static constexpr std::size_t ImplSize  = 488;
-    static constexpr std::size_t ImplAlign =  8;
+    static constexpr std::size_t ImplSize  = 504;
+    static constexpr std::size_t ImplAlign = 8;
     alignas(ImplAlign) unsigned char implStorage[ImplSize];
     
     /** Copy Constructor (deleted) */

@@ -17,8 +17,9 @@
 
 #include "qiti_API.hpp"
 
-#include <cstdint>
 #include <dlfcn.h>
+
+#include <cstdint>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -109,30 +110,5 @@ requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
     static constexpr auto* address = FuncPtr;
     return &getFunctionDataFromAddress(reinterpret_cast<void*>(address));
 }
-
-/** */
-/*
-// Likely no longer needed
-template <auto FuncPtr>
-[[nodiscard]] const qiti::FunctionData* QITI_API_INTERNAL getFunctionDataImpl() noexcept
-{
-    static constexpr std::string_view functionName = getFunctionName<FuncPtr>();
-    static constexpr std::string_view appendText = "()";
-    static constexpr auto output = []
-    {
-        std::array<char, functionName.size() + appendText.size() + 1> buf{}; // each value initialized to '\0'
-        // copy from functionName
-        for (size_t i = 0; i < functionName.size(); ++i)
-            buf[i] = functionName[i];
-        // copy from appendText
-        for (size_t i = 0; i < appendText.size(); ++i)
-            buf[i + functionName.size()] = appendText[i];
-        // buf[Sv.size()] is already '\0'
-        return buf;
-    }();
-    
-    return getFunctionData(output.data());
-}
- */
 
 } // namespace qiti

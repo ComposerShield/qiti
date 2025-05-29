@@ -13,6 +13,8 @@
  * See LICENSE.txt for license terms.
  ******************************************************************************/
 
+#pragma once
+
 #include "qiti_API.hpp"
 
 #include <cstdint>
