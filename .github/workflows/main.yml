@@ -34,7 +34,7 @@ jobs:
           ctest -C Debug
 
   mac-build-clang-ninja:
-    if: false # temporarily disable to save money
+    if: true
     runs-on: ubuntu-latest
     
     steps:
