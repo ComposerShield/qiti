@@ -11,6 +11,7 @@
 // Qiti Private API - not included in qiti_include.hpp
 #include "qiti_utils.hpp"
 
+#include <iostream>
 #include <string>
 
 /** NOT static to purposely allow external linkage and visibility to QITI */
@@ -22,22 +23,22 @@ __attribute__((noinline)) __attribute__((optnone))
     return std::string(demangled);
 }
 
-//TEST_CASE("qiti::getFunctionName()")
-//{
-//    qiti::ScopedQitiTest test;
-//    
-//    SECTION("Simple static function from this translation unit")
-//    {
-//        auto name = qiti::getFunctionName<&demangleFunc>();
-//        QITI_REQUIRE(name == "demangleFunc");
-//    }
-//    
-//    SECTION("Complex, namespaced, templated/typedef, STL function")
-//    {
-//        auto name = qiti::getFunctionName<&std::string::empty>();
-//        QITI_REQUIRE(name == "std::basic_string<char>::empty");
-//    }
-//}
+TEST_CASE("qiti::getFunctionName()")
+{
+    qiti::ScopedQitiTest test;
+    
+    SECTION("Simple static function from this translation unit")
+    {
+        auto name = qiti::getFunctionName<&demangleFunc>();
+        QITI_REQUIRE(name == "demangleFunc");
+    }
+    
+    SECTION("Complex, namespaced, templated/typedef, STL function")
+    {
+        auto name = qiti::getFunctionName<&std::string::empty>();
+        QITI_REQUIRE(name == "std::basic_string<char>::empty");
+    }
+}
 
 TEST_CASE("qiti::demangle() on valid Itanium‐ABI mangled names")
 {
