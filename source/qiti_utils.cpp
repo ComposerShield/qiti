@@ -151,6 +151,9 @@ void resetAll() noexcept
 extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
 __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site) noexcept
 {
+    if (this_fn == reinterpret_cast<void*>(&malloc))
+        return;
+    
     static thread_local int recursionCheck = 0;
     ++recursionCheck;
     assert (recursionCheck == 1);
