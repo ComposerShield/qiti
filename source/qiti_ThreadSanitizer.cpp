@@ -40,7 +40,7 @@
 
 //--------------------------------------------------------------------------
 
-static constexpr const char* QITI_TSAN_LOG_PATH = "/tmp/tsan.log";
+//static constexpr const char* QITI_TSAN_LOG_PATH = "/tmp/tsan.log";
 
 namespace fs = std::filesystem;
 
