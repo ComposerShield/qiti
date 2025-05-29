@@ -20,7 +20,6 @@
 using namespace qiti::example::utils;
 
 __attribute__((visibility("default")))
-__attribute__((no_sanitize("thread")))
 __attribute__((noinline))
 void localTestFunc()
 {
