@@ -22,6 +22,9 @@
 #include <functional>
 
 //--------------------------------------------------------------------------
+// Doxygen - Begin Internal Documentation
+/** \cond INTERNAL */
+//--------------------------------------------------------------------------
 
 namespace qiti
 {
@@ -30,23 +33,27 @@ namespace qiti
 class MallocHooks
 {
 public:
-    QITI_API_VAR static thread_local bool bypassMallocHooks;
-    QITI_API_VAR static thread_local uint64_t g_numHeapAllocationsOnCurrentThread;
-    QITI_API_VAR static thread_local std::function<void()> g_onNextHeapAllocation;
+    static thread_local bool bypassMallocHooks;
+    static thread_local uint32_t numHeapAllocationsOnCurrentThread;
+    static thread_local uint64_t amountHeapAllocatedOnCurrentThread;
+    static thread_local std::function<void()> onNextHeapAllocation;
     
     struct ScopedBypassMallocHooks
     {
-        QITI_API ScopedBypassMallocHooks() noexcept
+        QITI_API_INTERNAL ScopedBypassMallocHooks() noexcept
         : previous(bypassMallocHooks) { bypassMallocHooks = true; }
         
-        QITI_API ~ScopedBypassMallocHooks() noexcept { bypassMallocHooks = previous; }
+        QITI_API_INTERNAL ~ScopedBypassMallocHooks() noexcept { bypassMallocHooks = previous; }
     private:
         const bool previous;
     };
     
-    __attribute__((no_sanitize_thread))
-    static bool QITI_API getBypassMallocHooks();
-    
-    static void QITI_API mallocHook() noexcept;
+    /** */
+    static void QITI_API mallocHook(std::size_t size) noexcept;
 };
 } // namespace qiti
+
+//--------------------------------------------------------------------------
+/** \endcond */
+// Doxygen - End Internal Documentation
+//--------------------------------------------------------------------------

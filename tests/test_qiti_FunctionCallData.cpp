@@ -10,7 +10,7 @@
 
 using namespace qiti::example::FunctionCallData;
 
-TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations() returns expected values")
+TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations()")
 {
     qiti::ScopedQitiTest test;
     
@@ -37,5 +37,22 @@ TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations() returns expected valu
         
         auto lastFunctionCall = funcData->getLastFunctionCall();
         QITI_REQUIRE(lastFunctionCall.getNumHeapAllocations() == 0);
+    }
+}
+
+TEST_CASE("qiti::FunctionCallData::getAmountHeapAllocated()")
+{
+    qiti::ScopedQitiTest test;
+    
+    SECTION("1 heap allocations")
+    {
+        auto funcData = qiti::FunctionData::getFunctionData<&testHeapAllocation>();
+        QITI_REQUIRE(funcData != nullptr);
+        
+        testHeapAllocation(); // contains 1 int allocaation
+        
+        auto lastFunctionCall = funcData->getLastFunctionCall();
+        auto amountAllocated = lastFunctionCall.getAmountHeapAllocated();
+        QITI_REQUIRE(amountAllocated == sizeof(int));
     }
 }
