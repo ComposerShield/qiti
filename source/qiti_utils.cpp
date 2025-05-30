@@ -17,7 +17,7 @@
 
 #include "qiti_include.hpp"
 #include "qiti_instrument.hpp"
-
+#include "qiti_MallocHooks.hpp"
 #include "qiti_ReentrantSharedMutex.hpp"
 
 #include <cxxabi.h>
@@ -43,8 +43,6 @@
 qiti::ReentrantSharedMutex qiti_global_lock;
 
 std::mutex qiti_lock;
-
-extern thread_local std::recursive_mutex bypassMallocHooksLock;
 
 /** */
 [[nodiscard]] static auto& getFunctionMap() noexcept
@@ -155,10 +153,10 @@ void resetAll() noexcept
 extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
 __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site) noexcept
 {
-    std::scoped_lock mallocHooksLock(bypassMallocHooksLock);
-    
     if (qiti::profile::isProfilingFunction(this_fn))
     {
+        qiti::MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
+        
         std::scoped_lock<std::mutex> lock(qiti_lock);
         qiti::profile::updateFunctionDataOnEnter(this_fn);
     }
@@ -167,10 +165,10 @@ __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site) noexce
 extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
 __cyg_profile_func_exit(void * this_fn, [[maybe_unused]] void* call_site) noexcept
 {
-    std::scoped_lock mallocHooksLock(bypassMallocHooksLock);
-
     if (qiti::profile::isProfilingFunction(this_fn))
     {
+        qiti::MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
+        
         std::scoped_lock<std::mutex> lock(qiti_lock);
         qiti::profile::updateFunctionDataOnExit(this_fn);
     }

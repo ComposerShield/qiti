@@ -15,6 +15,7 @@
 
 #include "qiti_instrument.hpp"
 
+#include "qiti_MallocHooks.hpp"
 #include "qiti_ScopedNoHeapAllocations.hpp"
 
 #include <cassert>
@@ -24,9 +25,6 @@
 //--------------------------------------------------------------------------
 
 #ifndef QITI_DISABLE_INSTRUMENTS
-/** Note: not static, external linkage so it can be used in other translation units. */
-extern thread_local std::function<void()> g_onNextHeapAllocation;
-
 extern std::recursive_mutex qiti_global_lock;
 
 namespace qiti
@@ -40,14 +38,14 @@ void resetInstrumentation() noexcept
     
     qiti::ScopedNoHeapAllocations noAlloc;
     
-    g_onNextHeapAllocation = nullptr;
+    MallocHooks::g_onNextHeapAllocation = nullptr;
 }
 
 void onNextHeapAllocation(void (*heapAllocCallback)()) noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     
-    g_onNextHeapAllocation = heapAllocCallback;
+    MallocHooks::g_onNextHeapAllocation = heapAllocCallback;
 }
 
 void assertOnNextHeapAllocation() noexcept

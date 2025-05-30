@@ -16,7 +16,7 @@
 #include "qiti_FunctionData.hpp"
 
 #include "qiti_FunctionData_Impl.hpp"
-
+#include "qiti_MallocHooks.hpp"
 #include "qiti_ScopedNoHeapAllocations.hpp"
 
 #include <dlfcn.h>
@@ -30,8 +30,6 @@
 #include <thread>
 
 //--------------------------------------------------------------------------
-
-extern thread_local std::recursive_mutex bypassMallocHooksLock;
 
 static constexpr size_t MAX_THREADS = qiti::FunctionData::Impl::MAX_THREADS;
 static constexpr size_t THREAD_ID_NOT_FOUND   = MAX_THREADS;
@@ -78,7 +76,7 @@ FunctionData::FunctionData(void* functionAddress) noexcept
     static_assert(alignof(FunctionData::Impl) == FunctionData::ImplAlign,
                   "Impl alignment stricter than FunctionData::implStorage");
     
-    std::scoped_lock mallocHooksLock(bypassMallocHooksLock); // This function contains heap allocations
+    MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
     
     // Allocate Impl on the stack instead of the heap
     new (implStorage) Impl;

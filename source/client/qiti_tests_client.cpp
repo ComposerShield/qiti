@@ -13,19 +13,22 @@
  * See LICENSE.txt for license terms.
  ******************************************************************************/
 
- #include <stdlib.h>
+// Qiti Shared API
+#include "../../source/qiti_MallocHooks.hpp"
 
- #include <cstdint>
- #include <functional>
- #include <mutex>
+// TSAN
+#include <sanitizer/common_interface_defs.h>
+
+#include <stdlib.h>
+
+#include <atomic>
+#include <cstdint>
+#include <functional>
+#include <mutex>
 
  //--------------------------------------------------------------------------
 
 #define QITI_TSAN_LOG_PATH "/tmp/tsan.log"
-
-thread_local std::recursive_mutex bypassMallocHooksLock;
-thread_local uint64_t g_numHeapAllocationsOnCurrentThread = 0;
-thread_local std::function<void()> g_onNextHeapAllocation = nullptr;
 
 static constexpr const char TSAN_DEFAULT_OPTS[] = "report_thread_leaks=0"
                                                   ":abort_on_error=0"
@@ -47,25 +50,13 @@ const char* __tsan_default_options()
 
 //--------------------------------------------------------------------------
 
-extern "C" void __sanitizer_malloc_hook([[maybe_unused]] void* ptr, 
-                                        [[maybe_unused]] size_t size) 
+#if ! defined(__APPLE__)
+__attribute__((no_sanitize_thread))
+extern "C" void __sanitizer_malloc_hook([[maybe_unused]] void* ptr,
+                                        [[maybe_unused]] size_t size)
 {
-    std::unique_lock lock(bypassMallocHooksLock, std::try_to_lock);
-    
-    if (lock.owns_lock())
-    {
-        ++g_numHeapAllocationsOnCurrentThread;
-        if (g_onNextHeapAllocation != nullptr)
-        {
-            g_onNextHeapAllocation();
-            g_onNextHeapAllocation = nullptr;
-        }
-    }
+    qitiMallocHook();
 }
-
-extern "C" void __sanitizer_free_hook([[maybe_unused]] void* ptr) 
-{
-    // TODO: implement
-}
+#endif // ! defined(__APPLE__)
 
 //--------------------------------------------------------------------------

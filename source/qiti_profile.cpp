@@ -19,6 +19,7 @@
 #include "qiti_FunctionCallData.hpp"
 #include "qiti_FunctionData_Impl.hpp"
 #include "qiti_FunctionData.hpp"
+#include "qiti_MallocHooks.hpp"
 #include "qiti_ScopedNoHeapAllocations.hpp"
 
 #include <execinfo.h>
@@ -36,7 +37,7 @@
 
 //--------------------------------------------------------------------------
 
-std::unordered_set<void*> g_functionsToProfile;
+inline std::unordered_set<void*> g_functionsToProfile;
 bool g_profileAllFunctions = false;
 
 struct Init_g_functionsToProfile
@@ -48,7 +49,6 @@ struct Init_g_functionsToProfile
 };
 static const Init_g_functionsToProfile init_g_functionsToProfile;
 
-extern thread_local uint64_t g_numHeapAllocationsOnCurrentThread;
 extern std::recursive_mutex qiti_global_lock;
 
 //--------------------------------------------------------------------------
@@ -104,7 +104,7 @@ void resetProfiling() noexcept
         
     g_functionsToProfile.clear();
     g_profileAllFunctions = false;
-    g_numHeapAllocationsOnCurrentThread = 0;
+    MallocHooks::g_numHeapAllocationsOnCurrentThread = 0;
 }
 
 void beginProfilingFunction(void* functionAddress) noexcept
@@ -132,6 +132,7 @@ void endProfilingAllFunctions() noexcept
 
 bool isProfilingFunction(void* funcAddress) noexcept
 {
+    qiti::ScopedNoHeapAllocations noAlloc;
     return g_profileAllFunctions || g_functionsToProfile.contains(funcAddress);
 }
 
@@ -147,7 +148,7 @@ void endProfilingType(std::type_index /*functionAddress*/) noexcept
 
 uint64_t getNumHeapAllocationsOnCurrentThread() noexcept
 {
-    return g_numHeapAllocationsOnCurrentThread;
+    return MallocHooks::g_numHeapAllocationsOnCurrentThread;
 }
 
 void updateFunctionDataOnEnter(void* this_fn) noexcept
@@ -170,7 +171,7 @@ void updateFunctionDataOnEnter(void* this_fn) noexcept
     lastCallImpl->begin_time = std::chrono::steady_clock::now();
     lastCallImpl->callingThread = std::this_thread::get_id();
 #ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
-    impl->lastCallData.getImpl()->numHeapAllocationsBeforeFunctionCall = g_numHeapAllocationsOnCurrentThread;
+    impl->lastCallData.getImpl()->numHeapAllocationsBeforeFunctionCall = MallocHooks::g_numHeapAllocationsOnCurrentThread;
 #endif
     updateFunctionType(functionData);
 }
@@ -193,7 +194,7 @@ void updateFunctionDataOnExit(void* this_fn) noexcept
     callImpl->end_time = end_time;
     callImpl->timeSpentInFunctionNanoseconds = static_cast<uint64_t>(elapsed_ns.count());
 #ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
-    callImpl->numHeapAllocationsAfterFunctionCall = g_numHeapAllocationsOnCurrentThread;
+    callImpl->numHeapAllocationsAfterFunctionCall = MallocHooks::g_numHeapAllocationsOnCurrentThread;
 #endif
 }
 } // namespace profile
