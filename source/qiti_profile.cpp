@@ -104,7 +104,7 @@ void resetProfiling() noexcept
         
     g_functionsToProfile.clear();
     g_profileAllFunctions = false;
-    MallocHooks::g_numHeapAllocationsOnCurrentThread = 0;
+    MallocHooks::numHeapAllocationsOnCurrentThread = 0;
 }
 
 void beginProfilingFunction(void* functionAddress) noexcept
@@ -148,7 +148,12 @@ void endProfilingType(std::type_index /*functionAddress*/) noexcept
 
 uint64_t getNumHeapAllocationsOnCurrentThread() noexcept
 {
-    return MallocHooks::g_numHeapAllocationsOnCurrentThread;
+    return MallocHooks::numHeapAllocationsOnCurrentThread;
+}
+
+uint64_t getAmountHeapAllocatedOnCurrentThread() noexcept
+{
+    return MallocHooks::amountHeapAllocatedOnCurrentThread;
 }
 
 void updateFunctionDataOnEnter(void* this_fn) noexcept
@@ -170,9 +175,9 @@ void updateFunctionDataOnEnter(void* this_fn) noexcept
     auto* lastCallImpl = impl->lastCallData.getImpl();
     lastCallImpl->begin_time = std::chrono::steady_clock::now();
     lastCallImpl->callingThread = std::this_thread::get_id();
-#ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
-    impl->lastCallData.getImpl()->numHeapAllocationsBeforeFunctionCall = MallocHooks::g_numHeapAllocationsOnCurrentThread;
-#endif
+    lastCallImpl->numHeapAllocationsBeforeFunctionCall = MallocHooks::numHeapAllocationsOnCurrentThread;
+    lastCallImpl->amountHeapAllocatedBeforeFunctionCall = MallocHooks::amountHeapAllocatedOnCurrentThread;
+
     updateFunctionType(functionData);
 }
 
@@ -193,9 +198,8 @@ void updateFunctionDataOnExit(void* this_fn) noexcept
     // Update FunctionCallData
     callImpl->end_time = end_time;
     callImpl->timeSpentInFunctionNanoseconds = static_cast<uint64_t>(elapsed_ns.count());
-#ifndef QITI_DISABLE_HEAP_ALLOCATION_TRACKER
-    callImpl->numHeapAllocationsAfterFunctionCall = MallocHooks::g_numHeapAllocationsOnCurrentThread;
-#endif
+    callImpl->numHeapAllocationsAfterFunctionCall = MallocHooks::numHeapAllocationsOnCurrentThread;
+    callImpl->amountHeapAllocatedAfterFunctionCall = MallocHooks::amountHeapAllocatedOnCurrentThread;
 }
 } // namespace profile
 } // namespace qiti

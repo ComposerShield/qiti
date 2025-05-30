@@ -52,10 +52,10 @@ const char* __tsan_default_options()
 
 #if ! defined(__APPLE__)
 __attribute__((no_sanitize_thread))
-extern "C" void __sanitizer_malloc_hook([[maybe_unused]] void* ptr,
-                                        [[maybe_unused]] size_t size)
+extern "C" void __sanitizer_malloc_hook(void* /*ptr*/,
+                                        size_t size)
 {
-    qiti::MallocHooks::mallocHook();
+    qiti::MallocHooks::mallocHook(size);
 }
 #endif // ! defined(__APPLE__)
 

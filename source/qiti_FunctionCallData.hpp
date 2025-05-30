@@ -30,6 +30,9 @@ public:
     /** */
     [[nodiscard]] uint64_t QITI_API getNumHeapAllocations() const noexcept;
     
+    /** */
+    [[nodiscard]] uint64_t QITI_API getAmountHeapAllocated() const noexcept;
+    
     //--------------------------------------------------------------------------
     // Doxygen - Begin Internal Documentation
     /** \cond INTERNAL */

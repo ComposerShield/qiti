@@ -22,17 +22,11 @@ extern bool isQitiTestRunning() noexcept;
 //--------------------------------------------------------------------------
 
 thread_local bool qiti::MallocHooks::bypassMallocHooks = false;
+thread_local uint32_t qiti::MallocHooks::numHeapAllocationsOnCurrentThread = 0;
+thread_local uint64_t qiti::MallocHooks::amountHeapAllocatedOnCurrentThread;
+thread_local std::function<void()> qiti::MallocHooks::onNextHeapAllocation = nullptr;
 
-thread_local uint64_t qiti::MallocHooks::g_numHeapAllocationsOnCurrentThread = 0;
-
-thread_local std::function<void()> qiti::MallocHooks::g_onNextHeapAllocation = nullptr;
-
-bool qiti::MallocHooks::getBypassMallocHooks()
-{
-    return bypassMallocHooks;
-}
-
-void qiti::MallocHooks::mallocHook() noexcept
+void qiti::MallocHooks::mallocHook(std::size_t size) noexcept
 {
     if (! isQitiTestRunning())
         return;
@@ -40,13 +34,17 @@ void qiti::MallocHooks::mallocHook() noexcept
     if (qiti::MallocHooks::bypassMallocHooks)
         return;
     
-    ++qiti::MallocHooks::g_numHeapAllocationsOnCurrentThread;
-    if (qiti::MallocHooks::g_onNextHeapAllocation != nullptr)
+    ++numHeapAllocationsOnCurrentThread;
+    amountHeapAllocatedOnCurrentThread += size;
+
+    if (onNextHeapAllocation != nullptr)
     {
-        qiti::MallocHooks::g_onNextHeapAllocation();
-        qiti::MallocHooks::g_onNextHeapAllocation = nullptr;
+        onNextHeapAllocation();
+        onNextHeapAllocation = nullptr;
     }
 }
+
+//--------------------------------------------------------------------------
 
 #if defined(__APPLE__)
 /**
@@ -57,7 +55,7 @@ void qiti::MallocHooks::mallocHook() noexcept
  */
 void* operator new(std::size_t size)
 {
-    qiti::MallocHooks::mallocHook();
+    qiti::MallocHooks::mallocHook(size);
     
     // Original implementation
     if (void* ptr = std::malloc(size))
@@ -68,6 +66,8 @@ void* operator new(std::size_t size)
 
 void* operator new[](std::size_t size)
 {
+    qiti::MallocHooks::mallocHook(size);
+    
     if (size == 0)
         ++size; // avoid std::malloc(0) which may return nullptr on success
  

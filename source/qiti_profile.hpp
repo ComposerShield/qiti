@@ -84,6 +84,9 @@ inline void QITI_API endProfilingType() noexcept { endProfilingType( typeid(Type
 /** */
 [[nodiscard]] uint64_t QITI_API getNumHeapAllocationsOnCurrentThread() noexcept;
 
+/** */
+[[nodiscard]] uint64_t QITI_API getAmountHeapAllocatedOnCurrentThread() noexcept;
+
 /** \internal */
 void QITI_API_INTERNAL updateFunctionDataOnEnter(void* this_fn) noexcept;
 

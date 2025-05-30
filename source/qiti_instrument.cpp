@@ -38,14 +38,14 @@ void resetInstrumentation() noexcept
     
     qiti::ScopedNoHeapAllocations noAlloc;
     
-    MallocHooks::g_onNextHeapAllocation = nullptr;
+    MallocHooks::onNextHeapAllocation = nullptr;
 }
 
 void onNextHeapAllocation(void (*heapAllocCallback)()) noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     
-    MallocHooks::g_onNextHeapAllocation = heapAllocCallback;
+    MallocHooks::onNextHeapAllocation = heapAllocCallback;
 }
 
 void assertOnNextHeapAllocation() noexcept

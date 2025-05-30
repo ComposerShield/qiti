@@ -36,8 +36,11 @@ struct FunctionCallData::Impl
     
     uint64_t timeSpentInFunctionNanoseconds = 0;
     
-    uint64_t numHeapAllocationsBeforeFunctionCall = 0;
-    uint64_t numHeapAllocationsAfterFunctionCall  = 0;
+    uint32_t numHeapAllocationsBeforeFunctionCall = 0;
+    uint32_t numHeapAllocationsAfterFunctionCall  = 0;
+    
+    uint64_t amountHeapAllocatedBeforeFunctionCall = 0;
+    uint64_t amountHeapAllocatedAfterFunctionCall  = 0;
 };
 } // namespace qiti
 

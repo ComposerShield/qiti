@@ -121,4 +121,13 @@ uint64_t FunctionCallData::getNumHeapAllocations() const noexcept
     return impl->numHeapAllocationsAfterFunctionCall - impl->numHeapAllocationsBeforeFunctionCall;
 }
 
+uint64_t FunctionCallData::getAmountHeapAllocated() const noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
+    auto impl = getImpl();
+    assert(impl->amountHeapAllocatedAfterFunctionCall >= impl->amountHeapAllocatedBeforeFunctionCall);
+    return impl->amountHeapAllocatedAfterFunctionCall - impl->amountHeapAllocatedBeforeFunctionCall;
+}
+
 } // namespace qiti
