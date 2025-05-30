@@ -24,7 +24,8 @@ TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations() returns expected valu
         testHeapAllocation();
         
         auto lastFunctionCall = funcData->getLastFunctionCall();
-        QITI_REQUIRE(lastFunctionCall.getNumHeapAllocations() == 1);
+        auto numHeapAllocations = lastFunctionCall.getNumHeapAllocations();
+        QITI_REQUIRE(numHeapAllocations == 1);
     }
     
     SECTION("0 heap allocation")

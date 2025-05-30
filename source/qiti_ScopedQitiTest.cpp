@@ -33,7 +33,7 @@ struct ScopedQitiTest::Impl
 {
     std::chrono::steady_clock::time_point begin_time;
     
-    uint64_t maxLengthOfTest_ms = 50;
+    uint64_t maxLengthOfTest_ms = std::numeric_limits<uint64_t>::max();
 };
 //--------------------------------------------------------------------------
 

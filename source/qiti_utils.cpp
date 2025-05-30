@@ -44,24 +44,13 @@ qiti::ReentrantSharedMutex qiti_global_lock;
 
 std::mutex qiti_lock;
 
+extern thread_local std::recursive_mutex bypassMallocHooksLock;
+
 /** */
 [[nodiscard]] static auto& getFunctionMap() noexcept
 {
     static std::unordered_map<void*, qiti::FunctionData> map;
     return map;
-}
-
-/** */
-static inline QITI_API_INTERNAL bool isFunctionAlwaysIgnoredByProfiling(void* address) noexcept
-{
-    auto fp = static_cast<void*(*)(std::size_t)>(&::operator new);
-    auto operatorNew = reinterpret_cast<void*>(fp);
-    
-    assert(address != operatorNew);
-    assert(address != reinterpret_cast<void*>(malloc));
-    
-    return (address == operatorNew
-            || address == reinterpret_cast<void*>(malloc));
 }
 
 //--------------------------------------------------------------------------
@@ -166,25 +155,20 @@ void resetAll() noexcept
 extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
 __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site) noexcept
 {
-    if (isFunctionAlwaysIgnoredByProfiling(this_fn))
-        return;
-    
-    static thread_local int recursionCheck = 0;
-    ++recursionCheck;
-    assert (recursionCheck == 1);
+    std::scoped_lock mallocHooksLock(bypassMallocHooksLock);
     
     if (qiti::profile::isProfilingFunction(this_fn))
     {
         std::scoped_lock<std::mutex> lock(qiti_lock);
         qiti::profile::updateFunctionDataOnEnter(this_fn);
     }
-    
-    --recursionCheck;
 }
 
 extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
 __cyg_profile_func_exit(void * this_fn, [[maybe_unused]] void* call_site) noexcept
 {
+    std::scoped_lock mallocHooksLock(bypassMallocHooksLock);
+
     if (qiti::profile::isProfilingFunction(this_fn))
     {
         std::scoped_lock<std::mutex> lock(qiti_lock);

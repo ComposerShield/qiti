@@ -48,28 +48,8 @@ struct Init_g_functionsToProfile
 };
 static const Init_g_functionsToProfile init_g_functionsToProfile;
 
-inline thread_local uint64_t g_numHeapAllocationsOnCurrentThread = 0;
-
-extern thread_local std::function<void()> g_onNextHeapAllocation;
+extern thread_local uint64_t g_numHeapAllocationsOnCurrentThread;
 extern std::recursive_mutex qiti_global_lock;
-
-//--------------------------------------------------------------------------
-
-void* QITI_API malloc(size_t __size);
-
-void* QITI_API operator new(size_t size)
-{
-    ++g_numHeapAllocationsOnCurrentThread;
-    if (g_onNextHeapAllocation != nullptr)
-    {
-        g_onNextHeapAllocation();
-        g_onNextHeapAllocation = nullptr;
-    }
-    
-    // Original implementation
-    void* p = malloc(size);
-    return p;
-}
 
 //--------------------------------------------------------------------------
 

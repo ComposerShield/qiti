@@ -25,10 +25,13 @@
 #include <cassert>
 #include <cstdint>
 #include <cstring>
+#include <mutex>
 #include <utility>
 #include <thread>
 
 //--------------------------------------------------------------------------
+
+extern thread_local std::recursive_mutex bypassMallocHooksLock;
 
 static constexpr size_t MAX_THREADS = qiti::FunctionData::Impl::MAX_THREADS;
 static constexpr size_t THREAD_ID_NOT_FOUND   = MAX_THREADS;
@@ -75,7 +78,7 @@ FunctionData::FunctionData(void* functionAddress) noexcept
     static_assert(alignof(FunctionData::Impl) == FunctionData::ImplAlign,
                   "Impl alignment stricter than FunctionData::implStorage");
     
-    qiti::ScopedNoHeapAllocations noAlloc;
+    std::scoped_lock mallocHooksLock(bypassMallocHooksLock); // This function contains heap allocations
     
     // Allocate Impl on the stack instead of the heap
     new (implStorage) Impl;

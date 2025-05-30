@@ -25,7 +25,7 @@
 
 #ifndef QITI_DISABLE_INSTRUMENTS
 /** Note: not static, external linkage so it can be used in other translation units. */
-thread_local std::function<void()> g_onNextHeapAllocation = nullptr;
+extern thread_local std::function<void()> g_onNextHeapAllocation;
 
 extern std::recursive_mutex qiti_global_lock;
 
