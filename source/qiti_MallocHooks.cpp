@@ -49,13 +49,31 @@ void qiti::MallocHooks::mallocHook() noexcept
 }
 
 #if defined(__APPLE__)
-void* operator new([[maybe_unused]] std::size_t size)
+/**
+ Due to differences in the Thread Sanitizer runtime on Apple vs. Linux,
+ we need to insert our logic into "operator new" in macOS from the Qiti
+ dylib but on Linux, we must insert it into the malloc hook provided by
+ Thread Sanitizer directly in the final executable (qiti_tests_client.cpp).
+ */
+void* operator new(std::size_t size)
 {
     qiti::MallocHooks::mallocHook();
     
+    // Original implementation
     if (void* ptr = std::malloc(size))
         return ptr;
     
+    throw std::bad_alloc{};
+}
+
+void* operator new[](std::size_t size)
+{
+    if (size == 0)
+        ++size; // avoid std::malloc(0) which may return nullptr on success
+ 
+    if (void* ptr = std::malloc(size))
+        return ptr;
+ 
     throw std::bad_alloc{};
 }
 #endif // defined(__APPLE__)
