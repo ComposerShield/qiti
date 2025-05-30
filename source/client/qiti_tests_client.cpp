@@ -55,7 +55,7 @@ __attribute__((no_sanitize_thread))
 extern "C" void __sanitizer_malloc_hook([[maybe_unused]] void* ptr,
                                         [[maybe_unused]] size_t size)
 {
-    qitiMallocHook();
+    qiti::MallocHooks::mallocHook();
 }
 #endif // ! defined(__APPLE__)
 
