@@ -18,6 +18,7 @@
 #include "qiti_API.hpp"
 
 #include <cstddef>
+#include <cstdint>
 #include <functional>
 
 //--------------------------------------------------------------------------
