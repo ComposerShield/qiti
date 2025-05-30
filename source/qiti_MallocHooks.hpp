@@ -49,7 +49,7 @@ public:
     };
     
     /** */
-    static void QITI_API_INTERNAL mallocHook(std::size_t size) noexcept;
+    static void QITI_API mallocHook(std::size_t size) noexcept;
 };
 } // namespace qiti
 
