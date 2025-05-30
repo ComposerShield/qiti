@@ -10,7 +10,6 @@
 
 using namespace qiti::example::FunctionCallData;
 
-#if defined(__APPLE__) // TODO: support Linux
 TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations() returns expected values")
 {
     qiti::ScopedQitiTest test;
@@ -25,7 +24,8 @@ TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations() returns expected valu
         testHeapAllocation();
         
         auto lastFunctionCall = funcData->getLastFunctionCall();
-        QITI_REQUIRE(lastFunctionCall.getNumHeapAllocations() == 1);
+        auto numHeapAllocations = lastFunctionCall.getNumHeapAllocations();
+        QITI_REQUIRE(numHeapAllocations == 1);
     }
     
     SECTION("0 heap allocation")
@@ -39,4 +39,3 @@ TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations() returns expected valu
         QITI_REQUIRE(lastFunctionCall.getNumHeapAllocations() == 0);
     }
 }
-#endif // defined(__APPLE__)

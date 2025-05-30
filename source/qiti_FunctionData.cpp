@@ -16,7 +16,7 @@
 #include "qiti_FunctionData.hpp"
 
 #include "qiti_FunctionData_Impl.hpp"
-
+#include "qiti_MallocHooks.hpp"
 #include "qiti_ScopedNoHeapAllocations.hpp"
 
 #include <dlfcn.h>
@@ -25,6 +25,7 @@
 #include <cassert>
 #include <cstdint>
 #include <cstring>
+#include <mutex>
 #include <utility>
 #include <thread>
 
@@ -75,7 +76,7 @@ FunctionData::FunctionData(void* functionAddress) noexcept
     static_assert(alignof(FunctionData::Impl) == FunctionData::ImplAlign,
                   "Impl alignment stricter than FunctionData::implStorage");
     
-    qiti::ScopedNoHeapAllocations noAlloc;
+    MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
     
     // Allocate Impl on the stack instead of the heap
     new (implStorage) Impl;

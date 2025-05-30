@@ -14,8 +14,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG -D_DEBUG")
 
-find_package(Threads REQUIRED)
-
 set(SOURCES
     "include/qiti_include.hpp"
     "source/qiti_API.hpp"
@@ -31,6 +29,8 @@ set(SOURCES
     "source/qiti_LeakSanitizer.cpp"
     "source/qiti_LockData.hpp"
     "source/qiti_LockData.cpp"
+    "source/qiti_MallocHooks.hpp"
+    "source/qiti_MallocHooks.cpp"
     "source/qiti_profile.hpp"
     "source/qiti_profile.cpp"
     "source/qiti_ReentrantSharedMutex.hpp"
@@ -111,7 +111,7 @@ INTERFACE
     "-finstrument-functions"
     "-fno-omit-frame-pointer"
     "-fsanitize=thread" # thread sanitizer
-    "-g" 
+    "-g"  
     "-O0" # no optimizations
 )
 

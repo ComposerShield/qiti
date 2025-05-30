@@ -15,6 +15,7 @@
 
 #include "qiti_ScopedQitiTest.hpp"
 
+#include "qiti_MallocHooks.hpp"
 #include "qiti_utils.hpp"
 
 #include <atomic>
@@ -24,7 +25,12 @@
 #include <memory>
 
 //--------------------------------------------------------------------------
-std::atomic<bool> qitiTestRunning = false;
+static std::atomic<bool> qitiTestRunning = false;
+
+bool QITI_API_INTERNAL isQitiTestRunning() noexcept
+{
+    return qitiTestRunning.load(std::memory_order_relaxed);
+}
 //--------------------------------------------------------------------------
 namespace qiti
 {
@@ -33,12 +39,12 @@ struct ScopedQitiTest::Impl
 {
     std::chrono::steady_clock::time_point begin_time;
     
-    uint64_t maxLengthOfTest_ms = 50;
+    uint64_t maxLengthOfTest_ms = std::numeric_limits<uint64_t>::max();
 };
 //--------------------------------------------------------------------------
 
 ScopedQitiTest::ScopedQitiTest() noexcept
-{
+{    
     qiti::resetAll(); // start test from a blank slate
     
     bool qitiTestWasAlreadyRunning = qitiTestRunning.exchange(true, std::memory_order_relaxed);
