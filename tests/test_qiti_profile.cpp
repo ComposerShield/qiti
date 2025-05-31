@@ -91,8 +91,18 @@ TEST_CASE("qiti::profile::getNumHeapAllocationsOnCurrentThread()")
 {
     qiti::ScopedQitiTest test;
     
-    // TODO: implement (when more internals are guaranteed not to heap allocate)
+    // Should have no heap allocs yet
+    auto numAllocsAtStartup = qiti::profile::getNumHeapAllocationsOnCurrentThread();
+    QITI_CHECK(numAllocsAtStartup == 0);
+    
+    // 1 heap allocation
+    testHeapAllocation();
+    auto numAllocsAfterCallingTestFunc = qiti::profile::getNumHeapAllocationsOnCurrentThread();
+    QITI_CHECK(numAllocsAfterCallingTestFunc == 1);
+    
+    // Another heap allocation
+    testHeapAllocation();
+    auto numAllocsAfterCallingTestFuncAgain = qiti::profile::getNumHeapAllocationsOnCurrentThread();
+    QITI_CHECK(numAllocsAfterCallingTestFuncAgain == 2);
 }
-
-
 

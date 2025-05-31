@@ -104,7 +104,8 @@ void resetProfiling() noexcept
         
     g_functionsToProfile.clear();
     g_profileAllFunctions = false;
-    MallocHooks::numHeapAllocationsOnCurrentThread = 0;
+    MallocHooks::numHeapAllocationsOnCurrentThread  = 0u;
+    MallocHooks::amountHeapAllocatedOnCurrentThread = 0ull;
 }
 
 void beginProfilingFunction(void* functionAddress) noexcept

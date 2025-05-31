@@ -34,6 +34,7 @@ int testNoHeapAllocation() noexcept;
 namespace profile
 {
 void testFunc() noexcept;
+int testHeapAllocation() noexcept;
 
 class ProfileTestType
 {

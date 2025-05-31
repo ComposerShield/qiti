@@ -44,13 +44,15 @@ struct ScopedQitiTest::Impl
 //--------------------------------------------------------------------------
 
 ScopedQitiTest::ScopedQitiTest() noexcept
-{    
+{
+    // Heap allocate now before wiping memory of heap allocations
+    auto newImpl = std::make_unique<Impl>();
     qiti::resetAll(); // start test from a blank slate
     
     bool qitiTestWasAlreadyRunning = qitiTestRunning.exchange(true, std::memory_order_relaxed);
     assert(! qitiTestWasAlreadyRunning); // Only one Qiti test permitted at a time
     
-    impl = std::make_unique<Impl>();
+    impl = std::move(newImpl);
     impl->begin_time = std::chrono::steady_clock::now();
 }
 

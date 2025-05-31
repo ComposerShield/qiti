@@ -49,6 +49,13 @@ void testFunc() noexcept
 {
     volatile int _ = 42;
 }
+
+int testHeapAllocation() noexcept
+{
+    volatile int* test = new int{0};
+    delete test;
+    return 42;
+}
 } // namespace profile
 
 //--------------------------------------------------------------------------
