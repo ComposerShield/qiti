@@ -14,6 +14,8 @@
 #include <iostream>
 #include <string>
 
+//--------------------------------------------------------------------------
+
 using namespace qiti::example::utils;
 
 __attribute__((visibility("default")))
@@ -22,6 +24,8 @@ void localTestFunc()
 {
     volatile int _ = 42;
 }
+
+//--------------------------------------------------------------------------
 
 TEST_CASE("qiti::getFunctionName()")
 {

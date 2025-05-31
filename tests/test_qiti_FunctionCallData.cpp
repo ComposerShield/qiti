@@ -8,7 +8,11 @@
 // Basic Catch2 macros
 #include <catch2/catch_test_macros.hpp>
 
+//--------------------------------------------------------------------------
+
 using namespace qiti::example::FunctionCallData;
+
+//--------------------------------------------------------------------------
 
 TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations()")
 {

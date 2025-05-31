@@ -14,32 +14,9 @@
 #include <mutex>
 #include <regex>
 
+//--------------------------------------------------------------------------
+
 using namespace qiti::example::ThreadSanitizer;
-namespace fs = std::filesystem;
-
-[[nodiscard]] static std::optional<fs::path> findLatestLog(const std::string& prefix)
-{
-    std::optional<fs::path> best;
-    fs::path dir = fs::path(prefix).parent_path();
-    std::string base = fs::path(prefix).filename().string();
-    for (auto& ent : fs::directory_iterator(dir))
-    {
-        auto fn = ent.path().filename().string();
-        if (fn.rfind(base, 0) == 0)
-        {
-            if (!best || fs::last_write_time(ent) > fs::last_write_time(*best))
-                best = ent.path();
-        }
-    }
-    return best;
-}
-
-[[nodiscard]] static std::string slurpFile(const fs::path& p)
-{
-    std::ifstream in(p, std::ios::binary);
-    return { std::istreambuf_iterator<char>(in),
-             std::istreambuf_iterator<char>() };
-}
 
 //--------------------------------------------------------------------------
 

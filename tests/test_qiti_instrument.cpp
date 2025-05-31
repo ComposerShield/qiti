@@ -11,6 +11,8 @@
 // Qiti Private API - not included in qiti_include.hpp
 #include "qiti_instrument.hpp"
 
+//--------------------------------------------------------------------------
+
 TEST_CASE("qiti::FunctionCallData::resetInstrumentation()")
 {
     qiti::ScopedQitiTest test;

@@ -15,12 +15,16 @@
 
 #include <iostream>
 
+//--------------------------------------------------------------------------
+
 /** NOT static to purposely allow external linkage and visibility to QITI */
 __attribute__((noinline)) __attribute__((optnone))
 void testFunc() noexcept
 {
     volatile int _ = 42;
 }
+
+//--------------------------------------------------------------------------
 
 #if defined(__APPLE__) // TODO: support Linux
 TEST_CASE("qiti::FunctionData::getFunctionName()")

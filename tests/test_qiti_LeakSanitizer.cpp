@@ -10,6 +10,7 @@
 
 #include "qiti_LeakSanitizer.hpp"
 
+//--------------------------------------------------------------------------
 
 TEST_CASE("qiti::LeakSanitizer::passed")
 {

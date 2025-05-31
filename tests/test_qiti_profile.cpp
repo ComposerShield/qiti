@@ -11,7 +11,11 @@
 // Qiti Private API - not included in qiti_include.hpp
 #include "qiti_profile.hpp"
 
+//--------------------------------------------------------------------------
+
 using namespace qiti::example::profile;
+
+//--------------------------------------------------------------------------
 
 TEST_CASE("qiti::profile::resetProfiling()")
 {

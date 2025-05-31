@@ -10,6 +10,8 @@
 
 #include "qiti_LockData.hpp"
 
+//--------------------------------------------------------------------------
+
 /** Simple listener that records the last lock it saw acquired/released */
 class TestListener : public qiti::LockData::Listener
 {
