@@ -23,6 +23,7 @@
 #include <chrono>
 #include <limits>
 #include <memory>
+#include <utility>
 
 //--------------------------------------------------------------------------
 static std::atomic<bool> qitiTestRunning = false;
