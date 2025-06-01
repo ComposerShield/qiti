@@ -10,9 +10,10 @@ Qiti’s most powerful feature is in it's wrapping of Clang’s Thread Sanitizer
 
 ## Requirements: 
 
-- C++20
+- MacOS or Linux
 - Clang or Apple Clang (additional compiler support TBD)
-- Your unit-test executable must be compiled with optimizations disabled (e.g. -O0) to ensure accurate profiling and sanitization.
+- C++20
+- Your unit-test executable must be compiled with optimizations disabled (e.g. -O0) to ensure accurate profiling and sanitization. This will be done automatically when linking qiti_lib; however, you must ensure your settings do not override these changes (see "CMake Settings" below).
 
 ## CMake Integration
 
@@ -22,23 +23,35 @@ To integrate Qiti into your CMake-based project, add Qiti as a subdirectory and 
 # Add Qiti to your project
 add_subdirectory(path/to/qiti)
 
-# Link your test executable with Qiti
+# Create your unit test executable (e.g. Catch2)
 add_executable(my_tests
     tests/test_my_component.cpp
     # etc.
 )
 
+# Link any intermediary libraries you build (and wish to profile/instrument) with qiti_lib
+target_link_libraries(my_lib
+    PRIVATE
+        qiti_lib                # Qiti library target
+        Catch2::Catch2WithMain  # (or your chosen test framework)
+        # etc.
+)
+
+# Link your final unit test executable with qiti_lib and qiti_tests_client
 target_link_libraries(my_tests
     PRIVATE
         qiti_lib                # Qiti library target
-        Catch2::Catch2WithMain  # or your chosen test framework
+        qiti_tests_client       # Library specifically designed to link into final executable
+        Catch2::Catch2WithMain  # (or your chosen test framework)
         # etc.
 )
 ```
 
+## CMake Settings
+
 By linking against `qiti_lib`, Qiti automatically propagates:
 
-- **Include directories**: `${CMAKE_CURRENT_SOURCE_DIR}/include`
+- **Include directories**: `./include`
 - **Compiler flags** (via `INTERFACE`):
   - `-finstrument-functions`       (enable function instrumentation)
   - `-fno-omit-frame-pointer`     (preserve frame pointers)
@@ -48,8 +61,13 @@ By linking against `qiti_lib`, Qiti automatically propagates:
 - **Linker flags** (via `INTERFACE`):
   - `-fsanitize=thread`
 
-You do not need to add these flags yourself—just ensure you're using Clang with C++20 and building your test executable with `-O0` (or Debug-only).
+You do not need to add these flags yourself—just ensure you are using Clang with C++20 and building your test executable with `-O0` (or Debug-only).
 
+In addition, by linking your unit test executable with `qiti_tests_client`, Qiti automatically propagates:
+
+- **Object File**: `./source/client/qiti_tests_client.cpp`
+- **Linker flags** (via `INTERFACE`):
+  - `-rdynamic`
 
 ## Documentation
 
