@@ -23,14 +23,16 @@ namespace qiti
 {
 /**
  Abtracts a specific call of a specific function
+ 
+ Tracks per‐call metrics such as heap allocations and bytes allocated.
  */
 class FunctionCallData
 {
 public:    
-    /** */
+    /** Calculates how many allocations occurred between function entry and exit. */
     [[nodiscard]] uint64_t QITI_API getNumHeapAllocations() const noexcept;
     
-    /** */
+    /** Get the total bytes allocated on the heap during this call. */
     [[nodiscard]] uint64_t QITI_API getAmountHeapAllocated() const noexcept;
     
     //--------------------------------------------------------------------------
@@ -49,7 +51,11 @@ public:
     /** */
     [[nodiscard]] const Impl* QITI_API_INTERNAL getImpl() const noexcept;
     
-    /** */
+    /**
+     Reset this call data to its initial state.
+
+     Destroys and reinitializes the internal Impl on the stack.
+     */
     void QITI_API_INTERNAL reset() noexcept;
     
     /** Move Constructor */

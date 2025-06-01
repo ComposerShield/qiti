@@ -32,7 +32,9 @@ namespace qiti
 class FunctionData
 {
 public:
-    /** */
+    /**
+     Begins profiling for FuncPtr and returns a pointer to the corresponding FunctionData instance.
+     */
     template <auto FuncPtr>
     requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
     [[nodiscard]] static const qiti::FunctionData* QITI_API getFunctionData() noexcept
@@ -40,24 +42,39 @@ public:
         return getFunctionDataMutable<FuncPtr>(); // wrap in const
     }
     
-    /** */
+    /**
+     Get the demangled name of the function.
+
+     Returns a human-readable name for the function without mangling.
+     */
     [[nodiscard]] const char* QITI_API getFunctionName() const noexcept;
     
-    /** */
+    /**
+     Get the mangled name of the function.
+
+     Returns the compiler-generated mangled identifier for the function.
+     */
     [[nodiscard]] const char* QITI_API getMangledFunctionName() const noexcept;
     
-    /** */
+    /**
+     Get the total number of times this function was called.
+
+     Returns the count of all recorded invocations that have occurred since we began profiling the function.
+     */
     [[nodiscard]] uint64_t QITI_API getNumTimesCalled() const noexcept;
     
     /**
-     Returns true if function was called on the provided thread.
-     
-     Call example:
-     
+     Check if the function was called on a specific thread.
+
+     Returns true if any recorded invocation occurred on the thread identified by 'thread'.
      */
     [[nodiscard]] bool QITI_API wasCalledOnThread(std::thread::id thread) const noexcept;
 
-    /** */
+    /**
+     Retrieve the most recent function call data.
+
+     Returns a FunctionCallData object representing the last recorded invocation of this function.
+     */
     [[nodiscard]] FunctionCallData QITI_API getLastFunctionCall() const noexcept;
     
     //--------------------------------------------------------------------------
@@ -65,12 +82,21 @@ public:
     /** \cond INTERNAL */
     //--------------------------------------------------------------------------
     
-    /** */
+    /**
+     Construct FunctionData for a raw function address.
+
+     Initializes internal tracking structures using the provided function address.
+     */
     QITI_API_INTERNAL FunctionData(void* functionAddress) noexcept;
-    /** */
+    
+    /**
+     Destroy this FunctionData instance.
+
+     Cleans up any resources associated with tracking this function.
+     */
     QITI_API_INTERNAL ~FunctionData() noexcept;
     
-    /** */
+    /** Begins profiling for FuncPtr and returns a pointer to the corresponding mutable FunctionData instance. */
     template <auto FuncPtr>
     requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
     [[nodiscard]] static qiti::FunctionData* QITI_API_INTERNAL getFunctionDataMutable() noexcept
@@ -79,7 +105,11 @@ public:
         return &qiti::getFunctionDataFromAddress(reinterpret_cast<void*>(FuncPtr));
     }
     
-    /** */
+    /**
+     Record that the function was called.
+
+     Updates internal state to log a new invocation, including timestamp and thread information.
+     */
     void QITI_API_INTERNAL functionCalled() noexcept;
     
     struct Impl;
@@ -88,11 +118,17 @@ public:
     /** */
     [[nodiscard]] const Impl* QITI_API_INTERNAL getImpl() const noexcept;
     
-    /** */
+    /**
+     Listener interface for function entry and exit events.
+
+     Implement this interface to receive callbacks when a function begins or ends execution.
+     */
     struct Listener
     {
         virtual ~Listener() = default;
+        /** */
         virtual void QITI_API_INTERNAL onFunctionEnter(const FunctionData*) noexcept = 0;
+        /** */
         virtual void QITI_API_INTERNAL onFunctionExit (const FunctionData*) noexcept = 0;
     };
     

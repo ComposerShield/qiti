@@ -40,15 +40,28 @@ public:
     
     struct ScopedBypassMallocHooks
     {
-        QITI_API_INTERNAL ScopedBypassMallocHooks() noexcept
+        /** Temporarily disable malloc hooks for the current thread for however long this object is in scope. */
+        inline QITI_API_INTERNAL ScopedBypassMallocHooks() noexcept
         : previous(bypassMallocHooks) { bypassMallocHooks = true; }
         
-        QITI_API_INTERNAL ~ScopedBypassMallocHooks() noexcept { bypassMallocHooks = previous; }
+        /** On destruction, resets bypassMallocHooks to the value saved at construction. */
+        inline QITI_API_INTERNAL ~ScopedBypassMallocHooks() noexcept { bypassMallocHooks = previous; }
     private:
         const bool previous;
     };
     
-    /** */
+    /**
+     Hook invoked on each malloc call.
+     
+     More specifically,
+     macOs: on every call to `operator new` or `operator new[]`
+     Linux: on every call to `__sanitizer_malloc_hook` (called from TSan)
+     
+     Records the allocation size, updates thread-local counters, and executes
+     any pending onNextHeapAllocation callback if set.
+     
+     Custom implementation details ignored if not currently in a Qiti test.
+     */
     static void QITI_API mallocHook(std::size_t size) noexcept;
 };
 } // namespace qiti
