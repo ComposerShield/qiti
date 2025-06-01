@@ -6,11 +6,11 @@ Qiti is a lightweight C++20 library that brings profiling and instrumentation di
 
 By integrating seamlessly with your test framework of choice, Qiti lets you track custom metrics and gather performance insights without ever leaving your test suite.
 
-Qiti’s most powerful feature is in it's wrapping of Clang’s Thread Sanitizer: tests can be run in isolation under TSan, automatically detecting data races and other thread-safety issues. You can even enforce custom thread-safety behavior right from your test code, catching concurrency bugs early in CI.
+Qiti’s most powerful feature is its wrapping of Clang’s Thread Sanitizer: tests can be run in isolation under TSan, automatically detecting data races and other thread-safety issues. You can even enforce custom thread-safety behavior right from your test code, catching concurrency bugs early in CI.
 
-## Requirements: 
+## Requirements
 
-- MacOS or Linux
+- macOS or Linux
 - Clang or Apple Clang (additional compiler support TBD)
 - C++20
 - Your unit-test executable must be compiled with optimizations disabled (e.g. -O0) to ensure accurate profiling and sanitization. This will be done automatically when linking qiti_lib; however, you must ensure your settings do not override these changes (see "CMake Settings" below).
@@ -32,7 +32,7 @@ add_executable(my_tests
 # Link any intermediary libraries you build (and wish to profile/instrument) with qiti_lib
 target_link_libraries(my_lib
     PRIVATE
-        qiti_lib                # Qiti library target
+        qiti_lib                # General Qiti library target
         Catch2::Catch2WithMain  # (or your chosen test framework)
         # etc.
 )
@@ -40,8 +40,8 @@ target_link_libraries(my_lib
 # Link your final unit test executable with qiti_lib and qiti_tests_client
 target_link_libraries(my_tests
     PRIVATE
-        qiti_lib                # Qiti library target
-        qiti_tests_client       # Library specifically designed to link into final executable
+        qiti_lib                # General Qiti library target
+        qiti_tests_client       # Qiti target specific to final executable
         Catch2::Catch2WithMain  # (or your chosen test framework)
         # etc.
 )
@@ -61,7 +61,7 @@ By linking against `qiti_lib`, Qiti automatically propagates:
 - **Linker flags** (via `INTERFACE`):
   - `-fsanitize=thread`
 
-You do not need to add these flags yourself—just ensure you are using Clang with C++20 and building your test executable with `-O0` (or Debug-only).
+You do not need to add these flags yourself—just ensure you are using Clang with C++20 and building your test executable with `-O0` (or in Debug mode).
 
 In addition, by linking your unit test executable with `qiti_tests_client`, Qiti automatically propagates:
 
@@ -104,9 +104,9 @@ If Doxygen is not found, the build will fail with a "Doxygen not found" message�
 ## Quick Start
 
 In your unit test file, add
-  ```c++
-  #include "qiti_include.hpp"
-  ```
+```c++
+#include "qiti_include.hpp"
+```
 
 Then in each unit test you wish to use Qiti, add a qiti::ScopedQitiTest at the top of the test. For example:
 ```c++
@@ -187,14 +187,14 @@ TEST_CASE("Example Test")
             functionToRunOnThread0();
         });
         functionToRunOnThread1();
-        t.join()
+        t.join();
     };
     dataRaceDetector->run(codeToTest);
     REQUIRE(dataRaceDetector->passed()); // No data races detected
 }
 ```
 
-Please refer to documentation for full overview of all available features.
+Please refer to the documentation for a full overview of all available features.
 
 ## License
 
