@@ -74,8 +74,10 @@ In addition, by linking your unit test executable with `qiti_tests_client`, Qiti
 Qiti uses Doxygen (via a custom CMake `doxygen` target) to generate HTML API documentation. To build the docs, ensure Doxygen is installed on your system and then run the following from your project root:
 
 ```bash
-cmake -B build .
-cmake --build build --target doxygen
+cmake -B build-docs .
+cmake --build build-docs --target doxygen
+rm -fd build-docs
+open docs/html/index.html 
 ```
 
 This will invoke the `doxygen` target defined in `CMakeLists.txt` (which calls `Doxygen(source docs)`) and generate HTML output under `docs/html`. Once complete, open `docs/html/index.html` in your browser to view the documentation.
