@@ -18,9 +18,16 @@
 
 using namespace qiti::example::utils;
 
-__attribute__((visibility("default")))
+__attribute__((optnone))
 __attribute__((noinline))
-void localTestFunc()
+void localTestFunc() noexcept
+{
+    volatile int _ = 42;
+}
+
+__attribute__((optnone))
+__attribute__((noinline))
+static void localStaticTestFunc() noexcept
 {
     volatile int _ = 42;
 }
@@ -31,10 +38,16 @@ TEST_CASE("qiti::getFunctionName()")
 {
     qiti::ScopedQitiTest test;
     
-    SECTION("Simple static function from this translation unit")
+    SECTION("Simple global namespace function from this translation unit")
     {
         auto name = qiti::getFunctionName<&localTestFunc>();
         QITI_REQUIRE(name == "localTestFunc");
+    }
+    
+    SECTION("Simple global namespace static function from this translation unit")
+    {
+        auto name = qiti::getFunctionName<&localStaticTestFunc>();
+        QITI_REQUIRE(name == "localStaticTestFunc");
     }
     
     SECTION("Multi-namespaced function")
