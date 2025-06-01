@@ -26,15 +26,16 @@ void testFunc() noexcept
 
 //--------------------------------------------------------------------------
 
-#if defined(__APPLE__) // TODO: support Linux
 TEST_CASE("qiti::FunctionData::getFunctionName()")
 {
     qiti::ScopedQitiTest test;
-    
-    qiti::profile::beginProfilingFunction<&testFunc>();
-    auto functionData = qiti::getFunctionData<&testFunc>();
-    std::string name = functionData->getFunctionName();
-    QITI_CHECK(name == "testFunc()");
+
+    {
+        qiti::profile::beginProfilingFunction<&testFunc>();
+        auto functionData = qiti::getFunctionData<&testFunc>();
+        std::string name = functionData->getFunctionName();
+        QITI_CHECK(name == "testFunc()");
+    }
 }
 
 TEST_CASE("qiti::FunctionData::getMangledFunctionName()")
@@ -130,4 +131,3 @@ TEST_CASE("qiti::FunctionData::wasCalledOnThread()")
         QITI_CHECK(funcData->wasCalledOnThread(id));
     }
 }
-#endif // defined(__APPLE__)

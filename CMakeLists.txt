@@ -166,6 +166,13 @@ PRIVATE
     Catch2::Catch2WithMain
 )
 
+if(UNIX AND NOT APPLE)
+    # On Linux, add “-rdynamic” so that all global symbols are exported into the dynamic symbol table.
+    # Without this, functions defined in qiti_tests_client (and linked libraries) may not be visible to dladdr(),
+    # causing dli_sname to be nullptr and leading to crashes when trying to copy the symbol name.
+    target_link_options(qiti_tests_client INTERFACE "-rdynamic")
+endif()
+
 target_compile_options(qiti_tests 
 PRIVATE
     "-Werror"

@@ -88,10 +88,23 @@ FunctionData::FunctionData(void* functionAddress) noexcept
     Dl_info info;
     if (dladdr(functionAddress, &info))
     {
-        strncpy(impl->functionNameMangled, info.dli_sname, sizeof(impl->functionNameMangled) - 1);
-        char functionNameDemangled[256];
-        qiti::demangle(info.dli_sname, functionNameDemangled, sizeof(functionNameDemangled));
-        strncpy(impl->functionNameReal, functionNameDemangled, sizeof(impl->functionNameReal) - 1);
+        if (info.dli_sname == nullptr)
+        {
+            // dladdr succeeded but didn’t supply a symbol name -> use "<unknown>"
+            strncpy(impl->functionNameMangled, "<unknown>", sizeof(impl->functionNameMangled) - 1);
+            impl->functionNameMangled[sizeof(impl->functionNameMangled) - 1] = '\0';
+
+            // We can't demangle a nullptr, so just copy the same placeholder
+            strncpy(impl->functionNameReal, "<unknown>", sizeof(impl->functionNameReal) - 1);
+            impl->functionNameReal[sizeof(impl->functionNameReal) - 1] = '\0';
+        }
+        else
+        {
+            strncpy(impl->functionNameMangled, info.dli_sname, sizeof(impl->functionNameMangled) - 1);
+            char functionNameDemangled[256];
+            qiti::demangle(info.dli_sname, functionNameDemangled, sizeof(functionNameDemangled));
+            strncpy(impl->functionNameReal, functionNameDemangled, sizeof(impl->functionNameReal) - 1);
+        }
     }
     else
     {
