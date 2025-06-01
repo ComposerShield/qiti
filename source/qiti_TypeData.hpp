@@ -23,6 +23,7 @@
 
 namespace qiti
 {
+//--------------------------------------------------------------------------
 /**
  Abtracts a type and its history of use
  */

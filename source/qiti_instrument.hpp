@@ -25,13 +25,36 @@
 #ifndef QITI_DISABLE_INSTRUMENTS
 namespace qiti
 {
+/**
+ Tools for injecting custom logic into the application at runtime.
+
+ The instrument namespace provides functions to hook into the runtime flow,
+ allowing you to insert callbacks and additional logic as needed.
+ */
 namespace instrument
 {
+/**
+ Reset all instrumentation counters and state.
+
+ Clears any recorded data from previous profiling, returning the
+ instrumentation subsystem to its initial state.
+ */
 void QITI_API resetInstrumentation() noexcept;
 
-/** Provide a callback on next heap allocation */
+/**
+ Register a callback to be invoked on the next heap allocation.
+
+ Schedules the provided function pointer 'heapAllocCallback' to be
+ executed immediately after the next heap allocation occurs. This
+ facilitates custom handling or assertions around allocation events.
+ */
 void QITI_API onNextHeapAllocation(void(*heapAllocCallback)()) noexcept;
-/** Dhortcut for onNextHeapAllocation([]{assert(false);}); */
+
+/**
+ Triggers an assertion failure when the next heap allocation happens.
+
+ Shortcut equivalent to onNextHeapAllocation([]{ assert(false); });
+ */
 void QITI_API assertOnNextHeapAllocation() noexcept;
 
 } // namespace instrument

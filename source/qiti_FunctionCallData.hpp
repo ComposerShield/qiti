@@ -21,6 +21,7 @@
 
 namespace qiti
 {
+//--------------------------------------------------------------------------
 /**
  Abtracts a specific call of a specific function
  

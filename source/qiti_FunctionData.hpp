@@ -26,6 +26,7 @@
 
 namespace qiti
 {
+//--------------------------------------------------------------------------
 /**
  Abtracts a function and its history of use
  */

@@ -69,7 +69,6 @@ constexpr std::string_view getFunctionName() noexcept
     return {};
 }
 
-
 /**
  \internal
  demangle a GCC/Clang‐mangled name into a std::string
