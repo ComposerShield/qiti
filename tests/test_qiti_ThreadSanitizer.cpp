@@ -23,7 +23,6 @@ using namespace qiti::example::ThreadSanitizer;
 TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
 {
     qiti::ScopedQitiTest test;
-    test.setMaximumDurationOfTest_ms(1000ull);
     
     auto tsan = qiti::ThreadSanitizer::createFunctionsCalledInParallelDetector<testFunc0,
                                                                                testFunc1>();
