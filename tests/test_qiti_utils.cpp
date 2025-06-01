@@ -32,6 +32,11 @@ static void localStaticTestFunc() noexcept
     volatile int _ = 42;
 }
 
+inline void localInlineTestFunc() noexcept
+{
+    volatile int _ = 42;
+}
+
 //--------------------------------------------------------------------------
 
 TEST_CASE("qiti::getFunctionName()")
@@ -48,6 +53,12 @@ TEST_CASE("qiti::getFunctionName()")
     {
         auto name = qiti::getFunctionName<&localStaticTestFunc>();
         QITI_REQUIRE(name == "localStaticTestFunc");
+    }
+    
+    SECTION("Simple global namespace inline function from this translation unit")
+    {
+        auto name = qiti::getFunctionName<&localInlineTestFunc>();
+        QITI_REQUIRE(name == "localInlineTestFunc");
     }
     
     SECTION("Multi-namespaced function")
