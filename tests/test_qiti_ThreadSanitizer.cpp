@@ -20,7 +20,6 @@ using namespace qiti::example::ThreadSanitizer;
 
 //--------------------------------------------------------------------------
 
-#if defined(__APPLE__) // TODO: support Linux
 TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
 {
     qiti::ScopedQitiTest test;
@@ -89,7 +88,6 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of 
     QITI_REQUIRE(dataRaceDetector->failed());
     QITI_REQUIRE_FALSE(dataRaceDetector->passed());
 }
-#endif // defined(__APPLE__)
 
 TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of member variable")
 {
