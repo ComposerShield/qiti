@@ -9,7 +9,7 @@ on:
       - '**'
 
 jobs:
-  mac-build-xcode:
+  mac-15-build-xcode:
     # main branch only, or PRs into main
     if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: macos-15
@@ -22,6 +22,31 @@ jobs:
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: '16.2'
+
+      - name: Configure CMake (Xcode generator)
+        run: cmake . -B build -G Xcode
+
+      - name: Build
+        run: cmake --build build --config Debug --target qiti_tests
+        
+      - name: Run Unit Tests
+        run: |
+          cd build
+          ctest -C Debug
+          
+  mac-14-build-xcode:
+    # main branch only, or PRs into main
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Select Xcode 15.4
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '15.4'
 
       - name: Configure CMake (Xcode generator)
         run: cmake . -B build -G Xcode
