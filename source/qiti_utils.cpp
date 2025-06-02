@@ -18,7 +18,6 @@
 #include "qiti_include.hpp"
 #include "qiti_instrument.hpp"
 #include "qiti_MallocHooks.hpp"
-#include "qiti_ReentrantSharedMutex.hpp"
 
 #include <cxxabi.h>
 #include <dlfcn.h>
