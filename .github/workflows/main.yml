@@ -36,7 +36,7 @@ jobs:
           
   mac-14-build-xcode:
     # main branch only, or PRs into main
-    if: ${{ github.ref == 'refs/heads/main' }}
+
     runs-on: macos-14
 
     steps:
