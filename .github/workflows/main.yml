@@ -61,7 +61,7 @@ jobs:
           cd build
           ctest -C Debug
           
-  linux-build-clang-ninja:
+  ubuntu-build-clang-ninja:
     runs-on: ubuntu-latest
     
     steps:
@@ -82,6 +82,67 @@ jobs:
             -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_C_COMPILER=clang-16 \
             -DCMAKE_CXX_COMPILER=clang++-16
+
+      - name: Build
+        run: cmake --build build --target qiti_tests
+
+      - name: Run Unit Tests
+        run: |
+          cd build
+          ctest -C Debug --verbose
+
+  debian-build-clang-ninja:
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    container:
+      image: debian:stable
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install LLVM 16 & Ninja
+        run: |
+          apt-get update
+          apt-get install -y clang-16 ninja-build cmake git
+          echo "CC=clang-16" >> $GITHUB_ENV
+          echo "CXX=clang++-16" >> $GITHUB_ENV
+
+      - name: Configure CMake (Ninja, LLVM Clang)
+        run: |
+          cmake . -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_C_COMPILER=clang-16 \
+            -DCMAKE_CXX_COMPILER=clang++-16
+
+      - name: Build
+        run: cmake --build build --target qiti_tests
+
+      - name: Run Unit Tests
+        run: |
+          cd build
+          ctest -C Debug --verbose
+
+  fedora-build-clang-ninja:
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Clang & Ninja
+        run: |
+          dnf install -y clang llvm ninja-build cmake gcc-c++ git
+
+      - name: Configure CMake (Ninja, LLVM Clang)
+        run: |
+          cmake . -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_CXX_COMPILER=clang++
 
       - name: Build
         run: cmake --build build --target qiti_tests
