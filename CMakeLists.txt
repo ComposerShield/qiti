@@ -107,11 +107,18 @@ PRIVATE
     "-Wformat=2"
     "-Wimplicit-fallthrough"
 INTERFACE
+    # Instruments all visible functions not marked __attribute__((no_instrument_function))
     "-finstrument-functions"
+    # Required to walk the stack from within our function hooks (__cyg_profile_func_enter/exit)
     "-fno-omit-frame-pointer"
-    "-fsanitize=thread" # thread sanitizer
-    "-g"  
-    "-O0" # no optimizations
+    # Prevent inlining which breaks our ability to track memory
+    "-fno-inline"
+    # Enable Thread Sanitizer
+    "-fsanitize=thread"
+    # Generate debug info
+    "-g" 
+    # Disable Optimizations 
+    "-O0"
 )
 
 target_compile_definitions(qiti_lib
