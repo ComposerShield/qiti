@@ -103,7 +103,7 @@ jobs:
       - name: Install LLVM 16 & Ninja
         run: |
           apt-get update
-          apt-get install -y clang-16 ninja-build
+          apt-get install -y clang-16 ninja-build cmake
           echo "CC=clang-16" >> $GITHUB_ENV
           echo "CXX=clang++-16" >> $GITHUB_ENV
 
@@ -134,7 +134,7 @@ jobs:
 
       - name: Install Clang & Ninja
         run: |
-          dnf install -y clang llvm ninja-build cmake gcc-c++
+          dnf install -y clang llvm ninja-build cmake gcc-c++ git
 
       - name: Configure CMake (Ninja, LLVM Clang)
         run: |
