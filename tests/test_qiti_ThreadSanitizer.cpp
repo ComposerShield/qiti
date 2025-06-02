@@ -62,7 +62,6 @@ TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
 TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce false positive")
 {
     qiti::ScopedQitiTest test;
-    test.permitLongTest();
     
     auto noDataRace = [](){};
     auto dataRaceDetector = qiti::ThreadSanitizer::createDataRaceDetector();
@@ -74,7 +73,6 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce fals
 TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of global variable")
 {
     qiti::ScopedQitiTest test;
-    test.permitLongTest();
     
     auto dataRace = []()
     {
@@ -91,7 +89,6 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of 
 TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of member variable")
 {
     qiti::ScopedQitiTest test;
-    test.permitLongTest();
     
     auto dataRace = []()
     {

@@ -35,8 +35,6 @@ static constexpr const char TSAN_DEFAULT_OPTS[] = "report_thread_leaks=0"
                                                   ":log_path="
                                                   QITI_TSAN_LOG_PATH;
 
-//--------------------------------------------------------------------------
-
 extern "C"
 __attribute__((visibility("default")))
 __attribute__((no_sanitize("thread")))

@@ -25,6 +25,10 @@ namespace qiti
 {
 //--------------------------------------------------------------------------
 /**
+ Initializes Qiti profiling and other functionality.
+ 
+ Cleans up state when it goes out of scope.
+ Can be queried for details regarding the current Qiti-injected unit test.
  */
 class ScopedQitiTest
 {
@@ -34,19 +38,26 @@ public:
     /** */
     QITI_API ~ScopedQitiTest() noexcept;
     
-    /** */
-    uint64_t QITI_API getLengthOfTest_ms() const noexcept;
-    /** */
-    uint64_t QITI_API getLengthOfTest_ns() const noexcept;
+    /** Returns elapsed length of time since ScopedQitiTest was initialized. */
+    [[nodiscard]] uint64_t QITI_API getLengthOfTest_ms() const noexcept;
+    /** Returns elapsed length of time since ScopedQitiTest was initialized. */
+    [[nodiscard]] uint64_t QITI_API getLengthOfTest_ns() const noexcept;
     
-    /** 50 ms by default.*/
+    /** Assert if test exceeds duration specified. */
     void QITI_API setMaximumDurationOfTest_ms(uint64_t ms) noexcept;
-    /** */
-    void QITI_API permitLongTest() noexcept;
     
 private:
     struct Impl;
     std::unique_ptr<Impl> impl;
+    
+    /** Copy Constructor (deleted) */
+    ScopedQitiTest(const ScopedQitiTest&) = delete;
+    /** Copy Assignment (deleted) */
+    ScopedQitiTest& operator=(const ScopedQitiTest&) = delete;
+    /** Move Constructor (deleted) */
+    ScopedQitiTest(ScopedQitiTest&& other) noexcept;
+    /** Move Assignment (deleted) */
+    ScopedQitiTest& operator=(ScopedQitiTest&& other) noexcept;
 };
 //--------------------------------------------------------------------------
 } // namespace qiti

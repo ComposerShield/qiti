@@ -86,11 +86,6 @@ void ScopedQitiTest::setMaximumDurationOfTest_ms(uint64_t ms) noexcept
     impl->maxLengthOfTest_ms = ms;
 }
 
-void ScopedQitiTest::permitLongTest() noexcept
-{
-    setMaximumDurationOfTest_ms(std::numeric_limits<uint64_t>::max());
-}
-
 //--------------------------------------------------------------------------
 } // namespace qiti
 //--------------------------------------------------------------------------

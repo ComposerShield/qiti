@@ -17,7 +17,6 @@
 //TEST_CASE("ScopedNoHeapAllocations aborts on unexpected heap alloc")
 //{
 //    qiti::ScopedQitiTest test;
-//    test.permitLongTest();
 //
 //    QITI_REQUIRE_DEATH
 //    (
