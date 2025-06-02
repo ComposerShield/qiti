@@ -17,6 +17,8 @@
 
 #include "qiti_utils.hpp"
 
+#include <thread>
+
 //--------------------------------------------------------------------------
 
 namespace qiti
@@ -35,6 +37,15 @@ public:
     
     /** Get the total bytes allocated on the heap during this call. */
     [[nodiscard]] uint64_t QITI_API getAmountHeapAllocated() const noexcept;
+    
+    /** Get the total amount of time spent inside this function call. */
+    [[nodiscard]] uint64_t QITI_API getTimeSpentInFunction_ms() const noexcept;
+    
+    /** Get the total amount of time spent inside this function call. */
+    [[nodiscard]] uint64_t QITI_API getTimeSpentInFunction_ns() const noexcept;
+    
+    /** Get thread that was responsible for this function call. */
+    [[nodiscard]] std::thread::id QITI_API getThreadThatCalledFunction() const noexcept;
     
     //--------------------------------------------------------------------------
     // Doxygen - Begin Internal Documentation

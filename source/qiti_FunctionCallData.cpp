@@ -130,4 +130,21 @@ uint64_t FunctionCallData::getAmountHeapAllocated() const noexcept
     return impl->amountHeapAllocatedAfterFunctionCall - impl->amountHeapAllocatedBeforeFunctionCall;
 }
 
+uint64_t QITI_API FunctionCallData::getTimeSpentInFunction_ms() const noexcept
+{
+    if (getImpl()->timeSpentInFunctionNanoseconds == 0)
+        return 0; // prevent dividing by 0
+    return getImpl()->timeSpentInFunctionNanoseconds / 1000000;
+}
+
+uint64_t QITI_API FunctionCallData::getTimeSpentInFunction_ns() const noexcept
+{
+    return getImpl()->timeSpentInFunctionNanoseconds;
+}
+
+std::thread::id QITI_API FunctionCallData::getThreadThatCalledFunction() const noexcept
+{
+    return getImpl()->callingThread;
+}
+
 } // namespace qiti
