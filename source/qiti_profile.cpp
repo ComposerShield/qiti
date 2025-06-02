@@ -49,8 +49,6 @@ struct Init_g_functionsToProfile
 };
 static const Init_g_functionsToProfile init_g_functionsToProfile;
 
-extern std::recursive_mutex qiti_global_lock;
-
 //--------------------------------------------------------------------------
 
 /** */
@@ -98,10 +96,7 @@ namespace qiti
 namespace profile
 {
 void resetProfiling() noexcept
-{
-    // Prevent any qiti work while we disable profiling
-    std::scoped_lock<std::recursive_mutex> lock(qiti_global_lock);
-        
+{        
     g_functionsToProfile.clear();
     g_profileAllFunctions = false;
     MallocHooks::numHeapAllocationsOnCurrentThread  = 0u;

@@ -39,9 +39,6 @@
 
 //--------------------------------------------------------------------------
 
-/** */
-qiti::ReentrantSharedMutex qiti_global_lock;
-
 std::mutex qiti_lock;
 
 /** */
@@ -139,10 +136,6 @@ void demangle(const char* mangled_name, char* demangled_name, uint64_t demangled
 
 void resetAll() noexcept
 {
-    // Prevent any qiti work while we reset everything
-    // Demands exclusive lock, not a shared lock
-    std::scoped_lock<qiti::ReentrantSharedMutex> lock(qiti_global_lock);
-    
     getFunctionMap().clear();
     
     instrument::resetInstrumentation();

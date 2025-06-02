@@ -25,17 +25,12 @@
 //--------------------------------------------------------------------------
 
 #ifndef QITI_DISABLE_INSTRUMENTS
-extern std::recursive_mutex qiti_global_lock;
-
 namespace qiti
 {
 namespace instrument
 {
 void resetInstrumentation() noexcept
-{
-    // Prevent any qiti work while we clear out instrumenting of functions
-    std::scoped_lock<std::recursive_mutex> lock(qiti_global_lock);
-    
+{    
     qiti::ScopedNoHeapAllocations noAlloc;
     
     MallocHooks::onNextHeapAllocation = nullptr;

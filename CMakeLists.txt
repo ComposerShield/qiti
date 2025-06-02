@@ -33,7 +33,6 @@ set(SOURCES
     "source/qiti_MallocHooks.cpp"
     "source/qiti_profile.hpp"
     "source/qiti_profile.cpp"
-    "source/qiti_ReentrantSharedMutex.hpp"
     "source/qiti_ScopedNoHeapAllocations.hpp"
     "source/qiti_ScopedQitiTest.hpp"
     "source/qiti_ScopedQitiTest.cpp"

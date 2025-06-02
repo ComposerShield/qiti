@@ -64,6 +64,10 @@ public:
      Custom implementation details ignored if not currently in a Qiti test.
      */
     static void QITI_API mallocHook(std::size_t size) noexcept;
+
+private:
+    MallocHooks() = delete;
+    ~MallocHooks() = delete;
 };
 } // namespace qiti
 
