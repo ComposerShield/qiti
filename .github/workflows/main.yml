@@ -11,7 +11,7 @@ on:
 jobs:
   mac-15-build-xcode:
     # main branch only, or PRs into main
-    if: false
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: macos-15
 
     steps:
@@ -61,7 +61,7 @@ jobs:
 
   mac-build-clang-ninja:
     runs-on: macos-15
-    if: false
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -88,7 +88,7 @@ jobs:
           
   ubuntu-build-clang-ninja:
     runs-on: ubuntu-latest
-    if: false
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -117,7 +117,7 @@ jobs:
           ctest -C Debug --verbose
 
   debian-build-clang-ninja:
-    if: false
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     container:
       image: debian:stable
@@ -149,7 +149,7 @@ jobs:
           ctest -C Debug --verbose
 
   fedora-build-clang-ninja:
-    if: false
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     container:
       image: fedora:latest
