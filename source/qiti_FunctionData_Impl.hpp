@@ -52,7 +52,7 @@ public:
     
     FunctionType functionType = FunctionType::regular;
     
-    std::unordered_set<FunctionData::Listener*> listeners;
+    std::unordered_set<FunctionData::Listener*> listeners{};
     
     FunctionCallData lastCallData{};
 };

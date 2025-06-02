@@ -196,6 +196,17 @@ void updateFunctionDataOnExit(void* this_fn) noexcept
     callImpl->timeSpentInFunctionNanoseconds = static_cast<uint64_t>(elapsed_ns.count());
     callImpl->numHeapAllocationsAfterFunctionCall = MallocHooks::numHeapAllocationsOnCurrentThread;
     callImpl->amountHeapAllocatedAfterFunctionCall = MallocHooks::amountHeapAllocatedOnCurrentThread;
+    
+    if(impl->averageTimeSpentInFunctionNanoseconds == 0)
+        impl->averageTimeSpentInFunctionNanoseconds = callImpl->timeSpentInFunctionNanoseconds;
+    else
+    {
+        const auto currentAverage = impl->averageTimeSpentInFunctionNanoseconds;
+        auto effectiveTotal = currentAverage * (impl->numTimesCalled-1);
+        effectiveTotal += callImpl->timeSpentInFunctionNanoseconds;
+        const auto newAverage = effectiveTotal / impl->numTimesCalled;
+        impl->averageTimeSpentInFunctionNanoseconds = newAverage;
+    }
 }
 } // namespace profile
 } // namespace qiti
