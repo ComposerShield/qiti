@@ -92,7 +92,7 @@ jobs:
           ctest -C Debug --verbose
 
   debian-build-clang-ninja:
-    #if: ${{ github.ref == 'refs/heads/main' }}
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     container:
       image: debian:stable
@@ -124,7 +124,7 @@ jobs:
           ctest -C Debug --verbose
 
   fedora-build-clang-ninja:
-    #if: ${{ github.ref == 'refs/heads/main' }}
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     container:
       image: fedora:latest
