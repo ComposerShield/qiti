@@ -16,12 +16,12 @@
 #pragma once
 
 // Macros
-#include "qiti_API.hpp"
+#include "../source/qiti_API.hpp"
 
 // Classes
-#include "qiti_FunctionData.hpp"
-#include "qiti_FunctionCallData.hpp"
-#include "qiti_ScopedQitiTest.hpp"
-#include "qiti_ThreadSanitizer.hpp"
+#include "../source/qiti_FunctionData.hpp"
+#include "../source/qiti_FunctionCallData.hpp"
+#include "../source/qiti_ScopedQitiTest.hpp"
+#include "../source/qiti_ThreadSanitizer.hpp"
 
 //--------------------------------------------------------------------------
