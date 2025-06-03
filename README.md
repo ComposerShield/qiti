@@ -69,6 +69,10 @@ In addition, by linking your unit test executable with `qiti_tests_client`, Qiti
 - **Linker flags** (via `INTERFACE`):
   - `-rdynamic`
 
+## Deployment Target (macOS)
+
+- When compiling on macOS, the deployment target must be 10.15 (Catalina) or later.
+
 ## Documentation
 
 Qiti uses Doxygen (via a custom CMake `doxygen` target) to generate HTML API documentation. To build the docs, ensure Doxygen is installed on your system and then run the following from your project root:
