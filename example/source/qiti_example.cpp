@@ -80,7 +80,7 @@ void incrementCounter() noexcept
 
 void TestClass::incrementCounter() noexcept
 {
-    for (int i = 0; i < 100'000; ++i)
+    for (int i = 0; i < 1'100'000; ++i)
         ++_counter; // Unsynchronized write
 }
 } // namespace ThreadSanitizer
