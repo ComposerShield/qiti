@@ -60,3 +60,38 @@ TEST_CASE("qiti::FunctionCallData::getAmountHeapAllocated()")
         QITI_REQUIRE(amountAllocated == sizeof(int));
     }
 }
+
+TEST_CASE("qiti::FunctionCallData::getThreadThatCalledFunction()")
+{
+    qiti::ScopedQitiTest test;
+    
+    auto funcData = qiti::FunctionData::getFunctionData<&testHeapAllocation>();
+    QITI_REQUIRE(funcData != nullptr);
+    
+    const auto currentThreadID = std::this_thread::get_id();
+    
+    SECTION("Called from unit test thread")
+    {
+        testHeapAllocation();
+        
+        auto lastFunctionCall = funcData->getLastFunctionCall();
+        auto threadThatCalledFunction = lastFunctionCall.getThreadThatCalledFunction();
+        QITI_REQUIRE(threadThatCalledFunction == currentThreadID); // called from this thread
+    }
+    
+    SECTION("Called from custom thread")
+    {
+        std::thread t([]
+        {
+            testHeapAllocation();
+        });
+        auto tThreadID = t.get_id();
+        
+        t.join();
+        
+        auto lastFunctionCall = funcData->getLastFunctionCall();
+        auto threadThatCalledFunction = lastFunctionCall.getThreadThatCalledFunction();
+        QITI_REQUIRE_FALSE(threadThatCalledFunction == currentThreadID);
+        QITI_REQUIRE(threadThatCalledFunction == tThreadID); // called from t thread
+    }
+}

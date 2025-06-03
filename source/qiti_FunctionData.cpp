@@ -173,6 +173,11 @@ uint64_t FunctionData::getNumTimesCalled() const noexcept
     return getImpl()->numTimesCalled;
 }
 
+uint64_t FunctionData::getAverageTimeSpentInFunction_ns() const noexcept
+{
+    return getImpl()->averageTimeSpentInFunctionNanoseconds;
+}
+
 FunctionCallData FunctionData::getLastFunctionCall() const noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;

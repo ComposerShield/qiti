@@ -64,13 +64,16 @@ public:
      */
     [[nodiscard]] uint64_t QITI_API getNumTimesCalled() const noexcept;
     
+    /** Returns the average time spent inside this function, in nanoseconds. */
+    [[nodiscard]] uint64_t QITI_API getAverageTimeSpentInFunction_ns() const noexcept;
+    
     /**
      Check if the function was called on a specific thread.
 
      Returns true if any recorded invocation occurred on the thread identified by 'thread'.
      */
     [[nodiscard]] bool QITI_API wasCalledOnThread(std::thread::id thread) const noexcept;
-
+    
     /**
      Retrieve the most recent function call data.
 
