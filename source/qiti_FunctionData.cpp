@@ -108,7 +108,13 @@ FunctionData::FunctionData(void* functionAddress) noexcept
     }
     else
     {
-        std::terminate(); // TODO: will this ever happen?
+        // dladdr failed -> use "<unknown>"
+        strncpy(impl->functionNameMangled, "<unknown>", sizeof(impl->functionNameMangled) - 1);
+        impl->functionNameMangled[sizeof(impl->functionNameMangled) - 1] = '\0';
+
+        // We can't demangle a nullptr, so just copy the same placeholder
+        strncpy(impl->functionNameReal, "<unknown>", sizeof(impl->functionNameReal) - 1);
+        impl->functionNameReal[sizeof(impl->functionNameReal) - 1] = '\0';
     }
 }
 

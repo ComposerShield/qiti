@@ -35,9 +35,12 @@ class FunctionData
 public:
     /**
      Begins profiling for FuncPtr and returns a pointer to the corresponding FunctionData instance.
+     
+     FuncPtr can be a free function as well as member function.
      */
     template <auto FuncPtr>
     requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
+             || std::is_member_function_pointer_v<decltype(FuncPtr)>
     [[nodiscard]] static const qiti::FunctionData* QITI_API getFunctionData() noexcept
     {
         return getFunctionDataMutable<FuncPtr>(); // wrap in const
@@ -47,6 +50,8 @@ public:
      Get the demangled name of the function.
 
      Returns a human-readable name for the function without mangling.
+     
+     Does not currently support member functions.
      */
     [[nodiscard]] const char* QITI_API getFunctionName() const noexcept;
     
@@ -54,6 +59,8 @@ public:
      Get the mangled name of the function.
 
      Returns the compiler-generated mangled identifier for the function.
+     
+     Does not currently support member functions.
      */
     [[nodiscard]] const char* QITI_API getMangledFunctionName() const noexcept;
     
@@ -107,6 +114,20 @@ public:
     {
         qiti::profile::beginProfilingFunction<FuncPtr>();
         return &qiti::getFunctionDataFromAddress(reinterpret_cast<void*>(FuncPtr));
+    }
+    
+    /**
+     Begins profiling for FuncPtr and returns a pointer to the corresponding mutable FunctionData instance.
+     
+     Member function overload.
+     */
+    template <auto FuncPtr>
+    requires std::is_member_function_pointer_v<decltype(FuncPtr)>
+    [[nodiscard]] static qiti::FunctionData* QITI_API_INTERNAL getFunctionDataMutable() noexcept
+    {
+        static void* const uniqueAddress = nullptr;
+        qiti::profile::beginProfilingFunction(uniqueAddress);
+        return &qiti::getFunctionDataFromAddress(uniqueAddress);
     }
     
     /**
