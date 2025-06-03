@@ -204,7 +204,9 @@ void updateFunctionDataOnExit(void* this_fn) noexcept
         const auto currentAverage = impl->averageTimeSpentInFunctionNanoseconds;
         auto effectiveTotal = currentAverage * (impl->numTimesCalled-1);
         effectiveTotal += callImpl->timeSpentInFunctionNanoseconds;
-        const auto newAverage = effectiveTotal / impl->numTimesCalled;
+        const auto newAverage = (impl->numTimesCalled > 0)
+                                ? (effectiveTotal / impl->numTimesCalled)
+                                : 0;
         impl->averageTimeSpentInFunctionNanoseconds = newAverage;
     }
 }
