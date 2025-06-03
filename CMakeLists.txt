@@ -58,24 +58,28 @@ add_library(qiti_lib SHARED ${SOURCES})
 # Force client to compile this file
 add_library(qiti_tests_client OBJECT "source/client/qiti_tests_client.cpp")
 
-# Internal example app used for testing
-add_library(qiti_example_target SHARED ${EXAMPLE_SOURCES})
+if(PROJECT_IS_TOP_LEVEL)
+    # Internal example app used for testing
+    add_library(qiti_example_target SHARED ${EXAMPLE_SOURCES})
 
-target_link_libraries(qiti_example_target
-PRIVATE
-    qiti_lib
-)
+    target_link_libraries(qiti_example_target
+    PRIVATE
+        qiti_lib
+    )
+endif()
 
 if(APPLE)
     set_target_properties(qiti_lib PROPERTIES
         OSX_ARCHITECTURES "${ARCHS}"
         XCODE_GENERATE_SCHEME ON
     )
-
-    set_target_properties(qiti_example_target PROPERTIES
-        OSX_ARCHITECTURES "${ARCHS}"
-        XCODE_GENERATE_SCHEME ON
-    )
+    
+    if(PROJECT_IS_TOP_LEVEL)
+        set_target_properties(qiti_example_target PROPERTIES
+            OSX_ARCHITECTURES "${ARCHS}"
+            XCODE_GENERATE_SCHEME ON
+        )
+    endif()
 endif()
 
 target_include_directories(qiti_lib 
@@ -140,159 +144,163 @@ INTERFACE
 #       Unit Testing
 # =========================
 
-include(FetchContent)
-    FetchContent_Declare(
-    Catch2
-    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    GIT_TAG        v3.5.0
-)
-FetchContent_MakeAvailable(Catch2)
-
-add_executable(qiti_tests
-    "tests/qiti_test_macros.hpp"
-    "tests/test_qiti_FunctionCallData.cpp"
-    "tests/test_qiti_FunctionData.cpp"
-    "tests/test_qiti_instrument.cpp"
-    "tests/test_qiti_profile.cpp"
-    "tests/test_qiti_LeakSanitizer.cpp"
-    "tests/test_qiti_LockData.cpp"
-    "tests/test_qiti_ScopedNoHeapAllocations.cpp"
-    "tests/test_qiti_ThreadSanitizer.cpp"
-    "tests/test_qiti_TypeData.cpp"
-    "tests/test_qiti_utils.cpp"
-)
-
-if(APPLE)
-    set_target_properties(qiti_tests PROPERTIES
-        OSX_ARCHITECTURES "${ARCHS}"
-        XCODE_GENERATE_SCHEME ON
+if(PROJECT_IS_TOP_LEVEL)
+    include(FetchContent)
+        FetchContent_Declare(
+        Catch2
+        GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+        GIT_TAG        v3.5.0
     )
+    FetchContent_MakeAvailable(Catch2)
+
+    add_executable(qiti_tests
+        "tests/qiti_test_macros.hpp"
+        "tests/test_qiti_FunctionCallData.cpp"
+        "tests/test_qiti_FunctionData.cpp"
+        "tests/test_qiti_instrument.cpp"
+        "tests/test_qiti_profile.cpp"
+        "tests/test_qiti_LeakSanitizer.cpp"
+        "tests/test_qiti_LockData.cpp"
+        "tests/test_qiti_ScopedNoHeapAllocations.cpp"
+        "tests/test_qiti_ThreadSanitizer.cpp"
+        "tests/test_qiti_TypeData.cpp"
+        "tests/test_qiti_utils.cpp"
+    )
+
+    if(APPLE)
+        set_target_properties(qiti_tests PROPERTIES
+            OSX_ARCHITECTURES "${ARCHS}"
+            XCODE_GENERATE_SCHEME ON
+        )
+    endif()
+
+    target_link_libraries(qiti_tests 
+    PRIVATE
+        qiti_example_target
+        qiti_lib
+        qiti_tests_client
+        Catch2::Catch2WithMain
+    )
+
+    if(UNIX AND NOT APPLE)
+        # On Linux, add “-rdynamic” so that all global symbols are exported into the dynamic symbol table.
+        # Without this, functions defined in qiti_tests_client (and linked libraries) may not be visible to dladdr(),
+        # causing dli_sname to be nullptr and leading to crashes when trying to copy the symbol name.
+        target_link_options(qiti_tests_client INTERFACE "-rdynamic")
+    endif()
+
+    target_compile_options(qiti_tests 
+    PRIVATE
+        "-Werror"
+        "-Wpedantic"
+    )
+
+    enable_testing()
+
+    if(APPLE)
+        set_target_properties(Catch2 PROPERTIES 
+            OSX_ARCHITECTURES "${ARCHS}"
+        )
+
+        set_target_properties(Catch2WithMain PROPERTIES
+            OSX_ARCHITECTURES "${ARCHS}"
+        )
+
+        set_target_properties(qiti_tests PROPERTIES
+            OSX_ARCHITECTURES "${ARCHS}"
+            XCODE_GENERATE_SCHEME ON
+        )
+    endif()
+
+    target_include_directories(qiti_tests 
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/source
+        ${CMAKE_CURRENT_SOURCE_DIR}/example/source
+    )
+
+    # Load and use the .cmake file provided by Catch2
+    # https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md
+    # We have to manually provide the source directory here for now
+
+    include(${Catch2_SOURCE_DIR}/extras/Catch.cmake)
+
+    # When running ctest, you must add a configuration flag, e.g. "ctest -C Debug"
+    catch_discover_tests(qiti_tests DISCOVERY_MODE PRE_TEST)
 endif()
-
-target_link_libraries(qiti_tests 
-PRIVATE
-    qiti_example_target
-    qiti_lib
-    qiti_tests_client
-    Catch2::Catch2WithMain
-)
-
-if(UNIX AND NOT APPLE)
-    # On Linux, add “-rdynamic” so that all global symbols are exported into the dynamic symbol table.
-    # Without this, functions defined in qiti_tests_client (and linked libraries) may not be visible to dladdr(),
-    # causing dli_sname to be nullptr and leading to crashes when trying to copy the symbol name.
-    target_link_options(qiti_tests_client INTERFACE "-rdynamic")
-endif()
-
-target_compile_options(qiti_tests 
-PRIVATE
-    "-Werror"
-    "-Wpedantic"
-)
-
-enable_testing()
-
-if(APPLE)
-    set_target_properties(Catch2 PROPERTIES 
-        OSX_ARCHITECTURES "${ARCHS}"
-    )
-
-    set_target_properties(Catch2WithMain PROPERTIES
-        OSX_ARCHITECTURES "${ARCHS}"
-    )
-
-    set_target_properties(qiti_tests PROPERTIES
-        OSX_ARCHITECTURES "${ARCHS}"
-        XCODE_GENERATE_SCHEME ON
-    )
-endif()
-
-target_include_directories(qiti_tests 
-PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/source
-    ${CMAKE_CURRENT_SOURCE_DIR}/example/source
-)
-
-# Load and use the .cmake file provided by Catch2
-# https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md
-# We have to manually provide the source directory here for now
-
-include(${Catch2_SOURCE_DIR}/extras/Catch.cmake)
-
-# When running ctest, you must add a configuration flag, e.g. "ctest -C Debug"
-catch_discover_tests(qiti_tests DISCOVERY_MODE PRE_TEST)
 
 # =========================
 #       Documentation
 # =========================
 
-function(Doxygen input output)
-    find_package(Doxygen)
-    if (NOT DOXYGEN_FOUND)
-        add_custom_target(doxygen COMMAND false
-            COMMENT "Doxygen not found")
-        return()
-    endif()
-    set(DOXYGEN_GENERATE_HTML YES)
-    set(DOXYGEN_HTML_OUTPUT
-        ${PROJECT_SOURCE_DIR}/${output}/html
-    )
+if(PROJECT_IS_TOP_LEVEL)
+    function(Doxygen input output)
+        find_package(Doxygen)
+        if (NOT DOXYGEN_FOUND)
+            add_custom_target(doxygen COMMAND false
+                COMMENT "Doxygen not found")
+            return()
+        endif()
+        set(DOXYGEN_GENERATE_HTML YES)
+        set(DOXYGEN_HTML_OUTPUT
+            ${PROJECT_SOURCE_DIR}/${output}/html
+        )
 
-    set(DOXYGEN_FILE_PATTERNS "*.h" "*.hpp") # do not process .cpp files
+        set(DOXYGEN_FILE_PATTERNS "*.h" "*.hpp") # do not process .cpp files
 
-    set(DOXYGEN_PREDEFINED ${COMPILE_DEFINITIONS})
-    set(DOXYGEN_EXTRACT_ALL YES)
-    set(DOXYGEN_INTERNAL_DOCS NO)
-    set(DOXYGEN_EXTRACT_PRIVATE NO)
-    set(DOXYGEN_EXTRACT_STATIC NO)
-    set(DOXYGEN_EXTRACT_MACROS = YES)
-    set(DOXYGEN_HIDE_UNDOC_CLASSES YES)
-    set(DOXYGEN_HIDE_UNDOC_MEMBERS YES)
-    set(DOXYGEN_SHOW_FILES NO)
-    set(DOXYGEN_VERBATIM_HEADERS NO)
-    set(DOXYGEN_RECURSIVE YES)
-    set(DOXYGEN_USE_MDFILE_AS_MAINPAGE ${PROJECT_SOURCE_DIR}/README.md)
-    set(DOXYGEN_CALL_GRAPH YES)
-    set(DOXYGEN_CALLER_GRAPH YES)
-    set(DOXYGEN_DOT_GRAPH_MAX_NODES 100)
-    set(DOXYGEN_SHOW_ENUM_VALUES YES)
-    set(DOXYGEN_INCLUDE_PATH ${INCLUDE_DIRECTORIES})
+        set(DOXYGEN_PREDEFINED ${COMPILE_DEFINITIONS})
+        set(DOXYGEN_EXTRACT_ALL YES)
+        set(DOXYGEN_INTERNAL_DOCS NO)
+        set(DOXYGEN_EXTRACT_PRIVATE NO)
+        set(DOXYGEN_EXTRACT_STATIC NO)
+        set(DOXYGEN_EXTRACT_MACROS = YES)
+        set(DOXYGEN_HIDE_UNDOC_CLASSES YES)
+        set(DOXYGEN_HIDE_UNDOC_MEMBERS YES)
+        set(DOXYGEN_SHOW_FILES NO)
+        set(DOXYGEN_VERBATIM_HEADERS NO)
+        set(DOXYGEN_RECURSIVE YES)
+        set(DOXYGEN_USE_MDFILE_AS_MAINPAGE ${PROJECT_SOURCE_DIR}/README.md)
+        set(DOXYGEN_CALL_GRAPH YES)
+        set(DOXYGEN_CALLER_GRAPH YES)
+        set(DOXYGEN_DOT_GRAPH_MAX_NODES 100)
+        set(DOXYGEN_SHOW_ENUM_VALUES YES)
+        set(DOXYGEN_INCLUDE_PATH ${INCLUDE_DIRECTORIES})
 
-    # completely mute warnings:
-    set(DOXYGEN_QUIET              YES)
+        # completely mute warnings:
+        set(DOXYGEN_QUIET              YES)
 
-    # specifically turn off “doc-error” warnings (mismatches between your comments
-    # and the actual code)
-    set(DOXYGEN_WARN_IF_DOC_ERROR  NO)
+        # specifically turn off “doc-error” warnings (mismatches between your comments
+        # and the actual code)
+        set(DOXYGEN_WARN_IF_DOC_ERROR  NO)
 
-    # if you’ve got stray \param or other tags pointing at non-existent symbols
-    # you can silence those too
-    set(DOXYGEN_WARN_NO_PARAMDOC   NO)
+        # if you’ve got stray \param or other tags pointing at non-existent symbols
+        # you can silence those too
+        set(DOXYGEN_WARN_NO_PARAMDOC   NO)
 
-    # turn on preprocessing & macro-expansion
-    set(DOXYGEN_ENABLE_PREPROCESSING YES)
-    set(DOXYGEN_MACRO_EXPANSION    YES)
-    set(DOXYGEN_EXPAND_ONLY_PREDEF YES)
+        # turn on preprocessing & macro-expansion
+        set(DOXYGEN_ENABLE_PREPROCESSING YES)
+        set(DOXYGEN_MACRO_EXPANSION    YES)
+        set(DOXYGEN_EXPAND_ONLY_PREDEF YES)
 
-    # force QITI_API* to be “nothing”
-    list(APPEND DOXYGEN_PREDEFINED
-        "QITI_API="
-        "QITI_API_INTERNAL=")
+        # force QITI_API* to be “nothing”
+        list(APPEND DOXYGEN_PREDEFINED
+            "QITI_API="
+            "QITI_API_INTERNAL=")
 
-    # if your Doxygen is new enough, also skip them entirely
-    set(DOXYGEN_SKIP_FUNCTION_MACROS YES)
+        # if your Doxygen is new enough, also skip them entirely
+        set(DOXYGEN_SKIP_FUNCTION_MACROS YES)
 
-    # ensure the HTML output folder exists
-    file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/${output}/html)
+        # ensure the HTML output folder exists
+        file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/${output}/html)
 
-    doxygen_add_docs(doxygen
-        ${PROJECT_SOURCE_DIR}/${input} ${PROJECT_SOURCE_DIR}/README.md 
-        COMMENT "Generate HTML documentation"
-    )
+        doxygen_add_docs(doxygen
+            ${PROJECT_SOURCE_DIR}/${input} ${PROJECT_SOURCE_DIR}/README.md 
+            COMMENT "Generate HTML documentation"
+        )
 
-    set_target_properties(doxygen PROPERTIES
-        XCODE_GENERATE_SCHEME ON
-    )
-endfunction()
+        set_target_properties(doxygen PROPERTIES
+            XCODE_GENERATE_SCHEME ON
+        )
+    endfunction()
 
-Doxygen(source docs)
+    Doxygen(source docs)
+endif()
