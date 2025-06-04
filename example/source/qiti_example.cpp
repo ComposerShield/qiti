@@ -15,11 +15,30 @@
 
 #include "qiti_example_include.hpp"
 
+#if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || defined(_M_IX86)
+  #include <immintrin.h>  // for _mm_pause()
+#endif
 #include <thread>
 
 //--------------------------------------------------------------------------
 
 int counter = 0; // Shared global variable
+
+inline static void cpu_pause() noexcept
+{
+    // x86 or x86_64:
+    #if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || defined(_M_IX86)
+        _mm_pause();
+    
+    // AArch64 (Apple Silicon, many ARM64 Linux ports, etc.):
+    #elif defined(__aarch64__) || defined(_M_ARM64) || defined(__arm64__)
+        __asm__ volatile("yield");
+    
+    // Fallback (any other architecture): just yield to scheduler
+    #else
+        std::this_thread::yield(); // hint to scheduler, very short pause
+    #endif
+}
 
 //--------------------------------------------------------------------------
 
@@ -91,9 +110,6 @@ void incrementCounter() noexcept
 
 // Despite egregiously being a data race, CI does not always detect it as a data race.
 // So we added some waits to make sure our tests don't intermittently fail
-
-__attribute__((noinline))
-__attribute__((optnone))
 void TestClass::incrementCounter() noexcept
 {
     volatile int dummyInternalVal = 0;
@@ -102,7 +118,10 @@ void TestClass::incrementCounter() noexcept
         dummyInternalVal += 1;   // prevent re-ordering
         ++_counter;              // Unsynchronized write
         if (_counter % 2 == 0)   // Unsynchronized read
-            std::this_thread::yield(); // hint to scheduler, very short pause
+            // spin for a brief moment, forcing both threads to sit in this
+            // branch at the same time more often
+            for (int k = 0; k < 100; ++k)
+                cpu_pause();
     }
 }
 } // namespace ThreadSanitizer
