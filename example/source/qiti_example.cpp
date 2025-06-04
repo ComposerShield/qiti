@@ -79,13 +79,13 @@ void testFunc1() noexcept
 
 void incrementCounter() noexcept
 {
-    for (int i = 0; i < 100'000; ++i)
+    for (int i = 0; i < 1'000'000; ++i)
         ++counter; // Unsynchronized write
 }
 
 void TestClass::incrementCounter() noexcept
 {
-    for (int i = 0; i < 1'100'000; ++i)
+    for (int i = 0; i < 1'000'000; ++i)
         ++_counter; // Unsynchronized write
 }
 } // namespace ThreadSanitizer
