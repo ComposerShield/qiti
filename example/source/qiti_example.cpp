@@ -15,7 +15,6 @@
 
 #include "qiti_example_include.hpp"
 
-#include <chrono>
 #include <thread>
 
 //--------------------------------------------------------------------------
@@ -92,6 +91,9 @@ void incrementCounter() noexcept
 
 // Despite egregiously being a data race, CI does not always detect it as a data race.
 // So we added some waits to make sure our tests don't intermittently fail
+
+__attribute__((noinline))
+__attribute__((optnone))
 void TestClass::incrementCounter() noexcept
 {
     volatile int dummyInternalVal = 0;
@@ -100,7 +102,7 @@ void TestClass::incrementCounter() noexcept
         dummyInternalVal += 1;   // prevent re-ordering
         ++_counter;              // Unsynchronized write
         if (_counter % 2 == 0)   // Unsynchronized read
-            std::this_thread::sleep_for(std::chrono::nanoseconds(10)); // wait
+            std::this_thread::yield(); // hint to scheduler, very short pause
     }
 }
 } // namespace ThreadSanitizer
