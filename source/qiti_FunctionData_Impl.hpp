@@ -42,7 +42,7 @@ struct FunctionData::Impl
 public:
     char functionNameMangled[128];
     char functionNameReal[128];
-    void* address = nullptr;
+    const void* address = nullptr;
     
     uint64_t numTimesCalled = 0;
     uint64_t averageTimeSpentInFunctionNanoseconds = 0;

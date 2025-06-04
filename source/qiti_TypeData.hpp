@@ -43,7 +43,7 @@ public:
     //--------------------------------------------------------------------------
     
     /** */
-    QITI_API_INTERNAL TypeData(void* functionAddress) noexcept;
+    QITI_API_INTERNAL TypeData(const void* functionAddress) noexcept;
     /** */
     QITI_API_INTERNAL ~TypeData() noexcept;
     

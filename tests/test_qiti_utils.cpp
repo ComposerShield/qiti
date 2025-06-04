@@ -78,7 +78,7 @@ TEST_CASE("qiti::getAddressForMangledFunctionName()")
 {
     qiti::ScopedQitiTest test;
     
-    auto* funcAddress = (void*)&testFunc0;
+    const auto* funcAddress = (const void*)&testFunc0;
     
     auto functionData = qiti::FunctionData::getFunctionData<&testFunc0>();
     QITI_REQUIRE( functionData != nullptr );

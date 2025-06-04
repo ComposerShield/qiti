@@ -56,6 +56,11 @@ int testHeapAllocation() noexcept
     delete test;
     return 42;
 }
+
+int TestType::testFunc() const noexcept
+{
+    return 0;
+}
 } // namespace profile
 
 //--------------------------------------------------------------------------
