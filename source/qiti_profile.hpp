@@ -17,6 +17,7 @@
 
 #include "qiti_API.hpp"
 
+#include <array>
 #include <cstdint>
 #include <string>
 #include <type_traits>
