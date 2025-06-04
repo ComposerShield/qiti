@@ -34,18 +34,8 @@ TEST_CASE("qiti::FunctionData::getFunctionName()")
         qiti::profile::beginProfilingFunction<&testFunc>();
         auto functionData = qiti::getFunctionData<&testFunc>();
         std::string name = functionData->getFunctionName();
-        QITI_CHECK(name == "testFunc()");
+        QITI_CHECK(name == "testFunc");
     }
-}
-
-TEST_CASE("qiti::FunctionData::getMangledFunctionName()")
-{
-    qiti::ScopedQitiTest test;
-    
-    qiti::profile::beginProfilingFunction<&testFunc>();
-    auto functionData = qiti::getFunctionData<&testFunc>();
-    std::string name = functionData->getMangledFunctionName();
-    QITI_CHECK(name == "_Z8testFuncv");
 }
 
 TEST_CASE("qiti::FunctionData::getNumTimesCalled()")

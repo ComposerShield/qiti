@@ -40,8 +40,9 @@ enum class FunctionType
 struct FunctionData::Impl
 {
 public:
-    char functionNameMangled[128];
-    char functionNameReal[128];
+    static constexpr const char* unknownFunctionName = "<unknown>";
+    
+    const char* functionName = unknownFunctionName;
     const void* address = nullptr;
     
     uint64_t numTimesCalled = 0;

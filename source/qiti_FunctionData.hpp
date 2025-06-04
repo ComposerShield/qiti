@@ -49,20 +49,9 @@ public:
     /**
      Get the demangled name of the function.
 
-     Returns a human-readable name for the function without mangling.
-     
-     Does not currently support member functions.
+     Returns a human-readable name for the function.
      */
     [[nodiscard]] const char* QITI_API getFunctionName() const noexcept;
-    
-    /**
-     Get the mangled name of the function.
-
-     Returns the compiler-generated mangled identifier for the function.
-     
-     Does not currently support member functions.
-     */
-    [[nodiscard]] const char* QITI_API getMangledFunctionName() const noexcept;
     
     /**
      Get the total number of times this function was called.
@@ -98,7 +87,7 @@ public:
 
      Initializes internal tracking structures using the provided function address.
      */
-    QITI_API_INTERNAL FunctionData(const void* functionAddress) noexcept;
+    QITI_API_INTERNAL FunctionData(const void* functionAddress, const char* functionName) noexcept;
     
     /**
      Destroy this FunctionData instance.
@@ -112,8 +101,10 @@ public:
     requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
     [[nodiscard]] static qiti::FunctionData* QITI_API_INTERNAL getFunctionDataMutable() noexcept
     {
+        static const auto* functionAddress = reinterpret_cast<const void*>(FuncPtr);
+        static const char* functionName    = profile::getFunctionName<FuncPtr>();
         qiti::profile::beginProfilingFunction<FuncPtr>();
-        return &qiti::getFunctionDataFromAddress(reinterpret_cast<const void*>(FuncPtr));
+        return &qiti::getFunctionDataFromAddress(functionAddress, functionName);
     }
     
     /**
@@ -125,9 +116,10 @@ public:
     requires std::is_member_function_pointer_v<decltype(FuncPtr)>
     [[nodiscard]] static qiti::FunctionData* QITI_API_INTERNAL getFunctionDataMutable() noexcept
     {
-        auto uniqueAddress = profile::getMemberFunctionMockAddress<FuncPtr>();
-        qiti::profile::beginProfilingFunction(uniqueAddress);
-        return &qiti::getFunctionDataFromAddress(uniqueAddress);
+        static const auto* functionAddress = profile::getMemberFunctionMockAddress<FuncPtr>();
+        static const char* functionName    = profile::getFunctionName<FuncPtr>();
+        qiti::profile::beginProfilingFunction(functionAddress);
+        return &qiti::getFunctionDataFromAddress(functionAddress, functionName);
     }
     
     /**

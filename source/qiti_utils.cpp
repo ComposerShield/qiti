@@ -80,14 +80,15 @@ void* getAddressForMangledFunctionName(const char* mangledName) noexcept
     return addr;
 }
 
-[[nodiscard]] qiti::FunctionData& getFunctionDataFromAddress(const void* functionAddress) noexcept
+[[nodiscard]] qiti::FunctionData& getFunctionDataFromAddress(const void* functionAddress,
+                                                             const char* functionName) noexcept
 {
     auto& g_functionMap = getFunctionMap();
     
     auto it = g_functionMap.find(functionAddress);
     if (it == g_functionMap.end()) // not yet added to map
     {
-        qiti::FunctionData data(functionAddress);
+        qiti::FunctionData data(functionAddress, functionName);
         
         auto [insertedIt, success] = g_functionMap.emplace(functionAddress, std::move(data));
         
