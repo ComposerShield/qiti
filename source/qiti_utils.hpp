@@ -17,6 +17,8 @@
 
 #include "qiti_API.hpp"
 
+#include "qiti_profile.hpp"
+
 #include <dlfcn.h>
 
 #include <cstdint>
@@ -35,39 +37,6 @@ class FunctionData;
 //--------------------------------------------------------------------------
 /** */
 void QITI_API_INTERNAL resetAll() noexcept;
-
-/**
- \internal
- Returns demangled function name (without parens)
- */
-template <auto FuncPtr>
-constexpr std::string_view getFunctionName() noexcept
-{
-#if defined(__clang__) || defined(__GNUC__)
-    constexpr std::string_view full   = __PRETTY_FUNCTION__;
-    // 1) find the last '=' in the "[FuncPtr = …]" part
-    auto eq = full.rfind('=');
-    if (eq == std::string_view::npos) return {};
-
-    // 2) move past '=' then skip spaces and '&'
-    auto start = eq + 1;
-    while (start < full.size() && (full[start] == ' ' || full[start] == '&'))
-        ++start;
-
-    // 3) find the last ']' which closes the bracketed section
-    auto end = full.rfind(']');
-    if (end == std::string_view::npos || end < start)
-        return {};     // unexpected format
-
-    // 4) return exactly the characters in between
-    return full.substr(start, end - start);
-
-#elif defined(_MSC_VER)
-    // similar logic with __FUNCSIG__
-#endif
-
-    return {};
-}
 
 /**
  \internal
@@ -99,15 +68,17 @@ void* QITI_API getAddressForMangledFunctionName(const char* mangledName) noexcep
 [[nodiscard]] const qiti::FunctionData* QITI_API getFunctionData(const char* demangledFunctionName) noexcept;
 
 /** \internal */
-[[nodiscard]] qiti::FunctionData& QITI_API getFunctionDataFromAddress(const void* functionAddress) noexcept;
+[[nodiscard]] qiti::FunctionData& QITI_API getFunctionDataFromAddress(const void* functionAddress,
+                                                                      const char* functionName = nullptr) noexcept;
 
-/** */
+
 template <auto FuncPtr>
 requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
 [[nodiscard]] const qiti::FunctionData* QITI_API getFunctionData() noexcept
 {
-    static constexpr auto* address = FuncPtr;
-    return &getFunctionDataFromAddress(reinterpret_cast<const void*>(address));
+    static const auto* functionAddress = reinterpret_cast<const void*>(FuncPtr);
+    static const char* functionName    = profile::getFunctionName<FuncPtr>();
+    return &getFunctionDataFromAddress(functionAddress, functionName);
 }
 
 } // namespace qiti

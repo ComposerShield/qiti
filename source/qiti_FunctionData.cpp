@@ -69,13 +69,13 @@ inline static size_t threadIdToIndexOrRegister(const std::thread::id& tid) noexc
 namespace qiti
 {
 
-FunctionData::FunctionData(const void* functionAddress) noexcept
+FunctionData::FunctionData(const void* functionAddress, const char* functionName) noexcept
 {
     static_assert(sizeof(FunctionData::Impl)  <= FunctionData::ImplSize,
                   "Impl is too large for FunctionData::implStorage");
     static_assert(alignof(FunctionData::Impl) == FunctionData::ImplAlign,
                   "Impl alignment stricter than FunctionData::implStorage");
-    
+        
     MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
     
     // Allocate Impl on the stack instead of the heap
@@ -84,38 +84,8 @@ FunctionData::FunctionData(const void* functionAddress) noexcept
     auto* impl = getImpl();
     
     impl->address = functionAddress;
-    
-    Dl_info info;
-    if (dladdr(functionAddress, &info))
-    {
-        if (info.dli_sname == nullptr)
-        {
-            // dladdr succeeded but didn’t supply a symbol name -> use "<unknown>"
-            strncpy(impl->functionNameMangled, "<unknown>", sizeof(impl->functionNameMangled) - 1);
-            impl->functionNameMangled[sizeof(impl->functionNameMangled) - 1] = '\0';
-
-            // We can't demangle a nullptr, so just copy the same placeholder
-            strncpy(impl->functionNameReal, "<unknown>", sizeof(impl->functionNameReal) - 1);
-            impl->functionNameReal[sizeof(impl->functionNameReal) - 1] = '\0';
-        }
-        else
-        {
-            strncpy(impl->functionNameMangled, info.dli_sname, sizeof(impl->functionNameMangled) - 1);
-            char functionNameDemangled[256];
-            qiti::demangle(info.dli_sname, functionNameDemangled, sizeof(functionNameDemangled));
-            strncpy(impl->functionNameReal, functionNameDemangled, sizeof(impl->functionNameReal) - 1);
-        }
-    }
-    else
-    {
-        // dladdr failed -> use "<unknown>"
-        strncpy(impl->functionNameMangled, "<unknown>", sizeof(impl->functionNameMangled) - 1);
-        impl->functionNameMangled[sizeof(impl->functionNameMangled) - 1] = '\0';
-
-        // We can't demangle a nullptr, so just copy the same placeholder
-        strncpy(impl->functionNameReal, "<unknown>", sizeof(impl->functionNameReal) - 1);
-        impl->functionNameReal[sizeof(impl->functionNameReal) - 1] = '\0';
-    }
+    if (functionName != nullptr)
+        impl->functionName = functionName;
 }
 
 FunctionData::~FunctionData() noexcept
@@ -162,14 +132,7 @@ const char* FunctionData::getFunctionName() const noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     
-    return getImpl()->functionNameReal;
-}
-
-const char* FunctionData::getMangledFunctionName() const noexcept
-{
-    qiti::ScopedNoHeapAllocations noAlloc;
-    
-    return getImpl()->functionNameMangled;
+    return getImpl()->functionName;
 }
 
 uint64_t FunctionData::getNumTimesCalled() const noexcept

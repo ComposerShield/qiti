@@ -57,7 +57,7 @@ static void QITI_API_INTERNAL updateFunctionType(qiti::FunctionData& functionDat
     qiti::ScopedNoHeapAllocations noAlloc;
 
     auto* impl = functionData.getImpl();
-    const char* name = impl->functionNameReal;
+    const char* name = impl->functionName;
     std::string_view sv{name};
 
     // find the opening '(' of the parameter list
@@ -103,12 +103,12 @@ void resetProfiling() noexcept
     MallocHooks::amountHeapAllocatedOnCurrentThread = 0ull;
 }
 
-void beginProfilingFunction(const void* functionAddress) noexcept
+void beginProfilingFunction(const void* functionAddress, const char* functionName) noexcept
 {
     g_functionsToProfile.insert(functionAddress);
     
     // This adds the function to our function map
-    (void)qiti::getFunctionDataFromAddress(functionAddress);
+    (void)qiti::getFunctionDataFromAddress(functionAddress, functionName);
 }
 
 void endProfilingFunction(const void* functionAddress) noexcept

@@ -45,46 +45,31 @@ TEST_CASE("qiti::getFunctionName()")
     
     SECTION("Simple global namespace function from this translation unit")
     {
-        auto name = qiti::getFunctionName<&localTestFunc>();
+        std::string name = qiti::profile::getFunctionName<&localTestFunc>();
         QITI_REQUIRE(name == "localTestFunc");
     }
     
     SECTION("Simple global namespace static function from this translation unit")
     {
-        auto name = qiti::getFunctionName<&localStaticTestFunc>();
+        std::string name = qiti::profile::getFunctionName<&localStaticTestFunc>();
         QITI_REQUIRE(name == "localStaticTestFunc");
     }
     
     SECTION("Simple global namespace inline function from this translation unit")
     {
-        auto name = qiti::getFunctionName<&localInlineTestFunc>();
+        std::string name = qiti::profile::getFunctionName<&localInlineTestFunc>();
         QITI_REQUIRE(name == "localInlineTestFunc");
     }
     
     SECTION("Multi-namespaced function")
     {
-        auto name = qiti::getFunctionName<&testFunc0>();
+        std::string name = qiti::profile::getFunctionName<&testFunc0>();
         QITI_REQUIRE(name == "qiti::example::utils::testFunc0");
     }
     
     SECTION("Complex, namespaced, templated/typedef, STL function")
     {
-        auto name = qiti::getFunctionName<&std::string::empty>();
+        std::string name = qiti::profile::getFunctionName<&std::string::empty>();
         QITI_REQUIRE(name == "std::basic_string<char>::empty");
     }
-}
-
-TEST_CASE("qiti::getAddressForMangledFunctionName()")
-{
-    qiti::ScopedQitiTest test;
-    
-    const auto* funcAddress = (const void*)&testFunc0;
-    
-    auto functionData = qiti::FunctionData::getFunctionData<&testFunc0>();
-    QITI_REQUIRE( functionData != nullptr );
-    
-    auto mangledName = functionData->getMangledFunctionName();
-    auto* address = qiti::getAddressForMangledFunctionName(mangledName);
-    
-    QITI_REQUIRE( address == funcAddress );    
 }
