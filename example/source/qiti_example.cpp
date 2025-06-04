@@ -15,6 +15,9 @@
 
 #include "qiti_example_include.hpp"
 
+#include <chrono>
+#include <thread>
+
 //--------------------------------------------------------------------------
 
 int counter = 0; // Shared global variable
@@ -77,31 +80,27 @@ void testFunc1() noexcept
     volatile int _ = 42; // dummy code
 }
 
-__attribute__((noinline))
-__attribute__((optnone))
 void incrementCounter() noexcept
 {
     volatile int dummyInternalVal = 0;
     for (int i = 0; i < 1'000'000; ++i)
     {
-        ++dummyInternalVal;    // prevent re-ordering
+        dummyInternalVal += 1; // prevent re-ordering
         ++counter;             // Unsynchronized write
-        if (counter == 42)     // Unsynchronized read
-            counter = counter; // Unsynchronized write
     }
 }
 
-__attribute__((noinline))
-__attribute__((optnone))
+// Despite egregiously being a data race, CI does not always detect it as a data race.
+// So we added some waits to make sure our tests don't intermittently fail
 void TestClass::incrementCounter() noexcept
 {
     volatile int dummyInternalVal = 0;
     for (int i = 0; i < 1'000'000; ++i)
     {
-        ++dummyInternalVal;      // prevent re-ordering
+        dummyInternalVal += 1;   // prevent re-ordering
         ++_counter;              // Unsynchronized write
-        if (_counter == 42)      // Unsynchronized read
-            _counter = _counter; // Unsynchronized write
+        if (_counter % 2 == 0)   // Unsynchronized read
+            std::this_thread::sleep_for(std::chrono::nanoseconds(10)); // wait
     }
 }
 } // namespace ThreadSanitizer
