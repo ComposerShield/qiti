@@ -28,24 +28,28 @@ TEST_CASE("qiti::profile::resetProfiling()")
     QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&testFunc>());
 }
 
-TEST_CASE("qiti::profile::beginProfilingFunction()")
+TEST_CASE("qiti::profile::{begin/end}ProfilingFunction() on free function")
 {
     qiti::ScopedQitiTest test;
     
     QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&testFunc>());
-    qiti::profile::beginProfilingFunction<&testFunc>();
-    QITI_REQUIRE(qiti::profile::isProfilingFunction<&testFunc>());
-}
-
-TEST_CASE("qiti::profile::endProfilingFunction()")
-{
-    qiti::ScopedQitiTest test;
-    
     qiti::profile::beginProfilingFunction<&testFunc>();
     QITI_REQUIRE(qiti::profile::isProfilingFunction<&testFunc>());
     
     qiti::profile::endProfilingFunction<&testFunc>();
     QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&testFunc>());
+}
+
+TEST_CASE("qiti::profile::{begin/end}ProfilingFunction() on member function")
+{
+    qiti::ScopedQitiTest test;
+    
+    QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&TestType::testFunc>());
+    qiti::profile::beginProfilingFunction<&TestType::testFunc>();
+    QITI_REQUIRE(qiti::profile::isProfilingFunction<&TestType::testFunc>());
+    
+    qiti::profile::endProfilingFunction<&TestType::testFunc>();
+    QITI_REQUIRE_FALSE(qiti::profile::isProfilingFunction<&TestType::testFunc>());
 }
 
 #if defined(__APPLE__)
@@ -85,9 +89,9 @@ TEST_CASE("qiti::profile::begin/endProfilingType()")
 {
     qiti::ScopedQitiTest test;
     
-    qiti::profile::beginProfilingType<ProfileTestType>();
+    qiti::profile::beginProfilingType<TestType>();
     
-    qiti::profile::endProfilingType<ProfileTestType>();
+    qiti::profile::endProfilingType<TestType>();
     // TODO: implement
 }
 

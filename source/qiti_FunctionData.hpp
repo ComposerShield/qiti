@@ -98,7 +98,7 @@ public:
 
      Initializes internal tracking structures using the provided function address.
      */
-    QITI_API_INTERNAL FunctionData(void* functionAddress) noexcept;
+    QITI_API_INTERNAL FunctionData(const void* functionAddress) noexcept;
     
     /**
      Destroy this FunctionData instance.
@@ -113,7 +113,7 @@ public:
     [[nodiscard]] static qiti::FunctionData* QITI_API_INTERNAL getFunctionDataMutable() noexcept
     {
         qiti::profile::beginProfilingFunction<FuncPtr>();
-        return &qiti::getFunctionDataFromAddress(reinterpret_cast<void*>(FuncPtr));
+        return &qiti::getFunctionDataFromAddress(reinterpret_cast<const void*>(FuncPtr));
     }
     
     /**
@@ -125,7 +125,7 @@ public:
     requires std::is_member_function_pointer_v<decltype(FuncPtr)>
     [[nodiscard]] static qiti::FunctionData* QITI_API_INTERNAL getFunctionDataMutable() noexcept
     {
-        static void* const uniqueAddress = nullptr;
+        auto uniqueAddress = profile::getMemberFunctionMockAddress<FuncPtr>();
         qiti::profile::beginProfilingFunction(uniqueAddress);
         return &qiti::getFunctionDataFromAddress(uniqueAddress);
     }

@@ -69,7 +69,7 @@ inline static size_t threadIdToIndexOrRegister(const std::thread::id& tid) noexc
 namespace qiti
 {
 
-FunctionData::FunctionData(void* functionAddress) noexcept
+FunctionData::FunctionData(const void* functionAddress) noexcept
 {
     static_assert(sizeof(FunctionData::Impl)  <= FunctionData::ImplSize,
                   "Impl is too large for FunctionData::implStorage");

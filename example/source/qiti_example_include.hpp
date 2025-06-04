@@ -36,9 +36,10 @@ namespace profile
 void testFunc() noexcept;
 int testHeapAllocation() noexcept;
 
-class ProfileTestType
+class TestType
 {
-    
+public:
+    int testFunc() const noexcept;
 };
 } // namespace profile
 

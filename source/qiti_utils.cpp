@@ -43,7 +43,7 @@ std::mutex qiti_lock;
 /** */
 [[nodiscard]] static auto& getFunctionMap() noexcept
 {
-    static std::unordered_map<void*, qiti::FunctionData> map;
+    static std::unordered_map<const void*, qiti::FunctionData> map;
     return map;
 }
 
@@ -80,7 +80,7 @@ void* getAddressForMangledFunctionName(const char* mangledName) noexcept
     return addr;
 }
 
-[[nodiscard]] qiti::FunctionData& getFunctionDataFromAddress(void* functionAddress) noexcept
+[[nodiscard]] qiti::FunctionData& getFunctionDataFromAddress(const void* functionAddress) noexcept
 {
     auto& g_functionMap = getFunctionMap();
     
@@ -102,7 +102,7 @@ void* getAddressForMangledFunctionName(const char* mangledName) noexcept
     auto& g_functionMap = getFunctionMap();
     
     auto it = std::find_if(g_functionMap.begin(), g_functionMap.end(),
-                           [demangledFunctionName](const std::pair<void*, const qiti::FunctionData&>& pair)
+                           [demangledFunctionName](const std::pair<const void*, const qiti::FunctionData&>& pair)
                            {
                                return pair.second.getFunctionName() == std::string(demangledFunctionName);
                            });

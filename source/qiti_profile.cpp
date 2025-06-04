@@ -37,7 +37,7 @@
 
 //--------------------------------------------------------------------------
 
-inline std::unordered_set<void*> g_functionsToProfile;
+inline std::unordered_set<const void*> g_functionsToProfile;
 bool g_profileAllFunctions = false;
 
 struct Init_g_functionsToProfile
@@ -103,7 +103,7 @@ void resetProfiling() noexcept
     MallocHooks::amountHeapAllocatedOnCurrentThread = 0ull;
 }
 
-void beginProfilingFunction(void* functionAddress) noexcept
+void beginProfilingFunction(const void* functionAddress) noexcept
 {
     g_functionsToProfile.insert(functionAddress);
     
@@ -111,7 +111,7 @@ void beginProfilingFunction(void* functionAddress) noexcept
     (void)qiti::getFunctionDataFromAddress(functionAddress);
 }
 
-void endProfilingFunction(void* functionAddress) noexcept
+void endProfilingFunction(const void* functionAddress) noexcept
 {
     g_functionsToProfile.erase(functionAddress);
 }
@@ -126,7 +126,7 @@ void endProfilingAllFunctions() noexcept
     g_profileAllFunctions = false;
 }
 
-bool isProfilingFunction(void* funcAddress) noexcept
+bool isProfilingFunction(const void* funcAddress) noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     return g_profileAllFunctions || g_functionsToProfile.contains(funcAddress);
@@ -152,7 +152,7 @@ uint64_t getAmountHeapAllocatedOnCurrentThread() noexcept
     return MallocHooks::amountHeapAllocatedOnCurrentThread;
 }
 
-void updateFunctionDataOnEnter(void* this_fn) noexcept
+void updateFunctionDataOnEnter(const void* this_fn) noexcept
 {
     // Update FunctionData
     auto& functionData = qiti::getFunctionDataFromAddress(this_fn);
@@ -177,7 +177,7 @@ void updateFunctionDataOnEnter(void* this_fn) noexcept
     updateFunctionType(functionData);
 }
 
-void updateFunctionDataOnExit(void* this_fn) noexcept
+void updateFunctionDataOnExit(const void* this_fn) noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     

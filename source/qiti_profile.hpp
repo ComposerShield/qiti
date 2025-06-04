@@ -22,11 +22,6 @@
 #include <typeindex>
 #include <typeinfo>
 
-//--------------------------------------------------------------------------
-// Doxygen - Begin Internal Documentation
-/** \cond INTERNAL */
-//--------------------------------------------------------------------------
-
 namespace qiti
 {
 namespace profile
@@ -34,21 +29,58 @@ namespace profile
 /** */
 void QITI_API resetProfiling() noexcept;
 
-/** \internal */
-void QITI_API beginProfilingFunction(void* functionAddress) noexcept;
+/**
+ \internal
+ Returns a mock "address" we can use for member functions.
+ C++ does not (portably) allow function pointers to member functions.
+ Addresses of static variables are guaranteed to be unique so we can
+ create one for each member function we wish to profile.
+ */
+template <auto FuncPtr>
+requires std::is_member_function_pointer_v<decltype(FuncPtr)>
+[[nodiscard]] const void* getMemberFunctionMockAddress() noexcept
+{
+    static const void* const uniqueAddress = nullptr;
+    return reinterpret_cast<const void*>(&uniqueAddress);
+}
 
 /** \internal */
-void QITI_API endProfilingFunction(void* functionAddress) noexcept;
+void QITI_API beginProfilingFunction(const void* functionAddress) noexcept;
+
+/** \internal */
+void QITI_API endProfilingFunction(const void* functionAddress) noexcept;
 
 /** */
 template<auto FuncPtr>
 requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
-void QITI_API inline beginProfilingFunction() noexcept { beginProfilingFunction( reinterpret_cast<void*>(FuncPtr)); }
+void QITI_API inline beginProfilingFunction() noexcept
+{
+    beginProfilingFunction(reinterpret_cast<const void*>(FuncPtr));
+}
+
+/** */
+template<auto FuncPtr>
+requires std::is_member_function_pointer_v<decltype(FuncPtr)>
+void QITI_API inline beginProfilingFunction() noexcept
+{
+    beginProfilingFunction(getMemberFunctionMockAddress<FuncPtr>());
+}
 
 /** */
 template <auto FuncPtr>
 requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
-void QITI_API inline endProfilingFunction() noexcept { endProfilingFunction( reinterpret_cast<void*>(FuncPtr)); }
+void QITI_API inline endProfilingFunction() noexcept
+{
+    endProfilingFunction(reinterpret_cast<const void*>(FuncPtr));
+}
+
+/** */
+template <auto FuncPtr>
+requires std::is_member_function_pointer_v<decltype(FuncPtr)>
+void QITI_API inline endProfilingFunction() noexcept
+{
+    endProfilingFunction(getMemberFunctionMockAddress<FuncPtr>());
+}
 
 /** */
 [[deprecated("Results in exceptions on Linux")]] void QITI_API beginProfilingAllFunctions() noexcept;
@@ -56,15 +88,30 @@ void QITI_API inline endProfilingFunction() noexcept { endProfilingFunction( rei
 /** */
 [[deprecated("Results in exceptions on Linux")]] void QITI_API endProfilingAllFunctions() noexcept;
 
-/** */
-[[nodiscard]] bool QITI_API isProfilingFunction(void* funcAddress) noexcept;
+/**
+ \internal
+ @returns true if we are currently profling function.
+ Free function overload.
+ */
+[[nodiscard]] bool QITI_API isProfilingFunction(const void* funcAddress) noexcept;
 
-/** */
+/** @returns true if we are currently profling function. */
 template<auto FuncPtr>
 requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
 [[nodiscard]] inline bool QITI_API isProfilingFunction() noexcept
 {
-    return isProfilingFunction( reinterpret_cast<void*>(FuncPtr));
+    return isProfilingFunction(reinterpret_cast<const void*>(FuncPtr));
+}
+
+/**
+ @returns true if we are currently profling function.
+ Member function overload.
+ */
+template<auto FuncPtr>
+requires std::is_member_function_pointer_v<decltype(FuncPtr)>
+[[nodiscard]] inline bool QITI_API isProfilingFunction() noexcept
+{
+    return isProfilingFunction(getMemberFunctionMockAddress<FuncPtr>());
 }
 
 /** \internal */
@@ -88,15 +135,10 @@ inline void QITI_API endProfilingType() noexcept { endProfilingType( typeid(Type
 [[nodiscard]] uint64_t QITI_API getAmountHeapAllocatedOnCurrentThread() noexcept;
 
 /** \internal */
-void QITI_API_INTERNAL updateFunctionDataOnEnter(void* this_fn) noexcept;
+void QITI_API_INTERNAL updateFunctionDataOnEnter(const void* this_fn) noexcept;
 
 /** \internal */
-void QITI_API_INTERNAL updateFunctionDataOnExit(void* this_fn) noexcept;
+void QITI_API_INTERNAL updateFunctionDataOnExit(const void* this_fn) noexcept;
 
 } // namespace profile
 } // namespace qiti
-
-//--------------------------------------------------------------------------
-/** \endcond */
-// Doxygen - End Internal Documentation
-//--------------------------------------------------------------------------

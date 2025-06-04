@@ -99,7 +99,7 @@ void* QITI_API getAddressForMangledFunctionName(const char* mangledName) noexcep
 [[nodiscard]] const qiti::FunctionData* QITI_API getFunctionData(const char* demangledFunctionName) noexcept;
 
 /** \internal */
-[[nodiscard]] qiti::FunctionData& QITI_API getFunctionDataFromAddress(void* functionAddress) noexcept;
+[[nodiscard]] qiti::FunctionData& QITI_API getFunctionDataFromAddress(const void* functionAddress) noexcept;
 
 /** */
 template <auto FuncPtr>
@@ -107,7 +107,7 @@ requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
 [[nodiscard]] const qiti::FunctionData* QITI_API getFunctionData() noexcept
 {
     static constexpr auto* address = FuncPtr;
-    return &getFunctionDataFromAddress(reinterpret_cast<void*>(address));
+    return &getFunctionDataFromAddress(reinterpret_cast<const void*>(address));
 }
 
 } // namespace qiti
