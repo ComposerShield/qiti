@@ -69,7 +69,8 @@ void* QITI_API getAddressForMangledFunctionName(const char* mangledName) noexcep
 
 /** \internal */
 [[nodiscard]] qiti::FunctionData& QITI_API getFunctionDataFromAddress(const void* functionAddress,
-                                                                      const char* functionName = nullptr) noexcept;
+                                                                      const char* functionName = nullptr,
+                                                                      int functionType = 0) noexcept;
 
 
 template <auto FuncPtr>

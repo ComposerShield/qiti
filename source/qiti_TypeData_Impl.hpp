@@ -28,13 +28,6 @@
 
 namespace qiti
 {
-enum class FunctionType
-{
-    regular,
-    constructor,
-    destructor
-};
-
 struct TypeData::Impl
 {
 public:

@@ -31,6 +31,39 @@ namespace profile
 /** */
 void QITI_API resetProfiling() noexcept;
 
+/** */
+template <auto FuncPtr>
+requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
+struct FunctionAddressHolder
+{
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wold-style-cast"
+    static constexpr const void* value = (const void*)FuncPtr; // NOLINT
+#pragma clang diagnostic pop
+};
+
+/** */
+template <auto FuncPtr>
+requires std::is_member_function_pointer_v<decltype(FuncPtr)>
+struct MemberFunctionMockAddressHolder
+{
+    static constexpr void* value = nullptr;
+};
+
+/**
+ \internal
+ Returns a mock "address" we can use for member functions.
+ C++ does not (portably) allow function pointers to member functions.
+ Addresses of static variables are guaranteed to be unique so we can
+ create one for each member function we wish to profile.
+ */
+template <auto FuncPtr>
+requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
+[[nodiscard]] constexpr const void* getFunctionAddress() noexcept
+{
+    return FunctionAddressHolder<FuncPtr>::value;
+}
+
 /**
  \internal
  Returns a mock "address" we can use for member functions.
@@ -40,10 +73,9 @@ void QITI_API resetProfiling() noexcept;
  */
 template <auto FuncPtr>
 requires std::is_member_function_pointer_v<decltype(FuncPtr)>
-[[nodiscard]] const void* getMemberFunctionMockAddress() noexcept
+[[nodiscard]] constexpr const void* getMemberFunctionMockAddress() noexcept
 {
-    static constexpr void* uniqueAddress = nullptr;
-    return reinterpret_cast<const void*>(&uniqueAddress);
+    return reinterpret_cast<const void*>(&MemberFunctionMockAddressHolder<FuncPtr>::value);
 }
 
 /** */
