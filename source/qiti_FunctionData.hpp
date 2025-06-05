@@ -18,6 +18,7 @@
 #include "qiti_FunctionCallData.hpp"
 #include "qiti_profile.hpp"
 #include "qiti_utils.hpp"
+#include "qiti_ScopedNoHeapAllocations.hpp"
 
 #include <cstdint>
 #include <thread>
@@ -33,6 +34,17 @@ namespace qiti
 class FunctionData
 {
 public:
+    enum class FunctionType
+    {
+        regular,
+        constructor,
+        destructor,
+        copyConstructor,
+        copyAssignment,
+        moveConstructor,
+        moveAssignment
+    };
+    
     /**
      Begins profiling for FuncPtr and returns a pointer to the corresponding FunctionData instance.
      
@@ -87,7 +99,9 @@ public:
 
      Initializes internal tracking structures using the provided function address.
      */
-    QITI_API_INTERNAL FunctionData(const void* functionAddress, const char* functionName) noexcept;
+    QITI_API_INTERNAL FunctionData(const void*  functionAddress,
+                                   const char*  functionName,
+                                   FunctionType functionType) noexcept;
     
     /**
      Destroy this FunctionData instance.
@@ -101,10 +115,13 @@ public:
     requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
     [[nodiscard]] static qiti::FunctionData* QITI_API_INTERNAL getFunctionDataMutable() noexcept
     {
-        static const auto* functionAddress = reinterpret_cast<const void*>(FuncPtr);
-        static const char* functionName    = profile::getFunctionName<FuncPtr>();
+        static constexpr auto functionAddress = profile::getFunctionAddress<FuncPtr>();
+        static const char*    functionName    = profile::getFunctionName<FuncPtr>();
+        static const auto     functionType    = getFunctionType(functionName);
         qiti::profile::beginProfilingFunction<FuncPtr>();
-        return &qiti::getFunctionDataFromAddress(functionAddress, functionName);
+        return &qiti::getFunctionDataFromAddress(functionAddress,
+                                                 functionName,
+                                                 static_cast<int>(functionType));
     }
     
     /**
@@ -116,10 +133,13 @@ public:
     requires std::is_member_function_pointer_v<decltype(FuncPtr)>
     [[nodiscard]] static qiti::FunctionData* QITI_API_INTERNAL getFunctionDataMutable() noexcept
     {
-        static const auto* functionAddress = profile::getMemberFunctionMockAddress<FuncPtr>();
-        static const char* functionName    = profile::getFunctionName<FuncPtr>();
+        static constexpr auto functionAddress = profile::getMemberFunctionMockAddress<FuncPtr>();
+        static const char*    functionName    = profile::getFunctionName<FuncPtr>();
+        static const auto     functionType    = getFunctionType(functionName);
         qiti::profile::beginProfilingFunction(functionAddress);
-        return &qiti::getFunctionDataFromAddress(functionAddress, functionName);
+        return &qiti::getFunctionDataFromAddress(functionAddress,
+                                                 functionName,
+                                                 static_cast<int>(functionType));
     }
     
     /**
@@ -174,6 +194,44 @@ private:
     void* operator new(std::size_t) = delete;
     /** Prevent heap allocating this class (deleted) */
     void* operator new[](std::size_t) = delete;
+    
+    /** */
+    [[nodiscard]] static FunctionType QITI_API_INTERNAL getFunctionType(const char* functionName) noexcept
+    {
+        ScopedNoHeapAllocations noAlloc;
+
+        std::string_view sv{functionName};
+
+        // find the opening '(' of the parameter list
+        auto paren = sv.find('(');
+        if (paren != std::string_view::npos)
+        {
+            // strip off the "(" and everything after:
+            sv.remove_suffix(sv.size() - paren);
+
+            // now find the last "::" in the prefix:
+            auto colcol = sv.rfind("::");
+            if (colcol != std::string_view::npos)
+            {
+                // [qualifier]::[last]
+                std::string_view qualifier = sv.substr(0, colcol);
+                std::string_view last_part = sv.substr(colcol + 2);
+
+                // constructor: qualifier == last_part
+                if (qualifier == last_part)
+                {
+                    return FunctionType::constructor;
+                }
+                // destructor: last_part begins with '~' and qualifier == last_part.substr(1)
+                else if (!last_part.empty() && last_part[0] == '~'
+                         && qualifier == last_part.substr(1))
+                {
+                    return FunctionType::destructor;
+                }
+            }
+        }
+        return FunctionType::regular;
+    }
     
     //--------------------------------------------------------------------------
     /** \endcond */
