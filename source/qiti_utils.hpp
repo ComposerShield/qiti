@@ -77,8 +77,8 @@ template <auto FuncPtr>
 requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
 [[nodiscard]] const qiti::FunctionData* QITI_API getFunctionData() noexcept
 {
-    static const auto* functionAddress = reinterpret_cast<const void*>(FuncPtr);
-    static const char* functionName    = profile::getFunctionName<FuncPtr>();
+    static constexpr auto functionAddress = profile::getFunctionAddress<FuncPtr>();
+    static constexpr auto functionName    = profile::getFunctionName<FuncPtr>();
     return &getFunctionDataFromAddress(functionAddress, functionName);
 }
 

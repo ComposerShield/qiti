@@ -116,8 +116,8 @@ public:
     [[nodiscard]] static qiti::FunctionData* QITI_API_INTERNAL getFunctionDataMutable() noexcept
     {
         static constexpr auto functionAddress = profile::getFunctionAddress<FuncPtr>();
-        static const char*    functionName    = profile::getFunctionName<FuncPtr>();
-        static const auto     functionType    = getFunctionType(functionName);
+        static constexpr auto functionName    = profile::getFunctionName<FuncPtr>();
+        static constexpr auto functionType    = getFunctionType(functionName);
         qiti::profile::beginProfilingFunction<FuncPtr>();
         return &qiti::getFunctionDataFromAddress(functionAddress,
                                                  functionName,
@@ -134,8 +134,8 @@ public:
     [[nodiscard]] static qiti::FunctionData* QITI_API_INTERNAL getFunctionDataMutable() noexcept
     {
         static constexpr auto functionAddress = profile::getMemberFunctionMockAddress<FuncPtr>();
-        static const char*    functionName    = profile::getFunctionName<FuncPtr>();
-        static const auto     functionType    = getFunctionType(functionName);
+        static constexpr auto functionName    = profile::getFunctionName<FuncPtr>();
+        static constexpr auto functionType    = getFunctionType(functionName);
         qiti::profile::beginProfilingFunction(functionAddress);
         return &qiti::getFunctionDataFromAddress(functionAddress,
                                                  functionName,
@@ -196,10 +196,8 @@ private:
     void* operator new[](std::size_t) = delete;
     
     /** */
-    [[nodiscard]] static FunctionType QITI_API_INTERNAL getFunctionType(const char* functionName) noexcept
+    [[nodiscard]] static constexpr FunctionType QITI_API_INTERNAL getFunctionType(const char* functionName) noexcept
     {
-        ScopedNoHeapAllocations noAlloc;
-
         std::string_view sv{functionName};
 
         // find the opening '(' of the parameter list
