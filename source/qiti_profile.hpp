@@ -59,7 +59,7 @@ struct MemberFunctionMockAddressHolder
  */
 template <auto FuncPtr>
 requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
-[[nodiscard]] constexpr const void* getFunctionAddress() noexcept
+[[nodiscard]] consteval const void* getFunctionAddress() noexcept
 {
     return FunctionAddressHolder<FuncPtr>::value;
 }
@@ -73,54 +73,60 @@ requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
  */
 template <auto FuncPtr>
 requires std::is_member_function_pointer_v<decltype(FuncPtr)>
-[[nodiscard]] constexpr const void* getMemberFunctionMockAddress() noexcept
+[[nodiscard]] consteval const void* getMemberFunctionMockAddress() noexcept
 {
-    return reinterpret_cast<const void*>(&MemberFunctionMockAddressHolder<FuncPtr>::value);
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wold-style-cast"
+    return (const void*)(&MemberFunctionMockAddressHolder<FuncPtr>::value); // NOLINT
+#pragma clang diagnostic pop
 }
+
+namespace FunctionNameHelpers
+{
+// A constexpr helper that slices out “FuncPtr = …” from __PRETTY_FUNCTION__.
+template <auto FuncPtr>
+consteval auto QITI_API_INTERNAL makeFunctionNameArray() noexcept
+{
+    constexpr const char* fullFuncName = __PRETTY_FUNCTION__;
+    constexpr std::string_view pretty = fullFuncName;
+    
+    constexpr std::string_view marker = "FuncPtr = ";
+    constexpr std::size_t start = pretty.find(marker) + marker.size();
+    constexpr std::size_t end   = pretty.rfind(']');
+    static_assert(start != std::string_view::npos, "Could not find “FuncPtr = ”");
+    static_assert(end   != std::string_view::npos, "Could not find trailing ‘]’");
+    
+    constexpr std::string_view raw = pretty.substr(start, end - start);
+    constexpr std::string_view funcPtrString =
+    (! raw.empty() && raw.front() == '&')
+    ? raw.substr(1)
+    : raw;
+    
+    std::array<char, funcPtrString.size() + 1> tmp = {};
+    for (std::size_t i = 0; i < funcPtrString.size(); ++i)
+    {
+        tmp[i] = funcPtrString[i];
+    }
+    tmp[funcPtrString.size()] = '\0';
+    return tmp;
+}
+
+// Each FuncPtr gets exactly one array-of-chars at namespace scope:
+template <auto FuncPtr>
+inline constexpr auto functionNameArray = makeFunctionNameArray<FuncPtr>();
+
+// Constexpr pointer into that array:
+template <auto FuncPtr>
+inline constexpr const char* functionNameCStr = functionNameArray<FuncPtr>.data();
+} // namespace FunctionNameHelpers
 
 /** */
 template<auto FuncPtr>
 requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
          || std::is_member_function_pointer_v<decltype(FuncPtr)>
-[[nodiscard]] const char* QITI_API getFunctionName() noexcept
+[[nodiscard]] consteval const char* QITI_API getFunctionName() noexcept
 {
-    // Grab the full pretty‐function string:
-    constexpr const char* fullFuncName = __PRETTY_FUNCTION__;
-    constexpr std::string_view pretty = fullFuncName;
-
-    // Find “FuncPtr = ” and the closing ‘]’:
-    constexpr std::string_view marker = "FuncPtr = ";
-    constexpr std::size_t start = pretty.find(marker) + marker.size();
-    constexpr std::size_t end   = pretty.rfind(']');
-    static_assert(start != std::string_view::npos, "Could not find ‘FuncPtr = ’");
-    static_assert(end   != std::string_view::npos, "Could not find trailing ‘]’");
-
-    // Slice out exactly the text between “FuncPtr = ” and ‘]’:
-    constexpr std::string_view raw = pretty.substr(start, end - start);
-    //    e.g. raw == "&qiti::example::profile::TestType::testFunc"
-
-    // Drop a leading '&' if present:
-    constexpr std::string_view funcPtrString =
-        (!raw.empty() && raw.front() == '&')
-            ? raw.substr(1)    // skip the first character
-            : raw;             // otherwise keep the whole thing
-    
-    // Copy contents into a char array, marked static so it can be shared outside this function
-    static const auto funcNameArray = [&funcPtrString] () constexpr
-    {
-        // sv.size() is constexpr ⇒ this makes a std::array<char, N+1>.
-        std::array<char, funcPtrString.size() + 1> tmp = {};
-        for (std::size_t i = 0; i < funcPtrString.size(); ++i)
-        {
-            tmp[i] = funcPtrString[i];
-        }
-        tmp[funcPtrString.size()] = '\0';  // null-terminate
-        return tmp;             // returns a std::array<char, N+1>
-    }();
-    
-    static const char* const cstr = funcNameArray.data();
-    
-    return cstr;
+    return FunctionNameHelpers::functionNameCStr<FuncPtr>;
 }
 
 /** \internal */
@@ -134,8 +140,8 @@ template<auto FuncPtr>
 requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
 void QITI_API inline beginProfilingFunction() noexcept
 {
-    static const auto* functionAddress = reinterpret_cast<const void*>(FuncPtr);
-    static const char* functionName    = getFunctionName<FuncPtr>();
+    static constexpr auto functionAddress = profile::getFunctionAddress<FuncPtr>();
+    static constexpr auto functionName    = profile::getFunctionName<FuncPtr>();
     beginProfilingFunction(functionAddress, functionName);
 }
 
@@ -144,8 +150,8 @@ template<auto FuncPtr>
 requires std::is_member_function_pointer_v<decltype(FuncPtr)>
 void QITI_API inline beginProfilingFunction() noexcept
 {
-    static const auto* functionAddress = getMemberFunctionMockAddress<FuncPtr>();
-    static const char* functionName    = getFunctionName<FuncPtr>();
+    static constexpr auto functionAddress = profile::getMemberFunctionMockAddress<FuncPtr>();
+    static constexpr auto functionName    = profile::getFunctionName<FuncPtr>();
     beginProfilingFunction(functionAddress, functionName);
 }
 
