@@ -198,36 +198,80 @@ private:
     /** */
     [[nodiscard]] static constexpr FunctionType QITI_API_INTERNAL getFunctionType(const char* functionName) noexcept
     {
-        std::string_view sv{functionName};
+        std::string_view func_sv{functionName};
 
-        // find the opening '(' of the parameter list
-        auto paren = sv.find('(');
+        // Find the opening '(' of the parameter list
+        auto paren = func_sv.find('(');
         if (paren != std::string_view::npos)
         {
-            // strip off the "(" and everything after:
-            sv.remove_suffix(sv.size() - paren);
+            // Split into:
+            //    before  = "Qualifier::LastPart"    (everything before '(')
+            //    params  = "(...)"                   (including parentheses)
+            std::string_view before = func_sv.substr(0, paren);
+            std::string_view params = func_sv.substr(paren); // e.g. "(const MyClass&)" or "(MyClass&&)"
 
-            // now find the last "::" in the prefix:
-            auto colcol = sv.rfind("::");
+            // Find the last "::" in the prefix to separate qualifier vs. last_part
+            auto colcol = before.rfind("::");
             if (colcol != std::string_view::npos)
             {
-                // [qualifier]::[last]
-                std::string_view qualifier = sv.substr(0, colcol);
-                std::string_view last_part = sv.substr(colcol + 2);
+                std::string_view qualifier = before.substr(0, colcol);
+                std::string_view last_part  = before.substr(colcol + 2);
 
-                // constructor: qualifier == last_part
-                if (qualifier == last_part)
+                // ---- Constructor family (name == qualifier) ----
+                if (last_part == qualifier)
                 {
+                    // Look for a parameter that is the same type as 'qualifier'
+                    auto pos = params.find(qualifier);
+                    if (pos != std::string_view::npos)
+                    {
+                        // Move‐constructor: parameter contains "Qualifier&&"
+                        if (params.find("&&", pos + qualifier.size()) != std::string_view::npos)
+                        {
+                            return FunctionType::moveConstructor;
+                        }
+                        // Copy‐constructor: parameter contains "Qualifier&" (but not "&&")
+                        else if (params.find("&", pos + qualifier.size()) != std::string_view::npos)
+                        {
+                            return FunctionType::copyConstructor;
+                        }
+                    }
+                    // Else: it's “someClass::someClass(...)” but not copy/move (e.g. default or other ctor)
                     return FunctionType::constructor;
                 }
-                // destructor: last_part begins with '~' and qualifier == last_part.substr(1)
+
+                // ---- Destructor (last_part starts with '~' and matches qualifier) ----
                 else if (!last_part.empty() && last_part[0] == '~'
                          && qualifier == last_part.substr(1))
                 {
                     return FunctionType::destructor;
                 }
+
+                // ---- Assignment‐operator family ----
+                else if (last_part == "operator=")
+                {
+                    // Again, look for qualifier in the parameter list
+                    auto pos = params.find(qualifier);
+                    if (pos != std::string_view::npos)
+                    {
+                        // Move‐assignment: "(someClass&&)"
+                        if (params.find("&&", pos + qualifier.size()) != std::string_view::npos)
+                        {
+                            return FunctionType::moveAssignment;
+                        }
+                        // Copy‐assignment: "(const someClass&)" or "(someClass&)"
+                        else if (params.find("&", pos + qualifier.size()) != std::string_view::npos)
+                        {
+                            return FunctionType::copyAssignment;
+                        }
+                    }
+                    // If there is an operator= but the parameter didn’t clearly match qualifier& or qualifier&&,
+                    // fall through to regular.
+                    return FunctionType::regular;
+                }
             }
         }
+
+        // ---- If none of the above matched, it's just a normal function ----
         return FunctionType::regular;
     }
     
