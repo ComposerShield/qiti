@@ -13,7 +13,7 @@
  * See LICENSE.txt for license terms.
  ******************************************************************************/
 
-#include "qiti_profile.hpp"
+#include "qiti_Profile.hpp"
 
 #include "qiti_FunctionCallData_Impl.hpp"
 #include "qiti_FunctionCallData.hpp"
@@ -53,9 +53,7 @@ static const Init_g_functionsToProfile init_g_functionsToProfile;
 
 namespace qiti
 {
-namespace profile
-{
-void resetProfiling() noexcept
+void Profile::resetProfiling() noexcept
 {        
     g_functionsToProfile.clear();
     g_profileAllFunctions = false;
@@ -63,59 +61,59 @@ void resetProfiling() noexcept
     MallocHooks::amountHeapAllocatedOnCurrentThread = 0ull;
 }
 
-void beginProfilingFunction(const void* functionAddress, const char* functionName) noexcept
+void Profile::beginProfilingFunction(const void* functionAddress, const char* functionName) noexcept
 {
     g_functionsToProfile.insert(functionAddress);
     
     // This adds the function to our function map
-    (void)qiti::getFunctionDataFromAddress(functionAddress, functionName);
+    (void)Utils::getFunctionDataFromAddress(functionAddress, functionName);
 }
 
-void endProfilingFunction(const void* functionAddress) noexcept
+void Profile::endProfilingFunction(const void* functionAddress) noexcept
 {
     g_functionsToProfile.erase(functionAddress);
 }
 
-void beginProfilingAllFunctions() noexcept
+void Profile::beginProfilingAllFunctions() noexcept
 {
     g_profileAllFunctions = true;
 }
 
-void endProfilingAllFunctions() noexcept
+void Profile::endProfilingAllFunctions() noexcept
 {
     g_profileAllFunctions = false;
 }
 
-bool isProfilingFunction(const void* funcAddress) noexcept
+bool Profile::isProfilingFunction(const void* funcAddress) noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     return g_profileAllFunctions || g_functionsToProfile.contains(funcAddress);
 }
 
-void beginProfilingType(std::type_index /*functionAddress*/) noexcept
+void Profile::beginProfilingType(std::type_index /*functionAddress*/) noexcept
 {
     
 }
 
-void endProfilingType(std::type_index /*functionAddress*/) noexcept
+void Profile::endProfilingType(std::type_index /*functionAddress*/) noexcept
 {
     
 }
 
-uint64_t getNumHeapAllocationsOnCurrentThread() noexcept
+uint64_t Profile::getNumHeapAllocationsOnCurrentThread() noexcept
 {
     return MallocHooks::numHeapAllocationsOnCurrentThread;
 }
 
-uint64_t getAmountHeapAllocatedOnCurrentThread() noexcept
+uint64_t Profile::getAmountHeapAllocatedOnCurrentThread() noexcept
 {
     return MallocHooks::amountHeapAllocatedOnCurrentThread;
 }
 
-void updateFunctionDataOnEnter(const void* this_fn) noexcept
+void Profile::updateFunctionDataOnEnter(const void* this_fn) noexcept
 {
     // Update FunctionData
-    auto& functionData = qiti::getFunctionDataFromAddress(this_fn);
+    auto& functionData = Utils::getFunctionDataFromAddress(this_fn);
     
     qiti::ScopedNoHeapAllocations noAlloc; // TODO: can we move this up to very top?
     
@@ -135,11 +133,11 @@ void updateFunctionDataOnEnter(const void* this_fn) noexcept
     lastCallImpl->amountHeapAllocatedBeforeFunctionCall = MallocHooks::amountHeapAllocatedOnCurrentThread;
 }
 
-void updateFunctionDataOnExit(const void* this_fn) noexcept
+void Profile::updateFunctionDataOnExit(const void* this_fn) noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     
-    auto& functionData = qiti::getFunctionDataFromAddress(this_fn);
+    auto& functionData = Utils::getFunctionDataFromAddress(this_fn);
     auto* impl = functionData.getImpl();
     auto* callImpl = impl->lastCallData.getImpl();
     
@@ -169,5 +167,4 @@ void updateFunctionDataOnExit(const void* this_fn) noexcept
         impl->averageTimeSpentInFunctionNanoseconds = newAverage;
     }
 }
-} // namespace profile
 } // namespace qiti

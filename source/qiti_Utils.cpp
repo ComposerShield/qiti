@@ -13,10 +13,10 @@
  * See LICENSE.txt for license terms.
  ******************************************************************************/
 
-#include <qiti_utils.hpp>
+#include <qiti_Utils.hpp>
 
 #include "qiti_include.hpp"
-#include "qiti_instrument.hpp"
+#include "qiti_Instrument.hpp"
 #include "qiti_MallocHooks.hpp"
 
 #include <cxxabi.h>
@@ -38,8 +38,6 @@
 
 //--------------------------------------------------------------------------
 
-std::mutex qiti_lock;
-
 /** */
 [[nodiscard]] static auto& getFunctionMap() noexcept
 {
@@ -51,38 +49,39 @@ std::mutex qiti_lock;
 
 namespace qiti
 {
-size_t getAllKnownFunctions(char* flatBuf,
-                            size_t maxFunctions,
-                            size_t maxNameLen) noexcept
+uint64_t Utils::getAllKnownFunctions(char* flatBuf,
+                                     uint64_t maxFunctions,
+                                     uint64_t maxNameLen) noexcept
 {
     auto& map = getFunctionMap();
-    size_t count = std::min(map.size(), maxFunctions);
-
+    const size_t count = std::min(map.size(),
+                                  static_cast<size_t>(maxFunctions));
+    
     size_t i = 0;
     for (auto it = map.begin(); it != map.end() && i < count; ++it, ++i)
     {
         const std::string& name = it->second.getFunctionName();
         // copy up to maxNameLen-1 chars, then force '\0'
         std::strncpy(
-          flatBuf + i * maxNameLen,
-          name.c_str(),
-          maxNameLen - 1
-        );
+                     flatBuf + i * maxNameLen,
+                     name.c_str(),
+                     maxNameLen - 1
+                     );
         flatBuf[i * maxNameLen + (maxNameLen - 1)] = '\0';
     }
-
+    
     return count;
 }
 
-void* getAddressForMangledFunctionName(const char* mangledName) noexcept
+void* Utils::getAddressForMangledFunctionName(const char* mangledName) noexcept
 {
     void* addr = dlsym(RTLD_DEFAULT, mangledName);
     return addr;
 }
 
-[[nodiscard]] qiti::FunctionData& getFunctionDataFromAddress(const void* functionAddress,
-                                                             const char* functionName,
-                                                             int functionType) noexcept
+[[nodiscard]] qiti::FunctionData& Utils::getFunctionDataFromAddress(const void* functionAddress,
+                                                                    const char* functionName,
+                                                                    int functionType) noexcept
 {
     auto& g_functionMap = getFunctionMap();
     
@@ -101,15 +100,15 @@ void* getAddressForMangledFunctionName(const char* mangledName) noexcept
     return it->second;
 }
 
-[[nodiscard]] const qiti::FunctionData* getFunctionData(const char* demangledFunctionName) noexcept
+[[nodiscard]] const qiti::FunctionData* Utils::getFunctionData(const char* demangledFunctionName) noexcept
 {
     auto& g_functionMap = getFunctionMap();
     
     auto it = std::find_if(g_functionMap.begin(), g_functionMap.end(),
                            [demangledFunctionName](const std::pair<const void*, const qiti::FunctionData&>& pair)
                            {
-                               return pair.second.getFunctionName() == std::string(demangledFunctionName);
-                           });
+        return pair.second.getFunctionName() == std::string(demangledFunctionName);
+    });
     
     if (it == g_functionMap.end()) // function not found
         return nullptr;
@@ -117,11 +116,11 @@ void* getAddressForMangledFunctionName(const char* mangledName) noexcept
     return &(it->second);
 }
 
-void demangle(const char* mangled_name, char* demangled_name, uint64_t demangled_size) noexcept
+void Utils::demangle(const char* mangled_name, char* demangled_name, uint64_t demangled_size) noexcept
 {
     int status = 0;
     char* result = abi::__cxa_demangle(mangled_name, nullptr, nullptr, &status);
-
+    
     if (status == 0 && result != nullptr)
     {
         // Safely copy into caller's buffer
@@ -137,44 +136,12 @@ void demangle(const char* mangled_name, char* demangled_name, uint64_t demangled
     }
 }
 
-void resetAll() noexcept
+void Utils::resetAll() noexcept
 {
     getFunctionMap().clear();
     
-    instrument::resetInstrumentation();
-    profile::resetProfiling();
+    Instrument::resetInstrumentation();
+    Profile::resetProfiling();
 }
+
 } // namespace qiti
-
-extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
-__cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site) noexcept
-{
-    if (qiti::profile::isProfilingFunction(this_fn))
-    {
-        qiti::MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
-        
-        std::scoped_lock<std::mutex> lock(qiti_lock);
-        qiti::profile::updateFunctionDataOnEnter(this_fn);
-    }
-}
-
-extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
-__cyg_profile_func_exit(void * this_fn, [[maybe_unused]] void* call_site) noexcept
-{
-    if (qiti::profile::isProfilingFunction(this_fn))
-    {
-        qiti::MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
-        
-        std::scoped_lock<std::mutex> lock(qiti_lock);
-        qiti::profile::updateFunctionDataOnExit(this_fn);
-    }
-}
-
-//--------------------------------------------------------------------------
-
-#if ! defined(__APPLE__)
-// Linux-only:
-// Force‐instantiate the char allocator, to prevent potential linker errors
-// with its some of its function symbols not being resolved.
-template class __attribute__((visibility("default"))) std::allocator<char>;
-#endif // ! defined(__APPLE__)

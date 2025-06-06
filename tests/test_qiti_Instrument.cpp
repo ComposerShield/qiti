@@ -9,7 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 // Qiti Private API - not included in qiti_include.hpp
-#include "qiti_instrument.hpp"
+#include "qiti_Instrument.hpp"
 
 //--------------------------------------------------------------------------
 
@@ -20,10 +20,10 @@ TEST_CASE("qiti::FunctionCallData::resetInstrumentation()")
     static auto val = 0; // static required so that lambda can access it and still be converted to a function pointer
     
     // Set a heap allocation callback
-    qiti::instrument::onNextHeapAllocation([](){++val;});
+    qiti::Instrument::onNextHeapAllocation([](){++val;});
     
     // Clear out instrumentation which should heap allocation callback
-    qiti::instrument::resetInstrumentation();
+    qiti::Instrument::resetInstrumentation();
     
     // Explicit heap allocation, would normally trigger onNextHeapAllocation()
     volatile auto* testAlloc = new int{42};
@@ -40,7 +40,7 @@ TEST_CASE("qiti::onNextHeapAllocation() is called on next heap allocation", "[qi
     qiti::ScopedQitiTest test;
     
     static int testValue = 0;
-    qiti::instrument::onNextHeapAllocation([](){ ++testValue; });
+    qiti::Instrument::onNextHeapAllocation([](){ ++testValue; });
     
     auto* heapAllocation = new int{0};
     QITI_CHECK(testValue == 1);

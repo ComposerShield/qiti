@@ -16,7 +16,7 @@
 #include "qiti_ScopedQitiTest.hpp"
 
 #include "qiti_MallocHooks.hpp"
-#include "qiti_utils.hpp"
+#include "qiti_Utils.hpp"
 
 #include <atomic>
 #include <cassert>
@@ -48,7 +48,7 @@ ScopedQitiTest::ScopedQitiTest() noexcept
 {
     // Heap allocate now before wiping memory of heap allocations
     auto newImpl = std::make_unique<Impl>();
-    qiti::resetAll(); // start test from a blank slate
+    Utils::resetAll(); // start test from a blank slate
     
     bool qitiTestWasAlreadyRunning = qitiTestRunning.exchange(true, std::memory_order_relaxed);
     assert(! qitiTestWasAlreadyRunning); // Only one Qiti test permitted at a time
@@ -64,7 +64,7 @@ ScopedQitiTest::~ScopedQitiTest() noexcept
     
     qitiTestRunning.store(false, std::memory_order_relaxed);
     
-    qiti::resetAll(); // clean up after ourselves
+    Utils::resetAll(); // clean up after ourselves
 }
 
 uint64_t ScopedQitiTest::getLengthOfTest_ms() const noexcept
