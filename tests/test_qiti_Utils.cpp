@@ -9,7 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 // Qiti Private API - not included in qiti_include.hpp
-#include "qiti_utils.hpp"
+#include "qiti_Utils.hpp"
 
 #include <iostream>
 #include <string>
@@ -45,31 +45,31 @@ TEST_CASE("qiti::getFunctionName()")
     
     SECTION("Simple global namespace function from this translation unit")
     {
-        std::string name = qiti::profile::getFunctionName<&localTestFunc>();
+        std::string name = qiti::Profile::getFunctionName<&localTestFunc>();
         QITI_REQUIRE(name == "localTestFunc");
     }
     
     SECTION("Simple global namespace static function from this translation unit")
     {
-        std::string name = qiti::profile::getFunctionName<&localStaticTestFunc>();
+        std::string name = qiti::Profile::getFunctionName<&localStaticTestFunc>();
         QITI_REQUIRE(name == "localStaticTestFunc");
     }
     
     SECTION("Simple global namespace inline function from this translation unit")
     {
-        std::string name = qiti::profile::getFunctionName<&localInlineTestFunc>();
+        std::string name = qiti::Profile::getFunctionName<&localInlineTestFunc>();
         QITI_REQUIRE(name == "localInlineTestFunc");
     }
     
     SECTION("Multi-namespaced function")
     {
-        std::string name = qiti::profile::getFunctionName<&testFunc0>();
+        std::string name = qiti::Profile::getFunctionName<&testFunc0>();
         QITI_REQUIRE(name == "qiti::example::utils::testFunc0");
     }
     
     SECTION("Complex, namespaced, templated/typedef, STL function")
     {
-        std::string name = qiti::profile::getFunctionName<&std::string::empty>();
+        std::string name = qiti::Profile::getFunctionName<&std::string::empty>();
         QITI_REQUIRE(name == "std::basic_string<char>::empty");
     }
 }

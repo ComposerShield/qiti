@@ -17,7 +17,7 @@
 
 #include "qiti_FunctionData.hpp"
 #include "qiti_LockData.hpp"
-#include "qiti_profile.hpp"
+#include "qiti_Profile.hpp"
 
 #include <sys/types.h>  // required for wait.h
 #include <sys/wait.h>   // for waitpid

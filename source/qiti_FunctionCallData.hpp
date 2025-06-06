@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include "qiti_utils.hpp"
+#include "qiti_Utils.hpp"
 
 #include <thread>
 

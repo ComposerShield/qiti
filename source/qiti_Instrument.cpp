@@ -13,7 +13,7 @@
  * See LICENSE.txt for license terms.
  ******************************************************************************/
 
-#include "qiti_instrument.hpp"
+#include "qiti_Instrument.hpp"
 
 #include "qiti_MallocHooks.hpp"
 #include "qiti_ScopedNoHeapAllocations.hpp"
@@ -27,28 +27,25 @@
 #ifndef QITI_DISABLE_INSTRUMENTS
 namespace qiti
 {
-namespace instrument
+void Instrument::resetInstrumentation() noexcept
 {
-void resetInstrumentation() noexcept
-{    
     qiti::ScopedNoHeapAllocations noAlloc;
     
     MallocHooks::onNextHeapAllocation = nullptr;
 }
 
-void onNextHeapAllocation(void (*heapAllocCallback)()) noexcept
+void Instrument::onNextHeapAllocation(void (*heapAllocCallback)()) noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     
     MallocHooks::onNextHeapAllocation = heapAllocCallback;
 }
 
-void assertOnNextHeapAllocation() noexcept
+void Instrument::assertOnNextHeapAllocation() noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     
     onNextHeapAllocation([]{ assert(false); });
 }
-} // namespace instrument
 } // namespace qiti
 #endif // ! QITI_DISABLE_INSTRUMENTS

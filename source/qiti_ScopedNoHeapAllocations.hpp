@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include "qiti_Profile.hpp"
+
 #include <stddef.h>  // defines size_t in the global namespace
 
 #include <cassert>
@@ -27,18 +29,14 @@
 
 namespace qiti
 {
-namespace profile
-{
-uint64_t getNumHeapAllocationsOnCurrentThread() noexcept;
-} // namespace profile
 
 struct ScopedNoHeapAllocations
 {
 public:
-    ScopedNoHeapAllocations()  noexcept : numHeapAllocationsBefore(profile::getNumHeapAllocationsOnCurrentThread()) {}
+    ScopedNoHeapAllocations()  noexcept : numHeapAllocationsBefore(Profile::getNumHeapAllocationsOnCurrentThread()) {}
     ~ScopedNoHeapAllocations() noexcept
     {
-        auto numHeapAllocationsAfter = profile::getNumHeapAllocationsOnCurrentThread();
+        auto numHeapAllocationsAfter = Profile::getNumHeapAllocationsOnCurrentThread();
         assert(numHeapAllocationsBefore == numHeapAllocationsAfter);
     }
     

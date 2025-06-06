@@ -16,8 +16,8 @@
 #pragma once
 
 #include "qiti_FunctionCallData.hpp"
-#include "qiti_profile.hpp"
-#include "qiti_utils.hpp"
+#include "qiti_Profile.hpp"
+#include "qiti_Utils.hpp"
 #include "qiti_ScopedNoHeapAllocations.hpp"
 
 #include <cstdint>
@@ -115,13 +115,13 @@ public:
     requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
     [[nodiscard]] static qiti::FunctionData* QITI_API_INTERNAL getFunctionDataMutable() noexcept
     {
-        static constexpr auto functionAddress = profile::getFunctionAddress<FuncPtr>();
-        static constexpr auto functionName    = profile::getFunctionName<FuncPtr>();
+        static constexpr auto functionAddress = Profile::getFunctionAddress<FuncPtr>();
+        static constexpr auto functionName    = Profile::getFunctionName<FuncPtr>();
         static constexpr auto functionType    = getFunctionType(functionName);
-        qiti::profile::beginProfilingFunction<FuncPtr>();
-        return &qiti::getFunctionDataFromAddress(functionAddress,
-                                                 functionName,
-                                                 static_cast<int>(functionType));
+        qiti::Profile::beginProfilingFunction<FuncPtr>();
+        return &Utils::getFunctionDataFromAddress(functionAddress,
+                                                  functionName,
+                                                  static_cast<int>(functionType));
     }
     
     /**
@@ -133,13 +133,13 @@ public:
     requires std::is_member_function_pointer_v<decltype(FuncPtr)>
     [[nodiscard]] static qiti::FunctionData* QITI_API_INTERNAL getFunctionDataMutable() noexcept
     {
-        static constexpr auto functionAddress = profile::getMemberFunctionMockAddress<FuncPtr>();
-        static constexpr auto functionName    = profile::getFunctionName<FuncPtr>();
+        static constexpr auto functionAddress = Profile::getMemberFunctionMockAddress<FuncPtr>();
+        static constexpr auto functionName    = Profile::getFunctionName<FuncPtr>();
         static constexpr auto functionType    = getFunctionType(functionName);
-        qiti::profile::beginProfilingFunction(functionAddress);
-        return &qiti::getFunctionDataFromAddress(functionAddress,
-                                                 functionName,
-                                                 static_cast<int>(functionType));
+        beginProfilingFunction(functionAddress);
+        return &Utils::getFunctionDataFromAddress(functionAddress,
+                                                  functionName,
+                                                  static_cast<int>(functionType));
     }
     
     /**
