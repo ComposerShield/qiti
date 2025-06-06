@@ -66,6 +66,10 @@ namespace FunctionNameHelpers
 } // namespace FunctionNameHelpers
 
 /**
+ Utility class for runtime profiling of functions and types.
+ 
+ The Profile class provides a convenient interface for instrumenting and querying profiling
+ data at runtime.
  */
 class Profile
 {

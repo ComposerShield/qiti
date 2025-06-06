@@ -33,8 +33,7 @@ namespace qiti
 //--------------------------------------------------------------------------
 class FunctionData;
 //--------------------------------------------------------------------------
-/**
- */
+/** Utility class for function‐metadata utilities and profiling support. */
 class Utils
 {
 public:
