@@ -16,6 +16,7 @@
 #include "qiti_MallocHooks.hpp"
 #include "qiti_Profile.hpp"
 
+#include <memory>
 #include <mutex>
 
 //--------------------------------------------------------------------------
