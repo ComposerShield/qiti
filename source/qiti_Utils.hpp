@@ -68,27 +68,34 @@ public:
     }
     
 private:
+    //--------------------------------------------------------------------------
+    // Doxygen - Begin Internal Documentation
+    /** \cond INTERNAL */
+    //--------------------------------------------------------------------------
+    
     friend class FunctionData;
     friend class Profile;
     
     Utils() = delete;
     ~Utils() = delete;
     
-    /**
-     \internal
-     demangle a GCC/Clang‐mangled name into a std::string
-     */
+    /** demangle a GCC/Clang‐mangled name into a std::string */
     static void QITI_API demangle(const char* mangled_name,
                                   char* demangled_name,
                                   uint64_t demangled_size) noexcept;
     
-    /** \internal */
+    /** */
     [[nodiscard]] static qiti::FunctionData& QITI_API getFunctionDataFromAddress(const void* functionAddress,
                                                                                  const char* functionName = nullptr,
                                                                                  int functionType = 0) noexcept;
     
-    /** \internal */
+    /** */
     [[nodiscard]] static const qiti::FunctionData* QITI_API getFunctionData(const char* demangledFunctionName) noexcept;
+    
+    //--------------------------------------------------------------------------
+    /** \endcond */
+    // Doxygen - End Internal Documentation
+    //--------------------------------------------------------------------------
     
 }; // class Utils
 }  // namespace qiti

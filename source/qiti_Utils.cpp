@@ -38,8 +38,6 @@
 
 //--------------------------------------------------------------------------
 
-std::mutex qiti_lock;
-
 /** */
 [[nodiscard]] static auto& getFunctionMap() noexcept
 {
@@ -146,52 +144,4 @@ void Utils::resetAll() noexcept
     Profile::resetProfiling();
 }
 
-class InstrumentHooks
-{
-public:
-    static void QITI_API_INTERNAL
-    __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site) noexcept
-    {
-        if (qiti::Profile::isProfilingFunction(this_fn))
-        {
-            qiti::MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
-            
-            std::scoped_lock<std::mutex> lock(qiti_lock);
-            qiti::Profile::updateFunctionDataOnEnter(this_fn);
-        }
-    }
-    
-    static void QITI_API_INTERNAL
-    __cyg_profile_func_exit(void * this_fn, [[maybe_unused]] void* call_site) noexcept
-    {
-        if (qiti::Profile::isProfilingFunction(this_fn))
-        {
-            qiti::MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
-            
-            std::scoped_lock<std::mutex> lock(qiti_lock);
-            qiti::Profile::updateFunctionDataOnExit(this_fn);
-        }
-    }
-};
 } // namespace qiti
-
-extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
-__cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site) noexcept
-{
-    qiti::InstrumentHooks::__cyg_profile_func_enter(this_fn, call_site);
-}
-
-extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
-__cyg_profile_func_exit(void * this_fn, [[maybe_unused]] void* call_site) noexcept
-{
-    qiti::InstrumentHooks::__cyg_profile_func_exit(this_fn, call_site);
-}
-
-//--------------------------------------------------------------------------
-
-#if ! defined(__APPLE__)
-// Linux-only:
-// Force‐instantiate the char allocator, to prevent potential linker errors
-// with its some of its function symbols not being resolved.
-template class __attribute__((visibility("default"))) std::allocator<char>;
-#endif // ! defined(__APPLE__)

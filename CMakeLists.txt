@@ -25,6 +25,7 @@ set(SOURCES
     "source/qiti_FunctionData.cpp"
     "source/qiti_Instrument.hpp"
     "source/qiti_Instrument.cpp"
+    "source/qiti_InstrumentHooks.cpp"
     "source/qiti_LeakSanitizer.hpp"
     "source/qiti_LeakSanitizer.cpp"
     "source/qiti_LockData.hpp"
