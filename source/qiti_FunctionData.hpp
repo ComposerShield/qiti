@@ -94,61 +94,6 @@ public:
     /** \cond INTERNAL */
     //--------------------------------------------------------------------------
     
-    /**
-     Construct FunctionData for a raw function address.
-
-     Initializes internal tracking structures using the provided function address.
-     */
-    QITI_API_INTERNAL FunctionData(const void*  functionAddress,
-                                   const char*  functionName,
-                                   FunctionType functionType) noexcept;
-    
-    /**
-     Destroy this FunctionData instance.
-
-     Cleans up any resources associated with tracking this function.
-     */
-    QITI_API_INTERNAL ~FunctionData() noexcept;
-    
-    /** Begins profiling for FuncPtr and returns a pointer to the corresponding mutable FunctionData instance. */
-    template <auto FuncPtr>
-    requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
-    [[nodiscard]] static qiti::FunctionData* QITI_API_INTERNAL getFunctionDataMutable() noexcept
-    {
-        static constexpr auto functionAddress = Profile::getFunctionAddress<FuncPtr>();
-        static constexpr auto functionName    = Profile::getFunctionName<FuncPtr>();
-        static constexpr auto functionType    = getFunctionType(functionName);
-        qiti::Profile::beginProfilingFunction<FuncPtr>();
-        return &Utils::getFunctionDataFromAddress(functionAddress,
-                                                  functionName,
-                                                  static_cast<int>(functionType));
-    }
-    
-    /**
-     Begins profiling for FuncPtr and returns a pointer to the corresponding mutable FunctionData instance.
-     
-     Member function overload.
-     */
-    template <auto FuncPtr>
-    requires std::is_member_function_pointer_v<decltype(FuncPtr)>
-    [[nodiscard]] static qiti::FunctionData* QITI_API_INTERNAL getFunctionDataMutable() noexcept
-    {
-        static constexpr auto functionAddress = Profile::getMemberFunctionMockAddress<FuncPtr>();
-        static constexpr auto functionName    = Profile::getFunctionName<FuncPtr>();
-        static constexpr auto functionType    = getFunctionType(functionName);
-        beginProfilingFunction(functionAddress);
-        return &Utils::getFunctionDataFromAddress(functionAddress,
-                                                  functionName,
-                                                  static_cast<int>(functionType));
-    }
-    
-    /**
-     Record that the function was called.
-
-     Updates internal state to log a new invocation, including timestamp and thread information.
-     */
-    void QITI_API_INTERNAL functionCalled() noexcept;
-    
     struct Impl;
     /** */
     [[nodiscard]] Impl* QITI_API_INTERNAL getImpl() noexcept;
@@ -174,16 +119,74 @@ public:
     /** */
     void QITI_API_INTERNAL removeListener(Listener* listener) noexcept;
     
+    /**
+     Destroy this FunctionData instance.
+
+     Cleans up any resources associated with tracking this function.
+     */
+    QITI_API_INTERNAL ~FunctionData() noexcept;
+    
+    /** Begins profiling for FuncPtr and returns a pointer to the corresponding mutable FunctionData instance. */
+    template <auto FuncPtr>
+    requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
+    [[nodiscard]] static qiti::FunctionData* QITI_API_INTERNAL getFunctionDataMutable() noexcept
+    {
+        static constexpr auto functionAddress = Profile::getFunctionAddress<FuncPtr>();
+        static constexpr auto functionName    = Profile::getFunctionName<FuncPtr>();
+        static constexpr auto functionType    = getFunctionType(functionName);
+        qiti::Profile::beginProfilingFunction<FuncPtr>();
+        return &Utils::getFunctionDataFromAddress(functionAddress,
+                                                  functionName,
+                                                  static_cast<int>(functionType));
+    }
+    
     /** Move Constructor */
     QITI_API_INTERNAL FunctionData(FunctionData&& other) noexcept;
     /** Move Assignment */
     [[nodiscard]] FunctionData& QITI_API_INTERNAL operator=(FunctionData&& other) noexcept;
     
 private:
+    friend class Profile;
+    friend class Utils;
+    
     // Stack-based pimpl idiom
     static constexpr std::size_t ImplSize  = 504;
     static constexpr std::size_t ImplAlign = 8;
     alignas(ImplAlign) unsigned char implStorage[ImplSize];
+    
+    /**
+     Construct FunctionData for a raw function address.
+
+     Initializes internal tracking structures using the provided function address.
+     */
+    QITI_API_INTERNAL FunctionData(const void*  functionAddress,
+                                   const char*  functionName,
+                                   FunctionType functionType) noexcept;
+    
+    /**
+     Begins profiling for FuncPtr and returns a pointer to the corresponding mutable FunctionData instance.
+     
+     Member function overload.
+     */
+    template <auto FuncPtr>
+    requires std::is_member_function_pointer_v<decltype(FuncPtr)>
+    [[nodiscard]] static qiti::FunctionData* QITI_API_INTERNAL getFunctionDataMutable() noexcept
+    {
+        static constexpr auto functionAddress = Profile::getMemberFunctionMockAddress<FuncPtr>();
+        static constexpr auto functionName    = Profile::getFunctionName<FuncPtr>();
+        static constexpr auto functionType    = getFunctionType(functionName);
+        beginProfilingFunction(functionAddress);
+        return &Utils::getFunctionDataFromAddress(functionAddress,
+                                                  functionName,
+                                                  static_cast<int>(functionType));
+    }
+    
+    /**
+     Record that the function was called.
+
+     Updates internal state to log a new invocation, including timestamp and thread information.
+     */
+    void QITI_API_INTERNAL functionCalled() noexcept;
     
     /** Copy Constructor (deleted) */
     FunctionData(const FunctionData&) = delete;
