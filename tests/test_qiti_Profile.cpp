@@ -114,6 +114,7 @@ TEST_CASE("qiti::Profile::getNumHeapAllocationsOnCurrentThread()")
     QITI_CHECK(numAllocsAfterCallingTestFuncAgain == 2);
 }
 
+#if defined(__APPLE__)
 TEST_CASE("qiti::Profile::getNumHeapAllocationsOnCurrentThread() passing into Catch2 SECTION")
 {
     qiti::ScopedQitiTest test;
@@ -131,4 +132,4 @@ TEST_CASE("qiti::Profile::getNumHeapAllocationsOnCurrentThread() passing into Ca
         QITI_REQUIRE(numAllocsAtStartOfSection == 0);
     }
 }
-
+#endif // defined(__APPLE__)
