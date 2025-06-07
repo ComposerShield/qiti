@@ -23,6 +23,7 @@
 
 #include <array>
 #include <memory>
+#include <mutex>
 #include <sstream>        // std::ostringstream
 #include <string>
 #include <vector>
@@ -59,8 +60,6 @@ static std::string demangle(const char* name) noexcept
 /** Capture the current call stack (skipping the first `skip` frames) */
 static std::vector<std::string> captureStackTrace(int framesToSkip = 1) noexcept
 {
-    qiti::MallocHooks::ScopedBypassMallocHooks bypassHooks;
-    
     constexpr int MAX_FRAMES = 128;
     void* addrs[MAX_FRAMES];
     int frames = backtrace(addrs, MAX_FRAMES);
@@ -100,6 +99,8 @@ inline static bool stackContainsFunction(const std::string& funcName, int frames
 /** */
 inline static bool stackContainsBlacklistedFunction() noexcept
 {
+    qiti::MallocHooks::ScopedBypassMallocHooks bypassHooks;
+    
     /** Only one thread accesses blackListedFunctions at a time. */
     static std::mutex stackContainsBlacklistedFunctionMutex{};
     std::scoped_lock lock(stackContainsBlacklistedFunctionMutex);
