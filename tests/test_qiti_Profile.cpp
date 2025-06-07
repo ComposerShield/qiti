@@ -100,17 +100,35 @@ TEST_CASE("qiti::Profile::getNumHeapAllocationsOnCurrentThread()")
     qiti::ScopedQitiTest test;
     
     // Should have no heap allocs yet
-    auto numAllocsAtStartup = qiti::Profile::getNumHeapAllocationsOnCurrentThread();
-    QITI_CHECK(numAllocsAtStartup == 0);
+    const auto numAllocsAtStartup = qiti::Profile::getNumHeapAllocationsOnCurrentThread();
+    QITI_REQUIRE(numAllocsAtStartup == 0);
     
     // 1 heap allocation
     testHeapAllocation();
-    auto numAllocsAfterCallingTestFunc = qiti::Profile::getNumHeapAllocationsOnCurrentThread();
+    const auto numAllocsAfterCallingTestFunc = qiti::Profile::getNumHeapAllocationsOnCurrentThread();
     QITI_CHECK(numAllocsAfterCallingTestFunc == 1);
     
     // Another heap allocation
     testHeapAllocation();
-    auto numAllocsAfterCallingTestFuncAgain = qiti::Profile::getNumHeapAllocationsOnCurrentThread();
+    const auto numAllocsAfterCallingTestFuncAgain = qiti::Profile::getNumHeapAllocationsOnCurrentThread();
     QITI_CHECK(numAllocsAfterCallingTestFuncAgain == 2);
+}
+
+TEST_CASE("qiti::Profile::getNumHeapAllocationsOnCurrentThread() passing into Catch2 SECTION")
+{
+    qiti::ScopedQitiTest test;
+    
+    // Should have no heap allocs yet
+    const auto numAllocsAtStartup = qiti::Profile::getNumHeapAllocationsOnCurrentThread();
+    QITI_REQUIRE(numAllocsAtStartup == 0);
+    
+    // When passing into a SECTION, Catch2 makes multiple heap allocations.
+    // We want to ensure we ignore those and not treat them as part of what the user is testing.
+    SECTION("Example Catch2 SECTION")
+    {
+        // Should still have no heap allocs
+        const auto numAllocsAtStartOfSection = qiti::Profile::getNumHeapAllocationsOnCurrentThread();
+        QITI_REQUIRE(numAllocsAtStartOfSection == 0);
+    }
 }
 

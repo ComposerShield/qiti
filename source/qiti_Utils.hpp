@@ -65,22 +65,22 @@ public:
         return &getFunctionDataFromAddress(functionAddress, functionName);
     }
     
-private:
     //--------------------------------------------------------------------------
     // Doxygen - Begin Internal Documentation
     /** \cond INTERNAL */
     //--------------------------------------------------------------------------
     
+    /** demangle a GCC/Clang‐mangled name into a std::string */
+    static void QITI_API_INTERNAL demangle(const char* mangled_name,
+                                           char* demangled_name,
+                                           uint64_t demangled_size) noexcept;
+    
+private:
     friend class FunctionData;
     friend class Profile;
     
     Utils() = delete;
     ~Utils() = delete;
-    
-    /** demangle a GCC/Clang‐mangled name into a std::string */
-    static void QITI_API demangle(const char* mangled_name,
-                                  char* demangled_name,
-                                  uint64_t demangled_size) noexcept;
     
     /** Likely never used. */
     static void* QITI_API_INTERNAL getAddressForMangledFunctionName(const char* mangledName) noexcept;
