@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(Qiti LANGUAGES C CXX)
+set(QITI_VERSION "0.0.1")
+project(Qiti 
+    VERSION ${QITI_VERSION} 
+    LANGUAGES C CXX
+)
 
 if(NOT (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"))
     message(FATAL_ERROR "Only Clang or Apple Clang compilers are supported")
@@ -71,12 +75,14 @@ endif()
 
 if(APPLE)
     set_target_properties(qiti_lib PROPERTIES
+        VERSION     ${PROJECT_VERSION}
         OSX_ARCHITECTURES "${ARCHS}"
         XCODE_GENERATE_SCHEME ON
     )
     
     if(PROJECT_IS_TOP_LEVEL)
         set_target_properties(qiti_example_target PROPERTIES
+            VERSION     ${PROJECT_VERSION}
             OSX_ARCHITECTURES "${ARCHS}"
             XCODE_GENERATE_SCHEME ON
         )
@@ -134,6 +140,11 @@ INTERFACE
 target_compile_definitions(qiti_lib
 PRIVATE
     QITI_DYLIB=1
+PUBLIC
+    QITI_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
+    QITI_VERSION_MINOR=${PROJECT_VERSION_MINOR}
+    QITI_VERSION_PATCH=${PROJECT_VERSION_PATCH}
+    QITI_VERSION=\"${PROJECT_VERSION}\" # need the escape-quoted string for a valid C literal:
 )
 
 target_link_options(qiti_lib
@@ -163,6 +174,7 @@ if(PROJECT_IS_TOP_LEVEL)
         "tests/test_qiti_LeakSanitizer.cpp"
         "tests/test_qiti_LockData.cpp"
         "tests/test_qiti_ScopedNoHeapAllocations.cpp"
+        "tests/test_qiti_ScopedQitiTest.cpp"
         "tests/test_qiti_ThreadSanitizer.cpp"
         "tests/test_qiti_TypeData.cpp"
         "tests/test_qiti_Utils.cpp"

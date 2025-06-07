@@ -38,6 +38,15 @@ public:
     /** */
     QITI_API ~ScopedQitiTest() noexcept;
     
+    /** */
+    static const char* QITI_API getQitiVersionString() noexcept;
+    /* */
+    static int QITI_API getQitiVersionMajor() noexcept;
+    /* */
+    static int QITI_API getQitiVersionMinor() noexcept;
+    /* */
+    static int QITI_API getQitiVersionPatch() noexcept;
+    
     /** Returns elapsed length of time since ScopedQitiTest was initialized. */
     [[nodiscard]] uint64_t QITI_API getLengthOfTest_ms() const noexcept;
     /** Returns elapsed length of time since ScopedQitiTest was initialized. */
