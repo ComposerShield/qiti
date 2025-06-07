@@ -68,9 +68,13 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce fals
     dataRaceDetector->run(noDataRace);
     QITI_REQUIRE(dataRaceDetector->passed());
     QITI_REQUIRE_FALSE(dataRaceDetector->failed());
+    
+    // Should have no report
+    QITI_REQUIRE(dataRaceDetector->getReport(false) == "");
 }
 
-TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of global variable")
+TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of global variable, "
+          "qiti::ThreadSanitizer::getReport()")
 {
     qiti::ScopedQitiTest test;
     
@@ -84,6 +88,44 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of 
     dataRaceDetector->run(dataRace);
     QITI_REQUIRE(dataRaceDetector->failed());
     QITI_REQUIRE_FALSE(dataRaceDetector->passed());
+    
+    const auto* functionData = qiti::FunctionData::getFunctionData<incrementCounter>();
+    const auto  functionName = functionData->getFunctionName();
+    
+    // Summary Report
+    {
+        /**
+         Example report:
+         "SUMMARY: ThreadSanitizer: data race qiti_example.cpp:107 in qiti::example::ThreadSanitizer::incrementCounter()"
+         */
+        auto report = dataRaceDetector->getReport(false);
+        // Report is not empty
+        QITI_REQUIRE(report != "");
+        // Report contains function name that had the data race
+        QITI_CHECK(report.find(functionName) != std::string::npos);
+    }
+    
+    // Verbose Report
+    {
+        /**
+         Example report:
+         "==================\nWARNING: ThreadSanitizer: data race (pid=82969)\n"
+         "Write of size 4 at 0x0001005cc000 by thread T5:\n"
+         "#0 qiti::example::ThreadSanitizer::incrementCounter() qiti_example.cpp:107 "
+         "(libqiti_example_target.0.0.1.dylib:arm64+0x39b0)\n"
+         "    #1 decltype(std::declval<void (*)() noexcept>()()) "
+         "std::__1::__invoke[abi:de180100]<void (*)() noexcept>(void (*&&)() noexcept) "
+         "invoke.h:344 (qiti_tests:arm64+0x100055078)\n"
+         etc.
+         */
+        auto verboseReport = dataRaceDetector->getReport(true);
+        // Report is not empty
+        QITI_REQUIRE(verboseReport != "");
+        // Report contains function name that had the data race
+        QITI_CHECK(verboseReport.find(functionName) != std::string::npos);
+        // Report contains "write" since it was a write that produced the race
+        QITI_CHECK(verboseReport.find("write") != std::string::npos);
+    }
 }
 
 #if defined(__APPLE__) // Turning off this test in Linux because it is just too brittle in CI
