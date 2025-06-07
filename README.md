@@ -14,6 +14,7 @@ Qiti’s most powerful feature is its wrapping of Clang’s Thread Sanitizer: te
 - Linux (tested on Ubuntu, Debian, and Fedora; x86_64)
 - Clang or Apple Clang (additional compiler support TBD)
 - C++20
+- CMake
 - Your unit-test executable must be compiled with optimizations disabled (e.g. -O0) to ensure accurate profiling and sanitization. 
   - This will be done automatically when linking qiti_lib; however, you must ensure your settings do not override these changes (see "CMake Settings" below).
 

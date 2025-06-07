@@ -25,6 +25,26 @@
 #include <memory>
 #include <utility>
 
+#ifndef QITI_VERSION_MAJOR
+  #warning "QITI_VERSION_MAJOR not defined, should have been set in CMakeLists.txt"
+  #define QITI_VERSION_MAJOR 0
+#endif
+
+#ifndef QITI_VERSION_MINOR
+  #warning "QITI_VERSION_MINOR not defined, should have been set in CMakeLists.txt"
+  #define QITI_VERSION_MINOR 0
+#endif
+
+#ifndef QITI_VERSION_PATCH
+  #warning "QITI_VERSION_PATCH not defined, should have been set in CMakeLists.txt"
+  #define QITI_VERSION_PATCH 0
+#endif
+
+#ifndef QITI_VERSION
+  #warning "QITI_VERSION not defined, should have been set in CMakeLists.txt"
+  #define QITI_VERSION "<unknown>"
+#endif
+
 //--------------------------------------------------------------------------
 static std::atomic<bool> qitiTestRunning = false;
 
@@ -65,6 +85,30 @@ ScopedQitiTest::~ScopedQitiTest() noexcept
     qitiTestRunning.store(false, std::memory_order_relaxed);
     
     Utils::resetAll(); // clean up after ourselves
+}
+
+const char* ScopedQitiTest::getQitiVersionString() noexcept
+{
+    static constexpr const char* version = QITI_VERSION;
+    return version;
+}
+
+int ScopedQitiTest::getQitiVersionMajor() noexcept
+{
+    static constexpr int version = QITI_VERSION_MAJOR;
+    return version;
+}
+
+int ScopedQitiTest::getQitiVersionMinor() noexcept
+{
+    static constexpr int version = QITI_VERSION_MINOR;
+    return version;
+}
+
+int ScopedQitiTest::getQitiVersionPatch() noexcept
+{
+    static constexpr int version = QITI_VERSION_PATCH;
+    return version;
 }
 
 uint64_t ScopedQitiTest::getLengthOfTest_ms() const noexcept
