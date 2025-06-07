@@ -38,10 +38,12 @@ class ThreadSanitizer
 {
 public:
     /**
-     Factory to create a detector for data race checking.
+     Factory to create a detector for data races.
      
      @returns a ThreadSanitizer object that can be queried via passed() or failed() to
      determine if any data race occurred within the function/lambda called by run().
+     
+     Function pointer/lambdas are run in a forked process with thread sanitizer enabled.
      
      @see run()
      @see passed()
@@ -78,11 +80,17 @@ public:
      @see run()
      @see passed()
      @see failed()
+     
+     TODO: Finish implementing
     */
+    [[deprecated("WIP - Not finished implementing.")]]
     [[nodiscard]] static std::unique_ptr<ThreadSanitizer> QITI_API createPotentialDeadlockDetector() noexcept;
     
     /**
-     @param func Function pointer or lambda that is immediately run in a forked process with ThreadSanitizer enabled.
+     @param func Function pointer or lambda that is immediately run and tested according to which ThreadSanitizer object you are using.
+     
+     Call passed()/failed() to query result.
+     getReport() may also provide additional information.
      
      @see passed()
      @see failed()
@@ -105,6 +113,11 @@ public:
      @see failed()
      */
     std::function<void()> onFail = nullptr;
+    
+    /**
+     Returns a report if one is available. Not neccessarily supported in every derived class.
+     */
+    [[nodiscard]] virtual std::string getReport(bool verbose) const noexcept;
     
     //--------------------------------------------------------------------------
     // Doxygen - Begin Internal Documentation

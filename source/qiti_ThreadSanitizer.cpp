@@ -17,6 +17,7 @@
 
 #include "qiti_FunctionData.hpp"
 #include "qiti_LockData.hpp"
+#include "qiti_MallocHooks.hpp"
 #include "qiti_Profile.hpp"
 
 #include <sys/types.h>  // required for wait.h
@@ -95,10 +96,10 @@ public:
     void QITI_API run(std::function<void()> func) noexcept override
     {
         constexpr char const* logPrefix = QITI_TSAN_LOG_PATH;
-
+        
         // wipe any old logs
         std::system(("rm -f " + std::string(logPrefix) + "*").c_str());
-
+        
         // fork & exec the helper that runs the race
         pid_t pid = fork();
         assert(pid >= 0);
@@ -108,66 +109,90 @@ public:
             func();   // run the function in child process, scannning for data races
             _exit(0); // clean exit of child process, may signal due to TSan
         }
-
+        
+        MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
+        
         // Parent: wait for child to exit (TSan will have exit()ed, flushing the log)
         int status = 0;
-        pid_t w;
-        do
         {
-            w = waitpid(pid, &status, 0);
+            pid_t w;
+            do
+            {
+                w = waitpid(pid, &status, 0);
+            }
+            while (w == -1 && errno == EINTR);
+            
+            assert(w == pid);
         }
-        while (w == -1 && errno == EINTR);
-
-        assert(w == pid);
         
         if (WIFEXITED(status))
         {
-            [[maybe_unused]] auto statusCode = WEXITSTATUS(status);
-//            assert(statusCode != 0);  // expect non-zero on race
+            auto statusCode = WEXITSTATUS(status);
+            std::cout << "[qiti::DataRaceDetector] Child Status Code: " << statusCode << "\n";
         }
         else if (WIFSIGNALED(status))
         {
             // Child killed by signal
             int sig = WTERMSIG(status);
-            assert(sig == SIGTRAP);            // or allow SIGABRT if you switch to abort()
+            assert(sig == SIGTRAP); // or allow SIGABRT if we switch to abort()
+            std::cout << "[qiti::DataRaceDetector] Child killed by signal " << sig << " (" << strsignal(sig) << ")\n";
         }
         else
         {
             std::terminate(); // Child neither exited nor was signaled?
         }
         
-        [[maybe_unused]] auto exitStatus = WEXITSTATUS(status);
-    //    assert(exitStatus == 0); // Causes crash in CI
-
         // Now read the newly created tsan.log.*
         auto logPath = findLatestLog(logPrefix);
+        
         if (logPath.has_value()) // new TSan file was written
         {
-            std::string report = slurpFile(*logPath);
+            std::cout << "[qiti::DataRaceDetector] Reading TSan log at: " << *logPath << "\n";
+            verboseReport = slurpFile(*logPath);
+            
+            // Case‐insensitive “data race” search
+            static const std::regex data_race_rx(R"(data race)",
+                                                 std::regex_constants::icase);
             
             // Look for “data race” anywhere in the report
-            if (std::regex_search(report, std::regex(R"(data race)")))
+            if (std::regex_search(verboseReport, data_race_rx))
             {
                 flagFailed();
                 
-                std::cout << "Data race detected!\n";
+                std::cout << "[qiti::DataRaceDetector] Data race detected!\n";
 
                 static const std::regex summary_rx(R"(^.*SUMMARY:.*$)",
                                                    std::regex_constants::multiline);
                 std::smatch sm;
-                if (std::regex_search(report, sm, summary_rx))
-                    std::cout << sm.str() << "\n";
+                if (std::regex_search(verboseReport, sm, summary_rx))
+                    shortReport = sm.str();
                 else
-                    std::cout << "no SUMMARY found\n";
+                    shortReport = "No SUMMARY found.";
+                
+                std::cout << "[qiti::DataRaceDetector] " << shortReport << "\n";
             }
+            else
+            {
+                std::cout << "[qiti::DataRaceDetector] No data race detected.\n";
+            }
+        }
+        else
+        {
+            std::cout << "[qiti::DataRaceDetector] No TSan log produced. Likely no data race detected.\n";
         }
         
         // cleanup log that was created
         std::system(("rm -f " + std::string(logPrefix) + "*").c_str());
     }
     
-private:
+    std::string getReport(bool verbose) const noexcept override
+    {
+        return verbose ? verboseReport : shortReport;
+    }
     
+private:
+    std::string shortReport{};
+    std::string verboseReport{};
 };
 
 //--------------------------------------------------------------------------
@@ -341,6 +366,8 @@ ThreadSanitizer::createPotentialDeadlockDetector() noexcept
 {
     return std::make_unique<LockOrderInversionDetector>();
 }
+
+std::string ThreadSanitizer::getReport(bool /*verbose*/) const noexcept { return {}; };
 
 //--------------------------------------------------------------------------
 } // namespace qiti
