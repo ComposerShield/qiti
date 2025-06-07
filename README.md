@@ -78,6 +78,8 @@ In addition, by linking your unit test executable with `qiti_tests_client`, Qiti
 
 ## Documentation
 
+Note: the following directions build documentation for the public API and omit documentation for the implementation details (e.g. private functions and functions not marked as visible to the final executable).
+
 Qiti uses Doxygen (via a custom CMake `doxygen` target) to generate HTML API documentation. To build the docs, ensure Doxygen is installed on your system and then run the following from your project root:
 
 ```bash
