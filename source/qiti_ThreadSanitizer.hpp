@@ -68,6 +68,7 @@ public:
     && isFreeFunction<FuncPtr1>
     [[nodiscard]] static std::unique_ptr<ThreadSanitizer> QITI_API createFunctionsCalledInParallelDetector() noexcept
     {
+        static_assert(FuncPtr0 != FuncPtr1, "Functions must not be the same function.");
         return createFunctionsCalledInParallelDetector(FunctionData::getFunctionDataMutable<FuncPtr0>(),
                                                        FunctionData::getFunctionDataMutable<FuncPtr1>());
     }
@@ -116,7 +117,7 @@ public:
     std::function<void()> onFail = nullptr;
     
     /**
-     Returns a report if one is available. Not neccessarily supported in every derived class.
+     Returns a report if one is available. Not necessarily supported in every derived class.
      */
     [[nodiscard]] virtual std::string getReport(bool verbose) const noexcept;
     
