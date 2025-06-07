@@ -20,6 +20,7 @@
 #include "qiti_MallocHooks.hpp"
 #include "qiti_Profile.hpp"
 
+#include <string.h>     // for strsignal()
 #include <sys/types.h>  // required for wait.h
 #include <sys/wait.h>   // for waitpid
 #include <unistd.h>     // for fork()
