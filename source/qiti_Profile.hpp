@@ -79,7 +79,7 @@ public:
     
     /** */
     template<auto FuncPtr>
-    requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
+    requires isFreeFunction<FuncPtr>
     static void QITI_API inline beginProfilingFunction() noexcept
     {
         static constexpr auto functionAddress = getFunctionAddress<FuncPtr>();
@@ -89,7 +89,7 @@ public:
     
     /** */
     template<auto FuncPtr>
-    requires std::is_member_function_pointer_v<decltype(FuncPtr)>
+    requires isMemberFunction<FuncPtr>
     static void QITI_API inline beginProfilingFunction() noexcept
     {
         static constexpr auto functionAddress = getMemberFunctionMockAddress<FuncPtr>();
@@ -99,7 +99,7 @@ public:
     
     /** */
     template <auto FuncPtr>
-    requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
+    requires isFreeFunction<FuncPtr>
     static void QITI_API inline endProfilingFunction() noexcept
     {
         endProfilingFunction(reinterpret_cast<const void*>(FuncPtr));
@@ -107,7 +107,7 @@ public:
     
     /** */
     template <auto FuncPtr>
-    requires std::is_member_function_pointer_v<decltype(FuncPtr)>
+    requires isMemberFunction<FuncPtr>
     static void QITI_API inline endProfilingFunction() noexcept
     {
         endProfilingFunction(getMemberFunctionMockAddress<FuncPtr>());
@@ -121,7 +121,7 @@ public:
     
     /** @returns true if we are currently profling function. */
     template<auto FuncPtr>
-    requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
+    requires isFreeFunction<FuncPtr>
     [[nodiscard]] static inline bool QITI_API isProfilingFunction() noexcept
     {
         return isProfilingFunction(reinterpret_cast<const void*>(FuncPtr));
@@ -132,7 +132,7 @@ public:
      Member function overload.
      */
     template<auto FuncPtr>
-    requires std::is_member_function_pointer_v<decltype(FuncPtr)>
+    requires isMemberFunction<FuncPtr>
     [[nodiscard]] static inline bool QITI_API isProfilingFunction() noexcept
     {
         return isProfilingFunction(getMemberFunctionMockAddress<FuncPtr>());
@@ -154,8 +154,8 @@ public:
     
     /** */
     template<auto FuncPtr>
-    requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
-    || std::is_member_function_pointer_v<decltype(FuncPtr)>
+    requires isFreeFunction<FuncPtr>
+    || isMemberFunction<FuncPtr>
     [[nodiscard]] static consteval const char* QITI_API getFunctionName() noexcept
     {
         return FunctionNameHelpers::functionNameCStr<FuncPtr>;
@@ -182,7 +182,7 @@ private:
 
     /** */
     template <auto FuncPtr>
-    requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
+    requires isFreeFunction<FuncPtr>
     struct FunctionAddressHolder
     {
 #pragma clang diagnostic push
@@ -193,7 +193,7 @@ private:
     
     /** */
     template <auto FuncPtr>
-    requires std::is_member_function_pointer_v<decltype(FuncPtr)>
+    requires isMemberFunction<FuncPtr>
     struct MemberFunctionMockAddressHolder
     {
         static constexpr void* value = nullptr;
@@ -206,7 +206,7 @@ private:
      create one for each member function we wish to profile.
      */
     template <auto FuncPtr>
-    requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
+    requires isFreeFunction<FuncPtr>
     [[nodiscard]] static consteval const void* getFunctionAddress() noexcept
     {
         return FunctionAddressHolder<FuncPtr>::value;
@@ -219,11 +219,12 @@ private:
      create one for each member function we wish to profile.
      */
     template <auto FuncPtr>
-    requires std::is_member_function_pointer_v<decltype(FuncPtr)>
+    requires isMemberFunction<FuncPtr>
     [[nodiscard]] static consteval const void* getMemberFunctionMockAddress() noexcept
     {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wold-style-cast"
+        // c-style cast required because reinterpret_cast cannot be performed at compile-time
         return (const void*)(&MemberFunctionMockAddressHolder<FuncPtr>::value); // NOLINT
 #pragma clang diagnostic pop
     }

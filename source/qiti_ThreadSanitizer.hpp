@@ -64,12 +64,12 @@ public:
      @see failed()
      */
     template<auto FuncPtr0, auto FuncPtr1>
-    requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr0)>>
-    && std::is_function_v<std::remove_pointer_t<decltype(FuncPtr1)>>
+    requires isFreeFunction<FuncPtr0>
+    && isFreeFunction<FuncPtr1>
     [[nodiscard]] static std::unique_ptr<ThreadSanitizer> QITI_API createFunctionsCalledInParallelDetector() noexcept
     {
         return createFunctionsCalledInParallelDetector(FunctionData::getFunctionDataMutable<FuncPtr0>(),
-                                            FunctionData::getFunctionDataMutable<FuncPtr1>());
+                                                       FunctionData::getFunctionDataMutable<FuncPtr1>());
     }
     
     /**

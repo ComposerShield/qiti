@@ -57,7 +57,7 @@ public:
                                                   uint64_t maxNameLen) noexcept;
     
     template <auto FuncPtr>
-    requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
+    requires isFreeFunction<FuncPtr>
     [[nodiscard]] static const qiti::FunctionData* QITI_API getFunctionData() noexcept
     {
         static constexpr auto functionAddress = Profile::getFunctionAddress<FuncPtr>();
