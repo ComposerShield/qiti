@@ -253,7 +253,6 @@ private:
 };
 
 //--------------------------------------------------------------------------
-
 /** Detects potential deadlocks by watching acquire‐order inversions. */
 class LockOrderInversionDetector final
 : public ThreadSanitizer

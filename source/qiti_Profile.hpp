@@ -79,7 +79,7 @@ public:
     
     /** */
     template<auto FuncPtr>
-    requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
+    requires isFreeFunction<FuncPtr>
     static void QITI_API inline beginProfilingFunction() noexcept
     {
         static constexpr auto functionAddress = getFunctionAddress<FuncPtr>();
@@ -89,7 +89,7 @@ public:
     
     /** */
     template<auto FuncPtr>
-    requires std::is_member_function_pointer_v<decltype(FuncPtr)>
+    requires isMemberFunction<FuncPtr>
     static void QITI_API inline beginProfilingFunction() noexcept
     {
         static constexpr auto functionAddress = getMemberFunctionMockAddress<FuncPtr>();
@@ -99,7 +99,7 @@ public:
     
     /** */
     template <auto FuncPtr>
-    requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
+    requires isFreeFunction<FuncPtr>
     static void QITI_API inline endProfilingFunction() noexcept
     {
         endProfilingFunction(reinterpret_cast<const void*>(FuncPtr));
@@ -107,7 +107,7 @@ public:
     
     /** */
     template <auto FuncPtr>
-    requires std::is_member_function_pointer_v<decltype(FuncPtr)>
+    requires isMemberFunction<FuncPtr>
     static void QITI_API inline endProfilingFunction() noexcept
     {
         endProfilingFunction(getMemberFunctionMockAddress<FuncPtr>());
@@ -121,7 +121,7 @@ public:
     
     /** @returns true if we are currently profling function. */
     template<auto FuncPtr>
-    requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
+    requires isFreeFunction<FuncPtr>
     [[nodiscard]] static inline bool QITI_API isProfilingFunction() noexcept
     {
         return isProfilingFunction(reinterpret_cast<const void*>(FuncPtr));
@@ -132,7 +132,7 @@ public:
      Member function overload.
      */
     template<auto FuncPtr>
-    requires std::is_member_function_pointer_v<decltype(FuncPtr)>
+    requires isMemberFunction<FuncPtr>
     [[nodiscard]] static inline bool QITI_API isProfilingFunction() noexcept
     {
         return isProfilingFunction(getMemberFunctionMockAddress<FuncPtr>());
@@ -154,14 +154,19 @@ public:
     
     /** */
     template<auto FuncPtr>
-    requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
-    || std::is_member_function_pointer_v<decltype(FuncPtr)>
+    requires isFreeFunction<FuncPtr>
+    || isMemberFunction<FuncPtr>
     [[nodiscard]] static consteval const char* QITI_API getFunctionName() noexcept
     {
         return FunctionNameHelpers::functionNameCStr<FuncPtr>;
     }
     
 private:
+    //--------------------------------------------------------------------------
+    // Doxygen - Begin Internal Documentation
+    /** \cond INTERNAL */
+    //--------------------------------------------------------------------------
+    
     friend class InstrumentHooks;
     friend class FunctionData;
     friend class Utils;
@@ -169,15 +174,15 @@ private:
     Profile() = delete;
     ~Profile() = delete;
     
-    /** \internal */
+    /** */
     static void QITI_API_INTERNAL updateFunctionDataOnEnter(const void* this_fn) noexcept;
     
-    /** \internal */
+    /** */
     static void QITI_API_INTERNAL updateFunctionDataOnExit(const void* this_fn) noexcept;
 
     /** */
     template <auto FuncPtr>
-    requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
+    requires isFreeFunction<FuncPtr>
     struct FunctionAddressHolder
     {
 #pragma clang diagnostic push
@@ -186,62 +191,64 @@ private:
 #pragma clang diagnostic pop
     };
     
-    /** \internal */
+    /** */
     template <auto FuncPtr>
-    requires std::is_member_function_pointer_v<decltype(FuncPtr)>
+    requires isMemberFunction<FuncPtr>
     struct MemberFunctionMockAddressHolder
     {
         static constexpr void* value = nullptr;
     };
     
     /**
-     \internal
      Returns a mock "address" we can use for member functions.
      C++ does not (portably) allow function pointers to member functions.
      Addresses of static variables are guaranteed to be unique so we can
      create one for each member function we wish to profile.
      */
     template <auto FuncPtr>
-    requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
+    requires isFreeFunction<FuncPtr>
     [[nodiscard]] static consteval const void* getFunctionAddress() noexcept
     {
         return FunctionAddressHolder<FuncPtr>::value;
     }
     
     /**
-     \internal
      Returns a mock "address" we can use for member functions.
      C++ does not (portably) allow function pointers to member functions.
      Addresses of static variables are guaranteed to be unique so we can
      create one for each member function we wish to profile.
      */
     template <auto FuncPtr>
-    requires std::is_member_function_pointer_v<decltype(FuncPtr)>
+    requires isMemberFunction<FuncPtr>
     [[nodiscard]] static consteval const void* getMemberFunctionMockAddress() noexcept
     {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wold-style-cast"
+        // c-style cast required because reinterpret_cast cannot be performed at compile-time
         return (const void*)(&MemberFunctionMockAddressHolder<FuncPtr>::value); // NOLINT
 #pragma clang diagnostic pop
     }
     
-    /** \internal */
+    /** */
     static void QITI_API beginProfilingFunction(const void* functionAddress, const char* functionName = nullptr) noexcept;
     
-    /** \internal */
+    /** */
     static void QITI_API endProfilingFunction(const void* functionAddress) noexcept;
     
-    /** \internal */
+    /** */
     static void QITI_API beginProfilingType(std::type_index functionAddress) noexcept;
     
-    /** \internal */
+    /** */
     static void QITI_API endProfilingType(std::type_index functionAddress) noexcept;
     
     /**
-     \internal
      @returns true if we are currently profling function.
-     Free function overload.
      */
     [[nodiscard]] static bool QITI_API isProfilingFunction(const void* funcAddress) noexcept;
 }; // class Profile
 }  // namespace qiti
+
+//--------------------------------------------------------------------------
+/** \endcond */
+// Doxygen - End Internal Documentation
+//--------------------------------------------------------------------------

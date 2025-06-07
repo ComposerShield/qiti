@@ -11,7 +11,8 @@
 #include "qiti_LeakSanitizer.hpp"
 
 //--------------------------------------------------------------------------
-
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated" // TODO: remove when finished implementing
 TEST_CASE("qiti::LeakSanitizer::passed")
 {
     qiti::ScopedQitiTest test;
@@ -20,3 +21,4 @@ TEST_CASE("qiti::LeakSanitizer::passed")
     // no leaking code
     QITI_REQUIRE(lsan.passed());
 }
+#pragma clang diagnostic pop

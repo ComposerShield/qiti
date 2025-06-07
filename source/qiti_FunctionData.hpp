@@ -51,8 +51,8 @@ public:
      FuncPtr can be a free function as well as member function.
      */
     template <auto FuncPtr>
-    requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
-             || std::is_member_function_pointer_v<decltype(FuncPtr)>
+    requires isFreeFunction<FuncPtr>
+             || isMemberFunction<FuncPtr>
     [[nodiscard]] static const qiti::FunctionData* QITI_API getFunctionData() noexcept
     {
         return getFunctionDataMutable<FuncPtr>(); // wrap in const
@@ -128,7 +128,7 @@ public:
     
     /** Begins profiling for FuncPtr and returns a pointer to the corresponding mutable FunctionData instance. */
     template <auto FuncPtr>
-    requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
+    requires isFreeFunction<FuncPtr>
     [[nodiscard]] static qiti::FunctionData* QITI_API_INTERNAL getFunctionDataMutable() noexcept
     {
         static constexpr auto functionAddress = Profile::getFunctionAddress<FuncPtr>();
@@ -169,7 +169,7 @@ private:
      Member function overload.
      */
     template <auto FuncPtr>
-    requires std::is_member_function_pointer_v<decltype(FuncPtr)>
+    requires isMemberFunction<FuncPtr>
     [[nodiscard]] static qiti::FunctionData* QITI_API_INTERNAL getFunctionDataMutable() noexcept
     {
         static constexpr auto functionAddress = Profile::getMemberFunctionMockAddress<FuncPtr>();

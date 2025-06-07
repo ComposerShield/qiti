@@ -28,7 +28,8 @@ namespace qiti
 /**
  TODO: Implement
  */
-class LeakSanitizer
+class [[deprecated("WIP - Not finished implementing.")]]
+LeakSanitizer
 {
 public:
     QITI_API LeakSanitizer() noexcept;

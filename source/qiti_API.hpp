@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <type_traits>
+
 /**
  \internal
  Marks functions to be excluded from instrumentation.
@@ -84,3 +86,14 @@
  */
 #define QITI_OVERLOAD(ReturnType, FunctionName, ...) \
     static_cast<ReturnType(*)(__VA_ARGS__)>(&FunctionName)
+
+namespace qiti
+{
+    template<auto FuncPtr>
+    concept isFreeFunction =
+        std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>;
+
+    template<auto FuncPtr>
+    concept isMemberFunction =
+        std::is_member_function_pointer_v<decltype(FuncPtr)>;
+} // namespace qiti

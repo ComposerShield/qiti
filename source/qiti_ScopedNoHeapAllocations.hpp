@@ -29,11 +29,22 @@
 
 namespace qiti
 {
-
+/**
+ RAII guard that asserts no heap allocations occur within its scope.
+ 
+ When a ScopedNoHeapAllocations object is constructed, it snapshots the
+ current number of heap allocations on the current thread. Upon destruction,
+ it queries the number again and asserts that the two values are equal.
+ 
+ This is useful for profiling and for ensuring that critical code paths
+ remain allocation-free.
+ */
 struct ScopedNoHeapAllocations
 {
 public:
+    /** */
     ScopedNoHeapAllocations()  noexcept : numHeapAllocationsBefore(Profile::getNumHeapAllocationsOnCurrentThread()) {}
+    /** */
     ~ScopedNoHeapAllocations() noexcept
     {
         auto numHeapAllocationsAfter = Profile::getNumHeapAllocationsOnCurrentThread();
@@ -41,14 +52,16 @@ public:
     }
     
 private:
+    /// Heap allocation count at construction time.
     const uint64_t numHeapAllocationsBefore;
     
+    // Disabled copy/move constructors/assignment operators
     ScopedNoHeapAllocations(const ScopedNoHeapAllocations&) = delete;
     ScopedNoHeapAllocations& operator=(const ScopedNoHeapAllocations&) = delete;
     ScopedNoHeapAllocations(ScopedNoHeapAllocations&&) = delete;
     ScopedNoHeapAllocations& operator=(ScopedNoHeapAllocations&&) = delete;
     
-    // Prevent heap allocating this class
+    // Prevent this guard itself from being heap‐allocated
     void* operator new(size_t) = delete;
     void* operator new[](size_t) = delete;
 };

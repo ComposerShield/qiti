@@ -31,7 +31,8 @@ namespace qiti
  TODO: Implement
  Abtracts a type and its history of use
  */
-class TypeData
+class [[deprecated("WIP - Not finished implementing.")]]
+TypeData
 {
 public:
     /** */
