@@ -21,7 +21,8 @@
 
 //--------------------------------------------------------------------------
 
-std::mutex qiti_lock;
+static std::mutex g_hookLock;
+static thread_local bool g_inHook = false;
 
 //--------------------------------------------------------------------------
 namespace qiti
@@ -37,7 +38,7 @@ public:
         {
             qiti::MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
             
-            std::scoped_lock<std::mutex> lock(qiti_lock);
+            std::scoped_lock<std::mutex> lock(g_hookLock);
             qiti::Profile::updateFunctionDataOnEnter(this_fn);
         }
     }
@@ -49,7 +50,7 @@ public:
         {
             qiti::MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
             
-            std::scoped_lock<std::mutex> lock(qiti_lock);
+            std::scoped_lock<std::mutex> lock(g_hookLock);
             qiti::Profile::updateFunctionDataOnExit(this_fn);
         }
     }
@@ -59,18 +60,32 @@ private:
 };
 } // namespace qiti
 
+//--------------------------------------------------------------------------
+
 /** Hook exposed by -finstrument-functions called whenever entering instrumented function. */
 extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
 __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site) noexcept
 {
+    if (g_inHook)
+        return;       // already in our hook, bail out
+    g_inHook = true;  // mark “in hook” for this thread
+    
     qiti::InstrumentHooks::__cyg_profile_func_enter(this_fn, call_site);
+    
+    g_inHook = false; // un-mark
 }
 
 /** Hook exposed by -finstrument-functions called whenever exiting instrumented function. */
 extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
 __cyg_profile_func_exit(void * this_fn, [[maybe_unused]] void* call_site) noexcept
 {
+    if (g_inHook)
+        return;
+    g_inHook = true;
+    
     qiti::InstrumentHooks::__cyg_profile_func_exit(this_fn, call_site);
+    
+    g_inHook = false;
 }
 
 //--------------------------------------------------------------------------
