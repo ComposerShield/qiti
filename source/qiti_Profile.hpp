@@ -162,6 +162,11 @@ public:
     }
     
 private:
+    //--------------------------------------------------------------------------
+    // Doxygen - Begin Internal Documentation
+    /** \cond INTERNAL */
+    //--------------------------------------------------------------------------
+    
     friend class InstrumentHooks;
     friend class FunctionData;
     friend class Utils;
@@ -169,10 +174,10 @@ private:
     Profile() = delete;
     ~Profile() = delete;
     
-    /** \internal */
+    /** */
     static void QITI_API_INTERNAL updateFunctionDataOnEnter(const void* this_fn) noexcept;
     
-    /** \internal */
+    /** */
     static void QITI_API_INTERNAL updateFunctionDataOnExit(const void* this_fn) noexcept;
 
     /** */
@@ -186,7 +191,7 @@ private:
 #pragma clang diagnostic pop
     };
     
-    /** \internal */
+    /** */
     template <auto FuncPtr>
     requires std::is_member_function_pointer_v<decltype(FuncPtr)>
     struct MemberFunctionMockAddressHolder
@@ -195,7 +200,6 @@ private:
     };
     
     /**
-     \internal
      Returns a mock "address" we can use for member functions.
      C++ does not (portably) allow function pointers to member functions.
      Addresses of static variables are guaranteed to be unique so we can
@@ -209,7 +213,6 @@ private:
     }
     
     /**
-     \internal
      Returns a mock "address" we can use for member functions.
      C++ does not (portably) allow function pointers to member functions.
      Addresses of static variables are guaranteed to be unique so we can
@@ -225,23 +228,26 @@ private:
 #pragma clang diagnostic pop
     }
     
-    /** \internal */
+    /** */
     static void QITI_API beginProfilingFunction(const void* functionAddress, const char* functionName = nullptr) noexcept;
     
-    /** \internal */
+    /** */
     static void QITI_API endProfilingFunction(const void* functionAddress) noexcept;
     
-    /** \internal */
+    /** */
     static void QITI_API beginProfilingType(std::type_index functionAddress) noexcept;
     
-    /** \internal */
+    /** */
     static void QITI_API endProfilingType(std::type_index functionAddress) noexcept;
     
     /**
-     \internal
      @returns true if we are currently profling function.
-     Free function overload.
      */
     [[nodiscard]] static bool QITI_API isProfilingFunction(const void* funcAddress) noexcept;
 }; // class Profile
 }  // namespace qiti
+
+//--------------------------------------------------------------------------
+/** \endcond */
+// Doxygen - End Internal Documentation
+//--------------------------------------------------------------------------
