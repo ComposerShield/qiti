@@ -21,8 +21,8 @@
 
 //--------------------------------------------------------------------------
 
-std::mutex s_listenersMutex;
-std::vector<qiti::LockData::Listener*> s_listeners;
+inline static std::mutex g_listenersMutex;
+inline static std::vector<qiti::LockData::Listener*> g_listeners;
 
 //--------------------------------------------------------------------------
 namespace qiti
@@ -30,29 +30,29 @@ namespace qiti
 //--------------------------------------------------------------------------
 void LockData::addGlobalListener(LockData::Listener* listener) noexcept
 {
-    std::scoped_lock<std::mutex> guard(s_listenersMutex);
-    s_listeners.push_back(listener);
+    std::scoped_lock<std::mutex> guard(g_listenersMutex);
+    g_listeners.push_back(listener);
 }
 
 void LockData::removeGlobalListener(LockData::Listener* listener) noexcept
 {
-    std::scoped_lock<std::mutex> guard(s_listenersMutex);
-    auto it = std::ranges::find(s_listeners, listener);
-    if (it != s_listeners.end())
-        s_listeners.erase(it);
+    std::scoped_lock<std::mutex> guard(g_listenersMutex);
+    auto it = std::ranges::find(g_listeners, listener);
+    if (it != g_listeners.end())
+        g_listeners.erase(it);
 }
 
 void LockData::notifyAcquire() noexcept
 {
-    std::scoped_lock<std::mutex> guard(s_listenersMutex);
-    for (auto* l : s_listeners)
+    std::scoped_lock<std::mutex> guard(g_listenersMutex);
+    for (auto* l : g_listeners)
         l->onAcquire(this);
 }
 
 void LockData::notifyRelease() noexcept
 {
-    std::scoped_lock<std::mutex> guard(s_listenersMutex);
-    for (auto* l : s_listeners)
+    std::scoped_lock<std::mutex> guard(g_listenersMutex);
+    for (auto* l : g_listeners)
         l->onRelease(this);
 }
 //--------------------------------------------------------------------------
