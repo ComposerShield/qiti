@@ -37,13 +37,14 @@ class FunctionData;
 class Utils
 {
 public:
-    /** */
+    /** Reset all profiling and instrumentation data (including function data mapping) */
     static void QITI_API_INTERNAL resetAll() noexcept;
     
     /**
      Copies up to maxFunctions names (each truncated to maxNameLen–1 chars + '\0')
      into a single flat buffer of size maxFunctions * maxNameLen.
-     Returns the actual number of names written.
+     
+     @returns the actual number of names written.
      
      Call example:
      constexpr size_t MAX_FUNCS = 128;
@@ -54,9 +55,6 @@ public:
     static uint64_t QITI_API getAllKnownFunctions(char* buffer,
                                                   uint64_t maxFunctions,
                                                   uint64_t maxNameLen) noexcept;
-    
-    /** */
-    static void* QITI_API getAddressForMangledFunctionName(const char* mangledName) noexcept;
     
     template <auto FuncPtr>
     requires std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>
@@ -83,6 +81,9 @@ private:
     static void QITI_API demangle(const char* mangled_name,
                                   char* demangled_name,
                                   uint64_t demangled_size) noexcept;
+    
+    /** Likely never used. */
+    static void* QITI_API_INTERNAL getAddressForMangledFunctionName(const char* mangledName) noexcept;
     
     /** */
     [[nodiscard]] static qiti::FunctionData& QITI_API getFunctionDataFromAddress(const void* functionAddress,
