@@ -98,7 +98,7 @@ inline static bool stackContainsFunction(const std::string& funcName, int frames
 }
 
 /** */
-[[maybe_unused]] inline static bool stackContainsBlacklistedFunction() noexcept
+inline static bool stackContainsBlacklistedFunction() noexcept
 {
     for (const auto& func : blackListedFunctions)
         if (stackContainsFunction(func, /*framesToSkip*/ 4))
@@ -116,10 +116,8 @@ void qiti::MallocHooks::mallocHook(std::size_t size) noexcept
     if (qiti::MallocHooks::bypassMallocHooks)
         return;
     
-#if defined(__APPLE__) // currently crashes on Fedora
     if (stackContainsBlacklistedFunction())
         return;
-#endif
     
     ++numHeapAllocationsOnCurrentThread;
     amountHeapAllocatedOnCurrentThread += size;
