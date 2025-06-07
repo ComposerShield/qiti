@@ -40,7 +40,7 @@ thread_local uint64_t qiti::MallocHooks::amountHeapAllocatedOnCurrentThread;
 thread_local std::function<void()> qiti::MallocHooks::onNextHeapAllocation = nullptr;
 
 /** Functions we never want to count towards heap allocations that we track. */
-static inline const std::array<std::string, 1> blackListedFunctions
+static inline const std::array<const char*, 1> blackListedFunctions
 {
     "Catch::Section::Section" // every time a Catch2 unit test enters a SECTION
 };
@@ -101,12 +101,8 @@ inline static bool stackContainsBlacklistedFunction() noexcept
 {
     qiti::MallocHooks::ScopedBypassMallocHooks bypassHooks;
     
-    /** Only one thread accesses blackListedFunctions at a time. */
-    static std::mutex stackContainsBlacklistedFunctionMutex{};
-    std::scoped_lock lock(stackContainsBlacklistedFunctionMutex);
-    
-    for (const auto& func : blackListedFunctions)
-        if (stackContainsFunction(func, /*framesToSkip*/ 4))
+    for (const char* func : blackListedFunctions)
+        if (stackContainsFunction(std::string(func), /*framesToSkip*/ 4))
             return true;
     return false;
 }
