@@ -57,6 +57,14 @@ TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
     
     QITI_CHECK(! tsan->passed());
     QITI_CHECK(tsan->failed());
+    
+    // Should have a report detailing the first infraction.
+    auto report = tsan->getReport(false);
+    QITI_REQUIRE(report != "");
+    
+    // Should have a report detailing each incident.
+    auto verboseReport = tsan->getReport(true);
+    QITI_REQUIRE(verboseReport != "");
 }
 
 TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce false positive")
