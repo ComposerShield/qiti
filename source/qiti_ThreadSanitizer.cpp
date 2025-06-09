@@ -32,6 +32,7 @@
 #include <filesystem>
 #include <fstream>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <regex>
 #include <sstream>
@@ -225,12 +226,26 @@ public:
         func1->removeListener(this);
     }
     
+    std::string getReport(bool verbose) const noexcept override
+    {
+        return verbose ? verboseReport : shortReport;
+    }
+    
 private:
     FunctionData* const func0;
     FunctionData* const func1;
     
     std::atomic<int32_t> numConcurrentFunc0 = 0;
     std::atomic<int32_t> numConcurrentFunc1 = 0;
+    
+    std::mutex reportLock{};
+    std::string shortReport{};
+    std::string verboseReport{};
+    
+    static constexpr const char* firstFuncCalledWhileInSecondString
+        = "1st function called while 2nd function was running.";
+    static constexpr const char* secondFuncCalledWhileInFirstString
+        = "2nd function called while 1st function was running.";
     
     void QITI_API_INTERNAL onFunctionEnter(const FunctionData* func) noexcept override
     {
@@ -240,7 +255,25 @@ private:
         const auto& numConcurrentOther = (func == func0) ? numConcurrentFunc1 : numConcurrentFunc0;
         
         if (numConcurrentOther > 0) // other func is currently running
+        {
             flagFailed();
+            
+            MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
+            
+            std::scoped_lock<std::mutex> lock(reportLock);
+            // Only log first infraction into shortReport
+            if (shortReport.empty())
+            {
+                shortReport.append((func == func0) ? firstFuncCalledWhileInSecondString
+                                                   : secondFuncCalledWhileInFirstString);
+                shortReport.append(" (Subsequent infractions ignored)");
+            }
+            
+            // Log every infraction into verboseReport
+            verboseReport.append((func == func0) ? firstFuncCalledWhileInSecondString
+                                                 : secondFuncCalledWhileInFirstString);
+            verboseReport.append("\n");
+        }
         
         ++numConcurrent;
     }
