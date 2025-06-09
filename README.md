@@ -20,6 +20,8 @@ Qiti’s most powerful feature is its wrapping of Clang’s Thread Sanitizer: te
 
 ## CMake Integration
 
+Note: Qiti should not be linked in your final release builds. You will likely need to add a flag to your CMake invocation (e.g. -DQiti=1) to only link into your project when building your Debug unit test executable, independent of your regular builds.
+
 To integrate Qiti into your CMake-based project, add Qiti as a subdirectory and link against the `qiti_lib` target provided by the library:
 
 ```cmake
