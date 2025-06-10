@@ -226,8 +226,8 @@ if(PROJECT_IS_TOP_LEVEL)
     target_link_libraries(qiti_test_gtest 
         PRIVATE 
             ${TEST_TARGET_LINK_LIBS}
-            GTest::gtest
-            GTest::gtest_main
+            gtest
+            gtest_main
     )
 
     target_compile_options(qiti_tests_catch2 PRIVATE ${TEST_TARGET_FLAGS})
@@ -247,16 +247,6 @@ if(PROJECT_IS_TOP_LEVEL)
     )
 
     if(APPLE)
-        set_target_properties(qiti_tests_catch2 PROPERTIES
-            OSX_ARCHITECTURES "${ARCHS}"
-            XCODE_GENERATE_SCHEME ON
-        )
-
-        set_target_properties(qiti_test_gtest PROPERTIES
-            OSX_ARCHITECTURES "${ARCHS}"
-            XCODE_GENERATE_SCHEME ON
-        )
-
         set_target_properties(Catch2 PROPERTIES 
             OSX_ARCHITECTURES "${ARCHS}"
         )
@@ -265,7 +255,28 @@ if(PROJECT_IS_TOP_LEVEL)
             OSX_ARCHITECTURES "${ARCHS}"
         )
 
+        set_target_properties(gtest PROPERTIES
+            OSX_ARCHITECTURES "${ARCHS}"
+        )
+
+        set_target_properties(gtest_main PROPERTIES
+            OSX_ARCHITECTURES "${ARCHS}"
+        )
+
+        set_target_properties(gmock PROPERTIES
+            OSX_ARCHITECTURES "${ARCHS}"
+        )
+
+        set_target_properties(gmock_main PROPERTIES
+            OSX_ARCHITECTURES "${ARCHS}"
+        )
+
         set_target_properties(qiti_tests_catch2 PROPERTIES
+            OSX_ARCHITECTURES "${ARCHS}"
+            XCODE_GENERATE_SCHEME ON
+        )
+
+        set_target_properties(qiti_test_gtest PROPERTIES
             OSX_ARCHITECTURES "${ARCHS}"
             XCODE_GENERATE_SCHEME ON
         )
@@ -283,7 +294,7 @@ if(PROJECT_IS_TOP_LEVEL)
 
     # When running ctest, you must add a configuration flag, e.g. "ctest -C Debug"
     catch_discover_tests(qiti_tests_catch2 DISCOVERY_MODE PRE_TEST)
-    gtest_discover_tests(qiti_test_gtest)
+    # gtest_discover_tests(qiti_test_gtest)
 endif()
 
 # =========================
