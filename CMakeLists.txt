@@ -129,12 +129,13 @@ INTERFACE
     "-fno-omit-frame-pointer"
     # Prevent inlining which breaks our ability to track memory
     "-fno-inline"
-    # Enable Thread Sanitizer
-    "-fsanitize=thread"
     # Generate debug info
     "-g" 
     # Disable Optimizations 
     "-O0"
+PUBLIC
+    # Enable Thread Sanitizer
+    "-fsanitize=thread"
 )
 
 target_compile_definitions(qiti_lib
@@ -148,9 +149,16 @@ PUBLIC
 )
 
 target_link_options(qiti_lib
-INTERFACE
+PUBLIC
     "-fsanitize=thread"
 )
+
+if(UNIX AND NOT APPLE)
+    # On Linux, add “-rdynamic” so that all global symbols are exported into the dynamic symbol table.
+    # Without this, functions defined in qiti_tests_client (and linked libraries) may not be visible to dladdr(),
+    # causing dli_sname to be nullptr and leading to crashes when trying to copy the symbol name.
+    target_link_options(qiti_tests_client INTERFACE "-rdynamic")
+endif()
 
 # =========================
 #       Unit Testing
@@ -165,7 +173,7 @@ if(PROJECT_IS_TOP_LEVEL)
     )
     FetchContent_MakeAvailable(Catch2)
 
-    add_executable(qiti_tests
+    set(TEST_TARGET_FILES
         "tests/qiti_test_macros.hpp"
         "tests/test_qiti_FunctionCallData.cpp"
         "tests/test_qiti_FunctionData.cpp"
@@ -180,33 +188,30 @@ if(PROJECT_IS_TOP_LEVEL)
         "tests/test_qiti_Utils.cpp"
     )
 
-    if(APPLE)
-        set_target_properties(qiti_tests PROPERTIES
-            OSX_ARCHITECTURES "${ARCHS}"
-            XCODE_GENERATE_SCHEME ON
-        )
-    endif()
-
-    target_link_libraries(qiti_tests 
-    PRIVATE
+    set(TEST_TARGET_LINK_LIBS
         qiti_example_target
         qiti_lib
         qiti_tests_client
         Catch2::Catch2WithMain
     )
 
-    if(UNIX AND NOT APPLE)
-        # On Linux, add “-rdynamic” so that all global symbols are exported into the dynamic symbol table.
-        # Without this, functions defined in qiti_tests_client (and linked libraries) may not be visible to dladdr(),
-        # causing dli_sname to be nullptr and leading to crashes when trying to copy the symbol name.
-        target_link_options(qiti_tests_client INTERFACE "-rdynamic")
-    endif()
-
-    target_compile_options(qiti_tests 
-    PRIVATE
+    set(TEST_TARGET_FLAGS
         "-Werror"
         "-Wpedantic"
     )
+
+    add_executable(qiti_tests_catch2 ${TEST_TARGET_FILES})
+
+    target_link_libraries(qiti_tests_catch2 PRIVATE ${TEST_FILES})
+
+    target_compile_options(qiti_tests_catch2 PRIVATE ${TEST_TARGET_FILES})
+
+    if(APPLE)
+        set_target_properties(qiti_tests_catch2 PROPERTIES
+            OSX_ARCHITECTURES "${ARCHS}"
+            XCODE_GENERATE_SCHEME ON
+        )
+    endif()
 
     enable_testing()
 
@@ -219,13 +224,13 @@ if(PROJECT_IS_TOP_LEVEL)
             OSX_ARCHITECTURES "${ARCHS}"
         )
 
-        set_target_properties(qiti_tests PROPERTIES
+        set_target_properties(qiti_tests_catch2 PROPERTIES
             OSX_ARCHITECTURES "${ARCHS}"
             XCODE_GENERATE_SCHEME ON
         )
     endif()
 
-    target_include_directories(qiti_tests 
+    target_include_directories(qiti_tests_catch2 
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/source
         ${CMAKE_CURRENT_SOURCE_DIR}/example/source
@@ -238,7 +243,7 @@ if(PROJECT_IS_TOP_LEVEL)
     include(${Catch2_SOURCE_DIR}/extras/Catch.cmake)
 
     # When running ctest, you must add a configuration flag, e.g. "ctest -C Debug"
-    catch_discover_tests(qiti_tests DISCOVERY_MODE PRE_TEST)
+    catch_discover_tests(qiti_tests_catch2 DISCOVERY_MODE PRE_TEST)
 endif()
 
 # =========================
