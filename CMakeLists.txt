@@ -215,7 +215,7 @@ if(PROJECT_IS_TOP_LEVEL)
     )
 
     add_executable(qiti_tests_catch2 ${TEST_TARGET_FILES})
-    add_executable(qiti_test_gtest ${TEST_TARGET_FILES})
+    add_executable(qiti_tests_gtest ${TEST_TARGET_FILES})
 
     target_link_libraries(qiti_tests_catch2 
         PRIVATE 
@@ -223,7 +223,7 @@ if(PROJECT_IS_TOP_LEVEL)
             Catch2::Catch2WithMain
     )
     
-    target_link_libraries(qiti_test_gtest 
+    target_link_libraries(qiti_tests_gtest 
         PRIVATE 
             ${TEST_TARGET_LINK_LIBS}
             gtest
@@ -231,17 +231,17 @@ if(PROJECT_IS_TOP_LEVEL)
     )
 
     target_compile_options(qiti_tests_catch2 PRIVATE ${TEST_TARGET_FLAGS})
-    target_compile_options(qiti_test_gtest PRIVATE ${TEST_TARGET_FLAGS})
+    target_compile_options(qiti_tests_gtest PRIVATE ${TEST_TARGET_FLAGS})
 
     target_include_directories(qiti_tests_catch2 PRIVATE ${TEST_INCLUDE_DIRS})
-    target_include_directories(qiti_test_gtest PRIVATE ${TEST_INCLUDE_DIRS})
+    target_include_directories(qiti_tests_gtest PRIVATE ${TEST_INCLUDE_DIRS})
 
     target_compile_definitions(qiti_tests_catch2
         PRIVATE
             QITI_CATCH2=1
     )
 
-    target_compile_definitions(qiti_test_gtest
+    target_compile_definitions(qiti_tests_gtest
         PRIVATE
             QITI_GTEST=1
     )
@@ -276,7 +276,7 @@ if(PROJECT_IS_TOP_LEVEL)
             XCODE_GENERATE_SCHEME ON
         )
 
-        set_target_properties(qiti_test_gtest PROPERTIES
+        set_target_properties(qiti_tests_gtest PROPERTIES
             OSX_ARCHITECTURES "${ARCHS}"
             XCODE_GENERATE_SCHEME ON
         )
@@ -294,7 +294,7 @@ if(PROJECT_IS_TOP_LEVEL)
 
     # When running ctest, you must add a configuration flag, e.g. "ctest -C Debug"
     catch_discover_tests(qiti_tests_catch2 DISCOVERY_MODE PRE_TEST)
-    # gtest_discover_tests(qiti_test_gtest)
+    # gtest_discover_tests(qiti_tests_gtest)
 endif()
 
 # =========================
