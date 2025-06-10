@@ -164,14 +164,24 @@ endif()
 #       Unit Testing
 # =========================
 
+# Support both Catch2 and GTest
 if(PROJECT_IS_TOP_LEVEL)
     include(FetchContent)
-        FetchContent_Declare(
+    
+    FetchContent_Declare(
         Catch2
         GIT_REPOSITORY https://github.com/catchorg/Catch2.git
         GIT_TAG        v3.5.0
     )
+
+    FetchContent_Declare(
+        googletest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG        v1.17.0
+    )
+
     FetchContent_MakeAvailable(Catch2)
+    FetchContent_MakeAvailable(googletest)
 
     set(TEST_TARGET_FILES
         "tests/qiti_test_macros.hpp"
@@ -192,7 +202,6 @@ if(PROJECT_IS_TOP_LEVEL)
         qiti_example_target
         qiti_lib
         qiti_tests_client
-        Catch2::Catch2WithMain
     )
 
     set(TEST_TARGET_FLAGS
@@ -200,22 +209,54 @@ if(PROJECT_IS_TOP_LEVEL)
         "-Wpedantic"
     )
 
+    set(TEST_INCLUDE_DIRS
+        "${CMAKE_CURRENT_SOURCE_DIR}/source"
+        "${CMAKE_CURRENT_SOURCE_DIR}/example/source"
+    )
+
     add_executable(qiti_tests_catch2 ${TEST_TARGET_FILES})
+    add_executable(qiti_test_gtest ${TEST_TARGET_FILES})
 
-    target_link_libraries(qiti_tests_catch2 PRIVATE ${TEST_FILES})
+    target_link_libraries(qiti_tests_catch2 
+        PRIVATE 
+            ${TEST_TARGET_LINK_LIBS}
+            Catch2::Catch2WithMain
+    )
+    
+    target_link_libraries(qiti_test_gtest 
+        PRIVATE 
+            ${TEST_TARGET_LINK_LIBS}
+            GTest::gtest
+            GTest::gtest_main
+    )
 
-    target_compile_options(qiti_tests_catch2 PRIVATE ${TEST_TARGET_FILES})
+    target_compile_options(qiti_tests_catch2 PRIVATE ${TEST_TARGET_FLAGS})
+    target_compile_options(qiti_test_gtest PRIVATE ${TEST_TARGET_FLAGS})
+
+    target_include_directories(qiti_tests_catch2 PRIVATE ${TEST_INCLUDE_DIRS})
+    target_include_directories(qiti_test_gtest PRIVATE ${TEST_INCLUDE_DIRS})
+
+    target_compile_definitions(qiti_tests_catch2
+        PRIVATE
+            QITI_CATCH2=1
+    )
+
+    target_compile_definitions(qiti_test_gtest
+        PRIVATE
+            QITI_GTEST=1
+    )
 
     if(APPLE)
         set_target_properties(qiti_tests_catch2 PROPERTIES
             OSX_ARCHITECTURES "${ARCHS}"
             XCODE_GENERATE_SCHEME ON
         )
-    endif()
 
-    enable_testing()
+        set_target_properties(qiti_test_gtest PROPERTIES
+            OSX_ARCHITECTURES "${ARCHS}"
+            XCODE_GENERATE_SCHEME ON
+        )
 
-    if(APPLE)
         set_target_properties(Catch2 PROPERTIES 
             OSX_ARCHITECTURES "${ARCHS}"
         )
@@ -230,11 +271,7 @@ if(PROJECT_IS_TOP_LEVEL)
         )
     endif()
 
-    target_include_directories(qiti_tests_catch2 
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/source
-        ${CMAKE_CURRENT_SOURCE_DIR}/example/source
-    )
+    enable_testing()
 
     # Load and use the .cmake file provided by Catch2
     # https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md
@@ -242,8 +279,11 @@ if(PROJECT_IS_TOP_LEVEL)
 
     include(${Catch2_SOURCE_DIR}/extras/Catch.cmake)
 
+    include(GoogleTest)
+
     # When running ctest, you must add a configuration flag, e.g. "ctest -C Debug"
     catch_discover_tests(qiti_tests_catch2 DISCOVERY_MODE PRE_TEST)
+    gtest_discover_tests(qiti_test_gtest)
 endif()
 
 # =========================

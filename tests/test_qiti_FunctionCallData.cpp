@@ -5,8 +5,6 @@
 #include "qiti_include.hpp"
 // Special unit test include
 #include "qiti_test_macros.hpp"
-// Basic Catch2 macros
-#include <catch2/catch_test_macros.hpp>
 
 //--------------------------------------------------------------------------
 
@@ -14,11 +12,11 @@ using namespace qiti::example::FunctionCallData;
 
 //--------------------------------------------------------------------------
 
-TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations()")
+QITI_TEST(FunctionCallData, getNumHeapAllocations)
 {
     qiti::ScopedQitiTest test;
     
-    SECTION("1 heap allocations")
+    QITI_SECTION("1 heap allocations")
     {
         auto funcData = qiti::FunctionData::getFunctionData<&testHeapAllocation>();
         QITI_REQUIRE(funcData != nullptr);
@@ -32,7 +30,7 @@ TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations()")
         QITI_REQUIRE(numHeapAllocations == 1);
     }
     
-    SECTION("0 heap allocation")
+    QITI_SECTION("0 heap allocation")
     {
         auto funcData = qiti::FunctionData::getFunctionData<&testNoHeapAllocation>();
         QITI_REQUIRE(funcData != nullptr);
@@ -44,11 +42,11 @@ TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations()")
     }
 }
 
-TEST_CASE("qiti::FunctionCallData::getAmountHeapAllocated()")
+QITI_TEST(FunctionCallData, getAmountHeapAllocated)
 {
     qiti::ScopedQitiTest test;
     
-    SECTION("1 heap allocations")
+    QITI_SECTION("1 heap allocations")
     {
         auto funcData = qiti::FunctionData::getFunctionData<&testHeapAllocation>();
         QITI_REQUIRE(funcData != nullptr);
@@ -61,7 +59,7 @@ TEST_CASE("qiti::FunctionCallData::getAmountHeapAllocated()")
     }
 }
 
-TEST_CASE("qiti::FunctionCallData::getThreadThatCalledFunction()")
+QITI_TEST(FunctionCallData, getThreadThatCalledFunction)
 {
     qiti::ScopedQitiTest test;
     
@@ -70,7 +68,7 @@ TEST_CASE("qiti::FunctionCallData::getThreadThatCalledFunction()")
     
     const auto currentThreadID = std::this_thread::get_id();
     
-    SECTION("Called from unit test thread")
+    QITI_SECTION("Called from unit test thread")
     {
         testHeapAllocation();
         
@@ -79,7 +77,7 @@ TEST_CASE("qiti::FunctionCallData::getThreadThatCalledFunction()")
         QITI_REQUIRE(threadThatCalledFunction == currentThreadID); // called from this thread
     }
     
-    SECTION("Called from custom thread")
+    QITI_SECTION("Called from custom thread")
     {
         std::thread t([]
         {

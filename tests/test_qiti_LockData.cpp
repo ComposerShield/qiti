@@ -5,8 +5,6 @@
 #include "qiti_include.hpp"
 // Special unit test include
 #include "qiti_test_macros.hpp"
-// Basic Catch2 macros
-#include <catch2/catch_test_macros.hpp>
 
 #include "qiti_LockData.hpp"
 
@@ -30,7 +28,7 @@ public:
     }
 };
 
-TEST_CASE( "LockData delivers acquire and release to a single listener", "[LockData]" )
+QITI_TEST(LockData, delivers_acquire_and_release_to_a_single_listener)
 {
     qiti::ScopedQitiTest test;
 
@@ -57,7 +55,7 @@ TEST_CASE( "LockData delivers acquire and release to a single listener", "[LockD
     QITI_REQUIRE( listener.lastRelease == nullptr );
 }
 
-TEST_CASE( "LockData can handle multiple listeners", "[LockData]" )
+QITI_TEST(LockData, handle_multiple_listeners)
 {
     qiti::ScopedQitiTest test;
 
@@ -77,7 +75,7 @@ TEST_CASE( "LockData can handle multiple listeners", "[LockData]" )
     QITI_REQUIRE( b.lastRelease == &ld );
 }
 
-TEST_CASE( "LockData::key() returns the object’s own address and is unique", "[LockData]" )
+QITI_TEST(LockData, key_returns_the_object_address_and_is_unique)
 {
     qiti::ScopedQitiTest test;
 
@@ -85,12 +83,12 @@ TEST_CASE( "LockData::key() returns the object’s own address and is unique", "
     qiti::LockData b;
 
     // key() should equal the object's address
-    REQUIRE( a.key() == static_cast<const void*>(&a) );
-    REQUIRE( b.key() == static_cast<const void*>(&b) );
+    QITI_REQUIRE( a.key() == static_cast<const void*>(&a) );
+    QITI_REQUIRE( b.key() == static_cast<const void*>(&b) );
 
     // each instance must produce a distinct key
-    REQUIRE( a.key() != b.key() );
+    QITI_REQUIRE( a.key() != b.key() );
 
     // repeated calls stay consistent
-    REQUIRE( a.key() == a.key() );
+    QITI_REQUIRE( a.key() == a.key() );
 }

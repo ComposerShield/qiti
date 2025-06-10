@@ -2,6 +2,12 @@
 #include <cassert>
 #include <cstring> // for std::strerror
 
+#if (QITI_CATCH2==1)
+    #include <catch2/catch_test_macros.hpp>
+#elif (QITI_GTEST==1)
+    #include <gtest/gtest.h>
+#endif
+
 #if defined (DEBUG) || defined (_DEBUG) || ! (defined (NDEBUG) || defined (_NDEBUG))
     #define QITI_DEBUG_ASSERT(expression) assert(expression)
 #else
@@ -11,24 +17,38 @@
 // Unit Tests Macro Extensions
 // Note: the do/while loop design is important to maintain the expression as a single statement
 
-// Extend Catch2 CHECK test to assert inline in debug builds
-#define QITI_CHECK(...) do {                          \
-    QITI_DEBUG_ASSERT(__VA_ARGS__); /* Debug assert inline */ \
-    CHECK(__VA_ARGS__);   /* Forward to Catch2  */  \
-} while (false)
+#if (QITI_CATCH2==1)
+    #define QITI_TEST(funcName, funcDescription) TEST_CASE( #funcName, #funcDescription )
+    #define QITI_SECTION SECTION
 
-// Extend Catch2 REQUIRE test to assert inline in debug builds
-#define QITI_REQUIRE(...) do {                        \
-    QITI_DEBUG_ASSERT(__VA_ARGS__); /* Debug assert inline */ \
-    REQUIRE(__VA_ARGS__); /* Forward to Catch2  */  \
-} while (false)
+    // Extend Catch2 CHECK test to assert inline in debug builds
+    #define QITI_CHECK(...) do {                          \
+        QITI_DEBUG_ASSERT(__VA_ARGS__); /* Debug assert inline */ \
+        CHECK(__VA_ARGS__);   /* Forward to Catch2  */  \
+    } while (false)
+    
+    // Extend Catch2 REQUIRE test to assert inline in debug builds
+    #define QITI_REQUIRE(...) do {                        \
+        QITI_DEBUG_ASSERT(__VA_ARGS__); /* Debug assert inline */ \
+        REQUIRE(__VA_ARGS__); /* Forward to Catch2  */  \
+    } while (false)
+    
+    // Extend Catch2 REQUIRE_FALSE test to assert inline in debug builds
+    #define QITI_REQUIRE_FALSE(...) do {                        \
+        QITI_DEBUG_ASSERT(! (__VA_ARGS__));   /* Debug assert inline */ \
+        REQUIRE_FALSE(__VA_ARGS__); /* Forward to Catch2  */  \
+    } while (false)
 
-// Extend Catch2 REQUIRE_FALSE test to assert inline in debug builds
-#define QITI_REQUIRE_FALSE(...) do {                        \
-    QITI_DEBUG_ASSERT(! (__VA_ARGS__));   /* Debug assert inline */ \
-    REQUIRE_FALSE(__VA_ARGS__); /* Forward to Catch2  */  \
-} while (false)
+#elif (QITI_GTEST==1)
+    #define QITI_TEST TEST
+    #define QITI_SECTION(...)
 
+    #define QITI_CHECK EXPECT_TRUE
+    
+    #define QITI_REQUIRE ASSERT_TRUE
+    
+    #define QITI_REQUIRE_FALSE ASSERT_FALSE
+#endif // (QITI_CATCH2==1)
 
 // "Death Tests"
 
