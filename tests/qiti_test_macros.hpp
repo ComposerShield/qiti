@@ -18,7 +18,7 @@
 // Note: the do/while loop design is important to maintain the expression as a single statement
 
 #if (QITI_CATCH2==1)
-    #define QITI_TEST(funcName, funcDescription) TEST_CASE( #funcName, #funcDescription )
+    #define QITI_TEST(funcName, funcDescription) TEST_CASE( #funcName ", " #funcDescription )
     #define QITI_SECTION SECTION
 
     // Extend Catch2 CHECK test to assert inline in debug builds
