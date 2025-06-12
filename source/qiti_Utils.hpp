@@ -27,7 +27,9 @@
 #include <type_traits>
 
 //--------------------------------------------------------------------------
-
+// Doxygen - Begin Internal Documentation
+/** \cond INTERNAL */
+//--------------------------------------------------------------------------
 namespace qiti
 {
 //--------------------------------------------------------------------------
@@ -65,11 +67,6 @@ public:
         return &getFunctionDataFromAddress(functionAddress, functionName);
     }
     
-    //--------------------------------------------------------------------------
-    // Doxygen - Begin Internal Documentation
-    /** \cond INTERNAL */
-    //--------------------------------------------------------------------------
-    
     /** demangle a GCC/Clang‐mangled name into a std::string */
     static void QITI_API_INTERNAL demangle(const char* mangled_name,
                                            char* demangled_name,
@@ -93,10 +90,10 @@ private:
     /** */
     [[nodiscard]] static const qiti::FunctionData* QITI_API getFunctionData(const char* demangledFunctionName) noexcept;
     
-    //--------------------------------------------------------------------------
-    /** \endcond */
-    // Doxygen - End Internal Documentation
-    //--------------------------------------------------------------------------
-    
 }; // class Utils
 }  // namespace qiti
+
+//--------------------------------------------------------------------------
+/** \endcond */
+// Doxygen - End Internal Documentation
+//--------------------------------------------------------------------------

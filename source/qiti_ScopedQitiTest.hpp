@@ -38,6 +38,12 @@ public:
     /** */
     QITI_API ~ScopedQitiTest() noexcept;
     
+    /**
+     Reset all profiling and instrumentation data.
+     Optionally reset start time of the test.
+     */
+    void QITI_API reset(bool resetTestStartTime) noexcept;
+    
     /** */
     static const char* QITI_API getQitiVersionString() noexcept;
     /* */
