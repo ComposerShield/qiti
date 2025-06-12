@@ -49,30 +49,6 @@
 
 namespace qiti
 {
-uint64_t Utils::getAllKnownFunctions(char* flatBuf,
-                                     uint64_t maxFunctions,
-                                     uint64_t maxNameLen) noexcept
-{
-    auto& map = getFunctionMap();
-    const size_t count = std::min(map.size(),
-                                  static_cast<size_t>(maxFunctions));
-    
-    size_t i = 0;
-    for (auto it = map.begin(); it != map.end() && i < count; ++it, ++i)
-    {
-        const std::string& name = it->second.getFunctionName();
-        // copy up to maxNameLen-1 chars, then force '\0'
-        std::strncpy(
-                     flatBuf + i * maxNameLen,
-                     name.c_str(),
-                     maxNameLen - 1
-                     );
-        flatBuf[i * maxNameLen + (maxNameLen - 1)] = '\0';
-    }
-    
-    return count;
-}
-
 void* Utils::getAddressForMangledFunctionName(const char* mangledName) noexcept
 {
     void* addr = dlsym(RTLD_DEFAULT, mangledName);

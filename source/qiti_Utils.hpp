@@ -42,22 +42,6 @@ public:
     /** Reset all profiling and instrumentation data (including function data mapping) */
     static void QITI_API_INTERNAL resetAll() noexcept;
     
-    /**
-     Copies up to maxFunctions names (each truncated to maxNameLen–1 chars + '\0')
-     into a single flat buffer of size maxFunctions * maxNameLen.
-     
-     @returns the actual number of names written.
-     
-     Call example:
-     constexpr size_t MAX_FUNCS = 128;
-     constexpr size_t MAX_NAME_LEN = 64;
-     char buffer[MAX_FUNCS * MAX_NAME_LEN];
-     getAllKnownFunctions(buffer, MAX_FUNCS, MAX_NAME_LEN);
-     */
-    static uint64_t QITI_API getAllKnownFunctions(char* buffer,
-                                                  uint64_t maxFunctions,
-                                                  uint64_t maxNameLen) noexcept;
-    
     template <auto FuncPtr>
     requires isFreeFunction<FuncPtr>
     [[nodiscard]] static const qiti::FunctionData* QITI_API getFunctionData() noexcept
