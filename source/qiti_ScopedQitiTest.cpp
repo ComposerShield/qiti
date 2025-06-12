@@ -87,6 +87,14 @@ ScopedQitiTest::~ScopedQitiTest() noexcept
     Utils::resetAll(); // clean up after ourselves
 }
 
+void ScopedQitiTest::reset(bool resetTestStartTime) noexcept
+{
+    Utils::resetAll();
+    
+    if (resetTestStartTime)
+        impl->begin_time = std::chrono::steady_clock::now();
+}
+
 const char* ScopedQitiTest::getQitiVersionString() noexcept
 {
     static constexpr const char* version = QITI_VERSION;

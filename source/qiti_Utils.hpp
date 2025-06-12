@@ -27,7 +27,9 @@
 #include <type_traits>
 
 //--------------------------------------------------------------------------
-
+// Doxygen - Begin Internal Documentation
+/** \cond INTERNAL */
+//--------------------------------------------------------------------------
 namespace qiti
 {
 //--------------------------------------------------------------------------
@@ -40,22 +42,6 @@ public:
     /** Reset all profiling and instrumentation data (including function data mapping) */
     static void QITI_API_INTERNAL resetAll() noexcept;
     
-    /**
-     Copies up to maxFunctions names (each truncated to maxNameLen–1 chars + '\0')
-     into a single flat buffer of size maxFunctions * maxNameLen.
-     
-     @returns the actual number of names written.
-     
-     Call example:
-     constexpr size_t MAX_FUNCS = 128;
-     constexpr size_t MAX_NAME_LEN = 64;
-     char buffer[MAX_FUNCS * MAX_NAME_LEN];
-     getAllKnownFunctions(buffer, MAX_FUNCS, MAX_NAME_LEN);
-     */
-    static uint64_t QITI_API getAllKnownFunctions(char* buffer,
-                                                  uint64_t maxFunctions,
-                                                  uint64_t maxNameLen) noexcept;
-    
     template <auto FuncPtr>
     requires isFreeFunction<FuncPtr>
     [[nodiscard]] static const qiti::FunctionData* QITI_API getFunctionData() noexcept
@@ -64,11 +50,6 @@ public:
         static constexpr auto functionName    = Profile::getFunctionName<FuncPtr>();
         return &getFunctionDataFromAddress(functionAddress, functionName);
     }
-    
-    //--------------------------------------------------------------------------
-    // Doxygen - Begin Internal Documentation
-    /** \cond INTERNAL */
-    //--------------------------------------------------------------------------
     
     /** demangle a GCC/Clang‐mangled name into a std::string */
     static void QITI_API_INTERNAL demangle(const char* mangled_name,
@@ -93,10 +74,10 @@ private:
     /** */
     [[nodiscard]] static const qiti::FunctionData* QITI_API getFunctionData(const char* demangledFunctionName) noexcept;
     
-    //--------------------------------------------------------------------------
-    /** \endcond */
-    // Doxygen - End Internal Documentation
-    //--------------------------------------------------------------------------
-    
 }; // class Utils
 }  // namespace qiti
+
+//--------------------------------------------------------------------------
+/** \endcond */
+// Doxygen - End Internal Documentation
+//--------------------------------------------------------------------------
