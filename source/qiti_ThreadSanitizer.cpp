@@ -191,7 +191,7 @@ public:
         std::system(("rm -f " + std::string(logPrefix) + "*").c_str());
     }
     
-    std::string getReport(bool verbose) const noexcept override
+    std::string QITI_API getReport(bool verbose) const noexcept override
     {
         return verbose ? verboseReport : shortReport;
     }
@@ -230,7 +230,7 @@ public:
         func1->removeListener(this);
     }
     
-    std::string getReport(bool verbose) const noexcept override
+    std::string QITI_API getReport(bool verbose) const noexcept override
     {
         return verbose ? verboseReport : shortReport;
     }
