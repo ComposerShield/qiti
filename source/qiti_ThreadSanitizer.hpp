@@ -74,7 +74,7 @@ public:
     }
     
     /**
-     Factory to create a lock-order inversion detector.
+     macOS-only: Factory to create a lock-order inversion detector.
     
      When calling run(), tracks every mutex-acquire; if two locks are
      ever taken in inverted order on different threads, it flags failure.
@@ -83,7 +83,7 @@ public:
      @see passed()
      @see failed()
      
-     TODO: Finish implementing
+     TODO: Implement on Linux
     */
 #if ! defined(__APPLE__)
     [[deprecated("WIP - Not finished implementing on target. Only supported on MacOS currently.")]]
