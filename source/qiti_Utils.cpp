@@ -17,6 +17,7 @@
 
 #include "qiti_include.hpp"
 #include "qiti_Instrument.hpp"
+#include "qiti_LockData.hpp"
 #include "qiti_MallocHooks.hpp"
 
 #include <cxxabi.h>
@@ -118,6 +119,7 @@ void Utils::resetAll() noexcept
     
     Instrument::resetInstrumentation();
     Profile::resetProfiling();
+    LockData::resetAllListeners();
 }
 
 } // namespace qiti

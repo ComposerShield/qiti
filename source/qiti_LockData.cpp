@@ -61,6 +61,12 @@ void LockData::notifyRelease(const pthread_mutex_t* lockReleased) noexcept
     for (auto* l : g_listeners)
         l->onRelease(lockReleased);
 }
+
+void LockData::resetAllListeners() noexcept
+{
+    qiti::LockHooks::LockBypassingHook<LockType, MutexType> lock(g_listenersMutex);
+    g_listeners.clear();
+}
 //--------------------------------------------------------------------------
 } // namespace qiti
 //--------------------------------------------------------------------------

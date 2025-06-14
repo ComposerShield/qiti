@@ -48,13 +48,13 @@ public:
     /** Unregister for lock/unlock notifications. */
     static void QITI_API removeGlobalListener(Listener* listener) noexcept;
     
-    /** Unique identifier for this lock */
-//    [[nodiscard]] const void* QITI_API key() const noexcept { return _lock; }
-    
     /** Notify listeners of a lock acquisition */
     static void QITI_API notifyAcquire(const pthread_mutex_t* lock) noexcept;
     /** Notify listeners of a lock release */
     static void QITI_API notifyRelease(const pthread_mutex_t* lock) noexcept;
+    
+    /** */
+    static void QITI_API_INTERNAL resetAllListeners() noexcept;
     
 private:
     const void* _lock;
