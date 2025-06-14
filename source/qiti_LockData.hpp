@@ -54,9 +54,6 @@ public:
     
     /** */
     static void QITI_API_INTERNAL resetAllListeners() noexcept;
-    
-private:
-    const void* _lock;
 };
 } // namespace qiti
 
