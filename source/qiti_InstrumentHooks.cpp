@@ -14,6 +14,8 @@
  ******************************************************************************/
 
 #include "qiti_MallocHooks.hpp"
+
+#include "qiti_LockHooks.hpp"
 #include "qiti_Profile.hpp"
 
 #include <memory>
@@ -21,7 +23,10 @@
 
 //--------------------------------------------------------------------------
 
-static std::mutex g_hookLock;
+using MutexType = std::mutex;
+using LockType = std::scoped_lock<MutexType>;
+
+static MutexType g_hookLock;
 static thread_local bool g_inHook = false;
 
 //--------------------------------------------------------------------------
@@ -38,7 +43,7 @@ public:
         {
             qiti::MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
             
-            std::scoped_lock<std::mutex> lock(g_hookLock);
+            qiti::LockHooks::LockBypassingHook<LockType, MutexType> lock(g_hookLock);
             qiti::Profile::updateFunctionDataOnEnter(this_fn);
         }
     }
@@ -50,7 +55,7 @@ public:
         {
             qiti::MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
             
-            std::scoped_lock<std::mutex> lock(g_hookLock);
+            qiti::LockHooks::LockBypassingHook<LockType, MutexType> lock(g_hookLock);
             qiti::Profile::updateFunctionDataOnExit(this_fn);
         }
     }

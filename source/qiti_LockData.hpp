@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <pthread.h>
+
 #include "qiti_API.hpp"
 
 //--------------------------------------------------------------------------
@@ -26,7 +28,6 @@ namespace qiti
 {
 //--------------------------------------------------------------------------
 /**
- TODO: Implement
  */
 class LockData
 {
@@ -36,9 +37,9 @@ public:
         QITI_API Listener() noexcept = default;
         virtual QITI_API ~Listener() noexcept = default;
         /** User provided callback. */
-        virtual void QITI_API onAcquire(const LockData* ld) noexcept = 0;
+        virtual void QITI_API onAcquire(const pthread_mutex_t* ld) noexcept = 0;
         /** User provided callback. */
-        virtual void QITI_API onRelease(const LockData* ld) noexcept = 0;
+        virtual void QITI_API onRelease(const pthread_mutex_t* ld) noexcept = 0;
     };
     
     /** Register for lock/unlock notifications. */
@@ -46,13 +47,17 @@ public:
     /** Unregister for lock/unlock notifications. */
     static void QITI_API removeGlobalListener(Listener* listener) noexcept;
     
-    /** Unique identifier for this lock */
-    [[nodiscard]] const void* QITI_API key() const noexcept { return reinterpret_cast<const void*>(this); }
-
     /** Notify listeners of a lock acquisition */
-    void QITI_API notifyAcquire() noexcept;
+    static void QITI_API notifyAcquire(const pthread_mutex_t* lock) noexcept;
     /** Notify listeners of a lock release */
-    void QITI_API notifyRelease() noexcept;
+    static void QITI_API notifyRelease(const pthread_mutex_t* lock) noexcept;
+    
+    /** */
+    static void QITI_API_INTERNAL resetAllListeners() noexcept;
+    
+private:
+    LockData() = delete;
+    ~LockData() = delete;
 };
 } // namespace qiti
 

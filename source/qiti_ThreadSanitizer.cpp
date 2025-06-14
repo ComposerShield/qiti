@@ -17,6 +17,7 @@
 
 #include "qiti_FunctionData.hpp"
 #include "qiti_LockData.hpp"
+#include "qiti_LockHooks.hpp"
 #include "qiti_MallocHooks.hpp"
 #include "qiti_Profile.hpp"
 
@@ -34,6 +35,7 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <ranges>       // NOLINT - false positive in cpplint
 #include <regex>
 #include <sstream>
 #include <string>
@@ -97,6 +99,8 @@ public:
     
     void QITI_API run(std::function<void()> func) noexcept override
     {
+        qiti::LockHooks::ScopedDisableHooks disableHooks;
+        
         constexpr char const* logPrefix = QITI_TSAN_LOG_PATH;
         
         // wipe any old logs
@@ -238,7 +242,10 @@ private:
     std::atomic<int32_t> numConcurrentFunc0 = 0;
     std::atomic<int32_t> numConcurrentFunc1 = 0;
     
-    std::mutex reportLock{};
+    using MutexType = std::mutex;
+    using LockType = std::scoped_lock<MutexType>;
+    MutexType reportLock{};
+    
     std::string shortReport{};
     std::string verboseReport{};
     
@@ -260,7 +267,8 @@ private:
             
             MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
             
-            std::scoped_lock<std::mutex> lock(reportLock);
+            qiti::LockHooks::LockBypassingHook<LockType, MutexType> lock(reportLock);
+            
             // Only log first infraction into shortReport
             if (shortReport.empty())
             {
@@ -308,20 +316,20 @@ private:
     // Global lock‐order graph: edge A → B means "A was held when B was acquired".
     // We only need to detect any cycle.
     std::mutex _graphLock;
-    std::unordered_map<const void*, std::vector<void*>> _edges;
+    std::unordered_map<const void*, std::vector<const void*>> _edges;
 
     // Per-thread stack of held locks:
-    inline static thread_local std::vector<void*> _heldStack;
+    inline static thread_local std::vector<const void*> _heldStack;
 
     // Listener callbacks:
-    void onAcquire(const LockData* ld) noexcept override
+    void onAcquire(const pthread_mutex_t* mutexAddress) noexcept override
     {
-        void* key = const_cast<void*>(ld->key());
+        auto key = reinterpret_cast<const void*>(mutexAddress);
         
         // Check for cycle: if any held H has a path back to itself via key
         {
             std::lock_guard _(_graphLock);
-            for (void* H : _heldStack)
+            for (const void* H : _heldStack)
             {
                 // add edge H→key, but first see if key→…→H already exists
                 if (_detectPath(key, H))
@@ -336,15 +344,22 @@ private:
         _heldStack.push_back(key);
     }
 
-    void onRelease(const LockData* ld) noexcept override
+    void onRelease(const pthread_mutex_t* mutexAddress) noexcept override
     {
-        const void* key = ld->key();
+        auto key = reinterpret_cast<const void*>(mutexAddress);
+        
+        assert(! _heldStack.empty());
         
         // pop the stack (must be last)
-        if (!_heldStack.empty() && _heldStack.back() == key)
+        if (_heldStack.back() == key)
             _heldStack.pop_back();
         else
-            assert(false && "lock/unlock mismatch in DeadlockDetector");
+        {
+            flagFailed(); // inverse order detected
+            auto it = std::ranges::find(_heldStack, key);
+            if (it != _heldStack.end())
+                _heldStack.erase(it);
+        }
     }
 
     // DFS to see if there's a path from 'from' to 'to' in our lock‐order graph
@@ -352,14 +367,16 @@ private:
     {
         std::unordered_set<const void*> seen;
         std::vector<const void*> stack{from};
-        while (!stack.empty())
+        while (! stack.empty())
         {
             const void* cur = stack.back(); stack.pop_back();
-            if (cur == to) return true;
-            if (!seen.insert(cur).second) continue;
+            if (cur == to)
+                return true;
+            if (!seen.insert(cur).second)
+                continue;
             auto it = _edges.find(cur);
             if (it != _edges.end())
-                for (void* nxt : it->second)
+                for (const void* nxt : it->second)
                     stack.push_back(nxt);
         }
         return false;
