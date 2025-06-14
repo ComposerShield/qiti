@@ -25,6 +25,7 @@
 
 extern bool isQitiTestRunning() noexcept;
 
+[[maybe_unused]] /** TODO: remove when supporting Linux. */
 static thread_local bool g_inHook = false;
 
 //--------------------------------------------------------------------------
