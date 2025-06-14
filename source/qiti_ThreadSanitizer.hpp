@@ -121,7 +121,7 @@ public:
     /**
      Returns a report if one is available. Not necessarily supported in every derived class.
      */
-    [[nodiscard]] virtual std::string getReport(bool verbose) const noexcept;
+    [[nodiscard]] virtual std::string QITI_API getReport(bool verbose) const noexcept;
     
     //--------------------------------------------------------------------------
     // Doxygen - Begin Internal Documentation
