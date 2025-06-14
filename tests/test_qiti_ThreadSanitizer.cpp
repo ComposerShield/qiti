@@ -8,6 +8,7 @@
 // Basic Catch2 macros
 #include <catch2/catch_test_macros.hpp>
 
+#include <chrono>
 #include <iostream>
 #include <filesystem>
 #include <fstream>
@@ -171,6 +172,7 @@ TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() does not pro
     {
         auto noMutexesAtAll = [](){};
         
+        // Should pass
         potentialDeadlockDetector->run(noMutexesAtAll);
         QITI_REQUIRE(potentialDeadlockDetector->passed());
         QITI_REQUIRE_FALSE(potentialDeadlockDetector->failed());
@@ -201,9 +203,46 @@ TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() does not pro
             t.join();
         };
         
+        // Should pass
         potentialDeadlockDetector->run(singleMutexWithNoDeadlock);
         QITI_REQUIRE(potentialDeadlockDetector->passed());
         QITI_REQUIRE_FALSE(potentialDeadlockDetector->failed());
+    }
+}
+
+TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects potential deadlock")
+{
+    qiti::ScopedQitiTest test;
+    
+    auto potentialDeadlockDetector = qiti::ThreadSanitizer::createPotentialDeadlockDetector();
+    
+    SECTION("Run code that inverts the order of mutex locking which implies a potential deadlock,"
+            "but does not actually deadlock here.")
+    {
+        auto singleMutexWithNoDeadlock = []()
+        {
+            std::mutex mutexA;
+            std::mutex mutexB;
+            
+            std::thread t([&]
+            {
+                // Thread t locks A then B
+                std::lock_guard<std::mutex> lockA(mutexA);
+                // Give main thread a chance to run
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                std::lock_guard<std::mutex> lockB(mutexB);
+            });
+            
+            // Main thread locks B then A, but uses scoped_lock (deadlock-safe)
+            std::scoped_lock lock(mutexB, mutexA);
+            
+            t.join();
+        };
+        
+        // Should fail
+        potentialDeadlockDetector->run(singleMutexWithNoDeadlock);
+        QITI_REQUIRE_FALSE(potentialDeadlockDetector->passed());
+        QITI_REQUIRE(potentialDeadlockDetector->failed());
     }
 }
 #if ! defined(__APPLE__)
