@@ -209,7 +209,11 @@ TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() does not pro
         QITI_REQUIRE_FALSE(potentialDeadlockDetector->failed());
     }
 }
+#if ! defined(__APPLE__)
+#pragma clang diagnostic pop
+#endif
 
+#if defined(__APPLE__) // TODO: remove when this feature is supported on Linux
 TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects potential deadlock")
 {
     qiti::ScopedQitiTest test;
@@ -245,6 +249,4 @@ TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects pote
         QITI_REQUIRE(potentialDeadlockDetector->failed());
     }
 }
-#if ! defined(__APPLE__)
-#pragma clang diagnostic pop
-#endif
+#endif // defined(__APPLE__)
