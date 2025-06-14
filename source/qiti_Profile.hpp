@@ -207,7 +207,7 @@ private:
      */
     template <auto FuncPtr>
     requires isFreeFunction<FuncPtr>
-    [[nodiscard]] static consteval const void* getFunctionAddress() noexcept
+    [[nodiscard]] static consteval const void* QITI_API getFunctionAddress() noexcept
     {
         return FunctionAddressHolder<FuncPtr>::value;
     }
@@ -220,7 +220,7 @@ private:
      */
     template <auto FuncPtr>
     requires isMemberFunction<FuncPtr>
-    [[nodiscard]] static consteval const void* getMemberFunctionMockAddress() noexcept
+    [[nodiscard]] static consteval const void* QITI_API getMemberFunctionMockAddress() noexcept
     {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wold-style-cast"
