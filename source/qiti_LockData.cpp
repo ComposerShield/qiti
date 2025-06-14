@@ -15,45 +15,51 @@
 
 #include "qiti_LockData.hpp"
 
+#include "qiti_LockHooks.hpp"
+
 #include <mutex>
 #include <ranges> // NOLINT - false positive in cpplint
 #include <vector>
 
 //--------------------------------------------------------------------------
 
-inline static std::mutex g_listenersMutex;
+using MutexType = std::mutex;
+using LockType = std::scoped_lock<MutexType>;
+
+inline static MutexType g_listenersMutex;
 inline static std::vector<qiti::LockData::Listener*> g_listeners;
 
 //--------------------------------------------------------------------------
 namespace qiti
 {
 //--------------------------------------------------------------------------
+
 void LockData::addGlobalListener(LockData::Listener* listener) noexcept
 {
-    std::scoped_lock<std::mutex> guard(g_listenersMutex);
+    qiti::LockHooks::LockBypassingHook<LockType, MutexType> lock(g_listenersMutex);
     g_listeners.push_back(listener);
 }
 
 void LockData::removeGlobalListener(LockData::Listener* listener) noexcept
 {
-    std::scoped_lock<std::mutex> guard(g_listenersMutex);
+    qiti::LockHooks::LockBypassingHook<LockType, MutexType> lock(g_listenersMutex);
     auto it = std::ranges::find(g_listeners, listener);
     if (it != g_listeners.end())
         g_listeners.erase(it);
 }
 
-void LockData::notifyAcquire() noexcept
+void LockData::notifyAcquire(const pthread_mutex_t* lockAcquired) noexcept
 {
-    std::scoped_lock<std::mutex> guard(g_listenersMutex);
+    qiti::LockHooks::LockBypassingHook<LockType, MutexType> lock(g_listenersMutex);
     for (auto* l : g_listeners)
-        l->onAcquire(this);
+        l->onAcquire(lockAcquired);
 }
 
-void LockData::notifyRelease() noexcept
+void LockData::notifyRelease(const pthread_mutex_t* lockReleased) noexcept
 {
-    std::scoped_lock<std::mutex> guard(g_listenersMutex);
+    qiti::LockHooks::LockBypassingHook<LockType, MutexType> lock(g_listenersMutex);
     for (auto* l : g_listeners)
-        l->onRelease(this);
+        l->onRelease(lockReleased);
 }
 //--------------------------------------------------------------------------
 } // namespace qiti

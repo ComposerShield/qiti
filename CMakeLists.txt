@@ -34,6 +34,8 @@ set(SOURCES
     "source/qiti_LeakSanitizer.cpp"
     "source/qiti_LockData.hpp"
     "source/qiti_LockData.cpp"
+    "source/qiti_LockHooks.cpp"
+    "source/qiti_LockHooks.hpp"
     "source/qiti_MallocHooks.hpp"
     "source/qiti_MallocHooks.cpp"
     "source/qiti_Profile.hpp"
@@ -78,6 +80,7 @@ if(APPLE)
         VERSION     ${PROJECT_VERSION}
         OSX_ARCHITECTURES "${ARCHS}"
         XCODE_GENERATE_SCHEME ON
+        INSTALL_NAME_DIR "@executable_path" # place next to executable within bundle
     )
     
     if(PROJECT_IS_TOP_LEVEL)

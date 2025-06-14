@@ -85,7 +85,9 @@ public:
      
      TODO: Finish implementing
     */
-    [[deprecated("WIP - Not finished implementing.")]]
+#if ! defined(__APPLE__)
+    [[deprecated("WIP - Not finished implementing on target. Only supported on MacOS currently.")]]
+#endif
     [[nodiscard]] static std::unique_ptr<ThreadSanitizer> QITI_API createPotentialDeadlockDetector() noexcept;
     
     /**

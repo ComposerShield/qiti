@@ -156,9 +156,11 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of 
 }
 #endif
 
-// TODO: remove when createPotentialDeadlockDetector() is fully implemented.
+// TODO: remove when createPotentialDeadlockDetector() is fully implemented, not just on Apple
+#if ! defined(__APPLE__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated"
+#endif
 TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() does not produce false positive")
 {
     qiti::ScopedQitiTest test;
@@ -204,4 +206,6 @@ TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() does not pro
         QITI_REQUIRE_FALSE(potentialDeadlockDetector->failed());
     }
 }
+#if ! defined(__APPLE__)
 #pragma clang diagnostic pop
+#endif
