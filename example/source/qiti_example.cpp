@@ -40,6 +40,16 @@ inline static void cpu_pause() noexcept
     #endif
 }
 
+__attribute__((optnone))
+__attribute__((noinline))
+uint64_t factorialIterative(uint64_t n) noexcept
+{
+    volatile uint64_t result = 1ULL;
+    for (uint64_t i = 2; i <= n; ++i)
+        result *= i;
+    return result;
+}
+
 //--------------------------------------------------------------------------
 
 namespace qiti
@@ -60,6 +70,22 @@ int testNoHeapAllocation() noexcept
 {
     volatile int test{42};
     return test;
+}
+
+__attribute__((optnone))
+__attribute__((noinline))
+int someWork() noexcept
+{
+    volatile auto val = factorialIterative(5);
+    return static_cast<int>(val);
+}
+
+__attribute__((optnone))
+__attribute__((noinline))
+int moreWork() noexcept
+{
+    volatile auto val = factorialIterative(50);
+    return static_cast<int>(val);
 }
 } // namespace FunctionCallData
 

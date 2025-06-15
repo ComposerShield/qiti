@@ -100,14 +100,41 @@ TEST_CASE("qiti::FunctionCallData::getTimeSpentInFunction")
 {
     qiti::ScopedQitiTest test;
     
-    auto funcData = qiti::FunctionData::getFunctionData<&testHeapAllocation>();
-    QITI_REQUIRE(funcData != nullptr);
+    SECTION("Clock time always greater than or equal to CPU time")
+    {
+        auto funcData = qiti::FunctionData::getFunctionData<&testHeapAllocation>();
+        QITI_REQUIRE(funcData != nullptr);
+        
+        testHeapAllocation();
+        
+        auto lastFunctionCall = funcData->getLastFunctionCall();
+        
+        auto timeSpentCpu   = lastFunctionCall.getTimeSpentInFunctionCpu_ns();
+        auto timeSpentClock = lastFunctionCall.getTimeSpentInFunctionWallClock_ns();
+        QITI_REQUIRE(timeSpentClock >= timeSpentCpu);
+    }
     
-    testHeapAllocation();
-    
-    auto lastFunctionCall = funcData->getLastFunctionCall();
-
-    auto timeSpentCpu   = lastFunctionCall.getTimeSpentInFunctionCpu_ns();
-    auto timeSpentClock = lastFunctionCall.getTimeSpentInFunctionWallClock_ns();
-    QITI_REQUIRE(timeSpentClock >= timeSpentCpu);
+    SECTION("More work results in more time elapsed")
+    {
+        auto someWorkFuncData = qiti::FunctionData::getFunctionData<&someWork>();
+        QITI_REQUIRE(someWorkFuncData != nullptr);
+        
+        auto moreWorkFuncData = qiti::FunctionData::getFunctionData<&moreWork>();
+        QITI_REQUIRE(moreWorkFuncData != nullptr);
+        
+        someWork();
+        moreWork();
+        
+        auto someWorkLastFunctionCall = someWorkFuncData->getLastFunctionCall();
+        auto moreWorkLastFunctionCall = moreWorkFuncData->getLastFunctionCall();
+        
+        auto someWorkTimeSpentCpu   = someWorkLastFunctionCall.getTimeSpentInFunctionCpu_ns();
+        auto moreWorkTimeSpentCpu   = moreWorkLastFunctionCall.getTimeSpentInFunctionCpu_ns();
+        
+        auto someWorkTimeSpentClock = someWorkLastFunctionCall.getTimeSpentInFunctionWallClock_ns();
+        auto moreWorkTimeSpentClock = moreWorkLastFunctionCall.getTimeSpentInFunctionWallClock_ns();
+        
+        QITI_CHECK(moreWorkTimeSpentCpu >= someWorkTimeSpentCpu);
+        QITI_CHECK(moreWorkTimeSpentClock >= someWorkTimeSpentClock);
+    }
 }
