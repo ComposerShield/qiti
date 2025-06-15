@@ -130,16 +130,28 @@ uint64_t FunctionCallData::getAmountHeapAllocated() const noexcept
     return impl->amountHeapAllocatedAfterFunctionCall - impl->amountHeapAllocatedBeforeFunctionCall;
 }
 
-uint64_t QITI_API FunctionCallData::getTimeSpentInFunction_ms() const noexcept
+uint64_t QITI_API FunctionCallData::getTimeSpentInFunctionCpu_ms() const noexcept
 {
-    if (getImpl()->timeSpentInFunctionNanoseconds == 0)
+    if (getImpl()->timeSpentInFunctionNanosecondsCpu == 0)
         return 0; // prevent dividing by 0
-    return getImpl()->timeSpentInFunctionNanoseconds / 1000000;
+    return getImpl()->timeSpentInFunctionNanosecondsCpu / 1000000;
 }
 
-uint64_t QITI_API FunctionCallData::getTimeSpentInFunction_ns() const noexcept
+uint64_t QITI_API FunctionCallData::getTimeSpentInFunctionCpu_ns() const noexcept
 {
-    return getImpl()->timeSpentInFunctionNanoseconds;
+    return getImpl()->timeSpentInFunctionNanosecondsCpu;
+}
+
+uint64_t QITI_API FunctionCallData::getTimeSpentInFunctionWallClock_ms() const noexcept
+{
+    if (getImpl()->timeSpentInFunctionNanosecondsWallClock == 0)
+        return 0; // prevent dividing by 0
+    return getImpl()->timeSpentInFunctionNanosecondsWallClock / 1000000;
+}
+
+uint64_t QITI_API FunctionCallData::getTimeSpentInFunctionWallClock_ns() const noexcept
+{
+    return getImpl()->timeSpentInFunctionNanosecondsWallClock;
 }
 
 std::thread::id QITI_API FunctionCallData::getThreadThatCalledFunction() const noexcept

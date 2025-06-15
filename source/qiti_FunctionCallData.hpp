@@ -37,12 +37,38 @@ public:
     
     /** Get the total bytes allocated on the heap during this call. */
     [[nodiscard]] uint64_t QITI_API getAmountHeapAllocated() const noexcept;
+
+    /**
+     Returns the CPU time spent inside this function call, in milliseconds.
+     
+     CPU time is the amount of time the thread actually spent executing
+     on the CPU (user + kernel mode), and does ​not​ include time spent off-CPU.
+     */
+    [[nodiscard]] uint64_t QITI_API getTimeSpentInFunctionCpu_ms() const noexcept;
     
-    /** Get the total amount of time spent inside this function call, in milliseconds. */
-    [[nodiscard]] uint64_t QITI_API getTimeSpentInFunction_ms() const noexcept;
+    /**
+     Returns the CPU time spent inside this function call, in nanoseconds.
+     
+     CPU time is the amount of time the thread actually spent executing
+     on the CPU (user + kernel mode), and does ​not​ include time spent off-CPU.
+     */
+    [[nodiscard]] uint64_t QITI_API getTimeSpentInFunctionCpu_ns() const noexcept;
     
-    /** Get the total amount of time spent inside this function call, in nanoseconds. */
-    [[nodiscard]] uint64_t QITI_API getTimeSpentInFunction_ns() const noexcept;
+    /**
+     Returns the wall-clock time spent inside this function call, in milliseconds.
+     
+     Wall-clock time is the real-world elapsed time between entry and exit,
+     and so includes any time the thread was preempted or blocked.
+     */
+    [[nodiscard]] uint64_t QITI_API getTimeSpentInFunctionWallClock_ms() const noexcept;
+    
+    /**
+     Returns the wall-clock time spent inside this function call, in nanoseconds.
+     
+     Wall-clock time is the real-world elapsed time between entry and exit,
+     and so includes any time the thread was preempted or blocked.
+     */
+    [[nodiscard]] uint64_t QITI_API getTimeSpentInFunctionWallClock_ns() const noexcept;
     
     /** Get thread that was responsible for this function call. */
     [[nodiscard]] std::thread::id QITI_API getThreadThatCalledFunction() const noexcept;

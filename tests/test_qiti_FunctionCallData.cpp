@@ -95,3 +95,19 @@ TEST_CASE("qiti::FunctionCallData::getThreadThatCalledFunction()")
         QITI_REQUIRE(threadThatCalledFunction == tThreadID); // called from t thread
     }
 }
+
+TEST_CASE("qiti::FunctionCallData::getTimeSpentInFunction")
+{
+    qiti::ScopedQitiTest test;
+    
+    auto funcData = qiti::FunctionData::getFunctionData<&testHeapAllocation>();
+    QITI_REQUIRE(funcData != nullptr);
+    
+    testHeapAllocation();
+    
+    auto lastFunctionCall = funcData->getLastFunctionCall();
+
+    auto timeSpentCpu   = lastFunctionCall.getTimeSpentInFunctionCpu_ns();
+    auto timeSpentClock = lastFunctionCall.getTimeSpentInFunctionWallClock_ns();
+    QITI_REQUIRE(timeSpentClock >= timeSpentCpu);
+}

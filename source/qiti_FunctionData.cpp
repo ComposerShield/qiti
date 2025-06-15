@@ -145,9 +145,14 @@ uint64_t FunctionData::getNumTimesCalled() const noexcept
     return getImpl()->numTimesCalled;
 }
 
-uint64_t FunctionData::getAverageTimeSpentInFunction_ns() const noexcept
+uint64_t FunctionData::getAverageTimeSpentInFunctionCpu_ns() const noexcept
 {
-    return getImpl()->averageTimeSpentInFunctionNanoseconds;
+    return getImpl()->averageTimeSpentInFunctionNanosecondsCpu;
+}
+
+uint64_t FunctionData::getAverageTimeSpentInFunctionWallClock_ns() const noexcept
+{
+    return getImpl()->averageTimeSpentInFunctionNanosecondsWallClock;
 }
 
 FunctionCallData FunctionData::getLastFunctionCall() const noexcept

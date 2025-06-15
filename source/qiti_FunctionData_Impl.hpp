@@ -39,7 +39,8 @@ public:
     const void* address = nullptr;
     
     uint64_t numTimesCalled = 0;
-    uint64_t averageTimeSpentInFunctionNanoseconds = 0;
+    uint64_t averageTimeSpentInFunctionNanosecondsCpu = 0;
+    uint64_t averageTimeSpentInFunctionNanosecondsWallClock = 0;
     
     static constexpr size_t MAX_THREADS = 256;
     std::bitset<MAX_THREADS> threadsCalledOn;
