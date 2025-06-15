@@ -151,8 +151,8 @@ void Profile::updateFunctionDataOnExit(const void* this_fn) noexcept
     
     // Get elapsed times
     const auto cpuElapsed_ns =
-        (uint64_t(cpuEndTime.tv_sec - callImpl->startTimeCpu.tv_sec) * 1'000'000'000ULL) +
-        (uint64_t(cpuEndTime.tv_nsec) - uint64_t(callImpl->startTimeCpu.tv_nsec));
+        (static_cast<uint64_t>(cpuEndTime.tv_sec - callImpl->startTimeCpu.tv_sec) * 1'000'000'000ULL) +
+        (static_cast<uint64_t>(cpuEndTime.tv_nsec) - static_cast<uint64_t>(callImpl->startTimeCpu.tv_nsec));
     const auto clockElapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(clockEndTime - callImpl->startTimeWallClock);
 
     // Update FunctionCallData (before updating listeners in case listeners need that information)
