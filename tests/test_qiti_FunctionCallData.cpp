@@ -122,11 +122,11 @@ TEST_CASE("qiti::FunctionCallData::getTimeSpentInFunction")
         auto moreWorkFuncData = qiti::FunctionData::getFunctionData<&moreWork>();
         QITI_REQUIRE(moreWorkFuncData != nullptr);
         
-        // Call once to "warm up" CPU to these functions. Else first function always gets additional performance hit
+        // Call once to "warm up" CPU to these functions.
+        // Else first function always gets additional performance hit and the results are less predictable.
         // The CPU needs to fetch the code into its I-cache, train its predictors, lazy-load the pages, etc.
-        // TODO: explore ways to "warm up" functions from within Qiti
-        (void)someWork();
-        (void)moreWork();
+        (void)someWork(); // "cold call"
+        (void)moreWork(); // "cold call"
         
         // Calls to be tested below
         (void)someWork();
