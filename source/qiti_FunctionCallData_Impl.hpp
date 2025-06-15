@@ -17,6 +17,9 @@
 
 #include "qiti_FunctionCallData.hpp"
 
+#include <time.h>
+#include <stdint.h>
+
 #include <chrono>
 #include <cstdint>
 #include <thread>
@@ -30,11 +33,15 @@ namespace qiti
 {
 struct FunctionCallData::Impl
 {
-    std::chrono::steady_clock::time_point begin_time;
-    std::chrono::steady_clock::time_point end_time;
+    std::chrono::steady_clock::time_point startTimeWallClock;
+    std::chrono::steady_clock::time_point endTimeWallClock;
+    timespec                              startTimeCpu;
+    timespec                              endTimeCpu;
+    
     std::thread::id callingThread;
     
-    uint64_t timeSpentInFunctionNanoseconds = 0;
+    uint64_t timeSpentInFunctionNanosecondsWallClock = 0;
+    uint64_t timeSpentInFunctionNanosecondsCpu = 0;
     
     uint32_t numHeapAllocationsBeforeFunctionCall = 0;
     uint32_t numHeapAllocationsAfterFunctionCall  = 0;

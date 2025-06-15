@@ -18,6 +18,8 @@
 #if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || defined(_M_IX86)
   #include <immintrin.h>  // for _mm_pause()
 #endif
+
+#include <cmath>
 #include <thread>
 
 //--------------------------------------------------------------------------
@@ -40,6 +42,16 @@ inline static void cpu_pause() noexcept
     #endif
 }
 
+__attribute__((optnone))
+__attribute__((noinline))
+double work(uint64_t n) noexcept
+{
+    double result = 1ULL;
+    for (uint64_t i = 2; i <= n; ++i)
+        result *= std::cos(static_cast<double>(i));
+    return result;
+}
+
 //--------------------------------------------------------------------------
 
 namespace qiti
@@ -60,6 +72,22 @@ int testNoHeapAllocation() noexcept
 {
     volatile int test{42};
     return test;
+}
+
+__attribute__((optnone))
+__attribute__((noinline))
+double someWork() noexcept
+{
+    auto val = work(5);
+    return val;
+}
+
+__attribute__((optnone))
+__attribute__((noinline))
+double moreWork() noexcept
+{
+    auto val = work(50);
+    return val;
 }
 } // namespace FunctionCallData
 

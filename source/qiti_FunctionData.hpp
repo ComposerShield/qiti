@@ -72,8 +72,21 @@ public:
      */
     [[nodiscard]] uint64_t QITI_API getNumTimesCalled() const noexcept;
     
-    /** Returns the average time spent inside this function, in nanoseconds. */
-    [[nodiscard]] uint64_t QITI_API getAverageTimeSpentInFunction_ns() const noexcept;
+    /**
+     Returns the average time spent inside this function, in nanoseconds.
+     
+     CPU time is the amount of time the thread actually spent executing
+     on the CPU (user + kernel mode), and does ​not​ include time spent off-CPU.
+     */
+    [[nodiscard]] uint64_t QITI_API getAverageTimeSpentInFunctionCpu_ns() const noexcept;
+    
+    /**
+     Returns the average time spent inside this function, in nanoseconds.
+     
+     Wall-clock time is the real-world elapsed time between entry and exit,
+     and so includes any time the thread was preempted or blocked.
+     */
+    [[nodiscard]] uint64_t QITI_API getAverageTimeSpentInFunctionWallClock_ns() const noexcept;
     
     /**
      Check if the function was called on a specific thread.
