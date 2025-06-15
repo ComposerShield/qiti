@@ -134,7 +134,7 @@ TEST_CASE("qiti::FunctionCallData::getTimeSpentInFunction")
         auto someWorkTimeSpentClock = someWorkLastFunctionCall.getTimeSpentInFunctionWallClock_ns();
         auto moreWorkTimeSpentClock = moreWorkLastFunctionCall.getTimeSpentInFunctionWallClock_ns();
         
-        QITI_CHECK(moreWorkTimeSpentCpu >= someWorkTimeSpentCpu);
-        QITI_CHECK(moreWorkTimeSpentClock >= someWorkTimeSpentClock);
+        CHECK(moreWorkTimeSpentCpu >= someWorkTimeSpentCpu);
+        CHECK(moreWorkTimeSpentClock >= someWorkTimeSpentClock);
     }
 }
