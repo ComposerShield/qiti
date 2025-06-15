@@ -42,11 +42,11 @@ inline static void cpu_pause() noexcept
 
 __attribute__((optnone))
 __attribute__((noinline))
-uint64_t factorialIterative(uint64_t n) noexcept
+double work(uint64_t n) noexcept
 {
-    volatile uint64_t result = 1ULL;
+    double result = 1ULL;
     for (uint64_t i = 2; i <= n; ++i)
-        result *= i;
+        result *= std::cos(static_cast<double>(i));
     return result;
 }
 
@@ -74,18 +74,18 @@ int testNoHeapAllocation() noexcept
 
 __attribute__((optnone))
 __attribute__((noinline))
-int someWork() noexcept
+double someWork() noexcept
 {
-    volatile auto val = factorialIterative(5);
-    return static_cast<int>(val);
+    auto val = work(5);
+    return val;
 }
 
 __attribute__((optnone))
 __attribute__((noinline))
-int moreWork() noexcept
+double moreWork() noexcept
 {
-    volatile auto val = factorialIterative(50);
-    return static_cast<int>(val);
+    auto val = work(50);
+    return val;
 }
 } // namespace FunctionCallData
 

@@ -27,8 +27,8 @@ namespace FunctionCallData
 {
 int testHeapAllocation() noexcept;
 int testNoHeapAllocation() noexcept;
-int someWork() noexcept;
-int moreWork() noexcept;
+double someWork() noexcept;
+double moreWork() noexcept;
 } // namespace FunctionCallData
 
 //--------------------------------------------------------------------------

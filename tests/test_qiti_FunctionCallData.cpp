@@ -122,8 +122,15 @@ TEST_CASE("qiti::FunctionCallData::getTimeSpentInFunction")
         auto moreWorkFuncData = qiti::FunctionData::getFunctionData<&moreWork>();
         QITI_REQUIRE(moreWorkFuncData != nullptr);
         
-        someWork();
-        moreWork();
+        // Call once to "warm up" CPU to these functions. Else first function always gets additional performance hit
+        // The CPU needs to fetch the code into its I-cache, train its predictors, lazy-load the pages, etc.
+        // TODO: explore ways to "warm up" functions from within Qiti
+        (void)someWork();
+        (void)moreWork();
+        
+        // Calls to be tested below
+        (void)someWork();
+        (void)moreWork();
         
         auto someWorkLastFunctionCall = someWorkFuncData->getLastFunctionCall();
         auto moreWorkLastFunctionCall = moreWorkFuncData->getLastFunctionCall();
@@ -134,7 +141,7 @@ TEST_CASE("qiti::FunctionCallData::getTimeSpentInFunction")
         auto someWorkTimeSpentClock = someWorkLastFunctionCall.getTimeSpentInFunctionWallClock_ns();
         auto moreWorkTimeSpentClock = moreWorkLastFunctionCall.getTimeSpentInFunctionWallClock_ns();
         
-        CHECK(moreWorkTimeSpentCpu >= someWorkTimeSpentCpu);
-        CHECK(moreWorkTimeSpentClock >= someWorkTimeSpentClock);
+        QITI_REQUIRE(moreWorkTimeSpentCpu >= someWorkTimeSpentCpu);
+        QITI_REQUIRE(moreWorkTimeSpentClock >= someWorkTimeSpentClock);
     }
 }
