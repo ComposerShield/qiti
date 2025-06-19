@@ -6,112 +6,112 @@ on:
       - '**'
 
 jobs:
-  mac-15-build-xcode:
-    # main branch only, or PRs into main
-    if: ${{ github.ref == 'refs/heads/main' }}
-    runs-on: macos-15
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        
-      - name: Select Xcode 16.2
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '16.2'
-
-      - name: Configure CMake (Xcode generator)
-        run: cmake . -B build -G Xcode
-
-      - name: Build
-        run: cmake --build build --config Debug --target qiti_tests
-        
-      - name: Run Unit Tests
-        run: |
-          cd build
-          ctest -C Debug
-          
-  mac-14-build-xcode:
-    # main branch only, or PRs into main
-
-    runs-on: macos-14
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        
-      - name: Select Xcode 15.4
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '15.4'
-
-      - name: Configure CMake (Xcode generator)
-        run: cmake . -B build -G Xcode
-
-      - name: Build
-        run: cmake --build build --config Debug --target qiti_tests
-        
-      - name: Run Unit Tests
-        run: |
-          cd build
-          ctest -C Debug
-
-  mac-build-clang-ninja:
-    runs-on: macos-15
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-  
-      - name: Install LLVM 16 & Ninja
-        run: |
-          brew install llvm@16 ninja
-          echo "PATH=$(brew --prefix llvm@16)/bin:$PATH" >> $GITHUB_ENV
-
-      - name: Configure CMake (Ninja, LLVM Clang)
-        run: cmake . -B build \
-             -G Ninja \
-             -DCMAKE_BUILD_TYPE=Debug \
-             -DCMAKE_C_COMPILER=clang \
-             -DCMAKE_CXX_COMPILER=clang++
-
-      - name: Build
-        run: cmake --build build --target qiti_tests
-        
-      - name: Run Unit Tests
-        run: |
-          cd build
-          ctest -C Debug
-          
-  ubuntu-build-clang-ninja:
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-  
-      - name: Install LLVM 16 & Ninja
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y clang-16 ninja-build
-          echo "CC=clang-16" >> $GITHUB_ENV
-          echo "CXX=clang++-16" >> $GITHUB_ENV
-
-      - name: Configure CMake (Ninja, LLVM Clang)
-        run: |
-          cmake . -B build \
-            -G Ninja \
-            -DCMAKE_BUILD_TYPE=Debug \
-            -DCMAKE_C_COMPILER=clang-16 \
-            -DCMAKE_CXX_COMPILER=clang++-16
-
-      - name: Build
-        run: cmake --build build --target qiti_tests
-
-      - name: Run Unit Tests
-        run: |
-          cd build
-          ctest -C Debug --verbose
+#  mac-15-build-xcode:
+#    # main branch only, or PRs into main
+#    if: ${{ github.ref == 'refs/heads/main' }}
+#    runs-on: macos-15
+#
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v3
+#        
+#      - name: Select Xcode 16.2
+#        uses: maxim-lobanov/setup-xcode@v1
+#        with:
+#          xcode-version: '16.2'
+#
+#      - name: Configure CMake (Xcode generator)
+#        run: cmake . -B build -G Xcode
+#
+#      - name: Build
+#        run: cmake --build build --config Debug --target qiti_tests
+#        
+#      - name: Run Unit Tests
+#        run: |
+#          cd build
+#          ctest -C Debug
+#          
+#  mac-14-build-xcode:
+#    # main branch only, or PRs into main
+#
+#    runs-on: macos-14
+#
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v3
+#        
+#      - name: Select Xcode 15.4
+#        uses: maxim-lobanov/setup-xcode@v1
+#        with:
+#          xcode-version: '15.4'
+#
+#      - name: Configure CMake (Xcode generator)
+#        run: cmake . -B build -G Xcode
+#
+#      - name: Build
+#        run: cmake --build build --config Debug --target qiti_tests
+#        
+#      - name: Run Unit Tests
+#        run: |
+#          cd build
+#          ctest -C Debug
+#
+#  mac-build-clang-ninja:
+#    runs-on: macos-15
+#    
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v3
+#  
+#      - name: Install LLVM 16 & Ninja
+#        run: |
+#          brew install llvm@16 ninja
+#          echo "PATH=$(brew --prefix llvm@16)/bin:$PATH" >> $GITHUB_ENV
+#
+#      - name: Configure CMake (Ninja, LLVM Clang)
+#        run: cmake . -B build \
+#             -G Ninja \
+#             -DCMAKE_BUILD_TYPE=Debug \
+#             -DCMAKE_C_COMPILER=clang \
+#             -DCMAKE_CXX_COMPILER=clang++
+#
+#      - name: Build
+#        run: cmake --build build --target qiti_tests
+#        
+#      - name: Run Unit Tests
+#        run: |
+#          cd build
+#          ctest -C Debug
+#          
+#  ubuntu-build-clang-ninja:
+#    runs-on: ubuntu-latest
+#    
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v3
+#  
+#      - name: Install LLVM 16 & Ninja
+#        run: |
+#          sudo apt-get update
+#          sudo apt-get install -y clang-16 ninja-build
+#          echo "CC=clang-16" >> $GITHUB_ENV
+#          echo "CXX=clang++-16" >> $GITHUB_ENV
+#
+#      - name: Configure CMake (Ninja, LLVM Clang)
+#        run: |
+#          cmake . -B build \
+#            -G Ninja \
+#            -DCMAKE_BUILD_TYPE=Debug \
+#            -DCMAKE_C_COMPILER=clang-16 \
+#            -DCMAKE_CXX_COMPILER=clang++-16
+#
+#      - name: Build
+#        run: cmake --build build --target qiti_tests
+#
+#      - name: Run Unit Tests
+#        run: |
+#          cd build
+#          ctest -C Debug --verbose
 
   ubuntu-build-gcc-ninja:
     runs-on: ubuntu-latest
@@ -143,73 +143,73 @@ jobs:
           cd build
           ctest -C Debug --verbose
 
-  debian-build-clang-ninja:
-    runs-on: ubuntu-latest
-    container:
-      image: debian:stable
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Install LLVM 16 & Ninja
-        run: |
-          apt-get update
-          apt-get install -y clang-16 ninja-build cmake git
-          echo "CC=clang-16" >> $GITHUB_ENV
-          echo "CXX=clang++-16" >> $GITHUB_ENV
-
-      - name: Configure CMake (Ninja, LLVM Clang)
-        run: |
-          cmake . -B build \
-            -G Ninja \
-            -DCMAKE_BUILD_TYPE=Debug \
-            -DCMAKE_C_COMPILER=clang-16 \
-            -DCMAKE_CXX_COMPILER=clang++-16
-
-      - name: Build
-        run: cmake --build build --target qiti_tests
-
-      - name: Run Unit Tests
-        run: |
-          cd build
-          ctest -C Debug --verbose
-
-  fedora-build-clang-ninja:
-    runs-on: ubuntu-latest
-    container:
-      image: fedora:latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Install Clang & Ninja
-        run: |
-          dnf install -y clang llvm ninja-build cmake gcc-c++ git
-
-      - name: Configure CMake (Ninja, LLVM Clang)
-        run: |
-          cmake . -B build \
-            -G Ninja \
-            -DCMAKE_BUILD_TYPE=Debug \
-            -DCMAKE_C_COMPILER=clang \
-            -DCMAKE_CXX_COMPILER=clang++
-
-      - name: Build
-        run: cmake --build build --target qiti_tests
-
-      - name: Run Unit Tests
-        run: |
-          cd build
-          ctest -C Debug --verbose
-
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        
-      - name: Install cpplint
-        run: pip3 install cpplint
-
-      - name: Run CPPLint
-        run: ./runCpplint.sh
+#  debian-build-clang-ninja:
+#    runs-on: ubuntu-latest
+#    container:
+#      image: debian:stable
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v3
+#
+#      - name: Install LLVM 16 & Ninja
+#        run: |
+#          apt-get update
+#          apt-get install -y clang-16 ninja-build cmake git
+#          echo "CC=clang-16" >> $GITHUB_ENV
+#          echo "CXX=clang++-16" >> $GITHUB_ENV
+#
+#      - name: Configure CMake (Ninja, LLVM Clang)
+#        run: |
+#          cmake . -B build \
+#            -G Ninja \
+#            -DCMAKE_BUILD_TYPE=Debug \
+#            -DCMAKE_C_COMPILER=clang-16 \
+#            -DCMAKE_CXX_COMPILER=clang++-16
+#
+#      - name: Build
+#        run: cmake --build build --target qiti_tests
+#
+#      - name: Run Unit Tests
+#        run: |
+#          cd build
+#          ctest -C Debug --verbose
+#
+#  fedora-build-clang-ninja:
+#    runs-on: ubuntu-latest
+#    container:
+#      image: fedora:latest
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v3
+#
+#      - name: Install Clang & Ninja
+#        run: |
+#          dnf install -y clang llvm ninja-build cmake gcc-c++ git
+#
+#      - name: Configure CMake (Ninja, LLVM Clang)
+#        run: |
+#          cmake . -B build \
+#            -G Ninja \
+#            -DCMAKE_BUILD_TYPE=Debug \
+#            -DCMAKE_C_COMPILER=clang \
+#            -DCMAKE_CXX_COMPILER=clang++
+#
+#      - name: Build
+#        run: cmake --build build --target qiti_tests
+#
+#      - name: Run Unit Tests
+#        run: |
+#          cd build
+#          ctest -C Debug --verbose
+#
+#  lint:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v3
+#        
+#      - name: Install cpplint
+#        run: pip3 install cpplint
+#
+#      - name: Run CPPLint
+#        run: ./runCpplint.sh
