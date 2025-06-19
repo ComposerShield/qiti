@@ -113,6 +113,36 @@ jobs:
           cd build
           ctest -C Debug --verbose
 
+  ubuntu-build-gcc-ninja:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install GCC & Ninja
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc g++ ninja-build
+          echo "CC=gcc" >> $GITHUB_ENV
+          echo "CXX=g++" >> $GITHUB_ENV
+
+      - name: Configure CMake (Ninja, GCC)
+        run: |
+          cmake . -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_C_COMPILER=gcc \
+            -DCMAKE_CXX_COMPILER=g++
+
+      - name: Build
+        run: cmake --build build --target qiti_tests
+
+      - name: Run Unit Tests
+        run: |
+          cd build
+          ctest -C Debug --verbose
+
   debian-build-clang-ninja:
     runs-on: ubuntu-latest
     container:
