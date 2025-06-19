@@ -123,8 +123,9 @@ PRIVATE
     "-Wpedantic"
     "-Wshadow"
     "-Wsign-conversion"
-    "-Wstring-conversion"
     "-Wzero-as-null-pointer-constant"
+    # clang-only flags:
+    $<$<CXX_COMPILER_ID:Clang>:-Wstring-conversion>
 INTERFACE
     # Instruments all visible functions not marked __attribute__((no_instrument_function))
     "-finstrument-functions"
