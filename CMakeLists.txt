@@ -6,9 +6,9 @@ project(Qiti
     LANGUAGES C CXX
 )
 
-if(NOT (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"))
-    message(FATAL_ERROR "Only Clang or Apple Clang compilers are supported")
-endif()
+# if(NOT (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"))
+#     message(FATAL_ERROR "Only Clang or Apple Clang compilers are supported")
+# endif()
 
 set(ARCHS "arm64;x86_64") # Universal Binary
 
