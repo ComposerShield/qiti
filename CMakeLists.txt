@@ -132,6 +132,8 @@ INTERFACE
     "-fno-omit-frame-pointer"
     # Prevent inlining which breaks our ability to track memory
     "-fno-inline"
+    # Profile each "branch" taken in each function
+    "-fprofile-arcs"
     # Enable Thread Sanitizer
     "-fsanitize=thread"
     # Generate debug info
