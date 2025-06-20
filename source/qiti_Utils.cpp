@@ -15,8 +15,9 @@
 
 #include <qiti_Utils.hpp>
 
-#include "qiti_include.hpp"
+#include "qiti_CoverageHooks.hpp"
 #include "qiti_Instrument.hpp"
+#include "qiti_FunctionData.hpp"
 #include "qiti_LockData.hpp"
 #include "qiti_MallocHooks.hpp"
 
@@ -120,6 +121,7 @@ void Utils::resetAll() noexcept
     Instrument::resetInstrumentation();
     Profile::resetProfiling();
     LockData::resetAllListeners();
+    CoverageHooks::reset();
 }
 
 } // namespace qiti

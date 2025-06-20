@@ -21,6 +21,8 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG -D_DEBUG")
 set(SOURCES
     "include/qiti_include.hpp"
     "source/qiti_API.hpp"
+    "source/qiti_CoverageHooks.hpp"
+    "source/qiti_CoverageHooks.cpp"
     "source/qiti_FunctionCallData_Impl.hpp"
     "source/qiti_FunctionCallData.hpp"
     "source/qiti_FunctionCallData.cpp"
@@ -99,7 +101,10 @@ PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-target_compile_options(qiti_lib 
+target_compile_options(qiti_lib
+PUBLIC
+    # Instrument code for coverage analysis.
+    "--coverage"
 PRIVATE
     # dylib symbol visibility
     "-fvisibility=hidden"
@@ -133,14 +138,14 @@ INTERFACE
     "-fno-omit-frame-pointer"
     # Prevent inlining which breaks our ability to track memory
     "-fno-inline"
-    # Profile each "branch" taken in each function
-    "-fprofile-arcs"
     # Enable Thread Sanitizer
     "-fsanitize=thread"
     # Generate debug info
     "-g" 
     # Disable Optimizations 
     "-O0"
+    # clang-only flags:
+    $<$<CXX_COMPILER_ID:Clang>:-Wstring-conversion>
 )
 
 target_compile_definitions(qiti_lib
@@ -154,6 +159,8 @@ PUBLIC
 )
 
 target_link_options(qiti_lib
+PUBLIC
+    "--coverage"
 INTERFACE
     "-fsanitize=thread"
 )
@@ -173,6 +180,7 @@ if(PROJECT_IS_TOP_LEVEL)
 
     add_executable(qiti_tests
         "tests/qiti_test_macros.hpp"
+        "tests/test_qiti_CoverageHooks.cpp"
         "tests/test_qiti_FunctionCallData.cpp"
         "tests/test_qiti_FunctionData.cpp"
         "tests/test_qiti_Instrument.cpp"
