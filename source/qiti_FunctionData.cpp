@@ -162,6 +162,13 @@ FunctionCallData FunctionData::getLastFunctionCall() const noexcept
     return getImpl()->lastCallData;
 }
 
+std::vector<const FunctionData*> FunctionData::getAllProfiledFunctionData() noexcept
+{
+    MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
+    
+    return Utils::getAllFunctionData();
+}
+
 void FunctionData::functionCalled() noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;

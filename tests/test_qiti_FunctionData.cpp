@@ -18,7 +18,8 @@
 //--------------------------------------------------------------------------
 
 /** NOT static to purposely allow external linkage and visibility to QITI */
-__attribute__((noinline)) __attribute__((optnone))
+__attribute__((noinline))
+__attribute__((optnone))
 void testFunc() noexcept
 {
     volatile int _ = 42;
@@ -120,4 +121,35 @@ TEST_CASE("qiti::FunctionData::wasCalledOnThread()")
         
         QITI_CHECK(funcData->wasCalledOnThread(id));
     }
+}
+
+TEST_CASE("qiti::FunctionData::getAllProfiledFunctionData()")
+{
+    qiti::ScopedQitiTest test;
+    
+    // Profile two functions
+    qiti::Profile::beginProfilingFunction<&testFunc>();
+    qiti::Profile::beginProfilingFunction<&qiti::example::FunctionCallData::testHeapAllocation>();
+    
+    // Run the two functions
+    testFunc();
+    qiti::example::FunctionCallData::testHeapAllocation();
+    
+    // getAllProfiledFunctionData() contains our two functions
+    auto numHeapAllocsBefore = qiti::Profile::getNumHeapAllocationsOnCurrentThread();
+    auto allFunctions = qiti::FunctionData::getAllProfiledFunctionData();
+    QITI_REQUIRE(allFunctions.size() >= 2);
+    QITI_REQUIRE(numHeapAllocsBefore == qiti::Profile::getNumHeapAllocationsOnCurrentThread());
+    
+    auto containsFunc = [&allFunctions](const std::string& funcName)->bool
+    {
+        for (const auto* func : allFunctions)
+            if (std::string(func->getFunctionName()) == funcName)
+                return true;
+        return false;
+    };
+    
+    QITI_CHECK(containsFunc("testFunc"));
+    QITI_CHECK(containsFunc("qiti::example::FunctionCallData::testHeapAllocation"));
+    QITI_REQUIRE_FALSE(containsFunc("randomFuncNameThatWeDidNotCall"));
 }

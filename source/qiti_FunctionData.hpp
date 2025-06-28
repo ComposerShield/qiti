@@ -22,6 +22,7 @@
 
 #include <cstdint>
 #include <thread>
+#include <vector>
 
 //--------------------------------------------------------------------------
 
@@ -101,6 +102,9 @@ public:
      Returns a FunctionCallData object representing the last recorded invocation of this function.
      */
     [[nodiscard]] FunctionCallData QITI_API getLastFunctionCall() const noexcept;
+    
+    /** */
+    [[nodiscard]] static std::vector<const FunctionData*> QITI_API getAllProfiledFunctionData() noexcept;
     
     //--------------------------------------------------------------------------
     // Doxygen - Begin Internal Documentation
