@@ -28,6 +28,7 @@
 #include <mutex>
 #include <utility>
 #include <thread>
+#include <vector>
 
 //--------------------------------------------------------------------------
 
