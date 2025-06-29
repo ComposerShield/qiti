@@ -103,7 +103,11 @@ public:
      */
     [[nodiscard]] FunctionCallData QITI_API getLastFunctionCall() const noexcept;
     
-    /** */
+    /**
+     Get all profiled function data.
+
+     Returns a vector of pointers to the FunctionData instances for each function currently being profiled.
+     */
     [[nodiscard]] static std::vector<const FunctionData*> QITI_API getAllProfiledFunctionData() noexcept;
     
     //--------------------------------------------------------------------------
