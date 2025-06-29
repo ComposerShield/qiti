@@ -136,20 +136,29 @@ TEST_CASE("qiti::FunctionData::getAllProfiledFunctionData()")
     qiti::example::FunctionCallData::testHeapAllocation();
     
     // getAllProfiledFunctionData() contains our two functions
-    auto numHeapAllocsBefore = qiti::Profile::getNumHeapAllocationsOnCurrentThread();
-    auto allFunctions = qiti::FunctionData::getAllProfiledFunctionData();
-    QITI_REQUIRE(allFunctions.size() >= 2);
-    QITI_REQUIRE(numHeapAllocsBefore == qiti::Profile::getNumHeapAllocationsOnCurrentThread());
-    
-    auto containsFunc = [&allFunctions](const std::string& funcName)->bool
     {
-        for (const auto* func : allFunctions)
-            if (std::string(func->getFunctionName()) == funcName)
-                return true;
-        return false;
-    };
+        auto numHeapAllocsBefore = qiti::Profile::getNumHeapAllocationsOnCurrentThread();
+        auto allFunctions = qiti::FunctionData::getAllProfiledFunctionData();
+        QITI_REQUIRE(allFunctions.size() >= 2);
+        QITI_REQUIRE(numHeapAllocsBefore == qiti::Profile::getNumHeapAllocationsOnCurrentThread());
+        
+        auto containsFunc = [&allFunctions](const std::string& funcName)->bool
+        {
+            for (const auto* func : allFunctions)
+                if (std::string(func->getFunctionName()) == funcName)
+                    return true;
+            return false;
+        };
+        
+        QITI_CHECK(containsFunc("testFunc"));
+        QITI_CHECK(containsFunc("qiti::example::FunctionCallData::testHeapAllocation"));
+        QITI_REQUIRE_FALSE(containsFunc("randomFuncNameThatWeDidNotCall"));
+    }
     
-    QITI_CHECK(containsFunc("testFunc"));
-    QITI_CHECK(containsFunc("qiti::example::FunctionCallData::testHeapAllocation"));
-    QITI_REQUIRE_FALSE(containsFunc("randomFuncNameThatWeDidNotCall"));
+    // Reset
+    test.reset(false);
+    
+    // No profiled functions should be available
+    auto allFunctionsAfterReset = qiti::FunctionData::getAllProfiledFunctionData();
+    QITI_REQUIRE(allFunctionsAfterReset.size() == 0);
 }
