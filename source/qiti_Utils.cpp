@@ -36,6 +36,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
+#include <vector>
 
 //--------------------------------------------------------------------------
 
@@ -91,6 +92,18 @@ void* Utils::getAddressForMangledFunctionName(const char* mangledName) noexcept
         return nullptr;
     
     return &(it->second);
+}
+
+std::vector<const qiti::FunctionData*> Utils::getAllFunctionData() noexcept
+{
+    std::vector<const qiti::FunctionData*> output;
+    
+    auto& functionMap = getFunctionMap();
+    output.reserve(functionMap.size());
+    for (auto& entry : functionMap)
+        output.push_back(&entry.second);
+    
+    return output;
 }
 
 void Utils::demangle(const char* mangled_name, char* demangled_name, uint64_t demangled_size) noexcept

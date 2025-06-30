@@ -25,6 +25,7 @@
 #include <string>
 #include <string_view>
 #include <type_traits>
+#include <vector>
 
 //--------------------------------------------------------------------------
 // Doxygen - Begin Internal Documentation
@@ -50,6 +51,9 @@ public:
         static constexpr auto functionName    = Profile::getFunctionName<FuncPtr>();
         return &getFunctionDataFromAddress(functionAddress, functionName);
     }
+    
+    /** */
+    [[nodiscard]] static std::vector<const qiti::FunctionData*> QITI_API getAllFunctionData() noexcept;
     
     /** demangle a GCC/Clang‐mangled name into a std::string */
     static void QITI_API_INTERNAL demangle(const char* mangled_name,

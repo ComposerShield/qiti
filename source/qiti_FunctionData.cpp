@@ -28,6 +28,7 @@
 #include <mutex>
 #include <utility>
 #include <thread>
+#include <vector>
 
 //--------------------------------------------------------------------------
 
@@ -160,6 +161,13 @@ FunctionCallData FunctionData::getLastFunctionCall() const noexcept
     qiti::ScopedNoHeapAllocations noAlloc;
     
     return getImpl()->lastCallData;
+}
+
+std::vector<const FunctionData*> FunctionData::getAllProfiledFunctionData() noexcept
+{
+    MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
+    
+    return Utils::getAllFunctionData();
 }
 
 void FunctionData::functionCalled() noexcept
