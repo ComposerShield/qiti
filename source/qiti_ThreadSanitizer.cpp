@@ -140,7 +140,6 @@ public:
         {
             // Child killed by signal
             int sig = WTERMSIG(status);
-            assert(sig == SIGTRAP); // or allow SIGABRT if we switch to abort()
             std::cout << "[qiti::DataRaceDetector] Child killed by signal " << sig << " (" << strsignal(sig) << ")\n";
         }
         else
