@@ -22,7 +22,11 @@ if(CMAKE_GENERATOR MATCHES "Xcode")
   # Turn on Thread Sanitizer in the Diagnostics section of each scheme
   # This is the required way to included tsan with Xcode because otherwise,
   # depending on your project config, it may link too late in the process.
-  set(CMAKE_XCODE_SCHEME_THREAD_SANITIZER ON)
+  if(PROJECT_IS_TOP_LEVEL)
+    set(CMAKE_XCODE_SCHEME_THREAD_SANITIZER ON)
+  else()
+    set(CMAKE_XCODE_SCHEME_THREAD_SANITIZER ON PARENT_SCOPE)
+  endif()
 endif()
 
 set(SOURCES
