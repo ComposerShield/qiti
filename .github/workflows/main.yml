@@ -22,7 +22,7 @@ jobs:
         run: cmake . -B build -G Xcode
 
       - name: Build
-        run: cmake --build build --config Debug --target qiti_tests
+        run: cmake --build build --config Debug --scheme qiti_tests
         
       - name: Run Unit Tests
         run: |
@@ -45,7 +45,7 @@ jobs:
         run: cmake . -B build -G Xcode
 
       - name: Build
-        run: cmake --build build --config Debug --target qiti_tests
+        run: cmake --build build --config Debug --scheme qiti_tests
         
       - name: Run Unit Tests
         run: |
