@@ -18,6 +18,13 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG -D_DEBUG")
 
+if(CMAKE_GENERATOR MATCHES "Xcode")
+  # Turn on Thread Sanitizer in the Diagnostics section of each scheme
+  # This is the required way to included tsan with Xcode because otherwise,
+  # depending on your project config, it may link too late in the process.
+  set(CMAKE_XCODE_SCHEME_THREAD_SANITIZER ON)
+endif()
+
 set(SOURCES
     "include/qiti_include.hpp"
     "source/qiti_API.hpp"
@@ -132,13 +139,16 @@ INTERFACE
     "-fno-omit-frame-pointer"
     # Prevent inlining which breaks our ability to track memory
     "-fno-inline"
-    # Enable Thread Sanitizer
-    "-fsanitize=thread"
     # Generate debug info
     "-g" 
     # Disable Optimizations 
     "-O0"
 )
+
+if(NOT CMAKE_GENERATOR MATCHES "Xcode")
+  # Enable Thread Sanitizer (already enabled for Xcode above)
+  target_compile_options(qiti_lib INTERFACE "-fsanitize=thread")
+endif()
 
 target_compile_definitions(qiti_lib
 PRIVATE
@@ -150,10 +160,11 @@ PUBLIC
     QITI_VERSION=\"${PROJECT_VERSION}\" # need the escape-quoted string for a valid C literal:
 )
 
-target_link_options(qiti_lib
-INTERFACE
-    "-fsanitize=thread"
-)
+
+if(NOT CMAKE_GENERATOR MATCHES "Xcode")
+  # Enable Thread Sanitizer (already enabled for Xcode above)
+  target_link_options(qiti_lib INTERFACE "-fsanitize=thread")
+endif()
 
 # =========================
 #       Unit Testing
