@@ -8,6 +8,9 @@
 // Basic Catch2 macros
 #include <catch2/catch_test_macros.hpp>
 
+// TSAN must be enabled for these tests
+#ifdef QITI_ENABLE_THREAD_SANITIZER
+
 #include <chrono>
 #include <iostream>
 #include <filesystem>
@@ -250,3 +253,5 @@ TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects pote
     }
 }
 #endif // defined(__APPLE__)
+
+#endif // QITI_ENABLE_THREAD_SANITIZER
