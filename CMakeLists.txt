@@ -224,6 +224,7 @@ if(PROJECT_IS_TOP_LEVEL)
     # ThreadSanitizer compile definition for test files
     if(QITI_ENABLE_THREAD_SANITIZER)
         target_compile_definitions(qiti_tests PRIVATE QITI_ENABLE_THREAD_SANITIZER=1)
+        target_compile_definitions(qiti_tests_client PRIVATE QITI_ENABLE_THREAD_SANITIZER=1)
     endif()
 
     enable_testing()
