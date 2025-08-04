@@ -132,12 +132,12 @@ void qiti::MallocHooks::mallocHook(std::size_t size) noexcept
 
 //--------------------------------------------------------------------------
 
-#if defined(__APPLE__)
+#if defined(__APPLE__) || ! defined(QITI_ENABLE_THREAD_SANITIZER)
 /**
- Due to differences in the Thread Sanitizer runtime on Apple vs. Linux,
- we need to insert our logic into "operator new" in macOS from the Qiti
- dylib but on Linux, we must insert it into the malloc hook provided by
- Thread Sanitizer directly in the final executable (qiti_tests_client.cpp).
+ Memory allocation hook implementation:
+ - macOS: Always uses operator new override
+ - Linux with ThreadSanitizer: Uses __sanitizer_malloc_hook (in qiti_tests_client.cpp)
+ - Linux without ThreadSanitizer: Uses operator new override (matches macOS implementation)
  */
 void* operator new(std::size_t size)
 {
@@ -162,6 +162,6 @@ void* operator new[](std::size_t size)
  
     throw std::bad_alloc{};
 }
-#endif // defined(__APPLE__)
+#endif // defined(__APPLE__) || ! defined(QITI_ENABLE_THREAD_SANITIZER)
 
 //--------------------------------------------------------------------------

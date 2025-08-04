@@ -21,7 +21,7 @@ jobs:
           xcode-version: '16.2'
 
       - name: Configure CMake (Xcode generator)
-        run: cmake . -B build -G Xcode
+        run: cmake . -B build -G Xcode -DQITI_ENABLE_THREAD_SANITIZER=ON
 
       - name: Build
         run: cmake --build build --config Debug --target qiti_tests
@@ -46,7 +46,7 @@ jobs:
           xcode-version: '15.4'
 
       - name: Configure CMake (Xcode generator)
-        run: cmake . -B build -G Xcode
+        run: cmake . -B build -G Xcode -DQITI_ENABLE_THREAD_SANITIZER=ON
 
       - name: Build
         run: cmake --build build --config Debug --target qiti_tests
@@ -73,7 +73,8 @@ jobs:
              -G Ninja \
              -DCMAKE_BUILD_TYPE=Debug \
              -DCMAKE_C_COMPILER=clang \
-             -DCMAKE_CXX_COMPILER=clang++
+             -DCMAKE_CXX_COMPILER=clang++ \
+             -DQITI_ENABLE_THREAD_SANITIZER=ON
 
       - name: Build
         run: cmake --build build --target qiti_tests
@@ -98,6 +99,37 @@ jobs:
           echo "CXX=clang++-16" >> $GITHUB_ENV
 
       - name: Configure CMake (Ninja, LLVM Clang)
+        run: |
+          cmake . -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_C_COMPILER=clang-16 \
+            -DCMAKE_CXX_COMPILER=clang++-16 \
+            -DQITI_ENABLE_THREAD_SANITIZER=ON
+
+      - name: Build
+        run: cmake --build build --target qiti_tests
+
+      - name: Run Unit Tests
+        run: |
+          cd build
+          ctest -C Debug --verbose
+
+  ubuntu-build-clang-ninja-no-tsan:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+  
+      - name: Install LLVM 16 & Ninja
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-16 ninja-build
+          echo "CC=clang-16" >> $GITHUB_ENV
+          echo "CXX=clang++-16" >> $GITHUB_ENV
+
+      - name: Configure CMake (Ninja, LLVM Clang, No ThreadSanitizer)
         run: |
           cmake . -B build \
             -G Ninja \
@@ -134,7 +166,8 @@ jobs:
             -G Ninja \
             -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_C_COMPILER=clang-16 \
-            -DCMAKE_CXX_COMPILER=clang++-16
+            -DCMAKE_CXX_COMPILER=clang++-16 \
+            -DQITI_ENABLE_THREAD_SANITIZER=ON
 
       - name: Build
         run: cmake --build build --target qiti_tests
@@ -162,7 +195,8 @@ jobs:
             -G Ninja \
             -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_C_COMPILER=clang \
-            -DCMAKE_CXX_COMPILER=clang++
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DQITI_ENABLE_THREAD_SANITIZER=ON
 
       - name: Build
         run: cmake --build build --target qiti_tests

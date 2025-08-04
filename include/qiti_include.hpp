@@ -22,6 +22,9 @@
 #include "../source/qiti_FunctionData.hpp"
 #include "../source/qiti_FunctionCallData.hpp"
 #include "../source/qiti_ScopedQitiTest.hpp"
+
+#ifdef QITI_ENABLE_THREAD_SANITIZER
 #include "../source/qiti_ThreadSanitizer.hpp"
+#endif
 
 //--------------------------------------------------------------------------

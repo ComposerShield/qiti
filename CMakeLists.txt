@@ -16,6 +16,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# Optional ThreadSanitizer support
+option(QITI_ENABLE_THREAD_SANITIZER "Enable ThreadSanitizer wrapper functionality" OFF)
+
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG -D_DEBUG")
 
 set(SOURCES
@@ -130,15 +133,22 @@ INTERFACE
     "-finstrument-functions"
     # Required to walk the stack from within our function hooks (__cyg_profile_func_enter/exit)
     "-fno-omit-frame-pointer"
-    # Prevent inlining which breaks our ability to track memory
-    "-fno-inline"
-    # Enable Thread Sanitizer
-    "-fsanitize=thread"
     # Generate debug info
     "-g" 
-    # Disable Optimizations 
-    "-O0"
 )
+
+# ThreadSanitizer-specific options (only when enabled)
+if(QITI_ENABLE_THREAD_SANITIZER)
+    target_compile_options(qiti_lib INTERFACE
+        # Prevent inlining which breaks our ability to track memory with TSan
+        "-fno-inline"
+        # Enable Thread Sanitizer
+        "-fsanitize=thread"
+        # Disable Optimizations (required for TSan accuracy)
+        "-O0"
+    )
+    target_compile_definitions(qiti_lib PUBLIC QITI_ENABLE_THREAD_SANITIZER=1)
+endif()
 
 target_compile_definitions(qiti_lib
 PRIVATE
@@ -150,10 +160,10 @@ PUBLIC
     QITI_VERSION=\"${PROJECT_VERSION}\" # need the escape-quoted string for a valid C literal:
 )
 
-target_link_options(qiti_lib
-INTERFACE
-    "-fsanitize=thread"
-)
+# ThreadSanitizer-specific link options (only when enabled)
+if(QITI_ENABLE_THREAD_SANITIZER)
+    target_link_options(qiti_lib INTERFACE "-fsanitize=thread")
+endif()
 
 # =========================
 #       Unit Testing
@@ -210,6 +220,12 @@ if(PROJECT_IS_TOP_LEVEL)
         "-Werror"
         "-Wpedantic"
     )
+
+    # ThreadSanitizer compile definition for test files
+    if(QITI_ENABLE_THREAD_SANITIZER)
+        target_compile_definitions(qiti_tests PRIVATE QITI_ENABLE_THREAD_SANITIZER=1)
+        target_compile_definitions(qiti_tests_client PRIVATE QITI_ENABLE_THREAD_SANITIZER=1)
+    endif()
 
     enable_testing()
 
