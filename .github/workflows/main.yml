@@ -115,6 +115,36 @@ jobs:
           cd build
           ctest -C Debug --verbose
 
+  ubuntu-build-clang-ninja-no-tsan:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+  
+      - name: Install LLVM 16 & Ninja
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-16 ninja-build
+          echo "CC=clang-16" >> $GITHUB_ENV
+          echo "CXX=clang++-16" >> $GITHUB_ENV
+
+      - name: Configure CMake (Ninja, LLVM Clang, No ThreadSanitizer)
+        run: |
+          cmake . -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_C_COMPILER=clang-16 \
+            -DCMAKE_CXX_COMPILER=clang++-16
+
+      - name: Build
+        run: cmake --build build --target qiti_tests
+
+      - name: Run Unit Tests
+        run: |
+          cd build
+          ctest -C Debug --verbose
+
   debian-build-clang-ninja:
     runs-on: ubuntu-latest
     container:
