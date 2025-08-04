@@ -221,6 +221,11 @@ if(PROJECT_IS_TOP_LEVEL)
         "-Wpedantic"
     )
 
+    # ThreadSanitizer compile definition for test files
+    if(QITI_ENABLE_THREAD_SANITIZER)
+        target_compile_definitions(qiti_tests PRIVATE QITI_ENABLE_THREAD_SANITIZER=1)
+    endif()
+
     enable_testing()
 
     if(APPLE)
