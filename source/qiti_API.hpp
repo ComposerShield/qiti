@@ -96,4 +96,18 @@ namespace qiti
     template<auto FuncPtr>
     concept isMemberFunction =
         std::is_member_function_pointer_v<decltype(FuncPtr)>;
+
+    /**
+     * Check if ThreadSanitizer wrapper functionality is enabled.
+     * 
+     * @returns true if QITI_ENABLE_THREAD_SANITIZER was defined during compilation
+     */
+    constexpr bool isThreadSanitizerEnabled() noexcept
+    {
+#ifdef QITI_ENABLE_THREAD_SANITIZER
+        return true;
+#else
+        return false;
+#endif
+    }
 } // namespace qiti

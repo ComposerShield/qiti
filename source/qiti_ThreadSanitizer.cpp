@@ -15,6 +15,8 @@
 
 #include "qiti_ThreadSanitizer.hpp"
 
+#ifdef QITI_ENABLE_THREAD_SANITIZER
+
 #include "qiti_FunctionData.hpp"
 #include "qiti_LockData.hpp"
 #include "qiti_LockHooks.hpp"
@@ -421,3 +423,5 @@ std::string ThreadSanitizer::getReport(bool /*verbose*/) const noexcept { return
 //--------------------------------------------------------------------------
 } // namespace qiti
 //--------------------------------------------------------------------------
+
+#endif // QITI_ENABLE_THREAD_SANITIZER

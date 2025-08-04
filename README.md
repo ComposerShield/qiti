@@ -6,7 +6,7 @@ Qiti is a lightweight C++20 library that brings profiling and instrumentation di
 
 By integrating seamlessly with your test framework of choice, Qiti lets you track custom metrics and gather performance insights without ever leaving your test suite.
 
-Qiti’s most powerful feature is its wrapping of Clang’s Thread Sanitizer: tests can be run in isolation under TSan, automatically detecting data races and other thread-safety issues. You can even enforce custom thread-safety behavior right from your test code, catching concurrency bugs early in CI.
+Qiti also provides optional Thread Sanitizer wrapper functionality: when enabled, tests can be run in isolation under TSan, automatically detecting data races and other thread-safety issues. You can even enforce custom thread-safety behavior right from your test code, catching concurrency bugs early in CI.
 
 ## Requirements
 
@@ -15,12 +15,24 @@ Qiti’s most powerful feature is its wrapping of Clang’s Thread Sanitizer: te
 - Clang or Apple Clang (additional compiler support TBD)
 - C++20
 - CMake
-- Your unit-test executable must be compiled with optimizations disabled (e.g. -O0) to ensure accurate profiling and sanitization. 
-  - This will be done automatically when linking qiti_lib; however, you must ensure your settings do not override these changes (see "CMake Settings" below).
+- When using ThreadSanitizer functionality, your unit-test executable must be compiled with optimizations disabled (-O0) to ensure accurate sanitization.
+  - This will be done automatically when linking qiti_lib with `QITI_ENABLE_THREAD_SANITIZER=ON`; however, you must ensure your settings do not override these changes (see "CMake Settings" below).
 
 ## CMake Integration
 
 Note: Qiti should not be linked in your final release builds. You will likely need to add a flag to your CMake invocation (e.g. -DQiti=1) to only link into your project when building your Debug unit test executable, independent of your regular builds.
+
+### ThreadSanitizer Support
+
+ThreadSanitizer functionality is **optional** and disabled by default. To enable it, add `-DQITI_ENABLE_THREAD_SANITIZER=ON` to your CMake configuration:
+
+```bash
+cmake -B build . -DQITI_ENABLE_THREAD_SANITIZER=ON
+```
+
+When enabled, this adds ThreadSanitizer compiler flags (`-fsanitize=thread`, `-fno-inline`, `-O0`) and makes the `qiti::ThreadSanitizer` class available.
+
+### Project Integration
 
 To integrate Qiti into your CMake-based project, add Qiti as a subdirectory and link against the `qiti_lib` target provided by the library:
 
@@ -57,16 +69,18 @@ target_link_libraries(my_tests
 By linking against `qiti_lib`, Qiti automatically propagates:
 
 - **Include directories**: `./include`
-- **Compiler flags** (via `INTERFACE`):
+- **Core compiler flags** (via `INTERFACE`):
   - `-finstrument-functions`       (enable function instrumentation)
   - `-fno-omit-frame-pointer`     (preserve frame pointers)
-  - `-fsanitize=thread`            (enable Thread Sanitizer)
   - `-g`                           (generate debug symbols)
-  - `-O0`                          (disable optimizations)
-- **Linker flags** (via `INTERFACE`):
+- **ThreadSanitizer flags** (when `QITI_ENABLE_THREAD_SANITIZER=ON`):
+  - `-fsanitize=thread`            (enable Thread Sanitizer)
+  - `-fno-inline`                  (prevent inlining for TSan accuracy)
+  - `-O0`                          (disable optimizations for TSan accuracy)
+- **ThreadSanitizer linker flags** (when enabled):
   - `-fsanitize=thread`
 
-You do not need to add these flags yourself—just ensure you are using Clang with C++20 and building your test executable with `-O0` (or in Debug mode).
+You do not need to add these flags yourself—just ensure you are using Clang with C++20. When ThreadSanitizer is enabled, optimization flags are handled automatically.
 
 In addition, by linking your unit test executable with `qiti_tests_client`, Qiti automatically propagates:
 
@@ -85,7 +99,7 @@ Note: the following directions build documentation for the public API and omit d
 Qiti uses Doxygen (via a custom CMake `doxygen` target) to generate HTML API documentation. To build the docs, ensure Doxygen is installed on your system and then run the following from your project root:
 
 ```bash
-cmake -B build-docs .
+cmake -B build-docs . -DQITI_ENABLE_THREAD_SANITIZER=ON
 cmake --build build-docs --target doxygen
 rm -fd build-docs
 open docs/html/index.html 
@@ -186,8 +200,9 @@ TEST_CASE("Example Test")
 ```
 
 ### Thread Sanitizer Tests
-Detect data races.
+Detect data races (requires `QITI_ENABLE_THREAD_SANITIZER=ON`).
 ```c++
+#ifdef QITI_ENABLE_THREAD_SANITIZER
 TEST_CASE("Example Test")
 {
     qiti::ScopedQitiTest test;
@@ -205,6 +220,7 @@ TEST_CASE("Example Test")
     dataRaceDetector->run(codeToTest);
     REQUIRE(dataRaceDetector->passed()); // No data races detected
 }
+#endif
 ```
 
 Please refer to the documentation for a full overview of all available features.

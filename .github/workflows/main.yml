@@ -21,7 +21,7 @@ jobs:
           xcode-version: '16.2'
 
       - name: Configure CMake (Xcode generator)
-        run: cmake . -B build -G Xcode
+        run: cmake . -B build -G Xcode -DQITI_ENABLE_THREAD_SANITIZER=ON
 
       - name: Build
         run: cmake --build build --config Debug --target qiti_tests
@@ -46,7 +46,7 @@ jobs:
           xcode-version: '15.4'
 
       - name: Configure CMake (Xcode generator)
-        run: cmake . -B build -G Xcode
+        run: cmake . -B build -G Xcode -DQITI_ENABLE_THREAD_SANITIZER=ON
 
       - name: Build
         run: cmake --build build --config Debug --target qiti_tests
@@ -73,7 +73,8 @@ jobs:
              -G Ninja \
              -DCMAKE_BUILD_TYPE=Debug \
              -DCMAKE_C_COMPILER=clang \
-             -DCMAKE_CXX_COMPILER=clang++
+             -DCMAKE_CXX_COMPILER=clang++ \
+             -DQITI_ENABLE_THREAD_SANITIZER=ON
 
       - name: Build
         run: cmake --build build --target qiti_tests
@@ -103,7 +104,8 @@ jobs:
             -G Ninja \
             -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_C_COMPILER=clang-16 \
-            -DCMAKE_CXX_COMPILER=clang++-16
+            -DCMAKE_CXX_COMPILER=clang++-16 \
+            -DQITI_ENABLE_THREAD_SANITIZER=ON
 
       - name: Build
         run: cmake --build build --target qiti_tests
@@ -134,7 +136,8 @@ jobs:
             -G Ninja \
             -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_C_COMPILER=clang-16 \
-            -DCMAKE_CXX_COMPILER=clang++-16
+            -DCMAKE_CXX_COMPILER=clang++-16 \
+            -DQITI_ENABLE_THREAD_SANITIZER=ON
 
       - name: Build
         run: cmake --build build --target qiti_tests
@@ -162,7 +165,8 @@ jobs:
             -G Ninja \
             -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_C_COMPILER=clang \
-            -DCMAKE_CXX_COMPILER=clang++
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DQITI_ENABLE_THREAD_SANITIZER=ON
 
       - name: Build
         run: cmake --build build --target qiti_tests
