@@ -5,8 +5,6 @@
 #include "qiti_include.hpp"
 // Special unit test include
 #include "qiti_test_macros.hpp"
-// Basic Catch2 macros
-#include <catch2/catch_test_macros.hpp>
 
 // TSAN must be enabled for these tests
 #ifdef QITI_ENABLE_THREAD_SANITIZER
@@ -24,7 +22,7 @@ using namespace qiti::example::ThreadSanitizer;
 
 //--------------------------------------------------------------------------
 
-TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
+QITI_TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
 {
     qiti::ScopedQitiTest test;
     
@@ -71,7 +69,7 @@ TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
     QITI_REQUIRE(verboseReport != "");
 }
 
-TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce false positive")
+QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce false positive")
 {
     qiti::ScopedQitiTest test;
     
@@ -85,7 +83,7 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce fals
     QITI_REQUIRE(dataRaceDetector->getReport(false) == "");
 }
 
-TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of global variable, "
+QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of global variable, "
           "qiti::ThreadSanitizer::getReport()")
 {
     qiti::ScopedQitiTest test;
@@ -141,7 +139,7 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of 
 }
 
 #if defined(__APPLE__) // Turning off this test in Linux because it is just too brittle in CI
-TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of member variable")
+QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of member variable")
 {
     qiti::ScopedQitiTest test;
     
@@ -165,13 +163,13 @@ TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated"
 #endif
-TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() does not produce false positive")
+QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() does not produce false positive")
 {
     qiti::ScopedQitiTest test;
     
     auto potentialDeadlockDetector = qiti::ThreadSanitizer::createPotentialDeadlockDetector();
     
-    SECTION("Run code containing no locks.")
+    QITI_SECTION("Run code containing no locks.")
     {
         auto noMutexesAtAll = [](){};
         
@@ -181,7 +179,7 @@ TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() does not pro
         QITI_REQUIRE_FALSE(potentialDeadlockDetector->failed());
     }
     
-    SECTION("Run code containing 1 lock that does not deadlock.")
+    QITI_SECTION("Run code containing 1 lock that does not deadlock.")
     {
         auto singleMutexWithNoDeadlock = []()
         {
@@ -217,13 +215,13 @@ TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() does not pro
 #endif
 
 #if defined(__APPLE__) // TODO: remove when this feature is supported on Linux
-TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects potential deadlock")
+QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects potential deadlock")
 {
     qiti::ScopedQitiTest test;
     
     auto potentialDeadlockDetector = qiti::ThreadSanitizer::createPotentialDeadlockDetector();
     
-    SECTION("Run code that inverts the order of mutex locking which implies a potential deadlock,"
+    QITI_SECTION("Run code that inverts the order of mutex locking which implies a potential deadlock,"
             "but does not actually deadlock here.")
     {
         auto singleMutexWithNoDeadlock = []()
