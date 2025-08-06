@@ -40,7 +40,8 @@ QITI_TEST_CASE("qiti::onNextHeapAllocation() is called on next heap allocation",
     static int testValue = 0;
     qiti::Instrument::onNextHeapAllocation([](){ ++testValue; });
     
-    auto* heapAllocation = new int{0};
+    // Volatile to ensure compiler does not reorder it and break check
+    volatile auto* heapAllocation = new int{0};
     QITI_CHECK(testValue == 1);
     delete heapAllocation;
 }
