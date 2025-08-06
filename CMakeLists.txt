@@ -10,7 +10,6 @@ if(NOT (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL
     message(FATAL_ERROR "Only Clang or Apple Clang compilers are supported")
 endif()
 
-set(ARCHS "arm64;x86_64") # Universal Binary
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -84,7 +83,6 @@ endif()
 if(APPLE)
     set_target_properties(qiti_lib PROPERTIES
         VERSION     ${PROJECT_VERSION}
-        OSX_ARCHITECTURES "${ARCHS}"
         XCODE_GENERATE_SCHEME ON
         INSTALL_NAME_DIR "@executable_path" # place next to executable within bundle
     )
@@ -92,7 +90,6 @@ if(APPLE)
     if(PROJECT_IS_TOP_LEVEL)
         set_target_properties(qiti_example_target PROPERTIES
             VERSION     ${PROJECT_VERSION}
-            OSX_ARCHITECTURES "${ARCHS}"
             XCODE_GENERATE_SCHEME ON
         )
     endif()
@@ -211,7 +208,6 @@ if(PROJECT_IS_TOP_LEVEL)
     function(configure_test_target target_name framework_libraries framework_definitions)
         if(APPLE)
             set_target_properties(${target_name} PROPERTIES
-                OSX_ARCHITECTURES "${ARCHS}"
                 XCODE_GENERATE_SCHEME ON
             )
         endif()
@@ -281,24 +277,6 @@ if(PROJECT_IS_TOP_LEVEL)
 
     enable_testing()
 
-    # Apple-specific properties for test framework dependencies
-    if(APPLE)
-        set_target_properties(Catch2 PROPERTIES 
-            OSX_ARCHITECTURES "${ARCHS}"
-        )
-
-        set_target_properties(Catch2WithMain PROPERTIES
-            OSX_ARCHITECTURES "${ARCHS}"
-        )
-
-        set_target_properties(gtest PROPERTIES
-            OSX_ARCHITECTURES "${ARCHS}"
-        )
-
-        set_target_properties(gtest_main PROPERTIES
-            OSX_ARCHITECTURES "${ARCHS}"
-        )
-    endif()
 
     # Test discovery for Catch2 targets
     # Load and use the .cmake file provided by Catch2
