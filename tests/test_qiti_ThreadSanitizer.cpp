@@ -9,6 +9,11 @@
 // TSAN must be enabled for these tests
 #ifdef QITI_ENABLE_THREAD_SANITIZER
 
+// Disable optimizations for this entire file to prevent Release mode optimizations
+// from interfering with timing-sensitive thread synchronization and race conditions
+// that ThreadSanitizer tests rely on to function correctly
+#pragma clang optimize off
+
 #include <chrono>
 #include <iostream>
 #include <filesystem>
@@ -88,8 +93,7 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data rac
 {
     qiti::ScopedQitiTest test;
     
-    auto dataRace = []() __attribute__((optimize("O0")))
-    {
+    auto dataRace = []()    {
         std::thread t(incrementCounter); // Intentional data race
         incrementCounter();              // Intentional data race
         t.join();
@@ -143,11 +147,10 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data rac
 {
     qiti::ScopedQitiTest test;
     
-    auto dataRace = []() __attribute__((optimize("O0")))
-    {
+    auto dataRace = []()    {
         TestClass testClass;
         
-        std::thread t([&testClass]() __attribute__((optimize("O0"))){ testClass.incrementCounter(); }); // Intentional data race
+        std::thread t([&testClass](){ testClass.incrementCounter(); }); // Intentional data race
         testClass.incrementCounter();                                   // Intentional data race
         t.join();
     };
@@ -181,12 +184,12 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() does no
     
     QITI_SECTION("Run code containing 1 lock that does not deadlock.")
     {
-        auto singleMutexWithNoDeadlock = []() __attribute__((noinline))
+        auto singleMutexWithNoDeadlock = []()
         {
             std::mutex mutex;
             
             // Mutex locked in parallel
-            std::thread t([&mutex]() __attribute__((noinline))
+            std::thread t([&mutex]()
             {
                 for (auto i=0; i<1'000; ++i)
                 {
@@ -224,16 +227,14 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects
     QITI_SECTION("Run code that inverts the order of mutex locking which implies a potential deadlock,"
             "but does not actually deadlock here.")
     {
-        auto singleMutexWithNoDeadlock = []() __attribute__((optimize("O0")))
-        {
+        auto singleMutexWithNoDeadlock = []()        {
             std::mutex mutexA;
             std::mutex mutexB;
             
             // Use volatile to prevent any reordering
             volatile bool threadStarted = false;
             
-            std::thread t([&]() __attribute__((optimize("O0")))
-            {
+            std::thread t([&]()            {
                 threadStarted = true;
                 // Thread t locks A then B
                 std::lock_guard<std::mutex> lockA(mutexA);
@@ -263,5 +264,8 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects
     }
 }
 #endif // defined(__APPLE__)
+
+// Re-enable optimizations for subsequent files
+#pragma clang optimize on
 
 #endif // QITI_ENABLE_THREAD_SANITIZER
