@@ -50,15 +50,15 @@
     }
     
     // GTest test case macro with section support
-    #define QITI_TEST_CASE(name) \
-        void name##_impl(); \
-        TEST(QitiTest, name) { \
+    #define QITI_TEST_CASE(catch2_name, gtest_name) \
+        void gtest_name##_impl(); \
+        TEST(QitiTest, gtest_name) { \
             qiti::internal::SectionManager::reset(); \
             do { \
-                name##_impl(); \
+                gtest_name##_impl(); \
             } while (qiti::internal::SectionManager::needsRestart()); \
         } \
-        void name##_impl()
+        void gtest_name##_impl()
     
     // GTest section macro  
     #define QITI_SECTION(name) \
@@ -85,7 +85,7 @@
     #include <catch2/catch_test_macros.hpp>
     
     // Catch2 test case macro
-    #define QITI_TEST_CASE(name) TEST_CASE(name)
+    #define QITI_TEST_CASE(catch2_name, gtest_name) TEST_CASE(catch2_name)
     
     // Catch2 section macro
     #define QITI_SECTION(name) SECTION(name)

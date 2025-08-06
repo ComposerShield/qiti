@@ -15,7 +15,7 @@ using namespace qiti::example::profile;
 
 //--------------------------------------------------------------------------
 
-QITI_TEST_CASE("qiti::Profile::resetProfiling()")
+QITI_TEST_CASE("qiti::Profile::resetProfiling()", ProfileResetProfiling)
 {
     qiti::ScopedQitiTest test;
     
@@ -26,7 +26,7 @@ QITI_TEST_CASE("qiti::Profile::resetProfiling()")
     QITI_REQUIRE_FALSE(qiti::Profile::isProfilingFunction<&testFunc>());
 }
 
-QITI_TEST_CASE("qiti::Profile::{begin/end}ProfilingFunction() on free function")
+QITI_TEST_CASE("qiti::Profile::{begin/end}ProfilingFunction() on free function", ProfileBeginEndProfilingFunctionFree)
 {
     qiti::ScopedQitiTest test;
     
@@ -38,7 +38,7 @@ QITI_TEST_CASE("qiti::Profile::{begin/end}ProfilingFunction() on free function")
     QITI_REQUIRE_FALSE(qiti::Profile::isProfilingFunction<&testFunc>());
 }
 
-QITI_TEST_CASE("qiti::Profile::{begin/end}ProfilingFunction() on member function")
+QITI_TEST_CASE("qiti::Profile::{begin/end}ProfilingFunction() on member function", ProfileBeginEndProfilingFunctionMember)
 {
     qiti::ScopedQitiTest test;
     
@@ -53,7 +53,7 @@ QITI_TEST_CASE("qiti::Profile::{begin/end}ProfilingFunction() on member function
 #if defined(__APPLE__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated"
-QITI_TEST_CASE("qiti::Profile::beginProfilingAllFunctions()")
+QITI_TEST_CASE("qiti::Profile::beginProfilingAllFunctions()", ProfileBeginProfilingAllFunctions)
 {
     qiti::ScopedQitiTest test;
     
@@ -63,7 +63,7 @@ QITI_TEST_CASE("qiti::Profile::beginProfilingAllFunctions()")
     qiti::Profile::endProfilingAllFunctions();
 }
 
-QITI_TEST_CASE("qiti::Profile::endProfilingAllFunctions()")
+QITI_TEST_CASE("qiti::Profile::endProfilingAllFunctions()", ProfileEndProfilingAllFunctions)
 {
     qiti::ScopedQitiTest test;
     
@@ -76,14 +76,14 @@ QITI_TEST_CASE("qiti::Profile::endProfilingAllFunctions()")
 #pragma clang diagnostic pop
 #endif // defined(__APPLE__)
 
-QITI_TEST_CASE("qiti::Profile::isProfilingFunction()")
+QITI_TEST_CASE("qiti::Profile::isProfilingFunction()", ProfileIsProfilingFunction)
 {
     qiti::ScopedQitiTest test;
     
     // TODO: implement
 }
 
-QITI_TEST_CASE("qiti::Profile::begin/endProfilingType()")
+QITI_TEST_CASE("qiti::Profile::begin/endProfilingType()", ProfileBeginEndProfilingType)
 {
     qiti::ScopedQitiTest test;
     
@@ -93,7 +93,7 @@ QITI_TEST_CASE("qiti::Profile::begin/endProfilingType()")
     // TODO: implement
 }
 
-QITI_TEST_CASE("qiti::Profile::getNumHeapAllocationsOnCurrentThread()")
+QITI_TEST_CASE("qiti::Profile::getNumHeapAllocationsOnCurrentThread()", ProfileGetNumHeapAllocationsOnCurrentThread)
 {
     qiti::ScopedQitiTest test;
     
@@ -112,7 +112,7 @@ QITI_TEST_CASE("qiti::Profile::getNumHeapAllocationsOnCurrentThread()")
     QITI_CHECK(numAllocsAfterCallingTestFuncAgain == 2);
 }
 
-QITI_TEST_CASE("qiti::Profile::getNumHeapAllocationsOnCurrentThread() passing into Catch2 QITI_SECTION")
+QITI_TEST_CASE("qiti::Profile::getNumHeapAllocationsOnCurrentThread() passing into Catch2 QITI_SECTION", ProfileGetNumHeapAllocationsWithSection)
 {
     qiti::ScopedQitiTest test;
     

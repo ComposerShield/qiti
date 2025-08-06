@@ -25,7 +25,7 @@ void testFunc() noexcept
 
 //--------------------------------------------------------------------------
 
-QITI_TEST_CASE("qiti::FunctionData::getFunctionName()")
+QITI_TEST_CASE("qiti::FunctionData::getFunctionName()", FunctionDataGetFunctionName)
 {
     qiti::ScopedQitiTest test;
 
@@ -37,7 +37,7 @@ QITI_TEST_CASE("qiti::FunctionData::getFunctionName()")
     }
 }
 
-QITI_TEST_CASE("qiti::FunctionData::getNumTimesCalled()")
+QITI_TEST_CASE("qiti::FunctionData::getNumTimesCalled()", FunctionDataGetNumTimesCalled)
 {
     qiti::ScopedQitiTest test;
     
@@ -67,7 +67,7 @@ QITI_TEST_CASE("qiti::FunctionData::getNumTimesCalled()")
     }
 }
 
-QITI_TEST_CASE("qiti::FunctionData::getNumTimesCalled(), using static constructor")
+QITI_TEST_CASE("qiti::FunctionData::getNumTimesCalled(), using static constructor", FunctionDataGetNumTimesCalledStaticConstructor)
 {
     qiti::ScopedQitiTest test;
     
@@ -86,7 +86,7 @@ QITI_TEST_CASE("qiti::FunctionData::getNumTimesCalled(), using static constructo
     }
 }
 
-QITI_TEST_CASE("qiti::FunctionData::wasCalledOnThread()")
+QITI_TEST_CASE("qiti::FunctionData::wasCalledOnThread()", FunctionDataWasCalledOnThread)
 {
     qiti::ScopedQitiTest test;
     
@@ -121,7 +121,7 @@ QITI_TEST_CASE("qiti::FunctionData::wasCalledOnThread()")
     }
 }
 
-QITI_TEST_CASE("qiti::FunctionData::getAllProfiledFunctionData()")
+QITI_TEST_CASE("qiti::FunctionData::getAllProfiledFunctionData()", FunctionDataGetAllProfiledFunctionData)
 {
     qiti::ScopedQitiTest test;
     

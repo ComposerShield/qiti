@@ -85,7 +85,7 @@ do {                                                                \
 //    );
 //}
 
-QITI_TEST_CASE("ScopedNoHeapAllocations survives no heap alloc")
+QITI_TEST_CASE("ScopedNoHeapAllocations survives no heap alloc", ScopedNoHeapAllocationsSurvives)
 {
     qiti::ScopedQitiTest test;
     test.setMaximumDurationOfTest_ms(500ull);

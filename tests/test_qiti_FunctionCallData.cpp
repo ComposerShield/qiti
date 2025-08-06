@@ -12,7 +12,7 @@ using namespace qiti::example::FunctionCallData;
 
 //--------------------------------------------------------------------------
 
-QITI_TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations()")
+QITI_TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations()", FunctionCallDataGetNumHeapAllocations)
 {
     qiti::ScopedQitiTest test;
     
@@ -42,7 +42,7 @@ QITI_TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations()")
     }
 }
 
-QITI_TEST_CASE("qiti::FunctionCallData::getAmountHeapAllocated()")
+QITI_TEST_CASE("qiti::FunctionCallData::getAmountHeapAllocated()", FunctionCallDataGetAmountHeapAllocated)
 {
     qiti::ScopedQitiTest test;
     
@@ -59,7 +59,7 @@ QITI_TEST_CASE("qiti::FunctionCallData::getAmountHeapAllocated()")
     }
 }
 
-QITI_TEST_CASE("qiti::FunctionCallData::getThreadThatCalledFunction()")
+QITI_TEST_CASE("qiti::FunctionCallData::getThreadThatCalledFunction()", FunctionCallDataGetThreadThatCalledFunction)
 {
     qiti::ScopedQitiTest test;
     
@@ -94,7 +94,7 @@ QITI_TEST_CASE("qiti::FunctionCallData::getThreadThatCalledFunction()")
     }
 }
 
-QITI_TEST_CASE("qiti::FunctionCallData::getTimeSpentInFunction")
+QITI_TEST_CASE("qiti::FunctionCallData::getTimeSpentInFunction", FunctionCallDataGetTimeSpentInFunction)
 {
     qiti::ScopedQitiTest test;
     

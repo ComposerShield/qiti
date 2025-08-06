@@ -22,7 +22,7 @@ using namespace qiti::example::ThreadSanitizer;
 
 //--------------------------------------------------------------------------
 
-QITI_TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
+QITI_TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel", ThreadSanitizerFunctionsNotCalledInParallel)
 {
     qiti::ScopedQitiTest test;
     
@@ -69,7 +69,7 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel")
     QITI_REQUIRE(verboseReport != "");
 }
 
-QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce false positive")
+QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce false positive", ThreadSanitizerDataRaceDetectorNoFalsePositive)
 {
     qiti::ScopedQitiTest test;
     
@@ -83,7 +83,7 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce
     QITI_REQUIRE(dataRaceDetector->getReport(false) == "");
 }
 
-QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of global variable, "
+QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of global variable, ", ThreadSanitizerDataRaceDetectorGlobalVariable
           "qiti::ThreadSanitizer::getReport()")
 {
     qiti::ScopedQitiTest test;
@@ -139,7 +139,7 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data rac
 }
 
 #if defined(__APPLE__) // Turning off this test in Linux because it is just too brittle in CI
-QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of member variable")
+QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of member variable", ThreadSanitizerDataRaceDetectorMemberVariable)
 {
     qiti::ScopedQitiTest test;
     
@@ -163,7 +163,7 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data rac
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated"
 #endif
-QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() does not produce false positive")
+QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() does not produce false positive", ThreadSanitizerDeadlockDetectorNoFalsePositive)
 {
     qiti::ScopedQitiTest test;
     
@@ -215,7 +215,7 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() does no
 #endif
 
 #if defined(__APPLE__) // TODO: remove when this feature is supported on Linux
-QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects potential deadlock")
+QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects potential deadlock", ThreadSanitizerDeadlockDetectorDetectsDeadlock)
 {
     qiti::ScopedQitiTest test;
     
