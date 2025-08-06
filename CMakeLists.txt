@@ -303,7 +303,6 @@ if(PROJECT_IS_TOP_LEVEL)
     include(${Catch2_SOURCE_DIR}/extras/Catch.cmake)
     
     # When running ctest, you must add a configuration flag, e.g. "ctest -C Debug"
-    catch_discover_tests(qiti_tests DISCOVERY_MODE PRE_TEST)
     catch_discover_tests(qiti_tests_catch2 DISCOVERY_MODE PRE_TEST)
 
     # Test discovery for GTest targets
