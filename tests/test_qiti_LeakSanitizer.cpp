@@ -11,7 +11,7 @@
 //--------------------------------------------------------------------------
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated" // TODO: remove when finished implementing
-QITI_TEST_CASE("qiti::LeakSanitizer::passed")
+QITI_TEST_CASE("qiti::LeakSanitizer::passed", LeakSanitizerPassed)
 {
     qiti::ScopedQitiTest test;
     

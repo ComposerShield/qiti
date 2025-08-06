@@ -11,7 +11,7 @@
 
 //--------------------------------------------------------------------------
 
-QITI_TEST_CASE("qiti::FunctionCallData::resetInstrumentation()")
+QITI_TEST_CASE("qiti::FunctionCallData::resetInstrumentation()", FunctionCallDataResetInstrumentation)
 {
     qiti::ScopedQitiTest test;
     
@@ -33,7 +33,7 @@ QITI_TEST_CASE("qiti::FunctionCallData::resetInstrumentation()")
     delete testAlloc;
 }
 
-QITI_TEST_CASE("qiti::onNextHeapAllocation() is called on next heap allocation")
+QITI_TEST_CASE("qiti::onNextHeapAllocation() is called on next heap allocation", OnNextHeapAllocationIsCalled)
 {
     qiti::ScopedQitiTest test;
     

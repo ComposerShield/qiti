@@ -37,7 +37,7 @@ inline void localInlineTestFunc() noexcept
 
 //--------------------------------------------------------------------------
 
-QITI_TEST_CASE("qiti::getFunctionName()")
+QITI_TEST_CASE("qiti::getFunctionName()", GetFunctionName)
 {
     qiti::ScopedQitiTest test;
     

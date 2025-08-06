@@ -28,7 +28,7 @@ public:
     }
 };
 
-QITI_TEST_CASE( "LockData delivers acquire and release to a single listener" )
+QITI_TEST_CASE( "LockData delivers acquire and release to a single listener", LockDataSingleListener )
 {
     qiti::ScopedQitiTest test;
 
@@ -55,7 +55,7 @@ QITI_TEST_CASE( "LockData delivers acquire and release to a single listener" )
     QITI_REQUIRE( listener.lastRelease == nullptr );
 }
 
-QITI_TEST_CASE( "LockData can handle multiple listeners" )
+QITI_TEST_CASE( "LockData can handle multiple listeners", LockDataMultipleListeners )
 {
     qiti::ScopedQitiTest test;
 

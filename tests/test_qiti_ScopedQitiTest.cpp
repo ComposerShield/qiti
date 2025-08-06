@@ -10,7 +10,7 @@
 
 //--------------------------------------------------------------------------
 
-QITI_TEST_CASE("qiti::ScopedQitiTest::getQitiVersionString()")
+QITI_TEST_CASE("qiti::ScopedQitiTest::getQitiVersionString()", ScopedQitiTestGetQitiVersionString)
 {
     qiti::ScopedQitiTest test;
 
