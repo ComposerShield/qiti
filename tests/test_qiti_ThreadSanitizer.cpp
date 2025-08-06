@@ -84,8 +84,7 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce
     QITI_REQUIRE(dataRaceDetector->getReport(false) == "");
 }
 
-QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of global variable, ", ThreadSanitizerDataRaceDetectorGlobalVariable
-          "qiti::ThreadSanitizer::getReport()")
+QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of global variable, ", ThreadSanitizerDataRaceDetectorGlobalVariable)
 {
     qiti::ScopedQitiTest test;
     
