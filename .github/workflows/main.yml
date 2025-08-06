@@ -24,12 +24,12 @@ jobs:
         run: cmake . -B build -G Xcode -DQITI_ENABLE_THREAD_SANITIZER=ON
 
       - name: Build
-        run: cmake --build build --config Debug --target qiti_tests_catch2
+        run: cmake --build build --config Release --target qiti_tests_catch2
         
       - name: Run Unit Tests
         run: |
           cd build
-          ctest -C Debug
+          ctest -C Release
           
   mac-14-build-xcode:
     # main branch only, or PRs into main
@@ -49,12 +49,12 @@ jobs:
         run: cmake . -B build -G Xcode -DQITI_ENABLE_THREAD_SANITIZER=ON
 
       - name: Build
-        run: cmake --build build --config Debug --target qiti_tests_catch2
+        run: cmake --build build --config Release --target qiti_tests_catch2
         
       - name: Run Unit Tests
         run: |
           cd build
-          ctest -C Debug
+          ctest -C Release
 
   mac-build-clang-ninja:
     runs-on: macos-15
@@ -71,7 +71,7 @@ jobs:
       - name: Configure CMake (Ninja, LLVM Clang)
         run: cmake . -B build \
              -G Ninja \
-             -DCMAKE_BUILD_TYPE=Debug \
+             -DCMAKE_BUILD_TYPE=Release \
              -DCMAKE_C_COMPILER=clang \
              -DCMAKE_CXX_COMPILER=clang++ \
              -DQITI_ENABLE_THREAD_SANITIZER=ON
@@ -82,7 +82,7 @@ jobs:
       - name: Run Unit Tests
         run: |
           cd build
-          ctest -C Debug
+          ctest -C Release
           
   ubuntu-build-clang-ninja:
     runs-on: ubuntu-latest
@@ -102,7 +102,7 @@ jobs:
         run: |
           cmake . -B build \
             -G Ninja \
-            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_COMPILER=clang-16 \
             -DCMAKE_CXX_COMPILER=clang++-16 \
             -DQITI_ENABLE_THREAD_SANITIZER=ON
@@ -113,7 +113,7 @@ jobs:
       - name: Run Unit Tests
         run: |
           cd build
-          ctest -C Debug --verbose
+          ctest -C Release --verbose
 
   ubuntu-build-clang-ninja-no-tsan:
     runs-on: ubuntu-latest
@@ -133,7 +133,7 @@ jobs:
         run: |
           cmake . -B build \
             -G Ninja \
-            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_COMPILER=clang-16 \
             -DCMAKE_CXX_COMPILER=clang++-16 \
             -DQITI_ENABLE_GTEST_DISCOVERY=ON
@@ -146,7 +146,7 @@ jobs:
       - name: Run Unit Tests
         run: |
           cd build
-          ctest -C Debug --verbose
+          ctest -C Release --verbose
 
   debian-build-clang-ninja:
     runs-on: ubuntu-latest
@@ -167,7 +167,7 @@ jobs:
         run: |
           cmake . -B build \
             -G Ninja \
-            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_COMPILER=clang-16 \
             -DCMAKE_CXX_COMPILER=clang++-16 \
             -DQITI_ENABLE_THREAD_SANITIZER=ON
@@ -178,7 +178,7 @@ jobs:
       - name: Run Unit Tests
         run: |
           cd build
-          ctest -C Debug --verbose
+          ctest -C Release --verbose
 
   fedora-build-clang-ninja:
     runs-on: ubuntu-latest
@@ -196,7 +196,7 @@ jobs:
         run: |
           cmake . -B build \
             -G Ninja \
-            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
             -DQITI_ENABLE_THREAD_SANITIZER=ON
@@ -207,7 +207,7 @@ jobs:
       - name: Run Unit Tests
         run: |
           cd build
-          ctest -C Debug --verbose
+          ctest -C Release --verbose
 
   lint:
     runs-on: ubuntu-latest

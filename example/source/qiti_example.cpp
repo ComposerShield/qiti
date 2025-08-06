@@ -22,6 +22,11 @@
 #include <cmath>
 #include <thread>
 
+// Disable optimizations for this entire file to prevent Release mode optimizations
+// from interfering with timing-sensitive thread synchronization and race conditions
+// that unit tests rely on to function correctly
+#pragma clang optimize off
+
 //--------------------------------------------------------------------------
 
 int counter = 0; // Shared global variable
@@ -40,16 +45,6 @@ inline static void cpu_pause() noexcept
     #else
         std::this_thread::yield(); // hint to scheduler, very short pause
     #endif
-}
-
-__attribute__((optnone))
-__attribute__((noinline))
-double work(uint64_t n) noexcept
-{
-    double result = 1ULL;
-    for (uint64_t i = 2; i <= n; ++i)
-        result *= std::cos(static_cast<double>(i));
-    return result;
 }
 
 //--------------------------------------------------------------------------
@@ -74,20 +69,22 @@ int testNoHeapAllocation() noexcept
     return test;
 }
 
-__attribute__((optnone))
-__attribute__((noinline))
-double someWork() noexcept
+double fastWork() noexcept
 {
-    auto val = work(5);
-    return val;
+    volatile double result = 1.0;
+    for (int i = 0; i < 10000; ++i) {
+        result += i * 0.001;
+    }
+    return result;
 }
 
-__attribute__((optnone))
-__attribute__((noinline))
-double moreWork() noexcept
+double slowWork() noexcept
 {
-    auto val = work(50);
-    return val;
+    volatile double result = 1.0;
+    for (int i = 0; i < 100000; ++i) {
+        result += i * 0.001;
+    }
+    return result;
 }
 } // namespace FunctionCallData
 
@@ -167,3 +164,6 @@ void testFunc0() noexcept
 //--------------------------------------------------------------------------
 } // namespace example
 } // namespace qiti
+
+// Re-enable optimizations for subsequent files
+#pragma clang optimize on

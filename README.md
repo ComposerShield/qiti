@@ -20,7 +20,7 @@ Qiti also provides optional Thread Sanitizer wrapper functionality: when enabled
 
 ## CMake Integration
 
-Note: Qiti should not be linked in your final release builds. You will likely need to add a flag to your CMake invocation (e.g. -DQiti=1) to only link into your project when building your Debug unit test executable, independent of your regular builds.
+Note: Qiti should not be linked in your final release builds. You will likely need to add a flag to your CMake invocation (e.g. -DQiti=1) to only link into your project when building your unit test executable, independent of your regular builds.
 
 ### ThreadSanitizer Support
 

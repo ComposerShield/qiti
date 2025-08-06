@@ -33,6 +33,10 @@ QITI_TEST_CASE("qiti::FunctionCallData::resetInstrumentation()", FunctionCallDat
     delete testAlloc;
 }
 
+// Disable optimizations for heap allocation tests to prevent Release mode optimizations
+// from interfering with timing (and existance) of heap allocations
+#pragma clang optimize off
+
 QITI_TEST_CASE("qiti::onNextHeapAllocation() is called on next heap allocation", OnNextHeapAllocationIsCalled)
 {
     qiti::ScopedQitiTest test;
@@ -40,7 +44,11 @@ QITI_TEST_CASE("qiti::onNextHeapAllocation() is called on next heap allocation",
     static int testValue = 0;
     qiti::Instrument::onNextHeapAllocation([](){ ++testValue; });
     
-    auto* heapAllocation = new int{0};
+    // Volatile to ensure compiler does not reorder it and break check
+    volatile auto* heapAllocation = new int{0};
     QITI_CHECK(testValue == 1);
     delete heapAllocation;
 }
+
+// Re-enable optimizations for subsequent files
+#pragma clang optimize on
