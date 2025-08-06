@@ -279,10 +279,6 @@ if(PROJECT_IS_TOP_LEVEL)
         target_link_options(qiti_tests_client INTERFACE "-rdynamic")
     endif()
 
-    # Disable Link-Time Optimization for all test targets to prevent timing-sensitive tests
-    # from being optimized in ways that break their expected behavior (shared by all test targets)
-    target_link_options(qiti_tests_client INTERFACE "-fno-lto")
-
     enable_testing()
 
     # Apple-specific properties for test framework dependencies
