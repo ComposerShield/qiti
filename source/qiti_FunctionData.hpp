@@ -196,7 +196,7 @@ private:
         static constexpr auto functionAddress = Profile::getMemberFunctionMockAddress<FuncPtr>();
         static constexpr auto functionName    = Profile::getFunctionName<FuncPtr>();
         static constexpr auto functionType    = getFunctionType(functionName);
-        beginProfilingFunction(functionAddress);
+        qiti::Profile::beginProfilingFunction(functionAddress);
         return &Utils::getFunctionDataFromAddress(functionAddress,
                                                   functionName,
                                                   static_cast<int>(functionType));
