@@ -22,6 +22,11 @@
 #include <cmath>
 #include <thread>
 
+// Disable optimizations for this entire file to prevent Release mode optimizations
+// from interfering with timing-sensitive thread synchronization and race conditions
+// that unit tests rely on to function correctly
+#pragma clang optimize off
+
 //--------------------------------------------------------------------------
 
 int counter = 0; // Shared global variable
@@ -189,3 +194,6 @@ void testFunc0() noexcept
 //--------------------------------------------------------------------------
 } // namespace example
 } // namespace qiti
+
+// Re-enable optimizations for subsequent files
+#pragma clang optimize on
