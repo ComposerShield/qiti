@@ -47,7 +47,7 @@ public:
     /** */
     ~ScopedNoHeapAllocations() noexcept
     {
-        auto numHeapAllocationsAfter = Profile::getNumHeapAllocationsOnCurrentThread();
+        [[maybe_unused]] auto numHeapAllocationsAfter = Profile::getNumHeapAllocationsOnCurrentThread();
         assert(numHeapAllocationsBefore == numHeapAllocationsAfter);
     }
     
