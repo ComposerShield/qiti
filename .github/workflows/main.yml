@@ -7,8 +7,7 @@ on:
 
 jobs:
   mac-15-build-xcode:
-    # main branch only, or PRs into main
-    if: ${{ github.ref == 'refs/heads/main' }}
+  
     runs-on: macos-15
 
     steps:
@@ -21,10 +20,15 @@ jobs:
           xcode-version: '16.2'
 
       - name: Configure CMake (Xcode generator)
-        run: cmake . -B build -G Xcode -DQITI_ENABLE_THREAD_SANITIZER=ON
+        run: |
+          cmake . -B build \
+          -G Xcode \
+          -DQITI_ENABLE_THREAD_SANITIZER=ON
 
-      - name: Build
-        run: cmake --build build --config Release --target qiti_tests_catch2
+      - name: Build Tests
+        run: |
+          cmake --build build --config Release --target qiti_tests_catch2
+          cmake --build build --config Release --target qiti_tests_gtest
         
       - name: Run Unit Tests
         run: |
@@ -46,10 +50,15 @@ jobs:
           xcode-version: '15.4'
 
       - name: Configure CMake (Xcode generator)
-        run: cmake . -B build -G Xcode -DQITI_ENABLE_THREAD_SANITIZER=ON
+        run: |
+          cmake . -B build \
+          -G Xcode \
+          -DQITI_ENABLE_THREAD_SANITIZER=ON
 
-      - name: Build
-        run: cmake --build build --config Release --target qiti_tests_catch2
+      - name: Build Tests
+        run: |
+          cmake --build build --config Release --target qiti_tests_catch2
+          cmake --build build --config Release --target qiti_tests_gtest
         
       - name: Run Unit Tests
         run: |
@@ -75,8 +84,7 @@ jobs:
              -DCMAKE_BUILD_TYPE=Release \
              -DCMAKE_C_COMPILER=clang \
              -DCMAKE_CXX_COMPILER=clang++ \
-             -DQITI_ENABLE_THREAD_SANITIZER=ON \
-             -DQITI_ENABLE_GTEST_DISCOVERY=ON
+             -DQITI_ENABLE_THREAD_SANITIZER=ON
 
       - name: Build Tests
         run: |
@@ -109,8 +117,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_COMPILER=clang-16 \
             -DCMAKE_CXX_COMPILER=clang++-16 \
-            -DQITI_ENABLE_THREAD_SANITIZER=ON \
-            -DQITI_ENABLE_GTEST_DISCOVERY=ON
+            -DQITI_ENABLE_THREAD_SANITIZER=ON
 
       - name: Build Tests
         run: |
@@ -142,8 +149,7 @@ jobs:
             -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_COMPILER=clang-16 \
-            -DCMAKE_CXX_COMPILER=clang++-16 \
-            -DQITI_ENABLE_GTEST_DISCOVERY=ON
+            -DCMAKE_CXX_COMPILER=clang++-16
 
       - name: Build Tests  
         run: |
@@ -177,8 +183,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_COMPILER=clang-16 \
             -DCMAKE_CXX_COMPILER=clang++-16 \
-            -DQITI_ENABLE_THREAD_SANITIZER=ON \
-            -DQITI_ENABLE_GTEST_DISCOVERY=ON
+            -DQITI_ENABLE_THREAD_SANITIZER=ON
 
       - name: Build Tests
         run: |
@@ -209,8 +214,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
-            -DQITI_ENABLE_THREAD_SANITIZER=ON \
-            -DQITI_ENABLE_GTEST_DISCOVERY=ON
+            -DQITI_ENABLE_THREAD_SANITIZER=ON
 
       - name: Build Tests
         run: |

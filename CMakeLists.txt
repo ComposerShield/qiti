@@ -18,9 +18,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Optional ThreadSanitizer support
 option(QITI_ENABLE_THREAD_SANITIZER "Enable ThreadSanitizer wrapper functionality" OFF)
 
-# Optional GTest testing support
-option(QITI_ENABLE_GTEST_DISCOVERY "Enable GTest test discovery for qiti_tests_gtest target" OFF)
-
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG -D_DEBUG")
 
 set(SOURCES
@@ -282,15 +279,13 @@ if(PROJECT_IS_TOP_LEVEL)
     # Load and use the .cmake file provided by Catch2
     # https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md
     include(${Catch2_SOURCE_DIR}/extras/Catch.cmake)
-    
+
+    # Test discovery for GTest targets
+    include(GoogleTest)
+
     # When running ctest, you must add a configuration flag, e.g. "ctest -C Debug"
     catch_discover_tests(qiti_tests_catch2 DISCOVERY_MODE PRE_TEST)
-
-    # Test discovery for GTest targets (only when enabled)
-    if(QITI_ENABLE_GTEST_DISCOVERY)
-        include(GoogleTest)
-        gtest_discover_tests(qiti_tests_gtest)
-    endif()
+    gtest_discover_tests(qiti_tests_gtest DISCOVERY_MODE PRE_TEST)
 endif()
 
 # =========================
