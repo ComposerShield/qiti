@@ -53,7 +53,7 @@ __attribute__((optnone))
 __attribute__((noinline))
 double work(uint64_t n) noexcept
 {
-    double result = 1ULL;
+    static auto result = 1.f;
     for (uint64_t i = 2; i <= n; ++i)
         result *= std::cos(static_cast<double>(i));
     return result;
