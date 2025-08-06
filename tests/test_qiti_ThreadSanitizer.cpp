@@ -14,6 +14,7 @@
 // that ThreadSanitizer tests rely on to function correctly
 #pragma clang optimize off
 
+#include <atomic>
 #include <chrono>
 #include <iostream>
 #include <filesystem>
@@ -231,25 +232,36 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects
             std::mutex mutexA;
             std::mutex mutexB;
             
-            // Use volatile to prevent any reordering
-            volatile bool threadStarted = false;
+            // More robust synchronization using atomics and barriers
+            std::atomic<bool> threadHasLockA{false};
+            std::atomic<bool> mainThreadReady{false};
             
             std::thread t([&]()            {
-                threadStarted = true;
                 // Thread t locks A then B
                 std::lock_guard<std::mutex> lockA(mutexA);
-                // Give main thread a chance to run
-                std::this_thread::sleep_for(std::chrono::milliseconds(50));
+                threadHasLockA.store(true);
+                
+                // Wait for main thread to signal it's ready
+                while (! mainThreadReady.load()) {
+                    std::this_thread::yield();
+                }
+                
+                // Small computational work to ensure timing
+                volatile int work = 0;
+                for (int i = 0; i < 10000; ++i) {
+                    work += i;
+                }
+                
                 std::lock_guard<std::mutex> lockB(mutexB);
             });
             
-            // Wait for thread to start
-            while (! threadStarted) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            // Wait for thread to acquire lockA
+            while (! threadHasLockA.load()) {
+                std::this_thread::yield();
             }
             
-            // Small delay to ensure thread gets lockA first
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            // Signal that main thread is ready to proceed
+            mainThreadReady.store(true);
             
             // Main thread locks B then A, but uses scoped_lock (deadlock-safe)
             std::scoped_lock lock(mutexB, mutexA);
