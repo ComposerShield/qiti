@@ -54,8 +54,8 @@ jobs:
 
       - name: Build Tests
         run: |
-          cmake --build build --target qiti_tests_catch2
-          cmake --build build --target qiti_tests_gtest
+          cmake --build build --config Release --target qiti_tests_catch2
+          cmake --build build --config Release --target qiti_tests_gtest
         
       - name: Run Unit Tests
         run: |
