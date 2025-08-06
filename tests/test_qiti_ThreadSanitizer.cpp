@@ -89,7 +89,8 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data rac
 {
     qiti::ScopedQitiTest test;
     
-    auto dataRace = []()    {
+    auto dataRace = []()
+    {
         std::thread t(incrementCounter); // Intentional data race
         incrementCounter();              // Intentional data race
         t.join();
@@ -143,7 +144,8 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data rac
 {
     qiti::ScopedQitiTest test;
     
-    auto dataRace = []()    {
+    auto dataRace = []()
+    {
         TestClass testClass;
         
         std::thread t([&testClass](){ testClass.incrementCounter(); }); // Intentional data race
@@ -231,7 +233,8 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects
             std::atomic<bool> threadHasLockA{false};
             std::atomic<bool> mainThreadReady{false};
             
-            std::thread t([&]()            {
+            std::thread t([&]()
+            {
                 // Thread t locks A then B
                 std::lock_guard<std::mutex> lockA(mutexA);
                 threadHasLockA.store(true);
