@@ -49,8 +49,7 @@ jobs:
         run: |
           cmake . -B build \
           -G Xcode \
-          -DQITI_ENABLE_THREAD_SANITIZER=ON \
-          -DQITI_ENABLE_GTEST_DISCOVERY=ON
+          -DQITI_ENABLE_THREAD_SANITIZER=ON
 
       - name: Build Tests
         run: |
@@ -81,8 +80,7 @@ jobs:
              -DCMAKE_BUILD_TYPE=Release \
              -DCMAKE_C_COMPILER=clang \
              -DCMAKE_CXX_COMPILER=clang++ \
-             -DQITI_ENABLE_THREAD_SANITIZER=ON \
-             -DQITI_ENABLE_GTEST_DISCOVERY=ON
+             -DQITI_ENABLE_THREAD_SANITIZER=ON
 
       - name: Build Tests
         run: |
@@ -115,8 +113,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_COMPILER=clang-16 \
             -DCMAKE_CXX_COMPILER=clang++-16 \
-            -DQITI_ENABLE_THREAD_SANITIZER=ON \
-            -DQITI_ENABLE_GTEST_DISCOVERY=ON
+            -DQITI_ENABLE_THREAD_SANITIZER=ON
 
       - name: Build Tests
         run: |
@@ -148,8 +145,7 @@ jobs:
             -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_COMPILER=clang-16 \
-            -DCMAKE_CXX_COMPILER=clang++-16 \
-            -DQITI_ENABLE_GTEST_DISCOVERY=ON
+            -DCMAKE_CXX_COMPILER=clang++-16
 
       - name: Build Tests  
         run: |
@@ -183,8 +179,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_COMPILER=clang-16 \
             -DCMAKE_CXX_COMPILER=clang++-16 \
-            -DQITI_ENABLE_THREAD_SANITIZER=ON \
-            -DQITI_ENABLE_GTEST_DISCOVERY=ON
+            -DQITI_ENABLE_THREAD_SANITIZER=ON
 
       - name: Build Tests
         run: |
@@ -215,8 +210,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
-            -DQITI_ENABLE_THREAD_SANITIZER=ON \
-            -DQITI_ENABLE_GTEST_DISCOVERY=ON
+            -DQITI_ENABLE_THREAD_SANITIZER=ON
 
       - name: Build Tests
         run: |
