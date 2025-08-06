@@ -249,7 +249,7 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects
                 // Small computational work to ensure timing
                 volatile int work = 0;
                 for (int i = 0; i < 10000; ++i) {
-                    work += i;
+                    work = work + i;
                 }
                 
                 std::lock_guard<std::mutex> lockB(mutexB);
