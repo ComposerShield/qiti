@@ -31,8 +31,6 @@
 
 int counter = 0; // Shared global variable
 
-__attribute__((optnone))
-__attribute__((noinline))
 inline static void cpu_pause() noexcept
 {
     // x86 or x86_64:
@@ -58,8 +56,6 @@ namespace example
 //--------------------------------------------------------------------------
 namespace FunctionCallData
 {
-__attribute__((optnone))
-__attribute__((noinline))
 int testHeapAllocation() noexcept
 {
     volatile int* test = new int{0};
@@ -67,15 +63,12 @@ int testHeapAllocation() noexcept
     return 42;
 }
 
-__attribute__((optnone))
-__attribute__((noinline))
 int testNoHeapAllocation() noexcept
 {
     volatile int test{42};
     return test;
 }
 
-__attribute__((noinline))
 double fastWork() noexcept
 {
     volatile double result = 1.0;
@@ -85,7 +78,6 @@ double fastWork() noexcept
     return result;
 }
 
-__attribute__((noinline))
 double slowWork() noexcept
 {
     volatile double result = 1.0;
@@ -99,15 +91,11 @@ double slowWork() noexcept
 //--------------------------------------------------------------------------
 namespace profile
 {
-__attribute__((optnone))
-__attribute__((noinline))
 void testFunc() noexcept
 {
     volatile int _ = 42;
 }
 
-__attribute__((optnone))
-__attribute__((noinline))
 int testHeapAllocation() noexcept
 {
     volatile int* test = new int{0};
@@ -115,8 +103,6 @@ int testHeapAllocation() noexcept
     return 42;
 }
 
-__attribute__((optnone))
-__attribute__((noinline))
 int TestType::testFunc() const noexcept
 {
     return 0;
@@ -127,22 +113,16 @@ int TestType::testFunc() const noexcept
 
 namespace ThreadSanitizer
 {
-__attribute__((optnone))
-__attribute__((noinline))
 void testFunc0() noexcept
 {
     volatile int _ = 42; // dummy code
 }
 
-__attribute__((optnone))
-__attribute__((noinline))
 void testFunc1() noexcept
 {
     volatile int _ = 42; // dummy code
 }
 
-__attribute__((optnone))
-__attribute__((noinline))
 void incrementCounter() noexcept
 {
     volatile int dummyInternalVal = 0;
@@ -155,8 +135,6 @@ void incrementCounter() noexcept
 
 // Despite egregiously being a data race, CI does not always detect it as a data race.
 // So we added some waits to make sure our tests don't intermittently fail
-__attribute__((optnone))
-__attribute__((noinline))
 void TestClass::incrementCounter() noexcept
 {
     volatile int dummyInternalVal = 0;
@@ -177,8 +155,6 @@ void TestClass::incrementCounter() noexcept
 
 namespace utils
 {
-__attribute__((optnone))
-__attribute__((noinline))
 void testFunc0() noexcept
 {
     volatile int _ = 42;
