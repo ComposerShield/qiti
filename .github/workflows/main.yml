@@ -69,15 +69,19 @@ jobs:
           echo "PATH=$(brew --prefix llvm@16)/bin:$PATH" >> $GITHUB_ENV
 
       - name: Configure CMake (Ninja, LLVM Clang)
-        run: cmake . -B build \
+        run: |
+          cmake . -B build \
              -G Ninja \
              -DCMAKE_BUILD_TYPE=Release \
              -DCMAKE_C_COMPILER=clang \
              -DCMAKE_CXX_COMPILER=clang++ \
-             -DQITI_ENABLE_THREAD_SANITIZER=ON
+             -DQITI_ENABLE_THREAD_SANITIZER=ON \
+             -DQITI_ENABLE_GTEST_DISCOVERY=ON
 
-      - name: Build
-        run: cmake --build build --target qiti_tests_catch2
+      - name: Build Tests
+        run: |
+          cmake --build build --target qiti_tests_catch2
+          cmake --build build --target qiti_tests_gtest
         
       - name: Run Unit Tests
         run: |

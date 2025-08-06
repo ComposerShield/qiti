@@ -17,6 +17,7 @@ Qiti also provides optional Thread Sanitizer wrapper functionality: when enabled
 - CMake
 - When using ThreadSanitizer functionality, your unit-test executable must be compiled with optimizations disabled (-O0) to ensure accurate sanitization.
   - This will be done automatically when linking qiti_lib with `QITI_ENABLE_THREAD_SANITIZER=ON`; however, you must ensure your settings do not override these changes (see "CMake Settings" below).
+- **macOS with ThreadSanitizer**: When building on macOS with `QITI_ENABLE_THREAD_SANITIZER=ON`, do not build universal binaries (arm64 + x86_64). ThreadSanitizer is incompatible with universal binaries. Build for your target architecture only.
 
 ## CMake Integration
 
