@@ -88,7 +88,7 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data rac
 {
     qiti::ScopedQitiTest test;
     
-    auto dataRace = []()
+    auto dataRace = []() __attribute__((optnone))
     {
         std::thread t(incrementCounter); // Intentional data race
         incrementCounter();              // Intentional data race
@@ -143,11 +143,11 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data rac
 {
     qiti::ScopedQitiTest test;
     
-    auto dataRace = []()
+    auto dataRace = []() __attribute__((optnone))
     {
         TestClass testClass;
         
-        std::thread t([&testClass](){ testClass.incrementCounter(); }); // Intentional data race
+        std::thread t([&testClass]() __attribute__((optnone)){ testClass.incrementCounter(); }); // Intentional data race
         testClass.incrementCounter();                                   // Intentional data race
         t.join();
     };
@@ -181,12 +181,12 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() does no
     
     QITI_SECTION("Run code containing 1 lock that does not deadlock.")
     {
-        auto singleMutexWithNoDeadlock = []()
+        auto singleMutexWithNoDeadlock = []() __attribute__((optnone))
         {
             std::mutex mutex;
             
             // Mutex locked in parallel
-            std::thread t([&mutex]
+            std::thread t([&mutex] __attribute__((optnone))
             {
                 for (auto i=0; i<1'000; ++i)
                 {
@@ -224,12 +224,12 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects
     QITI_SECTION("Run code that inverts the order of mutex locking which implies a potential deadlock,"
             "but does not actually deadlock here.")
     {
-        auto singleMutexWithNoDeadlock = []()
+        auto singleMutexWithNoDeadlock = []() __attribute__((optnone))
         {
             std::mutex mutexA;
             std::mutex mutexB;
             
-            std::thread t([&]
+            std::thread t([&] __attribute__((optnone))
             {
                 // Thread t locks A then B
                 std::lock_guard<std::mutex> lockA(mutexA);
