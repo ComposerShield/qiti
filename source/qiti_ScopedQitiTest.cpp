@@ -70,7 +70,7 @@ ScopedQitiTest::ScopedQitiTest() noexcept
     auto newImpl = std::make_unique<Impl>();
     Utils::resetAll(); // start test from a blank slate
     
-    bool qitiTestWasAlreadyRunning = qitiTestRunning.exchange(true, std::memory_order_relaxed);
+    [[maybe_unused]] bool qitiTestWasAlreadyRunning = qitiTestRunning.exchange(true, std::memory_order_relaxed);
     assert(! qitiTestWasAlreadyRunning); // Only one Qiti test permitted at a time
     
     impl = std::move(newImpl);
