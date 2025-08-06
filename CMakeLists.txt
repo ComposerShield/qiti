@@ -305,9 +305,9 @@ if(PROJECT_IS_TOP_LEVEL)
     # When running ctest, you must add a configuration flag, e.g. "ctest -C Debug"
     catch_discover_tests(qiti_tests_catch2 DISCOVERY_MODE PRE_TEST)
 
-    # Test discovery for GTest targets
-    include(GoogleTest)
-    gtest_discover_tests(qiti_tests_gtest)
+    # Test discovery for GTest targets (commented out - only enable if building GTest targets)
+    # include(GoogleTest)
+    # gtest_discover_tests(qiti_tests_gtest)
 endif()
 
 # =========================
