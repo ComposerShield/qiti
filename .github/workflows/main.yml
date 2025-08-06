@@ -129,16 +129,19 @@ jobs:
           echo "CC=clang-16" >> $GITHUB_ENV
           echo "CXX=clang++-16" >> $GITHUB_ENV
 
-      - name: Configure CMake (Ninja, LLVM Clang, No ThreadSanitizer)
+      - name: Configure CMake (Ninja, LLVM Clang, No ThreadSanitizer, Enable GTest)
         run: |
           cmake . -B build \
             -G Ninja \
             -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_C_COMPILER=clang-16 \
-            -DCMAKE_CXX_COMPILER=clang++-16
+            -DCMAKE_CXX_COMPILER=clang++-16 \
+            -DQITI_ENABLE_GTEST_DISCOVERY=ON
 
-      - name: Build
-        run: cmake --build build --target qiti_tests_catch2
+      - name: Build Tests  
+        run: |
+          cmake --build build --target qiti_tests_catch2
+          cmake --build build --target qiti_tests_gtest
 
       - name: Run Unit Tests
         run: |
