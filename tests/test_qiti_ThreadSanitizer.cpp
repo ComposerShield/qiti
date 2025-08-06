@@ -88,7 +88,7 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data rac
 {
     qiti::ScopedQitiTest test;
     
-    auto dataRace = []() __attribute__((noinline))
+    auto dataRace = []() __attribute__((optimize("O0")))
     {
         std::thread t(incrementCounter); // Intentional data race
         incrementCounter();              // Intentional data race
@@ -143,11 +143,11 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data rac
 {
     qiti::ScopedQitiTest test;
     
-    auto dataRace = []() __attribute__((noinline))
+    auto dataRace = []() __attribute__((optimize("O0")))
     {
         TestClass testClass;
         
-        std::thread t([&testClass]() __attribute__((noinline)){ testClass.incrementCounter(); }); // Intentional data race
+        std::thread t([&testClass]() __attribute__((optimize("O0"))){ testClass.incrementCounter(); }); // Intentional data race
         testClass.incrementCounter();                                   // Intentional data race
         t.join();
     };
@@ -224,19 +224,31 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects
     QITI_SECTION("Run code that inverts the order of mutex locking which implies a potential deadlock,"
             "but does not actually deadlock here.")
     {
-        auto singleMutexWithNoDeadlock = []() __attribute__((noinline))
+        auto singleMutexWithNoDeadlock = []() __attribute__((optimize("O0")))
         {
             std::mutex mutexA;
             std::mutex mutexB;
             
-            std::thread t([&]() __attribute__((noinline))
+            // Use volatile to prevent any reordering
+            volatile bool threadStarted = false;
+            
+            std::thread t([&]() __attribute__((optimize("O0")))
             {
+                threadStarted = true;
                 // Thread t locks A then B
                 std::lock_guard<std::mutex> lockA(mutexA);
                 // Give main thread a chance to run
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                std::this_thread::sleep_for(std::chrono::milliseconds(50));
                 std::lock_guard<std::mutex> lockB(mutexB);
             });
+            
+            // Wait for thread to start
+            while (! threadStarted) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+            
+            // Small delay to ensure thread gets lockA first
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
             
             // Main thread locks B then A, but uses scoped_lock (deadlock-safe)
             std::scoped_lock lock(mutexB, mutexA);
