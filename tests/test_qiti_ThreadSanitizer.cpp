@@ -9,11 +9,6 @@
 // TSAN must be enabled for these tests
 #ifdef QITI_ENABLE_THREAD_SANITIZER
 
-// Disable optimizations for this entire file to prevent Release mode optimizations
-// from interfering with timing-sensitive thread synchronization and race conditions
-// that ThreadSanitizer tests rely on to function correctly
-#pragma clang optimize off
-
 #include <atomic>
 #include <chrono>
 #include <iostream>
@@ -276,8 +271,5 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects
     }
 }
 #endif // defined(__APPLE__)
-
-// Re-enable optimizations for subsequent files
-#pragma clang optimize on
 
 #endif // QITI_ENABLE_THREAD_SANITIZER
