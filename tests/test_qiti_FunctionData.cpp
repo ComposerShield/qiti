@@ -5,8 +5,6 @@
 #include "qiti_include.hpp"
 // Special unit test include
 #include "qiti_test_macros.hpp"
-// Basic Catch2 macros
-#include <catch2/catch_test_macros.hpp>
 
 #include <algorithm>
 #include <random>
@@ -27,7 +25,7 @@ void testFunc() noexcept
 
 //--------------------------------------------------------------------------
 
-TEST_CASE("qiti::FunctionData::getFunctionName()")
+QITI_TEST_CASE("qiti::FunctionData::getFunctionName()")
 {
     qiti::ScopedQitiTest test;
 
@@ -39,7 +37,7 @@ TEST_CASE("qiti::FunctionData::getFunctionName()")
     }
 }
 
-TEST_CASE("qiti::FunctionData::getNumTimesCalled()")
+QITI_TEST_CASE("qiti::FunctionData::getNumTimesCalled()")
 {
     qiti::ScopedQitiTest test;
     
@@ -48,19 +46,19 @@ TEST_CASE("qiti::FunctionData::getNumTimesCalled()")
     auto funcData = qiti::Utils::getFunctionData<&testFunc>();
     QITI_REQUIRE(funcData != nullptr);
     
-    SECTION("Called twice")
+    QITI_SECTION("Called twice")
     {
         testFunc();
         testFunc();
         QITI_CHECK(funcData->getNumTimesCalled() == 2);
     }
     
-    SECTION("Not called")
+    QITI_SECTION("Not called")
     {
         QITI_CHECK(funcData->getNumTimesCalled() == 0);
     }
     
-    SECTION("Called twice on two different threads")
+    QITI_SECTION("Called twice on two different threads")
     {
         std::thread t([]{ testFunc(); });
         testFunc();
@@ -69,26 +67,26 @@ TEST_CASE("qiti::FunctionData::getNumTimesCalled()")
     }
 }
 
-TEST_CASE("qiti::FunctionData::getNumTimesCalled(), using static constructor")
+QITI_TEST_CASE("qiti::FunctionData::getNumTimesCalled(), using static constructor")
 {
     qiti::ScopedQitiTest test;
     
     auto funcData = qiti::FunctionData::getFunctionData<&testFunc>();
     QITI_REQUIRE(funcData != nullptr);
     
-    SECTION("Called once")
+    QITI_SECTION("Called once")
     {
         testFunc();
         QITI_CHECK(funcData->getNumTimesCalled() == 1);
     }
     
-    SECTION("Not called")
+    QITI_SECTION("Not called")
     {
         QITI_CHECK(funcData->getNumTimesCalled() == 0);
     }
 }
 
-TEST_CASE("qiti::FunctionData::wasCalledOnThread()")
+QITI_TEST_CASE("qiti::FunctionData::wasCalledOnThread()")
 {
     qiti::ScopedQitiTest test;
     
@@ -97,7 +95,7 @@ TEST_CASE("qiti::FunctionData::wasCalledOnThread()")
     auto funcData = qiti::Utils::getFunctionData<&testFunc>();
     QITI_REQUIRE(funcData != nullptr);
     
-    SECTION("Function called on current thread")
+    QITI_SECTION("Function called on current thread")
     {
         testFunc();
         
@@ -106,14 +104,14 @@ TEST_CASE("qiti::FunctionData::wasCalledOnThread()")
         QITI_CHECK(funcData->wasCalledOnThread(currentThread));
     }
     
-    SECTION("Function never called")
+    QITI_SECTION("Function never called")
     {
         std::thread::id currentThread = std::this_thread::get_id();
         
         QITI_CHECK(! funcData->wasCalledOnThread(currentThread));
     }
     
-    SECTION("Function called on custom thread")
+    QITI_SECTION("Function called on custom thread")
     {
         std::thread thread([]{ testFunc(); });
         auto id = thread.get_id();
@@ -123,7 +121,7 @@ TEST_CASE("qiti::FunctionData::wasCalledOnThread()")
     }
 }
 
-TEST_CASE("qiti::FunctionData::getAllProfiledFunctionData()")
+QITI_TEST_CASE("qiti::FunctionData::getAllProfiledFunctionData()")
 {
     qiti::ScopedQitiTest test;
     

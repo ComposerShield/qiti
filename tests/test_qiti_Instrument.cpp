@@ -5,15 +5,13 @@
 #include "qiti_include.hpp"
 // Special unit test include
 #include "qiti_test_macros.hpp"
-// Basic Catch2 macros
-#include <catch2/catch_test_macros.hpp>
 
 // Qiti Private API - not included in qiti_include.hpp
 #include "qiti_Instrument.hpp"
 
 //--------------------------------------------------------------------------
 
-TEST_CASE("qiti::FunctionCallData::resetInstrumentation()")
+QITI_TEST_CASE("qiti::FunctionCallData::resetInstrumentation()")
 {
     qiti::ScopedQitiTest test;
     
@@ -35,7 +33,7 @@ TEST_CASE("qiti::FunctionCallData::resetInstrumentation()")
     delete testAlloc;
 }
 
-TEST_CASE("qiti::onNextHeapAllocation() is called on next heap allocation", "[qiti::onNextHeapAllocation]")
+QITI_TEST_CASE("qiti::onNextHeapAllocation() is called on next heap allocation")
 {
     qiti::ScopedQitiTest test;
     

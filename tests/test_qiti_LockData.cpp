@@ -5,8 +5,6 @@
 #include "qiti_include.hpp"
 // Special unit test include
 #include "qiti_test_macros.hpp"
-// Basic Catch2 macros
-#include <catch2/catch_test_macros.hpp>
 
 #include "qiti_LockData.hpp"
 
@@ -30,7 +28,7 @@ public:
     }
 };
 
-TEST_CASE( "LockData delivers acquire and release to a single listener", "[LockData]" )
+QITI_TEST_CASE( "LockData delivers acquire and release to a single listener" )
 {
     qiti::ScopedQitiTest test;
 
@@ -57,7 +55,7 @@ TEST_CASE( "LockData delivers acquire and release to a single listener", "[LockD
     QITI_REQUIRE( listener.lastRelease == nullptr );
 }
 
-TEST_CASE( "LockData can handle multiple listeners", "[LockData]" )
+QITI_TEST_CASE( "LockData can handle multiple listeners" )
 {
     qiti::ScopedQitiTest test;
 

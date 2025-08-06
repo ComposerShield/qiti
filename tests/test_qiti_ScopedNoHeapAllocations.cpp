@@ -5,8 +5,6 @@
 #include "qiti_include.hpp"
 // Special unit test include
 #include "qiti_test_macros.hpp"
-// Basic Catch2 macros
-#include <catch2/catch_test_macros.hpp>
 
 // Qiti Private API - not included in qiti_include.hpp
 #include "qiti_LockHooks.hpp"
@@ -75,7 +73,7 @@ do {                                                                \
 } while(false)
 
 // Fails in CI but works locally...
-//TEST_CASE("ScopedNoHeapAllocations aborts on unexpected heap alloc")
+//QITI_TEST_CASE("ScopedNoHeapAllocations aborts on unexpected heap alloc")
 //{
 //    qiti::ScopedQitiTest test;
 //
@@ -87,7 +85,7 @@ do {                                                                \
 //    );
 //}
 
-TEST_CASE("ScopedNoHeapAllocations survives no heap alloc")
+QITI_TEST_CASE("ScopedNoHeapAllocations survives no heap alloc")
 {
     qiti::ScopedQitiTest test;
     test.setMaximumDurationOfTest_ms(500ull);

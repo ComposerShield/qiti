@@ -5,8 +5,6 @@
 #include "qiti_include.hpp"
 // Special unit test include
 #include "qiti_test_macros.hpp"
-// Basic Catch2 macros
-#include <catch2/catch_test_macros.hpp>
 
 // Qiti Private API - not included in qiti_include.hpp
 #include "qiti_Profile.hpp"
@@ -17,7 +15,7 @@ using namespace qiti::example::profile;
 
 //--------------------------------------------------------------------------
 
-TEST_CASE("qiti::Profile::resetProfiling()")
+QITI_TEST_CASE("qiti::Profile::resetProfiling()")
 {
     qiti::ScopedQitiTest test;
     
@@ -28,7 +26,7 @@ TEST_CASE("qiti::Profile::resetProfiling()")
     QITI_REQUIRE_FALSE(qiti::Profile::isProfilingFunction<&testFunc>());
 }
 
-TEST_CASE("qiti::Profile::{begin/end}ProfilingFunction() on free function")
+QITI_TEST_CASE("qiti::Profile::{begin/end}ProfilingFunction() on free function")
 {
     qiti::ScopedQitiTest test;
     
@@ -40,7 +38,7 @@ TEST_CASE("qiti::Profile::{begin/end}ProfilingFunction() on free function")
     QITI_REQUIRE_FALSE(qiti::Profile::isProfilingFunction<&testFunc>());
 }
 
-TEST_CASE("qiti::Profile::{begin/end}ProfilingFunction() on member function")
+QITI_TEST_CASE("qiti::Profile::{begin/end}ProfilingFunction() on member function")
 {
     qiti::ScopedQitiTest test;
     
@@ -55,7 +53,7 @@ TEST_CASE("qiti::Profile::{begin/end}ProfilingFunction() on member function")
 #if defined(__APPLE__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated"
-TEST_CASE("qiti::Profile::beginProfilingAllFunctions()")
+QITI_TEST_CASE("qiti::Profile::beginProfilingAllFunctions()")
 {
     qiti::ScopedQitiTest test;
     
@@ -65,7 +63,7 @@ TEST_CASE("qiti::Profile::beginProfilingAllFunctions()")
     qiti::Profile::endProfilingAllFunctions();
 }
 
-TEST_CASE("qiti::Profile::endProfilingAllFunctions()")
+QITI_TEST_CASE("qiti::Profile::endProfilingAllFunctions()")
 {
     qiti::ScopedQitiTest test;
     
@@ -78,14 +76,14 @@ TEST_CASE("qiti::Profile::endProfilingAllFunctions()")
 #pragma clang diagnostic pop
 #endif // defined(__APPLE__)
 
-TEST_CASE("qiti::Profile::isProfilingFunction()")
+QITI_TEST_CASE("qiti::Profile::isProfilingFunction()")
 {
     qiti::ScopedQitiTest test;
     
     // TODO: implement
 }
 
-TEST_CASE("qiti::Profile::begin/endProfilingType()")
+QITI_TEST_CASE("qiti::Profile::begin/endProfilingType()")
 {
     qiti::ScopedQitiTest test;
     
@@ -95,7 +93,7 @@ TEST_CASE("qiti::Profile::begin/endProfilingType()")
     // TODO: implement
 }
 
-TEST_CASE("qiti::Profile::getNumHeapAllocationsOnCurrentThread()")
+QITI_TEST_CASE("qiti::Profile::getNumHeapAllocationsOnCurrentThread()")
 {
     qiti::ScopedQitiTest test;
     
@@ -114,7 +112,7 @@ TEST_CASE("qiti::Profile::getNumHeapAllocationsOnCurrentThread()")
     QITI_CHECK(numAllocsAfterCallingTestFuncAgain == 2);
 }
 
-TEST_CASE("qiti::Profile::getNumHeapAllocationsOnCurrentThread() passing into Catch2 SECTION")
+QITI_TEST_CASE("qiti::Profile::getNumHeapAllocationsOnCurrentThread() passing into Catch2 QITI_SECTION")
 {
     qiti::ScopedQitiTest test;
     
@@ -122,9 +120,9 @@ TEST_CASE("qiti::Profile::getNumHeapAllocationsOnCurrentThread() passing into Ca
     const auto numAllocsAtStartup = qiti::Profile::getNumHeapAllocationsOnCurrentThread();
     QITI_REQUIRE(numAllocsAtStartup == 0);
     
-    // When passing into a SECTION, Catch2 makes multiple heap allocations.
+    // When passing into a QITI_SECTION, Catch2 makes multiple heap allocations.
     // We want to ensure we ignore those and not treat them as part of what the user is testing.
-    SECTION("Example Catch2 SECTION")
+    QITI_SECTION("Example Catch2 QITI_SECTION")
     {
         // Should still have no heap allocs
         const auto numAllocsAtStartOfSection = qiti::Profile::getNumHeapAllocationsOnCurrentThread();

@@ -5,15 +5,13 @@
 #include "qiti_include.hpp"
 // Special unit test include
 #include "qiti_test_macros.hpp"
-// Basic Catch2 macros
-#include <catch2/catch_test_macros.hpp>
 
 #include "qiti_LeakSanitizer.hpp"
 
 //--------------------------------------------------------------------------
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated" // TODO: remove when finished implementing
-TEST_CASE("qiti::LeakSanitizer::passed")
+QITI_TEST_CASE("qiti::LeakSanitizer::passed")
 {
     qiti::ScopedQitiTest test;
     
