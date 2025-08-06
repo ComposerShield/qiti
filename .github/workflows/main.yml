@@ -69,7 +69,8 @@ jobs:
           echo "PATH=$(brew --prefix llvm@16)/bin:$PATH" >> $GITHUB_ENV
 
       - name: Configure CMake (Ninja, LLVM Clang)
-        run: cmake . -B build \
+        run: |
+          cmake . -B build \
              -G Ninja \
              -DCMAKE_BUILD_TYPE=Release \
              -DCMAKE_C_COMPILER=clang \
