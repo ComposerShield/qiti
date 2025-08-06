@@ -88,7 +88,7 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data rac
 {
     qiti::ScopedQitiTest test;
     
-    auto dataRace = []() -> void __attribute__((optnone))
+    auto dataRace = []() __attribute__((noinline))
     {
         std::thread t(incrementCounter); // Intentional data race
         incrementCounter();              // Intentional data race
@@ -143,11 +143,11 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data rac
 {
     qiti::ScopedQitiTest test;
     
-    auto dataRace = []() -> void __attribute__((optnone))
+    auto dataRace = []() __attribute__((noinline))
     {
         TestClass testClass;
         
-        std::thread t([&testClass]() -> void __attribute__((optnone)){ testClass.incrementCounter(); }); // Intentional data race
+        std::thread t([&testClass]() __attribute__((noinline)){ testClass.incrementCounter(); }); // Intentional data race
         testClass.incrementCounter();                                   // Intentional data race
         t.join();
     };
@@ -181,12 +181,12 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() does no
     
     QITI_SECTION("Run code containing 1 lock that does not deadlock.")
     {
-        auto singleMutexWithNoDeadlock = []() -> void __attribute__((optnone))
+        auto singleMutexWithNoDeadlock = []() __attribute__((noinline))
         {
             std::mutex mutex;
             
             // Mutex locked in parallel
-            std::thread t([&mutex]() -> void __attribute__((optnone))
+            std::thread t([&mutex]() __attribute__((noinline))
             {
                 for (auto i=0; i<1'000; ++i)
                 {
@@ -224,12 +224,12 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects
     QITI_SECTION("Run code that inverts the order of mutex locking which implies a potential deadlock,"
             "but does not actually deadlock here.")
     {
-        auto singleMutexWithNoDeadlock = []() -> void __attribute__((optnone))
+        auto singleMutexWithNoDeadlock = []() __attribute__((noinline))
         {
             std::mutex mutexA;
             std::mutex mutexB;
             
-            std::thread t([&]() -> void __attribute__((optnone))
+            std::thread t([&]() __attribute__((noinline))
             {
                 // Thread t locks A then B
                 std::lock_guard<std::mutex> lockA(mutexA);
