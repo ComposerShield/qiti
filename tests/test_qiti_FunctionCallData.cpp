@@ -124,7 +124,12 @@ QITI_TEST_CASE("qiti::FunctionCallData::getTimeSpentInFunction", FunctionCallDat
         auto slowWorkFuncData = qiti::FunctionData::getFunctionData<&slowWork>();
         QITI_REQUIRE(slowWorkFuncData != nullptr);
         
-        // Call the functions to be tested
+        // Call once to "warm up" CPU caches, branch predictors, etc.
+        // First calls can have unpredictable performance overhead
+        (void)fastWork(); // "cold call"
+        (void)slowWork(); // "cold call"
+        
+        // Calls to be tested
         (void)fastWork();
         (void)slowWork();
         

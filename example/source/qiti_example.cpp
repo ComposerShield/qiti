@@ -19,7 +19,6 @@
   #include <immintrin.h>  // for _mm_pause()
 #endif
 
-#include <chrono>
 #include <cmath>
 #include <thread>
 
@@ -79,15 +78,21 @@ int testNoHeapAllocation() noexcept
 __attribute__((noinline))
 double fastWork() noexcept
 {
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    return 42.0;
+    volatile double result = 1.0;
+    for (int i = 0; i < 10000; ++i) {
+        result += i * 0.001;
+    }
+    return result;
 }
 
 __attribute__((noinline))
 double slowWork() noexcept
 {
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    return 42.0;
+    volatile double result = 1.0;
+    for (int i = 0; i < 100000; ++i) {
+        result += i * 0.001;
+    }
+    return result;
 }
 } // namespace FunctionCallData
 
