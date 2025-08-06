@@ -20,10 +20,15 @@ jobs:
           xcode-version: '16.2'
 
       - name: Configure CMake (Xcode generator)
-        run: cmake . -B build -G Xcode -DQITI_ENABLE_THREAD_SANITIZER=ON
+        run: |
+          cmake . -B build \
+          -G Xcode \
+          -DQITI_ENABLE_THREAD_SANITIZER=ON
 
-      - name: Build
-        run: cmake --build build --config Release --target qiti_tests_catch2
+      - name: Build Tests
+        run: |
+          cmake --build build --config Release --target qiti_tests_catch2
+          cmake --build build --config Release --target qiti_tests_gtest
         
       - name: Run Unit Tests
         run: |
