@@ -171,14 +171,25 @@ endif()
 
 if(PROJECT_IS_TOP_LEVEL)
     include(FetchContent)
-        FetchContent_Declare(
+    
+    # Fetch Catch2
+    FetchContent_Declare(
         Catch2
         GIT_REPOSITORY https://github.com/catchorg/Catch2.git
         GIT_TAG        v3.5.0
     )
     FetchContent_MakeAvailable(Catch2)
+    
+    # Fetch GTest
+    FetchContent_Declare(
+        googletest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG        v1.14.0
+    )
+    FetchContent_MakeAvailable(googletest)
 
-    add_executable(qiti_tests
+    # Test sources list
+    set(TEST_SOURCES
         "tests/qiti_test_macros.hpp"
         "tests/test_qiti_FunctionCallData.cpp"
         "tests/test_qiti_FunctionData.cpp"
@@ -193,42 +204,81 @@ if(PROJECT_IS_TOP_LEVEL)
         "tests/test_qiti_Utils.cpp"
     )
 
-    if(APPLE)
-        set_target_properties(qiti_tests PROPERTIES
-            OSX_ARCHITECTURES "${ARCHS}"
-            XCODE_GENERATE_SCHEME ON
+    # Function to configure common test settings
+    function(configure_test_target target_name framework_libraries framework_definitions)
+        if(APPLE)
+            set_target_properties(${target_name} PROPERTIES
+                OSX_ARCHITECTURES "${ARCHS}"
+                XCODE_GENERATE_SCHEME ON
+            )
+        endif()
+
+        target_link_libraries(${target_name} 
+        PRIVATE
+            qiti_example_target
+            qiti_lib
+            qiti_tests_client
+            ${framework_libraries}
         )
+
+        if(UNIX AND NOT APPLE)
+            # On Linux, add "-rdynamic" so that all global symbols are exported into the dynamic symbol table.
+            # Without this, functions defined in qiti_tests_client (and linked libraries) may not be visible to dladdr(),
+            # causing dli_sname to be nullptr and leading to crashes when trying to copy the symbol name.
+            target_link_options(${target_name} PRIVATE "-rdynamic")
+        endif()
+
+        target_compile_options(${target_name} 
+        PRIVATE
+            "-Werror"
+            "-Wpedantic"
+        )
+
+        # ThreadSanitizer compile definition for test files
+        if(QITI_ENABLE_THREAD_SANITIZER)
+            target_compile_definitions(${target_name} PRIVATE QITI_ENABLE_THREAD_SANITIZER=1)
+        endif()
+
+        # Add framework-specific definitions
+        if(framework_definitions)
+            target_compile_definitions(${target_name} PRIVATE ${framework_definitions})
+        endif()
+
+        target_include_directories(${target_name} 
+        PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/source
+            ${CMAKE_CURRENT_SOURCE_DIR}/example/source
+        )
+    endfunction()
+
+    # Catch2 Test Target
+    add_executable(qiti_tests_catch2 ${TEST_SOURCES})
+    configure_test_target(qiti_tests_catch2 "Catch2::Catch2WithMain" "")
+
+    # GTest Test Target  
+    add_executable(qiti_tests_gtest ${TEST_SOURCES})
+    configure_test_target(qiti_tests_gtest "gtest_main" "QITI_USE_GTEST")
+
+    # Default qiti_tests target (Catch2 for backward compatibility)
+    add_executable(qiti_tests ${TEST_SOURCES})
+    configure_test_target(qiti_tests "Catch2::Catch2WithMain" "")
+
+    # ThreadSanitizer compile definition for qiti_tests_client (shared by all test targets)
+    if(QITI_ENABLE_THREAD_SANITIZER)
+        target_compile_definitions(qiti_tests_client PRIVATE QITI_ENABLE_THREAD_SANITIZER=1)
     endif()
 
-    target_link_libraries(qiti_tests 
-    PRIVATE
-        qiti_example_target
-        qiti_lib
-        qiti_tests_client
-        Catch2::Catch2WithMain
-    )
-
+    # Linux-specific linker options for qiti_tests_client (shared by all test targets)
     if(UNIX AND NOT APPLE)
-        # On Linux, add “-rdynamic” so that all global symbols are exported into the dynamic symbol table.
+        # On Linux, add "-rdynamic" so that all global symbols are exported into the dynamic symbol table.
         # Without this, functions defined in qiti_tests_client (and linked libraries) may not be visible to dladdr(),
         # causing dli_sname to be nullptr and leading to crashes when trying to copy the symbol name.
         target_link_options(qiti_tests_client INTERFACE "-rdynamic")
     endif()
 
-    target_compile_options(qiti_tests 
-    PRIVATE
-        "-Werror"
-        "-Wpedantic"
-    )
-
-    # ThreadSanitizer compile definition for test files
-    if(QITI_ENABLE_THREAD_SANITIZER)
-        target_compile_definitions(qiti_tests PRIVATE QITI_ENABLE_THREAD_SANITIZER=1)
-        target_compile_definitions(qiti_tests_client PRIVATE QITI_ENABLE_THREAD_SANITIZER=1)
-    endif()
-
     enable_testing()
 
+    # Apple-specific properties for test framework dependencies
     if(APPLE)
         set_target_properties(Catch2 PROPERTIES 
             OSX_ARCHITECTURES "${ARCHS}"
@@ -238,26 +288,27 @@ if(PROJECT_IS_TOP_LEVEL)
             OSX_ARCHITECTURES "${ARCHS}"
         )
 
-        set_target_properties(qiti_tests PROPERTIES
+        set_target_properties(gtest PROPERTIES
             OSX_ARCHITECTURES "${ARCHS}"
-            XCODE_GENERATE_SCHEME ON
+        )
+
+        set_target_properties(gtest_main PROPERTIES
+            OSX_ARCHITECTURES "${ARCHS}"
         )
     endif()
 
-    target_include_directories(qiti_tests 
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/source
-        ${CMAKE_CURRENT_SOURCE_DIR}/example/source
-    )
-
+    # Test discovery for Catch2 targets
     # Load and use the .cmake file provided by Catch2
     # https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md
-    # We have to manually provide the source directory here for now
-
     include(${Catch2_SOURCE_DIR}/extras/Catch.cmake)
-
+    
     # When running ctest, you must add a configuration flag, e.g. "ctest -C Debug"
     catch_discover_tests(qiti_tests DISCOVERY_MODE PRE_TEST)
+    catch_discover_tests(qiti_tests_catch2 DISCOVERY_MODE PRE_TEST)
+
+    # Test discovery for GTest targets
+    include(GoogleTest)
+    gtest_discover_tests(qiti_tests_gtest)
 endif()
 
 # =========================
