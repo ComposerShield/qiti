@@ -10,6 +10,10 @@
 
 using namespace qiti::example::FunctionCallData;
 
+// Disable optimizations for this entire file to prevent Release mode optimizations
+// from interfering with number of or order of heap allocations
+#pragma clang optimize off
+
 //--------------------------------------------------------------------------
 
 QITI_TEST_CASE("qiti::FunctionCallData::getNumHeapAllocations()", FunctionCallDataGetNumHeapAllocations)
@@ -143,3 +147,6 @@ QITI_TEST_CASE("qiti::FunctionCallData::getTimeSpentInFunction", FunctionCallDat
         QITI_REQUIRE(moreWorkTimeSpentClock >= someWorkTimeSpentClock);
     }
 }
+
+// Re-enable optimizations for subsequent files
+#pragma clang optimize on
