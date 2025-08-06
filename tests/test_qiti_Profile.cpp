@@ -93,10 +93,6 @@ QITI_TEST_CASE("qiti::Profile::begin/endProfilingType()", ProfileBeginEndProfili
     // TODO: implement
 }
 
-// Disable optimizations for heap allocation tests to prevent Release mode optimizations
-// from interfering with timing (and existance) of heap allocations
-#pragma clang optimize off
-
 QITI_TEST_CASE("qiti::Profile::getNumHeapAllocationsOnCurrentThread()", ProfileGetNumHeapAllocationsOnCurrentThread)
 {
     qiti::ScopedQitiTest test;
@@ -135,6 +131,3 @@ QITI_TEST_CASE("qiti::Profile::getNumHeapAllocationsOnCurrentThread() passing in
     }
 }
 #endif
-
-// Re-enable optimizations for subsequent files
-#pragma clang optimize on
