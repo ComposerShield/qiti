@@ -116,35 +116,29 @@ QITI_TEST_CASE("qiti::FunctionCallData::getTimeSpentInFunction", FunctionCallDat
         QITI_REQUIRE(timeSpentClock >= timeSpentCpu);
     }
     
-    QITI_SECTION("More work results in more time elapsed")
+    QITI_SECTION("Slow work results in more time elapsed than fast work")
     {
-        auto someWorkFuncData = qiti::FunctionData::getFunctionData<&someWork>();
-        QITI_REQUIRE(someWorkFuncData != nullptr);
+        auto fastWorkFuncData = qiti::FunctionData::getFunctionData<&fastWork>();
+        QITI_REQUIRE(fastWorkFuncData != nullptr);
         
-        auto moreWorkFuncData = qiti::FunctionData::getFunctionData<&moreWork>();
-        QITI_REQUIRE(moreWorkFuncData != nullptr);
+        auto slowWorkFuncData = qiti::FunctionData::getFunctionData<&slowWork>();
+        QITI_REQUIRE(slowWorkFuncData != nullptr);
         
-        // Call once to "warm up" CPU to these functions.
-        // Else first function always gets additional performance hit and the results are less predictable.
-        // The CPU needs to fetch the code into its I-cache, train its predictors, lazy-load the pages, etc.
-        (void)someWork(); // "cold call"
-        (void)moreWork(); // "cold call"
+        // Call the functions to be tested
+        (void)fastWork();
+        (void)slowWork();
         
-        // Calls to be tested below
-        (void)someWork();
-        (void)moreWork();
+        auto fastWorkLastFunctionCall = fastWorkFuncData->getLastFunctionCall();
+        auto slowWorkLastFunctionCall = slowWorkFuncData->getLastFunctionCall();
         
-        auto someWorkLastFunctionCall = someWorkFuncData->getLastFunctionCall();
-        auto moreWorkLastFunctionCall = moreWorkFuncData->getLastFunctionCall();
+        auto fastWorkTimeSpentCpu   = fastWorkLastFunctionCall.getTimeSpentInFunctionCpu_ns();
+        auto slowWorkTimeSpentCpu   = slowWorkLastFunctionCall.getTimeSpentInFunctionCpu_ns();
         
-        auto someWorkTimeSpentCpu   = someWorkLastFunctionCall.getTimeSpentInFunctionCpu_ns();
-        auto moreWorkTimeSpentCpu   = moreWorkLastFunctionCall.getTimeSpentInFunctionCpu_ns();
+        auto fastWorkTimeSpentClock = fastWorkLastFunctionCall.getTimeSpentInFunctionWallClock_ns();
+        auto slowWorkTimeSpentClock = slowWorkLastFunctionCall.getTimeSpentInFunctionWallClock_ns();
         
-        auto someWorkTimeSpentClock = someWorkLastFunctionCall.getTimeSpentInFunctionWallClock_ns();
-        auto moreWorkTimeSpentClock = moreWorkLastFunctionCall.getTimeSpentInFunctionWallClock_ns();
-        
-        QITI_REQUIRE(moreWorkTimeSpentCpu >= someWorkTimeSpentCpu);
-        QITI_REQUIRE(moreWorkTimeSpentClock >= someWorkTimeSpentClock);
+        QITI_REQUIRE(slowWorkTimeSpentCpu >= fastWorkTimeSpentCpu);
+        QITI_REQUIRE(slowWorkTimeSpentClock >= fastWorkTimeSpentClock);
     }
 }
 

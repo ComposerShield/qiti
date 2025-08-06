@@ -19,6 +19,7 @@
   #include <immintrin.h>  // for _mm_pause()
 #endif
 
+#include <chrono>
 #include <cmath>
 #include <thread>
 
@@ -49,16 +50,6 @@ inline static void cpu_pause() noexcept
     #endif
 }
 
-__attribute__((optnone))
-__attribute__((noinline))
-double work(uint64_t n) noexcept
-{
-    static auto result = 1.f;
-    for (uint64_t i = 2; i <= n; ++i)
-        result *= std::cos(static_cast<double>(i));
-    return result;
-}
-
 //--------------------------------------------------------------------------
 
 namespace qiti
@@ -85,20 +76,18 @@ int testNoHeapAllocation() noexcept
     return test;
 }
 
-__attribute__((optnone))
 __attribute__((noinline))
-double someWork() noexcept
+double fastWork() noexcept
 {
-    auto val = work(5);
-    return val;
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    return 42.0;
 }
 
-__attribute__((optnone))
 __attribute__((noinline))
-double moreWork() noexcept
+double slowWork() noexcept
 {
-    auto val = work(50);
-    return val;
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    return 42.0;
 }
 } // namespace FunctionCallData
 
