@@ -79,7 +79,7 @@ ScopedQitiTest::ScopedQitiTest() noexcept
 
 ScopedQitiTest::~ScopedQitiTest() noexcept
 {
-    auto ms = getLengthOfTest_ms();
+    [[maybe_unused]] auto ms = getLengthOfTest_ms();
     assert(ms <= impl->maxLengthOfTest_ms);
     
     qitiTestRunning.store(false, std::memory_order_relaxed);
