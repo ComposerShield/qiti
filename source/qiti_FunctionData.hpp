@@ -21,6 +21,7 @@
 #include "qiti_ScopedNoHeapAllocations.hpp"
 
 #include <cstdint>
+#include <memory>
 #include <thread>
 #include <vector>
 
@@ -170,10 +171,7 @@ private:
     friend class Profile;
     friend class Utils;
     
-    // Stack-based pimpl idiom
-    static constexpr std::size_t ImplSize  = 504;
-    static constexpr std::size_t ImplAlign = 8;
-    alignas(ImplAlign) unsigned char implStorage[ImplSize];
+    std::unique_ptr<Impl> pImpl;
     
     /**
      Construct FunctionData for a raw function address.
@@ -214,10 +212,6 @@ private:
     /** Copy Assignment (deleted) */
     FunctionData& operator=(const FunctionData&) = delete;
     
-    /** Prevent heap allocating this class (deleted) */
-    void* operator new(std::size_t) = delete;
-    /** Prevent heap allocating this class (deleted) */
-    void* operator new[](std::size_t) = delete;
     
     /** */
     [[nodiscard]] static constexpr FunctionType QITI_API_INTERNAL getFunctionType(const char* functionName) noexcept

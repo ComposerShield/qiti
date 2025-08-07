@@ -17,6 +17,7 @@
 
 #include "qiti_Utils.hpp"
 
+#include <memory>
 #include <thread>
 
 //--------------------------------------------------------------------------
@@ -106,15 +107,7 @@ public:
     [[nodiscard]] FunctionCallData operator=(const FunctionCallData&) noexcept;
     
 private:
-    // Stack-based pimpl idiom
-    static constexpr std::size_t ImplSize  = 128;
-    static constexpr std::size_t ImplAlign =  8;
-    alignas(ImplAlign) unsigned char implStorage[ImplSize];
-    
-    /** Prevent heap allocating this class (deleted) */
-    void* operator new(std::size_t) = delete;
-    /** Prevent heap allocating this class (deleted) */
-    void* operator new[](std::size_t) = delete;
+    std::unique_ptr<Impl> pImpl;
     
     //--------------------------------------------------------------------------
     /** \endcond */

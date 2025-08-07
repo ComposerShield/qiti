@@ -16,100 +16,68 @@
 #include "qiti_FunctionCallData.hpp"
 
 #include "qiti_FunctionCallData_Impl.hpp"
-
 #include "qiti_ScopedNoHeapAllocations.hpp"
 
 #include <cassert>
 #include <chrono>
 #include <cstdint>
+#include <memory>
 #include <utility>
 
 //--------------------------------------------------------------------------
 
 namespace qiti
 {
+
 FunctionCallData::FunctionCallData() noexcept
+    : pImpl(std::make_unique<Impl>())
 {
     qiti::ScopedNoHeapAllocations noAlloc;
-    
-    static_assert(sizeof(FunctionCallData::Impl)  <= FunctionCallData::ImplSize,  "Impl is too large for FunctionCallData::implStorage");
-    static_assert(alignof(FunctionCallData::Impl) == FunctionCallData::ImplAlign, "Impl alignment stricter than FunctionCallData::implStorage");
-    
-    // Allocate Impl on the stack instead of the heap
-    new (implStorage) Impl;
 }
 
-FunctionCallData::~FunctionCallData() noexcept
-{
-    qiti::ScopedNoHeapAllocations noAlloc;
-    
-    getImpl()->~Impl();
-}
+FunctionCallData::~FunctionCallData() noexcept = default;
 
-// Move constructor
 FunctionCallData::FunctionCallData(FunctionCallData&& other) noexcept
+    : pImpl(std::move(other.pImpl))
 {
     qiti::ScopedNoHeapAllocations noAlloc;
-    
-    // move‐construct into our storage
-    new (implStorage) Impl(std::move(*other.getImpl()));
-    // destroy their Impl so we can re‐init it
-    other.getImpl()->~Impl();
-    // default‐construct theirs back into a valid (empty) state
-    new (other.implStorage) Impl();
 }
 
-// Move assignment
 FunctionCallData& FunctionCallData::operator=(FunctionCallData&& other) noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     
     if (this != &other) {
-        // destroy our current one
-        getImpl()->~Impl();
-        // move‐construct into our storage
-        new (implStorage) Impl(std::move(*other.getImpl()));
-        // tear down theirs…
-        other.getImpl()->~Impl();
-        // …and put them back into a default‐constructed safe state
-        new (other.implStorage) Impl();
+        pImpl = std::move(other.pImpl);
     }
     return *this;
 }
 
-// Copy constructor
 FunctionCallData::FunctionCallData(const FunctionCallData& other) noexcept
+    : pImpl(std::make_unique<Impl>(*other.pImpl))
 {
     qiti::ScopedNoHeapAllocations noAlloc;
-    
-    // placement‐new a copy of their Impl into our storage
-    new (implStorage) Impl(*other.getImpl());
 }
 
-// Copy assignment
 FunctionCallData FunctionCallData::operator=(const FunctionCallData& other) noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     
     if (this != &other)
     {
-        // destroy our current Impl
-        getImpl()->~Impl();
-        // placement‐new a copy of theirs
-        new (implStorage) Impl(*other.getImpl());
+        pImpl = std::make_unique<Impl>(*other.pImpl);
     }
     return *this;
 }
 
-FunctionCallData::Impl*       FunctionCallData::getImpl()       noexcept { return reinterpret_cast<Impl*>(implStorage); }
-const FunctionCallData::Impl* FunctionCallData::getImpl() const noexcept { return reinterpret_cast<const Impl*>(implStorage); }
+FunctionCallData::Impl*       FunctionCallData::getImpl()       noexcept { return pImpl.get(); }
+const FunctionCallData::Impl* FunctionCallData::getImpl() const noexcept { return pImpl.get(); }
 
 void FunctionCallData::reset() noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     
-    getImpl()->~Impl();
-    new (implStorage) Impl; // re-initialize
+    pImpl = std::make_unique<Impl>();
 }
 
 uint64_t FunctionCallData::getNumHeapAllocations() const noexcept
