@@ -91,6 +91,42 @@ public:
     [[nodiscard]] uint64_t QITI_API getAverageTimeSpentInFunctionWallClock_ns() const noexcept;
     
     /**
+     Returns the minimum CPU time spent in any single call to this function, in nanoseconds.
+     
+     CPU time is the amount of time the thread actually spent executing
+     on the CPU (user + kernel mode), and does ​not​ include time spent off-CPU.
+     Returns 0 if the function has never been called.
+     */
+    [[nodiscard]] uint64_t QITI_API getMinTimeSpentInFunctionCpu_ns() const noexcept;
+    
+    /**
+     Returns the maximum CPU time spent in any single call to this function, in nanoseconds.
+     
+     CPU time is the amount of time the thread actually spent executing
+     on the CPU (user + kernel mode), and does ​not​ include time spent off-CPU.
+     Returns 0 if the function has never been called.
+     */
+    [[nodiscard]] uint64_t QITI_API getMaxTimeSpentInFunctionCpu_ns() const noexcept;
+    
+    /**
+     Returns the minimum wall-clock time spent in any single call to this function, in nanoseconds.
+     
+     Wall-clock time is the real-world elapsed time between entry and exit,
+     and so includes any time the thread was preempted or blocked.
+     Returns 0 if the function has never been called.
+     */
+    [[nodiscard]] uint64_t QITI_API getMinTimeSpentInFunctionWallClock_ns() const noexcept;
+    
+    /**
+     Returns the maximum wall-clock time spent in any single call to this function, in nanoseconds.
+     
+     Wall-clock time is the real-world elapsed time between entry and exit,
+     and so includes any time the thread was preempted or blocked.
+     Returns 0 if the function has never been called.
+     */
+    [[nodiscard]] uint64_t QITI_API getMaxTimeSpentInFunctionWallClock_ns() const noexcept;
+    
+    /**
      Check if the function was called on a specific thread.
 
      Returns true if any recorded invocation occurred on the thread identified by 'thread'.

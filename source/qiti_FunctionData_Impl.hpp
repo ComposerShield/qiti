@@ -41,6 +41,11 @@ public:
     uint64_t averageTimeSpentInFunctionNanosecondsCpu = 0;
     uint64_t averageTimeSpentInFunctionNanosecondsWallClock = 0;
     
+    uint64_t minTimeSpentInFunctionNanosecondsCpu = 0;
+    uint64_t maxTimeSpentInFunctionNanosecondsCpu = 0;
+    uint64_t minTimeSpentInFunctionNanosecondsWallClock = 0;
+    uint64_t maxTimeSpentInFunctionNanosecondsWallClock = 0;
+    
     static constexpr size_t MAX_THREADS = 256;
     std::bitset<MAX_THREADS> threadsCalledOn;
     

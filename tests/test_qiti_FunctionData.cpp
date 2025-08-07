@@ -23,6 +23,18 @@ void testFunc() noexcept
     volatile int _ = 42;
 }
 
+/** Test function with variable execution time for min/max testing */
+__attribute__((noinline))
+__attribute__((optnone))
+void testFuncWithDelay(int delayMs) noexcept
+{
+    volatile int sum = 0;
+    // Create variable execution time by doing different amounts of work
+    for(int i = 0; i < delayMs * 1000; ++i) {
+        sum += i;
+    }
+}
+
 //--------------------------------------------------------------------------
 
 QITI_TEST_CASE("qiti::FunctionData::getFunctionName()", FunctionDataGetFunctionName)
@@ -159,4 +171,143 @@ QITI_TEST_CASE("qiti::FunctionData::getAllProfiledFunctionData()", FunctionDataG
     // No profiled functions should be available
     auto allFunctionsAfterReset = qiti::FunctionData::getAllProfiledFunctionData();
     QITI_REQUIRE(allFunctionsAfterReset.size() == 0);
+}
+
+QITI_TEST_CASE("qiti::FunctionData::getMinTimeSpentInFunctionCpu_ns()", FunctionDataGetMinTimeSpentInFunctionCpu)
+{
+    qiti::ScopedQitiTest test;
+    
+    auto funcData = qiti::FunctionData::getFunctionData<&testFuncWithDelay>();
+    QITI_REQUIRE(funcData != nullptr);
+    
+    QITI_SECTION("No calls made - should return 0")
+    {
+        QITI_CHECK(funcData->getMinTimeSpentInFunctionCpu_ns() == 0);
+    }
+    
+    QITI_SECTION("Single call")
+    {
+        testFuncWithDelay(1); // Small delay
+        uint64_t minTime = funcData->getMinTimeSpentInFunctionCpu_ns();
+        QITI_CHECK(minTime > 0); // Should have some measurable time
+    }
+    
+    QITI_SECTION("Multiple calls with different execution times")
+    {
+        // Make calls with different execution times
+        testFuncWithDelay(5);  // Longer delay
+        testFuncWithDelay(1);  // Shorter delay  
+        testFuncWithDelay(3);  // Medium delay
+        
+        uint64_t minTime = funcData->getMinTimeSpentInFunctionCpu_ns();
+        uint64_t maxTime = funcData->getMaxTimeSpentInFunctionCpu_ns();
+        
+        QITI_CHECK(minTime > 0);
+        QITI_CHECK(maxTime > 0);
+        QITI_CHECK(minTime <= maxTime); // Min should be <= max
+        QITI_CHECK(funcData->getNumTimesCalled() == 3);
+    }
+}
+
+QITI_TEST_CASE("qiti::FunctionData::getMaxTimeSpentInFunctionCpu_ns()", FunctionDataGetMaxTimeSpentInFunctionCpu)
+{
+    qiti::ScopedQitiTest test;
+    
+    auto funcData = qiti::FunctionData::getFunctionData<&testFuncWithDelay>();
+    QITI_REQUIRE(funcData != nullptr);
+    
+    QITI_SECTION("No calls made - should return 0")
+    {
+        QITI_CHECK(funcData->getMaxTimeSpentInFunctionCpu_ns() == 0);
+    }
+    
+    QITI_SECTION("Single call")
+    {
+        testFuncWithDelay(1); // Small delay
+        uint64_t maxTime = funcData->getMaxTimeSpentInFunctionCpu_ns();
+        QITI_CHECK(maxTime > 0); // Should have some measurable time
+    }
+    
+    QITI_SECTION("Multiple calls - max should track longest execution")
+    {
+        testFuncWithDelay(1);  // Short
+        uint64_t timeAfterFirst = funcData->getMaxTimeSpentInFunctionCpu_ns();
+        
+        testFuncWithDelay(5);  // Longer - should become new max
+        uint64_t timeAfterSecond = funcData->getMaxTimeSpentInFunctionCpu_ns();
+        
+        testFuncWithDelay(2);  // Medium - shouldn't change max
+        uint64_t timeAfterThird = funcData->getMaxTimeSpentInFunctionCpu_ns();
+        
+        QITI_CHECK(timeAfterFirst > 0);
+        QITI_CHECK(timeAfterSecond >= timeAfterFirst); // Second call was longer
+        QITI_CHECK(timeAfterThird == timeAfterSecond); // Third call shouldn't change max
+        QITI_CHECK(funcData->getNumTimesCalled() == 3);
+    }
+}
+
+QITI_TEST_CASE("qiti::FunctionData::getMinTimeSpentInFunctionWallClock_ns()", FunctionDataGetMinTimeSpentInFunctionWallClock)
+{
+    qiti::ScopedQitiTest test;
+    
+    auto funcData = qiti::FunctionData::getFunctionData<&testFuncWithDelay>();
+    QITI_REQUIRE(funcData != nullptr);
+    
+    QITI_SECTION("No calls made - should return 0")
+    {
+        QITI_CHECK(funcData->getMinTimeSpentInFunctionWallClock_ns() == 0);
+    }
+    
+    QITI_SECTION("Multiple calls with different execution times")
+    {
+        testFuncWithDelay(3);  // Medium delay
+        testFuncWithDelay(1);  // Shorter delay
+        testFuncWithDelay(5);  // Longer delay
+        
+        uint64_t minTime = funcData->getMinTimeSpentInFunctionWallClock_ns();
+        uint64_t maxTime = funcData->getMaxTimeSpentInFunctionWallClock_ns();
+        
+        QITI_CHECK(minTime > 0);
+        QITI_CHECK(maxTime > 0);
+        QITI_CHECK(minTime <= maxTime); // Min should be <= max
+        QITI_CHECK(funcData->getNumTimesCalled() == 3);
+    }
+}
+
+QITI_TEST_CASE("qiti::FunctionData::getMaxTimeSpentInFunctionWallClock_ns()", FunctionDataGetMaxTimeSpentInFunctionWallClock)
+{
+    qiti::ScopedQitiTest test;
+    
+    auto funcData = qiti::FunctionData::getFunctionData<&testFuncWithDelay>();
+    QITI_REQUIRE(funcData != nullptr);
+    
+    QITI_SECTION("No calls made - should return 0")
+    {
+        QITI_CHECK(funcData->getMaxTimeSpentInFunctionWallClock_ns() == 0);
+    }
+    
+    QITI_SECTION("Single call")
+    {
+        testFuncWithDelay(2);
+        uint64_t maxTime = funcData->getMaxTimeSpentInFunctionWallClock_ns();
+        QITI_CHECK(maxTime > 0); // Should have some measurable time
+    }
+    
+    QITI_SECTION("CPU vs WallClock consistency check")
+    {
+        testFuncWithDelay(2);
+        testFuncWithDelay(4);
+        
+        uint64_t minCpu = funcData->getMinTimeSpentInFunctionCpu_ns();
+        uint64_t maxCpu = funcData->getMaxTimeSpentInFunctionCpu_ns();
+        uint64_t minWall = funcData->getMinTimeSpentInFunctionWallClock_ns();
+        uint64_t maxWall = funcData->getMaxTimeSpentInFunctionWallClock_ns();
+        
+        // Both timing methods should show that min <= max
+        QITI_CHECK(minCpu <= maxCpu);
+        QITI_CHECK(minWall <= maxWall);
+        QITI_CHECK(minCpu > 0);
+        QITI_CHECK(minWall > 0);
+        QITI_CHECK(funcData->getNumTimesCalled() == 2);
+    }
 }

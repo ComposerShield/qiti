@@ -193,5 +193,27 @@ void Profile::updateFunctionDataOnExit(const void* this_fn) noexcept
                                 : 0;
         impl->averageTimeSpentInFunctionNanosecondsCpu = newAverage;
     }
+    
+    // Update min/max time spent in function (wall clock)
+    if(impl->minTimeSpentInFunctionNanosecondsWallClock == 0 || 
+       callImpl->timeSpentInFunctionNanosecondsWallClock < impl->minTimeSpentInFunctionNanosecondsWallClock)
+    {
+        impl->minTimeSpentInFunctionNanosecondsWallClock = callImpl->timeSpentInFunctionNanosecondsWallClock;
+    }
+    if(callImpl->timeSpentInFunctionNanosecondsWallClock > impl->maxTimeSpentInFunctionNanosecondsWallClock)
+    {
+        impl->maxTimeSpentInFunctionNanosecondsWallClock = callImpl->timeSpentInFunctionNanosecondsWallClock;
+    }
+    
+    // Update min/max time spent in function (CPU)
+    if(impl->minTimeSpentInFunctionNanosecondsCpu == 0 || 
+       callImpl->timeSpentInFunctionNanosecondsCpu < impl->minTimeSpentInFunctionNanosecondsCpu)
+    {
+        impl->minTimeSpentInFunctionNanosecondsCpu = callImpl->timeSpentInFunctionNanosecondsCpu;
+    }
+    if(callImpl->timeSpentInFunctionNanosecondsCpu > impl->maxTimeSpentInFunctionNanosecondsCpu)
+    {
+        impl->maxTimeSpentInFunctionNanosecondsCpu = callImpl->timeSpentInFunctionNanosecondsCpu;
+    }
 }
 } // namespace qiti
