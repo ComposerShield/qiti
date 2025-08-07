@@ -31,7 +31,7 @@ void testFuncWithDelay(int delayMs) noexcept
     volatile int sum = 0;
     // Create variable execution time by doing different amounts of work
     for(int i = 0; i < delayMs * 1000; ++i) {
-        sum += i;
+        sum = sum + i;
     }
 }
 
