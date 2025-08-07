@@ -19,6 +19,7 @@
 #include "qiti_ScopedNoHeapAllocations.hpp"
 
 #include <memory>
+#include <utility>
 
 //--------------------------------------------------------------------------
 
