@@ -127,4 +127,11 @@ std::thread::id QITI_API FunctionCallData::getThreadThatCalledFunction() const n
     return getImpl()->callingThread;
 }
 
+const FunctionData* FunctionCallData::getCaller() const noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
+    return getImpl()->caller;
+}
+
 } // namespace qiti

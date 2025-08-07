@@ -171,6 +171,20 @@ std::vector<const FunctionData*> FunctionData::getAllProfiledFunctionData() noex
     return Utils::getAllFunctionData();
 }
 
+std::vector<const FunctionData*> FunctionData::getCallers() const noexcept
+{
+    MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
+    
+    const auto& callersSet = getImpl()->callers;
+    std::vector<const FunctionData*> result;
+    result.reserve(callersSet.size());
+    
+    for (const auto* caller : callersSet)
+        result.push_back(caller);
+    
+    return result;
+}
+
 void FunctionData::functionCalled() noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;

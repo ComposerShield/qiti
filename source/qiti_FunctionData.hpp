@@ -147,6 +147,17 @@ public:
      */
     [[nodiscard]] static std::vector<const FunctionData*> QITI_API getAllProfiledFunctionData() noexcept;
     
+    /**
+     Get all functions that have called this function.
+     
+     Returns a vector of pointers to FunctionData instances representing all functions
+     that have called this function at least once during profiling. The vector may be 
+     empty if this function was only called from outside the profiled call stack.
+     
+     Note: This only works reliably when you have called qiti::Profile::beginProfilingAllFunctions().
+     */
+    [[nodiscard]] std::vector<const FunctionData*> QITI_API getCallers() const noexcept;
+    
     //--------------------------------------------------------------------------
     // Doxygen - Begin Internal Documentation
     /** \cond INTERNAL */

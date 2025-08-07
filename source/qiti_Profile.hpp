@@ -114,10 +114,10 @@ public:
     }
     
     /** */
-    [[deprecated("Results in exceptions on Linux")]] static void QITI_API beginProfilingAllFunctions() noexcept;
+    static void QITI_API beginProfilingAllFunctions() noexcept;
     
     /** */
-    [[deprecated("Results in exceptions on Linux")]] static void QITI_API endProfilingAllFunctions() noexcept;
+    static void QITI_API endProfilingAllFunctions() noexcept;
     
     /** @returns true if we are currently profling function. */
     template<auto FuncPtr>

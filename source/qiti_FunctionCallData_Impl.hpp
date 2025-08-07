@@ -38,6 +38,7 @@ struct FunctionCallData::Impl
     timespec                              endTimeCpu;
     
     std::thread::id callingThread;
+    const FunctionData* caller = nullptr;
     
     uint64_t timeSpentInFunctionNanosecondsWallClock = 0;
     uint64_t timeSpentInFunctionNanosecondsCpu = 0;
