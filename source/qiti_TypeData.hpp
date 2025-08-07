@@ -18,6 +18,7 @@
 #include "qiti_API.hpp"
 
 #include <cstdio>
+#include <memory>
 
 //--------------------------------------------------------------------------
 // Doxygen - Begin Internal Documentation
@@ -60,20 +61,12 @@ public:
     [[nodiscard]] TypeData& QITI_API_INTERNAL operator=(TypeData&& other) noexcept;
     
 private:
-    // Stack-based pimpl idiom
-    static constexpr size_t ImplSize  = 456;
-    static constexpr size_t ImplAlign =  8;
-    alignas(ImplAlign) unsigned char implStorage[ImplSize];
+    std::unique_ptr<Impl> pImpl;
     
     /** Copy Constructor (deleted) */
     TypeData(const TypeData&) = delete;
     /** Copy Assignment (deleted) */
     TypeData& operator=(const TypeData&) = delete;
-    
-    /** Prevent heap allocating this class (deleted) */
-    void* operator new(std::size_t) = delete;
-    /** Prevent heap allocating this class (deleted) */
-    void* operator new[](std::size_t) = delete;
     
     //--------------------------------------------------------------------------
     /** \endcond */

@@ -1,4 +1,3 @@
-
 /******************************************************************************
  * Qiti — C++ Profiling Library
  *
@@ -57,5 +56,3 @@ public:
 /** \endcond */
 // Doxygen - End Internal Documentation
 //--------------------------------------------------------------------------
-
-static_assert(sizeof(std::thread::id) == 8, "goose");

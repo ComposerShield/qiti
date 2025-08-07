@@ -73,61 +73,34 @@ namespace qiti
 FunctionData::FunctionData(const void* functionAddress,
                            const char* functionName,
                            FunctionType functionType) noexcept
+    : pImpl(std::make_unique<Impl>())
 {
-    static_assert(sizeof(FunctionData::Impl)  <= FunctionData::ImplSize,
-                  "Impl is too large for FunctionData::implStorage");
-    static_assert(alignof(FunctionData::Impl) == FunctionData::ImplAlign,
-                  "Impl alignment stricter than FunctionData::implStorage");
-        
     MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
     
-    // Allocate Impl on the stack instead of the heap
-    new (implStorage) Impl;
-        
-    auto* impl = getImpl();
-    
-    impl->address = functionAddress;
-    impl->functionType = functionType;
+    pImpl->address = functionAddress;
+    pImpl->functionType = functionType;
     if (functionName != nullptr)
-        impl->functionName = functionName; // else remain defaulted string
+        pImpl->functionName = functionName;
 }
 
-FunctionData::~FunctionData() noexcept
-{
-    getImpl()->~Impl();
-}
+FunctionData::~FunctionData() noexcept = default;
 
-FunctionData::Impl*       FunctionData::getImpl()       noexcept { return reinterpret_cast<Impl*>(implStorage); }
-const FunctionData::Impl* FunctionData::getImpl() const noexcept { return reinterpret_cast<const Impl*>(implStorage); }
+FunctionData::Impl*       FunctionData::getImpl()       noexcept { return pImpl.get(); }
+const FunctionData::Impl* FunctionData::getImpl() const noexcept { return pImpl.get(); }
 
-// Move constructor
 FunctionData::FunctionData(FunctionData&& other) noexcept
+    : pImpl(std::move(other.pImpl))
 {
     qiti::ScopedNoHeapAllocations noAlloc;
-    
-    // move‐construct into our storage
-    new (implStorage) Impl(std::move(*other.getImpl()));
-    // destroy their Impl so we can re‐init it
-    other.getImpl()->~Impl();
-    // default‐construct theirs back into a valid (empty) state
-    new (other.implStorage) Impl();
 }
 
-// Move assignment
 FunctionData& FunctionData::operator=(FunctionData&& other) noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     
     if (this != &other)
     {
-        // destroy our current one
-        getImpl()->~Impl();
-        // move‐construct into our storage
-        new (implStorage) Impl(std::move(*other.getImpl()));
-        // tear down theirs…
-        other.getImpl()->~Impl();
-        // …and put them back into a default‐constructed safe state
-        new (other.implStorage) Impl();
+        pImpl = std::move(other.pImpl);
     }
     return *this;
 }
@@ -158,7 +131,7 @@ uint64_t FunctionData::getAverageTimeSpentInFunctionWallClock_ns() const noexcep
 
 FunctionCallData FunctionData::getLastFunctionCall() const noexcept
 {
-    qiti::ScopedNoHeapAllocations noAlloc;
+    MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
     
     return getImpl()->lastCallData;
 }
