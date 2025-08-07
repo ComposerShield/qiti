@@ -33,9 +33,19 @@ namespace qiti
 class ScopedQitiTest
 {
 public:
-    /** */
+    /**
+     Initialize Qiti profiling for the duration of this scope.
+     
+     Sets up instrumentation, profiling hooks, and timing measurements.
+     Test timing begins when this constructor is called.
+     */
     QITI_API ScopedQitiTest() noexcept;
-    /** */
+    
+    /**
+     Clean up Qiti profiling state and finalize measurements.
+     
+     Validates maximum test duration if one was set.
+     */
     QITI_API ~ScopedQitiTest() noexcept;
     
     /**
@@ -44,18 +54,57 @@ public:
      */
     void QITI_API reset(bool resetTestStartTime) noexcept;
     
-    /** */
-    static const char* QITI_API getQitiVersionString() noexcept;
-    /* */
-    static int QITI_API getQitiVersionMajor() noexcept;
-    /* */
-    static int QITI_API getQitiVersionMinor() noexcept;
-    /* */
-    static int QITI_API getQitiVersionPatch() noexcept;
+    /**
+     Enable or disable profiling on all instrumented functions.
+     
+     When enabled, Qiti will profile every function compiled with
+     -finstrument-functions, not just those explicitly registered.
+     This is required for reliable caller tracking functionality.
+     
+     @param enable If true, profile all functions; if false, only profile explicitly registered functions
+     */
+    void QITI_API enableProfilingOnAllFunctions(bool enable) noexcept;
     
-    /** Returns elapsed length of time since ScopedQitiTest was initialized. */
+    /**
+     Get the full version string of Qiti.
+     
+     @returns A string in the format "major.minor.patch" (e.g., "1.0.0")
+     */
+    [[nodiscard]] static const char* QITI_API getQitiVersionString() noexcept;
+    
+    /**
+     Get the major version number of Qiti.
+     
+     @returns The major version component (e.g., 1 from "1.0.0")
+     */
+    [[nodiscard]] static int QITI_API getQitiVersionMajor() noexcept;
+    
+    /**
+     Get the minor version number of Qiti.
+     
+     @returns The minor version component (e.g., 0 from "1.0.0")
+     */
+    [[nodiscard]] static int QITI_API getQitiVersionMinor() noexcept;
+    
+    /**
+     Get the patch version number of Qiti.
+     
+     @returns The patch version component (e.g., 0 from "1.0.0")
+     */
+    [[nodiscard]] static int QITI_API getQitiVersionPatch() noexcept;
+    
+    /** 
+     Get elapsed length of time since ScopedQitiTest was initialized.
+     
+     @returns Elapsed time in milliseconds
+     */
     [[nodiscard]] uint64_t QITI_API getLengthOfTest_ms() const noexcept;
-    /** Returns elapsed length of time since ScopedQitiTest was initialized. */
+    
+    /** 
+     Get elapsed length of time since ScopedQitiTest was initialized.
+     
+     @returns Elapsed time in nanoseconds
+     */
     [[nodiscard]] uint64_t QITI_API getLengthOfTest_ns() const noexcept;
     
     /** Assert if test exceeds duration specified. */

@@ -50,9 +50,6 @@ QITI_TEST_CASE("qiti::Profile::{begin/end}ProfilingFunction() on member function
     QITI_REQUIRE_FALSE(qiti::Profile::isProfilingFunction<&TestType::testFunc>());
 }
 
-#if defined(__APPLE__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated"
 QITI_TEST_CASE("qiti::Profile::beginProfilingAllFunctions()", ProfileBeginProfilingAllFunctions)
 {
     qiti::ScopedQitiTest test;
@@ -73,8 +70,6 @@ QITI_TEST_CASE("qiti::Profile::endProfilingAllFunctions()", ProfileEndProfilingA
     qiti::Profile::endProfilingAllFunctions();
     QITI_REQUIRE_FALSE(qiti::Profile::isProfilingFunction<&testFunc>());
 }
-#pragma clang diagnostic pop
-#endif // defined(__APPLE__)
 
 QITI_TEST_CASE("qiti::Profile::isProfilingFunction()", ProfileIsProfilingFunction)
 {
