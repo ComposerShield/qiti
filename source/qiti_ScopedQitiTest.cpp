@@ -95,6 +95,12 @@ void ScopedQitiTest::reset(bool resetTestStartTime) noexcept
         impl->begin_time = std::chrono::steady_clock::now();
 }
 
+void ScopedQitiTest::enableProfilingOnAllFunctions(bool enable) noexcept
+{
+    enable ? Profile::beginProfilingAllFunctions()
+           : Profile::endProfilingAllFunctions();
+}
+
 const char* ScopedQitiTest::getQitiVersionString() noexcept
 {
     static constexpr const char* version = QITI_VERSION;

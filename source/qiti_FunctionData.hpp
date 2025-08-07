@@ -154,7 +154,7 @@ public:
      that have called this function at least once during profiling. The vector may be 
      empty if this function was only called from outside the profiled call stack.
      
-     Note: This only works reliably when you have called qiti::Profile::beginProfilingAllFunctions().
+     Note: This only works reliably when you have called ScopedQitiTest::enableProfilingOnAllFunctions(true).
      */
     [[nodiscard]] std::vector<const FunctionData*> QITI_API getCallers() const noexcept;
     

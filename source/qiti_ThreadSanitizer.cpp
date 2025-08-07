@@ -302,11 +302,11 @@ class LockOrderInversionDetector final
 {
 public:
     /** */
-    LockOrderInversionDetector() noexcept = default;
+    QITI_API_INTERNAL LockOrderInversionDetector() noexcept = default;
     /** */
-    ~LockOrderInversionDetector() noexcept override = default;
+    QITI_API_INTERNAL ~LockOrderInversionDetector() noexcept override = default;
     
-    void run(std::function<void()> func) noexcept override
+    void QITI_API_INTERNAL run(std::function<void()> func) noexcept override
     {
         LockData::addGlobalListener(this);
         func();
@@ -323,7 +323,7 @@ private:
     inline static thread_local std::vector<const void*> _heldStack;
 
     // Listener callbacks:
-    void onAcquire(const pthread_mutex_t* mutexAddress) noexcept override
+    void QITI_API_INTERNAL onAcquire(const pthread_mutex_t* mutexAddress) noexcept override
     {
         auto key = reinterpret_cast<const void*>(mutexAddress);
         
@@ -345,7 +345,7 @@ private:
         _heldStack.push_back(key);
     }
 
-    void onRelease(const pthread_mutex_t* mutexAddress) noexcept override
+    void QITI_API_INTERNAL onRelease(const pthread_mutex_t* mutexAddress) noexcept override
     {
         auto key = reinterpret_cast<const void*>(mutexAddress);
         
@@ -364,7 +364,7 @@ private:
     }
 
     // DFS to see if there's a path from 'from' to 'to' in our lock‐order graph
-    bool _detectPath(const void* from, const void* to)
+    bool QITI_API_INTERNAL _detectPath(const void* from, const void* to) noexcept
     {
         std::unordered_set<const void*> seen;
         std::vector<const void*> stack{from};

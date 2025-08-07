@@ -81,7 +81,7 @@ public:
      this function was called from outside the profiled call stack (e.g. from main
      or from a function not being profiled by Qiti).
      
-     Note: This only works reliably when you have called qiti::Profile::beginProfilingAllFunctions().
+     Note: This only works reliably when you have called ScopedQitiTest::enableProfilingOnAllFunctions(true).
      */
     [[nodiscard]] const FunctionData* QITI_API getCaller() const noexcept;
     

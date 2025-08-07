@@ -20,3 +20,22 @@ QITI_TEST_CASE("qiti::ScopedQitiTest::getQitiVersionString()", ScopedQitiTestGet
     QITI_CHECK(0       == qiti::ScopedQitiTest::getQitiVersionMinor());
     QITI_CHECK(1       == qiti::ScopedQitiTest::getQitiVersionPatch());
 }
+
+QITI_TEST_CASE("qiti::ScopedQitiTest::enableProfilingOnAllFunctions()", ScopedQitiTestEnableProfilingOnAllFunctions)
+{
+    using qiti::example::profile::testFunc;
+    {
+        qiti::ScopedQitiTest test;
+        
+        QITI_REQUIRE_FALSE(qiti::Profile::isProfilingFunction<&testFunc>());
+        test.enableProfilingOnAllFunctions(true);
+        QITI_REQUIRE(qiti::Profile::isProfilingFunction<&testFunc>());
+        test.enableProfilingOnAllFunctions(false);
+        QITI_REQUIRE_FALSE(qiti::Profile::isProfilingFunction<&testFunc>());
+        test.enableProfilingOnAllFunctions(true);
+        QITI_REQUIRE(qiti::Profile::isProfilingFunction<&testFunc>());
+    } // ScopedQitiTest destructs
+    
+    // should no longer profile after ScopedQitiTest destructs
+    QITI_REQUIRE_FALSE(qiti::Profile::isProfilingFunction<&testFunc>());
+}
