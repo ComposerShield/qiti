@@ -129,6 +129,34 @@ uint64_t FunctionData::getAverageTimeSpentInFunctionWallClock_ns() const noexcep
     return getImpl()->averageTimeSpentInFunctionNanosecondsWallClock;
 }
 
+uint64_t FunctionData::getMinTimeSpentInFunctionCpu_ns() const noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
+    return getImpl()->minTimeSpentInFunctionNanosecondsCpu;
+}
+
+uint64_t FunctionData::getMaxTimeSpentInFunctionCpu_ns() const noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
+    return getImpl()->maxTimeSpentInFunctionNanosecondsCpu;
+}
+
+uint64_t FunctionData::getMinTimeSpentInFunctionWallClock_ns() const noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
+    return getImpl()->minTimeSpentInFunctionNanosecondsWallClock;
+}
+
+uint64_t FunctionData::getMaxTimeSpentInFunctionWallClock_ns() const noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
+    return getImpl()->maxTimeSpentInFunctionNanosecondsWallClock;
+}
+
 FunctionCallData FunctionData::getLastFunctionCall() const noexcept
 {
     MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
