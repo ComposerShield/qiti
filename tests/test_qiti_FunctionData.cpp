@@ -35,6 +35,29 @@ void testFuncWithDelay(int delayMs) noexcept
     }
 }
 
+/** Test functions for caller tracking */
+__attribute__((noinline))
+__attribute__((optnone))
+void callerTestFuncA() noexcept
+{
+    volatile int _ = 1;
+}
+
+__attribute__((noinline))
+__attribute__((optnone))
+void callerTestFuncB() noexcept
+{
+    callerTestFuncA(); // B calls A
+}
+
+__attribute__((noinline))
+__attribute__((optnone))
+void callerTestFuncC() noexcept
+{
+    callerTestFuncA(); // C also calls A
+    callerTestFuncB(); // C calls B (which calls A)
+}
+
 //--------------------------------------------------------------------------
 
 QITI_TEST_CASE("qiti::FunctionData::getFunctionName()", FunctionDataGetFunctionName)
@@ -309,5 +332,110 @@ QITI_TEST_CASE("qiti::FunctionData::getMaxTimeSpentInFunctionWallClock_ns()", Fu
         QITI_CHECK(minCpu > 0);
         QITI_CHECK(minWall > 0);
         QITI_CHECK(funcData->getNumTimesCalled() == 2);
+    }
+}
+
+QITI_TEST_CASE("qiti::FunctionCallData::getCaller()", FunctionCallDataGetCaller)
+{
+    qiti::ScopedQitiTest test;
+    
+    // Enable profiling for all functions for reliable caller tracking
+    qiti::Profile::beginProfilingAllFunctions();
+    
+    auto funcDataA = qiti::FunctionData::getFunctionData<&callerTestFuncA>();
+    auto funcDataB = qiti::FunctionData::getFunctionData<&callerTestFuncB>();
+    auto funcDataC = qiti::FunctionData::getFunctionData<&callerTestFuncC>();
+    
+    QITI_REQUIRE(funcDataA != nullptr);
+    QITI_REQUIRE(funcDataB != nullptr);
+    QITI_REQUIRE(funcDataC != nullptr);
+    
+    QITI_SECTION("Direct call - no caller")
+    {
+        callerTestFuncA(); // Called directly from test
+        auto lastCall = funcDataA->getLastFunctionCall();
+        QITI_CHECK(lastCall.getCaller() == nullptr); // No profiled caller
+    }
+    
+    QITI_SECTION("Function called by another function")
+    {
+        callerTestFuncB(); // B calls A
+        auto lastCallA = funcDataA->getLastFunctionCall();
+        QITI_CHECK(lastCallA.getCaller() == funcDataB); // A was called by B
+    }
+    
+    QITI_SECTION("Complex call chain")
+    {
+        callerTestFuncC(); // C calls A, then C calls B (which calls A)
+        
+        // After this call sequence:
+        // - A was last called by B (since C->B->A was the final call to A)
+        // - B was called by C
+        auto lastCallA = funcDataA->getLastFunctionCall();
+        auto lastCallB = funcDataB->getLastFunctionCall();
+        
+        QITI_CHECK(lastCallA.getCaller() == funcDataB); // A's last caller was B
+        QITI_CHECK(lastCallB.getCaller() == funcDataC); // B was called by C
+    }
+}
+
+QITI_TEST_CASE("qiti::FunctionData::getCallers()", FunctionDataGetCallers)
+{
+    qiti::ScopedQitiTest test;
+    
+    // Enable profiling for all functions for reliable caller tracking
+    qiti::Profile::beginProfilingAllFunctions();
+    
+    auto funcDataA = qiti::FunctionData::getFunctionData<&callerTestFuncA>();
+    auto funcDataB = qiti::FunctionData::getFunctionData<&callerTestFuncB>();
+    auto funcDataC = qiti::FunctionData::getFunctionData<&callerTestFuncC>();
+    
+    QITI_REQUIRE(funcDataA != nullptr);
+    QITI_REQUIRE(funcDataB != nullptr);
+    QITI_REQUIRE(funcDataC != nullptr);
+    
+    QITI_SECTION("No callers initially")
+    {
+        auto callersA = funcDataA->getCallers();
+        auto callersB = funcDataB->getCallers(); 
+        auto callersC = funcDataC->getCallers();
+        
+        QITI_CHECK(callersA.empty());
+        QITI_CHECK(callersB.empty());
+        QITI_CHECK(callersC.empty());
+    }
+    
+    QITI_SECTION("Single caller")
+    {
+        callerTestFuncB(); // B calls A
+        
+        auto callersA = funcDataA->getCallers();
+        auto callersB = funcDataB->getCallers();
+        
+        QITI_REQUIRE(callersA.size() == 1);
+        QITI_CHECK(callersA[0] == funcDataB); // A was called by B
+        QITI_CHECK(callersB.empty()); // B wasn't called by any profiled function
+    }
+    
+    QITI_SECTION("Multiple callers")
+    {
+        callerTestFuncB(); // B calls A
+        callerTestFuncC(); // C calls A, then C calls B (which also calls A)
+        
+        auto callersA = funcDataA->getCallers();
+        auto callersB = funcDataB->getCallers();
+        auto callersC = funcDataC->getCallers();
+        
+        // A should have been called by both B and C
+        QITI_REQUIRE(callersA.size() == 2);
+        QITI_CHECK(std::find(callersA.begin(), callersA.end(), funcDataB) != callersA.end());
+        QITI_CHECK(std::find(callersA.begin(), callersA.end(), funcDataC) != callersA.end());
+        
+        // B should have been called by C
+        QITI_REQUIRE(callersB.size() == 1);
+        QITI_CHECK(callersB[0] == funcDataC);
+        
+        // C wasn't called by any profiled function
+        QITI_CHECK(callersC.empty());
     }
 }

@@ -74,6 +74,17 @@ public:
     /** Get thread that was responsible for this function call. */
     [[nodiscard]] std::thread::id QITI_API getThreadThatCalledFunction() const noexcept;
     
+    /** 
+     Get the function that called this function.
+     
+     Returns a pointer to the FunctionData of the calling function, or nullptr if
+     this function was called from outside the profiled call stack (e.g. from main
+     or from a function not being profiled by Qiti).
+     
+     Note: This only works reliably when you have called qiti::Profile::beginProfilingAllFunctions().
+     */
+    [[nodiscard]] const FunctionData* QITI_API getCaller() const noexcept;
+    
     //--------------------------------------------------------------------------
     // Doxygen - Begin Internal Documentation
     /** \cond INTERNAL */

@@ -31,6 +31,7 @@
 #include <memory>
 #include <mutex>
 #include <regex>
+#include <stack>
 #include <unordered_set>
 #include <utility>
 #include <string>
@@ -39,6 +40,9 @@
 
 inline std::unordered_set<const void*> g_functionsToProfile;
 bool g_profileAllFunctions = false;
+
+// Thread-local call stack to track caller relationships
+static thread_local std::stack<qiti::FunctionData*> g_callStack;
 
 struct Init_g_functionsToProfile
 {
@@ -126,7 +130,20 @@ void Profile::updateFunctionDataOnEnter(const void* this_fn) noexcept
     // Update FunctionCallData
     impl->lastCallData.reset(); // Deletes previous impl
     
+    // Track caller relationship - check if there's a caller on the stack
+    const FunctionData* caller = nullptr;
+    if (! g_callStack.empty())
+    {
+        caller = g_callStack.top();
+        if (caller != nullptr)
+            impl->callers.insert(caller);
+    }
+    
+    // Push this function onto the call stack
+    g_callStack.push(&functionData);
+    
     auto* lastCallImpl = impl->lastCallData.getImpl();
+    lastCallImpl->caller = caller;
     lastCallImpl->callingThread = std::this_thread::get_id();
     lastCallImpl->numHeapAllocationsBeforeFunctionCall = MallocHooks::numHeapAllocationsOnCurrentThread;
     lastCallImpl->amountHeapAllocatedBeforeFunctionCall = MallocHooks::amountHeapAllocatedOnCurrentThread;
@@ -214,6 +231,12 @@ void Profile::updateFunctionDataOnExit(const void* this_fn) noexcept
     if(callImpl->timeSpentInFunctionNanosecondsCpu > impl->maxTimeSpentInFunctionNanosecondsCpu)
     {
         impl->maxTimeSpentInFunctionNanosecondsCpu = callImpl->timeSpentInFunctionNanosecondsCpu;
+    }
+    
+    // Pop this function from the call stack
+    if (! g_callStack.empty())
+    {
+        g_callStack.pop();
     }
 }
 } // namespace qiti
