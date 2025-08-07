@@ -54,6 +54,8 @@ public:
     std::unordered_set<FunctionData::Listener*> listeners{};
     std::unordered_set<const FunctionData*> callers{};
     
+    uint64_t numUncaughtExceptionsThrown = 0;
+    
     FunctionCallData lastCallData{};
 };
 } // namespace qiti

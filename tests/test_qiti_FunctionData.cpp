@@ -58,6 +58,34 @@ void callerTestFuncC() noexcept
     callerTestFuncB(); // C calls B (which calls A)
 }
 
+__attribute__((noinline))
+__attribute__((optnone))
+void testFuncThrowsException()
+{
+    throw std::runtime_error("Test exception");
+}
+
+__attribute__((noinline))
+__attribute__((optnone))
+void testFuncCatchesException()
+{
+    try
+    {
+        testFuncThrowsException();
+    }
+    catch (const std::exception&)
+    {
+        // Caught the exception
+    }
+}
+
+__attribute__((noinline))
+__attribute__((optnone))
+void testFuncThrowsUncaughtException()
+{
+    testFuncThrowsException(); // This will propagate
+}
+
 //--------------------------------------------------------------------------
 
 QITI_TEST_CASE("qiti::FunctionData::getFunctionName()", FunctionDataGetFunctionName)
@@ -437,5 +465,76 @@ QITI_TEST_CASE("qiti::FunctionData::getCallers()", FunctionDataGetCallers)
         
         // C wasn't called by any profiled function
         QITI_CHECK(callersC.empty());
+    }
+}
+
+QITI_TEST_CASE("Exception tracking", FunctionDataExceptionTracking)
+{
+    qiti::ScopedQitiTest test;
+    test.enableProfilingOnAllFunctions(true);
+    
+    const auto* funcDataThrows = qiti::FunctionData::getFunctionData<testFuncThrowsException>();
+    const auto* funcDataCatches = qiti::FunctionData::getFunctionData<testFuncCatchesException>();
+    const auto* funcDataUncaught = qiti::FunctionData::getFunctionData<testFuncThrowsUncaughtException>();
+    
+    QITI_SECTION("No exceptions initially")
+    {
+        QITI_CHECK(funcDataThrows->getNumUncaughtExceptionsThrown() == 0);
+        QITI_CHECK(funcDataCatches->getNumUncaughtExceptionsThrown() == 0);
+        QITI_CHECK(funcDataUncaught->getNumUncaughtExceptionsThrown() == 0);
+    }
+    
+    QITI_SECTION("Caught exception")
+    {
+        testFuncCatchesException();
+        
+        // The exception was thrown but caught, so it should be counted as uncaught
+        // for the inner function but not the outer function
+        QITI_CHECK(funcDataThrows->getNumUncaughtExceptionsThrown() == 1);
+        QITI_CHECK(funcDataCatches->getNumUncaughtExceptionsThrown() == 0);
+        
+        // Check the call data
+        auto lastCallThrows = funcDataThrows->getLastFunctionCall();
+        auto lastCallCatches = funcDataCatches->getLastFunctionCall();
+        
+        QITI_CHECK(lastCallThrows.didThrowUncaughtException() == true);
+        QITI_CHECK(lastCallCatches.didThrowUncaughtException() == false);
+    }
+    
+    QITI_SECTION("Uncaught exception")
+    {
+        try
+        {
+            testFuncThrowsUncaughtException();
+        }
+        catch (const std::exception&)
+        {
+            // Catch it here so the test doesn't terminate
+        }
+        
+        // Both functions should have uncaught exceptions
+        QITI_CHECK(funcDataThrows->getNumUncaughtExceptionsThrown() == 1);
+        QITI_CHECK(funcDataUncaught->getNumUncaughtExceptionsThrown() == 1);
+        
+        // Check the call data
+        auto lastCallThrows = funcDataThrows->getLastFunctionCall();
+        auto lastCallUncaught = funcDataUncaught->getLastFunctionCall();
+        
+        QITI_CHECK(lastCallThrows.didThrowUncaughtException() == true);
+        QITI_CHECK(lastCallUncaught.didThrowUncaughtException() == true);
+    }
+    
+    QITI_SECTION("Multiple exceptions")
+    {
+        // Call the catching function multiple times
+        testFuncCatchesException();
+        testFuncCatchesException();
+        testFuncCatchesException();
+        
+        // testFuncThrowsException should have been called 3 times, each throwing
+        QITI_CHECK(funcDataThrows->getNumUncaughtExceptionsThrown() == 3);
+        QITI_CHECK(funcDataCatches->getNumUncaughtExceptionsThrown() == 0);
+        QITI_CHECK(funcDataThrows->getNumTimesCalled() == 3);
+        QITI_CHECK(funcDataCatches->getNumTimesCalled() == 3);
     }
 }

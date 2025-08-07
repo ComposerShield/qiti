@@ -77,13 +77,22 @@ public:
     /** 
      Get the function that called this function.
      
-     Returns a pointer to the FunctionData of the calling function, or nullptr if
+     @returns A pointer to the FunctionData of the calling function, or nullptr if
      this function was called from outside the profiled call stack (e.g. from main
      or from a function not being profiled by Qiti).
      
      Note: This only works reliably when you have called ScopedQitiTest::enableProfilingOnAllFunctions(true).
      */
     [[nodiscard]] const FunctionData* QITI_API getCaller() const noexcept;
+    
+    /**
+     @returns True if this function call threw an uncaught exception during execution.
+     
+     Indicates whether an exception was thrown during this function call that was
+     not caught within the function before it returned. This includes exceptions
+     thrown by functions called within this function.
+     */
+    [[nodiscard]] bool QITI_API didThrowUncaughtException() const noexcept;
     
     //--------------------------------------------------------------------------
     // Doxygen - Begin Internal Documentation

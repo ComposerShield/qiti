@@ -48,6 +48,9 @@ struct FunctionCallData::Impl
     
     uint64_t amountHeapAllocatedBeforeFunctionCall = 0;
     uint64_t amountHeapAllocatedAfterFunctionCall  = 0;
+    
+    int initialUncaughtExceptions = 0;
+    bool didThrowUncaughtException = false;
 };
 } // namespace qiti
 

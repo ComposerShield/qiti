@@ -134,4 +134,11 @@ const FunctionData* FunctionCallData::getCaller() const noexcept
     return getImpl()->caller;
 }
 
+bool FunctionCallData::didThrowUncaughtException() const noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
+    return getImpl()->didThrowUncaughtException;
+}
+
 } // namespace qiti
