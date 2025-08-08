@@ -42,6 +42,7 @@ set(SOURCES
     "source/qiti_MallocHooks.cpp"
     "source/qiti_Profile.hpp"
     "source/qiti_Profile.cpp"
+    "source/qiti_ExceptionHooks.cpp"
     "source/qiti_ScopedNoHeapAllocations.hpp"
     "source/qiti_ScopedQitiTest.hpp"
     "source/qiti_ScopedQitiTest.cpp"

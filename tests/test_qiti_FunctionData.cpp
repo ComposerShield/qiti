@@ -58,6 +58,34 @@ void callerTestFuncC() noexcept
     callerTestFuncB(); // C calls B (which calls A)
 }
 
+__attribute__((noinline))
+__attribute__((optnone))
+void testFuncThrowsException()
+{
+    throw std::runtime_error("Test exception");
+}
+
+__attribute__((noinline))
+__attribute__((optnone))
+void testFuncCatchesException()
+{
+    try
+    {
+        testFuncThrowsException();
+    }
+    catch (const std::exception&)
+    {
+        // Caught the exception
+    }
+}
+
+__attribute__((noinline))
+__attribute__((optnone))
+void testFuncThrowsUncaughtException()
+{
+    testFuncThrowsException(); // This will propagate
+}
+
 //--------------------------------------------------------------------------
 
 QITI_TEST_CASE("qiti::FunctionData::getFunctionName()", FunctionDataGetFunctionName)
@@ -437,5 +465,75 @@ QITI_TEST_CASE("qiti::FunctionData::getCallers()", FunctionDataGetCallers)
         
         // C wasn't called by any profiled function
         QITI_CHECK(callersC.empty());
+    }
+}
+
+QITI_TEST_CASE("Exception tracking", FunctionDataExceptionTracking)
+{
+    qiti::ScopedQitiTest test;
+    test.enableProfilingOnAllFunctions(true);
+    
+    const auto* funcDataThrows = qiti::FunctionData::getFunctionData<testFuncThrowsException>();
+    const auto* funcDataCatches = qiti::FunctionData::getFunctionData<testFuncCatchesException>();
+    const auto* funcDataPropagates = qiti::FunctionData::getFunctionData<testFuncThrowsUncaughtException>();
+    
+    QITI_SECTION("No exceptions initially")
+    {
+        QITI_CHECK(funcDataThrows->getNumExceptionsThrown() == 0);
+        QITI_CHECK(funcDataCatches->getNumExceptionsThrown() == 0);
+        QITI_CHECK(funcDataPropagates->getNumExceptionsThrown() == 0);
+    }
+    
+    QITI_SECTION("Function that throws and catches")
+    {
+        testFuncCatchesException();
+        
+        // Only the function that actually executes throw should be marked as throwing
+        QITI_CHECK(funcDataThrows->getNumExceptionsThrown() == 1);
+        QITI_CHECK(funcDataCatches->getNumExceptionsThrown() == 0); // This function catches, doesn't throw
+        
+        // Check the call data
+        auto lastCallThrows = funcDataThrows->getLastFunctionCall();
+        auto lastCallCatches = funcDataCatches->getLastFunctionCall();
+        
+        QITI_CHECK(lastCallThrows.getNumExceptionsThrown() > 0);
+        QITI_CHECK(lastCallCatches.getNumExceptionsThrown() == 0);
+    }
+    
+    QITI_SECTION("Exception propagation")
+    {
+        try
+        {
+            testFuncThrowsUncaughtException();
+        }
+        catch (const std::exception&)
+        {
+            // Catch it here so the test doesn't terminate
+        }
+        
+        // Only the function that actually throws should be marked as throwing
+        QITI_CHECK(funcDataThrows->getNumExceptionsThrown() == 1);
+        QITI_CHECK(funcDataPropagates->getNumExceptionsThrown() == 0); // This function doesn't throw, it just propagates
+        
+        // Check the call data
+        auto lastCallThrows = funcDataThrows->getLastFunctionCall();
+        auto lastCallPropagates = funcDataPropagates->getLastFunctionCall();
+        
+        QITI_CHECK(lastCallThrows.didThrowException() == true);
+        QITI_CHECK(lastCallPropagates.didThrowException() == false); // This function doesn't throw, it just propagates
+    }
+    
+    QITI_SECTION("Multiple exceptions")
+    {
+        // Call the catching function multiple times
+        testFuncCatchesException();
+        testFuncCatchesException();
+        testFuncCatchesException();
+        
+        // testFuncThrowsException should have been called 3 times, each throwing
+        QITI_CHECK(funcDataThrows->getNumExceptionsThrown() == 3);
+        QITI_CHECK(funcDataCatches->getNumExceptionsThrown() == 0);
+        QITI_CHECK(funcDataThrows->getNumTimesCalled() == 3);
+        QITI_CHECK(funcDataCatches->getNumTimesCalled() == 3);
     }
 }

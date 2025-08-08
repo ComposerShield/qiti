@@ -27,6 +27,7 @@
 #include <unistd.h>
 
 #include <cassert>
+#include <exception>
 #include <iostream>
 #include <memory>
 #include <mutex>
@@ -42,7 +43,7 @@ inline std::unordered_set<const void*> g_functionsToProfile;
 bool g_profileAllFunctions = false;
 
 // Thread-local call stack to track caller relationships
-static thread_local std::stack<qiti::FunctionData*> g_callStack;
+thread_local std::stack<qiti::FunctionData*> g_callStack;
 
 struct Init_g_functionsToProfile
 {

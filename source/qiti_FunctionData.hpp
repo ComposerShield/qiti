@@ -150,13 +150,22 @@ public:
     /**
      Get all functions that have called this function.
      
-     Returns a vector of pointers to FunctionData instances representing all functions
+     @returns A vector of pointers to FunctionData instances representing all functions
      that have called this function at least once during profiling. The vector may be 
      empty if this function was only called from outside the profiled call stack.
      
      Note: This only works reliably when you have called ScopedQitiTest::enableProfilingOnAllFunctions(true).
      */
     [[nodiscard]] std::vector<const FunctionData*> QITI_API getCallers() const noexcept;
+    
+    /**
+     @returns The total number of exceptions thrown by this function.
+     
+     Counts the number of times this specific function executed a throw statement.
+     This does not include exceptions thrown by other functions that this function calls.
+     @returns 0 if no exceptions have been thrown by this function.
+     */
+    [[nodiscard]] uint64_t QITI_API getNumExceptionsThrown() const noexcept;
     
     //--------------------------------------------------------------------------
     // Doxygen - Begin Internal Documentation
