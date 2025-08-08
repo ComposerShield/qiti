@@ -15,6 +15,7 @@
 #include "qiti_HotspotDetector.hpp"
 
 #include "qiti_MallocHooks.hpp"
+#include "qiti_Profile.hpp"
 #include "qiti_ScopedNoHeapAllocations.hpp"
 
 #include <algorithm>
@@ -35,8 +36,8 @@ std::vector<HotspotDetector::Hotspot> HotspotDetector::detectHotspots() noexcept
 
 std::vector<HotspotDetector::Hotspot> HotspotDetector::detectHotspots(double scoreThreshold) noexcept
 {
-    qiti::ScopedNoHeapAllocations noAlloc;
-    MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
+    qiti::MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
     
     std::vector<Hotspot> hotspots;
     
@@ -76,6 +77,9 @@ std::vector<HotspotDetector::Hotspot> HotspotDetector::detectHotspots(double sco
 
 double HotspotDetector::calculateHotspotScore(const FunctionData* func) noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
+    qiti::ScopedNoHeapAllocations noAllocs;
+    
     if (func == nullptr)
         return 0.0;
     
@@ -98,7 +102,7 @@ std::string HotspotDetector::getHotspotReason(const FunctionData* func) noexcept
     if (func == nullptr)
         return "Unknown function";
     
-    MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
+    qiti::MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
     
     std::ostringstream reason;
     
