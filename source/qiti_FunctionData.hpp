@@ -44,7 +44,9 @@ public:
         copyConstructor,
         copyAssignment,
         moveConstructor,
-        moveAssignment
+        moveAssignment,
+        
+        unknown
     };
     
     /**
@@ -166,6 +168,62 @@ public:
      @returns 0 if no exceptions have been thrown by this function.
      */
     [[nodiscard]] uint64_t QITI_API getNumExceptionsThrown() const noexcept;
+    
+    /**
+     @returns True if this function is any type of constructor.
+     
+     Example: `MyClass()`, `MyClass(const MyClass&)`, `MyClass(MyClass&&)`
+     */
+    [[nodiscard]] bool QITI_API isConstructor() const noexcept;
+
+    /**
+     @returns True if this function is a regular (non-copy, non-move) constructor.
+     
+     Example: `MyClass()`, `MyClass(int x, float y)`
+     */
+    [[nodiscard]] bool QITI_API isRegularConstructor() const noexcept;
+
+    /**
+     @returns True if this function is a copy constructor.
+     
+     Example: `MyClass(const MyClass& other)`
+     */
+    [[nodiscard]] bool QITI_API isCopyConstructor() const noexcept;
+
+    /**
+     @returns True if this function is a move constructor.
+     
+     Example: `MyClass(MyClass&& other)`
+     */
+    [[nodiscard]] bool QITI_API isMoveConstructor() const noexcept;
+
+    /**
+     @returns True if this function is any type of assignment operator.
+     
+     Example: `operator=(const MyClass&)`, `operator=(MyClass&&)`
+     */
+    [[nodiscard]] bool QITI_API isAssignment() const noexcept;
+
+    /**
+     @returns True if this function is a copy assignment operator.
+     
+     Example: `MyClass& operator=(const MyClass& other)`
+     */
+    [[nodiscard]] bool QITI_API isCopyAssignment() const noexcept;
+
+    /**
+     @returns True if this function is a move assignment operator.
+     
+     Example: `MyClass& operator=(MyClass&& other)`
+     */
+    [[nodiscard]] bool QITI_API isMoveAssignment() const noexcept;
+
+    /**
+     @returns True if this function is a destructor.
+     
+     Example: `~MyClass()`
+     */
+    [[nodiscard]] bool QITI_API isDestructor() const noexcept;
     
     //--------------------------------------------------------------------------
     // Doxygen - Begin Internal Documentation

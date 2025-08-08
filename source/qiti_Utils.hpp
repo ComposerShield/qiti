@@ -73,7 +73,7 @@ private:
     /** */
     [[nodiscard]] static qiti::FunctionData& QITI_API getFunctionDataFromAddress(const void* functionAddress,
                                                                                  const char* functionName = nullptr,
-                                                                                 int functionType = 0) noexcept;
+                                                                                 int functionType = -1) noexcept;
     
     /** */
     [[nodiscard]] static const qiti::FunctionData* QITI_API getFunctionData(const char* demangledFunctionName) noexcept;

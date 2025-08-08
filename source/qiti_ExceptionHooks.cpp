@@ -68,9 +68,9 @@ void QITI_API __cxa_throw(void* thrown_object,
     initializeExceptionHooks();
     
     // Record that the current function threw an exception
-    if (! g_callStack.empty())
+    if (! qiti::g_callStack.empty())
     {
-        auto* currentFunc = g_callStack.top();
+        auto* currentFunc = qiti::g_callStack.top();
         if (currentFunc)
         {
             auto* impl = currentFunc->getImpl();

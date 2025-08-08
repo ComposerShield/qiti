@@ -86,6 +86,58 @@ void testFuncThrowsUncaughtException()
     testFuncThrowsException(); // This will propagate
 }
 
+// Test classes for function type detection
+class TestClassForFunctionTypes
+{
+public:
+    __attribute__((noinline))
+    __attribute__((optnone))
+    TestClassForFunctionTypes() : value(0) {}        // Regular constructor
+    
+    __attribute__((noinline))
+    __attribute__((optnone))
+    TestClassForFunctionTypes(const TestClassForFunctionTypes& other) : value(other.value) {}  // Copy constructor
+    
+    __attribute__((noinline))
+    __attribute__((optnone))
+    TestClassForFunctionTypes(TestClassForFunctionTypes&& other) : value(other.value)
+    {
+        other.value = -1;  // Move constructor
+    }
+    
+    __attribute__((noinline))
+    __attribute__((optnone))
+    TestClassForFunctionTypes& operator=(const TestClassForFunctionTypes& other)  // Copy assignment
+    {
+        if (this != &other)
+            value = other.value;
+        return *this;
+    }
+    
+    __attribute__((noinline))
+    __attribute__((optnone))
+    TestClassForFunctionTypes& operator=(TestClassForFunctionTypes&& other)  // Move assignment
+    {
+        if (this != &other)
+        {
+            value = other.value;
+            other.value = -1;
+        }
+        return *this;
+    }
+    
+    __attribute__((noinline))
+    __attribute__((optnone))
+    ~TestClassForFunctionTypes() {}                  // Destructor
+    
+    __attribute__((noinline))
+    __attribute__((optnone))
+    void regularMethod() {}                          // Regular method
+    
+private:
+    int value; // dummy value
+};
+
 //--------------------------------------------------------------------------
 
 QITI_TEST_CASE("qiti::FunctionData::getFunctionName()", FunctionDataGetFunctionName)
@@ -535,5 +587,256 @@ QITI_TEST_CASE("Exception tracking", FunctionDataExceptionTracking)
         QITI_CHECK(funcDataCatches->getNumExceptionsThrown() == 0);
         QITI_CHECK(funcDataThrows->getNumTimesCalled() == 3);
         QITI_CHECK(funcDataCatches->getNumTimesCalled() == 3);
+    }
+}
+
+QITI_TEST_CASE("Function type detection", FunctionDataFunctionTypeDetection)
+{
+    qiti::ScopedQitiTest test;
+    test.enableProfilingOnAllFunctions(true);
+    
+    QITI_SECTION("Regular constructor")
+    {
+        // Create an object to trigger regular constructor
+        TestClassForFunctionTypes obj1;
+        
+        // Get all profiled functions and find the constructor
+        auto allFunctions = qiti::FunctionData::getAllProfiledFunctionData();
+        const qiti::FunctionData* ctorData = nullptr;
+        
+        for (const auto* func : allFunctions)
+        {
+            if (func->isRegularConstructor())
+            {
+                ctorData = func;
+                break;
+            }
+        }
+        
+        QITI_REQUIRE(ctorData != nullptr);
+        
+        QITI_CHECK(ctorData->isConstructor()        == true);
+        QITI_CHECK(ctorData->isRegularConstructor() == true);
+        QITI_CHECK(ctorData->isCopyConstructor()    == false);
+        QITI_CHECK(ctorData->isMoveConstructor()    == false);
+        QITI_CHECK(ctorData->isAssignment()         == false);
+        QITI_CHECK(ctorData->isCopyAssignment()     == false);
+        QITI_CHECK(ctorData->isMoveAssignment()     == false);
+        QITI_CHECK(ctorData->isDestructor()         == false);
+    }
+    
+    QITI_SECTION("Copy constructor")
+    {
+        TestClassForFunctionTypes obj1;
+        TestClassForFunctionTypes obj2(obj1);  // Trigger copy constructor
+        
+        // Find the copy constructor
+        auto allFunctions = qiti::FunctionData::getAllProfiledFunctionData();
+        const qiti::FunctionData* copyCtorData = nullptr;
+        
+        for (const auto* func : allFunctions)
+        {
+            if (func->isCopyConstructor())
+            {
+                copyCtorData = func;
+                break;
+            }
+        }
+        
+        QITI_REQUIRE(copyCtorData != nullptr);
+        
+        QITI_CHECK(copyCtorData->isConstructor()        == true);
+        QITI_CHECK(copyCtorData->isRegularConstructor() == false);
+        QITI_CHECK(copyCtorData->isCopyConstructor()    == true);
+        QITI_CHECK(copyCtorData->isMoveConstructor()    == false);
+        QITI_CHECK(copyCtorData->isAssignment()         == false);
+        QITI_CHECK(copyCtorData->isCopyAssignment()     == false);
+        QITI_CHECK(copyCtorData->isMoveAssignment()     == false);
+        QITI_CHECK(copyCtorData->isDestructor()         == false);
+    }
+    
+    QITI_SECTION("Move constructor")
+    {
+        TestClassForFunctionTypes obj1;
+        TestClassForFunctionTypes obj2(std::move(obj1));  // Trigger move constructor
+        
+        // Find the move constructor
+        auto allFunctions = qiti::FunctionData::getAllProfiledFunctionData();
+        const qiti::FunctionData* moveCtorData = nullptr;
+        
+        for (const auto* func : allFunctions) {
+            if (func->isMoveConstructor()) {
+                moveCtorData = func;
+                break;
+            }
+        }
+        
+        QITI_REQUIRE(moveCtorData != nullptr);
+        
+        QITI_CHECK(moveCtorData->isConstructor()        == true);
+        QITI_CHECK(moveCtorData->isRegularConstructor() == false);
+        QITI_CHECK(moveCtorData->isCopyConstructor()    == false);
+        QITI_CHECK(moveCtorData->isMoveConstructor()    == true);
+        QITI_CHECK(moveCtorData->isAssignment()         == false);
+        QITI_CHECK(moveCtorData->isCopyAssignment()     == false);
+        QITI_CHECK(moveCtorData->isMoveAssignment()     == false);
+        QITI_CHECK(moveCtorData->isDestructor()         == false);
+    }
+    
+    QITI_SECTION("Copy assignment")
+    {
+        TestClassForFunctionTypes obj1;
+        TestClassForFunctionTypes obj2;
+        obj2 = obj1;  // Trigger copy assignment
+        
+        // Find the copy assignment operator
+        auto allFunctions = qiti::FunctionData::getAllProfiledFunctionData();
+        const qiti::FunctionData* copyAssignData = nullptr;
+        
+        for (const auto* func : allFunctions)
+        {
+            if (func->isCopyAssignment())
+            {
+                copyAssignData = func;
+                break;
+            }
+        }
+        
+        QITI_REQUIRE(copyAssignData != nullptr);
+        
+        QITI_CHECK(copyAssignData->isConstructor()        == false);
+        QITI_CHECK(copyAssignData->isRegularConstructor() == false);
+        QITI_CHECK(copyAssignData->isCopyConstructor()    == false);
+        QITI_CHECK(copyAssignData->isMoveConstructor()    == false);
+        QITI_CHECK(copyAssignData->isAssignment()         == true);
+        QITI_CHECK(copyAssignData->isCopyAssignment()     == true);
+        QITI_CHECK(copyAssignData->isMoveAssignment()     == false);
+        QITI_CHECK(copyAssignData->isDestructor()         == false);
+    }
+    
+    QITI_SECTION("Move assignment")
+    {
+        TestClassForFunctionTypes obj1;
+        TestClassForFunctionTypes obj2;
+        obj2 = std::move(obj1);  // Trigger move assignment
+        
+        // Find the move assignment operator
+        auto allFunctions = qiti::FunctionData::getAllProfiledFunctionData();
+        const qiti::FunctionData* moveAssignData = nullptr;
+        
+        for (const auto* func : allFunctions)
+        {
+            if (func->isMoveAssignment())
+            {
+                moveAssignData = func;
+                break;
+            }
+        }
+        
+        QITI_REQUIRE(moveAssignData != nullptr);
+        
+        QITI_CHECK(moveAssignData->isConstructor()        == false);
+        QITI_CHECK(moveAssignData->isRegularConstructor() == false);
+        QITI_CHECK(moveAssignData->isCopyConstructor()    == false);
+        QITI_CHECK(moveAssignData->isMoveConstructor()    == false);
+        QITI_CHECK(moveAssignData->isAssignment()         == true);
+        QITI_CHECK(moveAssignData->isCopyAssignment()     == false);
+        QITI_CHECK(moveAssignData->isMoveAssignment()     == true);
+        QITI_CHECK(moveAssignData->isDestructor()         == false);
+    }
+    
+    QITI_SECTION("Regular method")
+    {
+        TestClassForFunctionTypes obj;
+        obj.regularMethod();  // Call regular method
+        
+        // Find the regular method
+        auto allFunctions = qiti::FunctionData::getAllProfiledFunctionData();
+        const qiti::FunctionData* methodData = nullptr;
+        
+        for (const auto* func : allFunctions)
+        {
+            const char* name = func->getFunctionName();
+            if (strstr(name, "regularMethod") != nullptr)
+            {
+                methodData = func;
+                break;
+            }
+        }
+        
+        QITI_REQUIRE(methodData != nullptr);
+        
+        QITI_CHECK(methodData->isConstructor()        == false);
+        QITI_CHECK(methodData->isRegularConstructor() == false);
+        QITI_CHECK(methodData->isCopyConstructor()    == false);
+        QITI_CHECK(methodData->isMoveConstructor()    == false);
+        QITI_CHECK(methodData->isAssignment()         == false);
+        QITI_CHECK(methodData->isCopyAssignment()     == false);
+        QITI_CHECK(methodData->isMoveAssignment()     == false);
+        QITI_CHECK(methodData->isDestructor()         == false);
+    }
+    
+    QITI_SECTION("Destructor")
+    {
+        // Create an object in a nested scope to trigger destructor
+        {
+            TestClassForFunctionTypes obj;
+        } // Destructor is called here when obj goes out of scope
+        
+        // Find the destructor
+        auto allFunctions = qiti::FunctionData::getAllProfiledFunctionData();
+        const qiti::FunctionData* destructorData = nullptr;
+        
+        for (const auto* func : allFunctions)
+        {
+            if (func->isDestructor())
+            {
+                destructorData = func;
+                break;
+            }
+        }
+        
+        QITI_REQUIRE(destructorData != nullptr);
+        
+        QITI_CHECK(destructorData->isConstructor()        == false);
+        QITI_CHECK(destructorData->isRegularConstructor() == false);
+        QITI_CHECK(destructorData->isCopyConstructor()    == false);
+        QITI_CHECK(destructorData->isMoveConstructor()    == false);
+        QITI_CHECK(destructorData->isAssignment()         == false);
+        QITI_CHECK(destructorData->isCopyAssignment()     == false);
+        QITI_CHECK(destructorData->isMoveAssignment()     == false);
+        QITI_CHECK(destructorData->isDestructor()         == true);
+    }
+    
+    QITI_SECTION("Destructor")
+    {
+        // Create an object in a nested scope to trigger destructor
+        {
+            TestClassForFunctionTypes obj;
+        } // Destructor is called here when obj goes out of scope
+        
+        // Find the destructor
+        auto allFunctions = qiti::FunctionData::getAllProfiledFunctionData();
+        const qiti::FunctionData* destructorData = nullptr;
+        
+        for (const auto* func : allFunctions)
+        {
+            if (func->isDestructor())
+            {
+                destructorData = func;
+                break;
+            }
+        }
+        
+        QITI_REQUIRE(destructorData != nullptr);
+        
+        QITI_CHECK(destructorData->isConstructor()        == false);
+        QITI_CHECK(destructorData->isRegularConstructor() == false);
+        QITI_CHECK(destructorData->isCopyConstructor()    == false);
+        QITI_CHECK(destructorData->isMoveConstructor()    == false);
+        QITI_CHECK(destructorData->isAssignment()         == false);
+        QITI_CHECK(destructorData->isCopyAssignment()     == false);
+        QITI_CHECK(destructorData->isMoveAssignment()     == false);
+        QITI_CHECK(destructorData->isDestructor()         == true);
     }
 }

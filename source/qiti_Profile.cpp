@@ -24,6 +24,7 @@
 
 #include <execinfo.h>
 #include <cxxabi.h>
+#include <dlfcn.h>
 #include <unistd.h>
 
 #include <cassert>
@@ -37,6 +38,8 @@
 #include <utility>
 #include <string>
 
+namespace qiti
+{
 //--------------------------------------------------------------------------
 
 inline std::unordered_set<const void*> g_functionsToProfile;
@@ -56,8 +59,6 @@ static const Init_g_functionsToProfile init_g_functionsToProfile;
 
 //--------------------------------------------------------------------------
 
-namespace qiti
-{
 void Profile::resetProfiling() noexcept
 {        
     g_functionsToProfile.clear();

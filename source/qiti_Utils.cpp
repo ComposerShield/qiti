@@ -47,6 +47,31 @@
     return map;
 }
 
+/** */
+[[nodiscard]] static const char* getFunctionName(const void* this_fn) noexcept
+{
+    Dl_info info;
+    const char* functionName = nullptr;
+    // Prevent memory leaks, clean up dynamically allocated function name strings
+    static std::vector<std::unique_ptr<char>> names;
+    
+    if (dladdr(this_fn, &info) && info.dli_sname)
+    {
+        // Demangle the function name
+        int status;
+        char* demangled = abi::__cxa_demangle(info.dli_sname, nullptr, nullptr, &status);
+        if (status == 0 && demangled)
+        {
+            auto& ref = names.emplace_back(std::unique_ptr<char>(demangled));
+            functionName = ref.get();
+        }
+        else
+            functionName = info.dli_sname; // mangled name
+    }
+    
+    return functionName;
+}
+
 //--------------------------------------------------------------------------
 
 namespace qiti
@@ -59,16 +84,25 @@ void* Utils::getAddressForMangledFunctionName(const char* mangledName) noexcept
 
 [[nodiscard]] qiti::FunctionData& Utils::getFunctionDataFromAddress(const void* functionAddress,
                                                                     const char* functionName,
-                                                                    int functionType) noexcept
+                                                                    int functionTypeInt) noexcept
 {
     auto& g_functionMap = getFunctionMap();
     
     auto it = g_functionMap.find(functionAddress);
     if (it == g_functionMap.end()) // not yet added to map
     {
+        if (functionName == nullptr)
+            functionName = getFunctionName(functionAddress);
+        
+        auto functionType = qiti::FunctionData::FunctionType::unknown; // default to unknown
+        if (functionTypeInt != -1)
+            functionType = static_cast<FunctionData::FunctionType>(functionTypeInt);
+        else if (functionName != nullptr)
+            functionType = qiti::FunctionData::getFunctionType(functionName);
+
         qiti::FunctionData data(functionAddress,
                                 functionName,
-                                static_cast<FunctionData::FunctionType>(functionType));
+                                functionType);
         
         auto [insertedIt, success] = g_functionMap.emplace(functionAddress, std::move(data));
         

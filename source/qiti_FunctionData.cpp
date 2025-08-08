@@ -192,6 +192,67 @@ uint64_t FunctionData::getNumExceptionsThrown() const noexcept
     return getImpl()->numExceptionsThrown;
 }
 
+bool FunctionData::isConstructor() const noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
+    const auto type = getImpl()->functionType;
+    return type == FunctionType::constructor ||
+           type == FunctionType::copyConstructor ||
+           type == FunctionType::moveConstructor;
+}
+
+bool FunctionData::isRegularConstructor() const noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
+    return getImpl()->functionType == FunctionType::constructor;
+}
+
+bool FunctionData::isCopyConstructor() const noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
+    return getImpl()->functionType == FunctionType::copyConstructor;
+}
+
+bool FunctionData::isMoveConstructor() const noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
+    return getImpl()->functionType == FunctionType::moveConstructor;
+}
+
+bool FunctionData::isAssignment() const noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
+    const auto type = getImpl()->functionType;
+    return type == FunctionType::copyAssignment ||
+           type == FunctionType::moveAssignment;
+}
+
+bool FunctionData::isCopyAssignment() const noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
+    return getImpl()->functionType == FunctionType::copyAssignment;
+}
+
+bool FunctionData::isMoveAssignment() const noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
+    return getImpl()->functionType == FunctionType::moveAssignment;
+}
+
+bool FunctionData::isDestructor() const noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
+    return getImpl()->functionType == FunctionType::destructor;
+}
+
 void FunctionData::functionCalled() noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
