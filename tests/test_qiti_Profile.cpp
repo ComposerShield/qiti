@@ -71,6 +71,21 @@ QITI_TEST_CASE("qiti::Profile::endProfilingAllFunctions()", ProfileEndProfilingA
     QITI_REQUIRE_FALSE(qiti::Profile::isProfilingFunction<&testFunc>());
 }
 
+QITI_TEST_CASE("qiti::Profile::ScopedDisableProfiling()", ProfileScopedDisableProfiling)
+{
+    qiti::ScopedQitiTest test;
+    
+    qiti::Profile::beginProfilingAllFunctions();
+    QITI_REQUIRE(qiti::Profile::isProfilingFunction<&testFunc>());
+    
+    {
+        qiti::Profile::ScopedDisableProfiling disableProfiling;
+        QITI_REQUIRE_FALSE(qiti::Profile::isProfilingFunction<&testFunc>());
+    } // profile enabled again when ScopedDisableProfiling goes out of scope
+    
+    QITI_REQUIRE(qiti::Profile::isProfilingFunction<&testFunc>());
+}
+
 QITI_TEST_CASE("qiti::Profile::isProfilingFunction()", ProfileIsProfilingFunction)
 {
     qiti::ScopedQitiTest test;

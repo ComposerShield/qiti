@@ -79,6 +79,16 @@ namespace FunctionNameHelpers
 class Profile
 {
 public:
+    /** RAII Object for disabling Profiling for the duration of a qiti function */
+    struct ScopedDisableProfiling
+    {
+        QITI_API ScopedDisableProfiling() noexcept;
+        QITI_API ~ScopedDisableProfiling() noexcept;
+        
+    private:
+        const bool wasProfilingEnabled;
+    };
+    
     /** */
     static void QITI_API resetProfiling() noexcept;
     

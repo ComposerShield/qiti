@@ -17,6 +17,7 @@
 
 #include "qiti_FunctionData_Impl.hpp"
 #include "qiti_MallocHooks.hpp"
+#include "qiti_Profile.hpp"
 #include "qiti_ScopedNoHeapAllocations.hpp"
 
 #include <dlfcn.h>
@@ -107,6 +108,7 @@ FunctionData& FunctionData::operator=(FunctionData&& other) noexcept
 
 const char* FunctionData::getFunctionName() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     qiti::ScopedNoHeapAllocations noAlloc;
     
     return getImpl()->functionName;
@@ -114,6 +116,7 @@ const char* FunctionData::getFunctionName() const noexcept
 
 uint64_t FunctionData::getNumTimesCalled() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     qiti::ScopedNoHeapAllocations noAlloc;
     
     return getImpl()->numTimesCalled;
@@ -121,16 +124,23 @@ uint64_t FunctionData::getNumTimesCalled() const noexcept
 
 uint64_t FunctionData::getAverageTimeSpentInFunctionCpu_ns() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
     return getImpl()->averageTimeSpentInFunctionNanosecondsCpu;
 }
 
 uint64_t FunctionData::getAverageTimeSpentInFunctionWallClock_ns() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
     return getImpl()->averageTimeSpentInFunctionNanosecondsWallClock;
 }
 
 uint64_t FunctionData::getMinTimeSpentInFunctionCpu_ns() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     qiti::ScopedNoHeapAllocations noAlloc;
     
     return getImpl()->minTimeSpentInFunctionNanosecondsCpu;
@@ -138,6 +148,7 @@ uint64_t FunctionData::getMinTimeSpentInFunctionCpu_ns() const noexcept
 
 uint64_t FunctionData::getMaxTimeSpentInFunctionCpu_ns() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     qiti::ScopedNoHeapAllocations noAlloc;
     
     return getImpl()->maxTimeSpentInFunctionNanosecondsCpu;
@@ -145,6 +156,7 @@ uint64_t FunctionData::getMaxTimeSpentInFunctionCpu_ns() const noexcept
 
 uint64_t FunctionData::getMinTimeSpentInFunctionWallClock_ns() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     qiti::ScopedNoHeapAllocations noAlloc;
     
     return getImpl()->minTimeSpentInFunctionNanosecondsWallClock;
@@ -152,6 +164,7 @@ uint64_t FunctionData::getMinTimeSpentInFunctionWallClock_ns() const noexcept
 
 uint64_t FunctionData::getMaxTimeSpentInFunctionWallClock_ns() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     qiti::ScopedNoHeapAllocations noAlloc;
     
     return getImpl()->maxTimeSpentInFunctionNanosecondsWallClock;
@@ -159,6 +172,7 @@ uint64_t FunctionData::getMaxTimeSpentInFunctionWallClock_ns() const noexcept
 
 FunctionCallData FunctionData::getLastFunctionCall() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
     
     return getImpl()->lastCallData;
@@ -166,6 +180,7 @@ FunctionCallData FunctionData::getLastFunctionCall() const noexcept
 
 std::vector<const FunctionData*> FunctionData::getAllProfiledFunctionData() noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
     
     return Utils::getAllFunctionData();
@@ -173,6 +188,7 @@ std::vector<const FunctionData*> FunctionData::getAllProfiledFunctionData() noex
 
 std::vector<const FunctionData*> FunctionData::getCallers() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
     
     const auto& callersSet = getImpl()->callers;
@@ -187,6 +203,7 @@ std::vector<const FunctionData*> FunctionData::getCallers() const noexcept
 
 uint64_t FunctionData::getNumExceptionsThrown() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     qiti::ScopedNoHeapAllocations noAlloc;
     
     return getImpl()->numExceptionsThrown;
@@ -194,6 +211,7 @@ uint64_t FunctionData::getNumExceptionsThrown() const noexcept
 
 bool FunctionData::isConstructor() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     qiti::ScopedNoHeapAllocations noAlloc;
     
     const auto type = getImpl()->functionType;
@@ -204,6 +222,7 @@ bool FunctionData::isConstructor() const noexcept
 
 bool FunctionData::isRegularConstructor() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     qiti::ScopedNoHeapAllocations noAlloc;
     
     return getImpl()->functionType == FunctionType::constructor;
@@ -211,6 +230,7 @@ bool FunctionData::isRegularConstructor() const noexcept
 
 bool FunctionData::isCopyConstructor() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     qiti::ScopedNoHeapAllocations noAlloc;
     
     return getImpl()->functionType == FunctionType::copyConstructor;
@@ -218,6 +238,7 @@ bool FunctionData::isCopyConstructor() const noexcept
 
 bool FunctionData::isMoveConstructor() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     qiti::ScopedNoHeapAllocations noAlloc;
     
     return getImpl()->functionType == FunctionType::moveConstructor;
@@ -225,6 +246,7 @@ bool FunctionData::isMoveConstructor() const noexcept
 
 bool FunctionData::isAssignment() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     qiti::ScopedNoHeapAllocations noAlloc;
     
     const auto type = getImpl()->functionType;
@@ -234,6 +256,7 @@ bool FunctionData::isAssignment() const noexcept
 
 bool FunctionData::isCopyAssignment() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     qiti::ScopedNoHeapAllocations noAlloc;
     
     return getImpl()->functionType == FunctionType::copyAssignment;
@@ -241,6 +264,7 @@ bool FunctionData::isCopyAssignment() const noexcept
 
 bool FunctionData::isMoveAssignment() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     qiti::ScopedNoHeapAllocations noAlloc;
     
     return getImpl()->functionType == FunctionType::moveAssignment;
@@ -248,6 +272,7 @@ bool FunctionData::isMoveAssignment() const noexcept
 
 bool FunctionData::isDestructor() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     qiti::ScopedNoHeapAllocations noAlloc;
     
     return getImpl()->functionType == FunctionType::destructor;
@@ -266,6 +291,7 @@ void FunctionData::functionCalled() noexcept
 
 bool FunctionData::wasCalledOnThread(std::thread::id thread) const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     qiti::ScopedNoHeapAllocations noAlloc;
     
     auto* impl = getImpl();

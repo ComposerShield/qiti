@@ -48,6 +48,8 @@ bool g_profileAllFunctions = false;
 // Thread-local call stack to track caller relationships
 thread_local std::stack<qiti::FunctionData*> g_callStack;
 
+static thread_local bool g_profilingEnabled = true;
+
 struct Init_g_functionsToProfile
 {
     Init_g_functionsToProfile()
@@ -56,6 +58,19 @@ struct Init_g_functionsToProfile
     }
 };
 static const Init_g_functionsToProfile init_g_functionsToProfile;
+
+//--------------------------------------------------------------------------
+
+Profile::ScopedDisableProfiling::ScopedDisableProfiling() noexcept
+: wasProfilingEnabled(g_profilingEnabled)
+{
+    g_profilingEnabled = false;
+}
+
+Profile::ScopedDisableProfiling::~ScopedDisableProfiling() noexcept
+{
+    g_profilingEnabled = wasProfilingEnabled;
+}
 
 //--------------------------------------------------------------------------
 
@@ -93,6 +108,11 @@ void Profile::endProfilingAllFunctions() noexcept
 bool Profile::isProfilingFunction(const void* funcAddress) noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
+    
+    // mechanism to disable qiti profiling within qiti functions
+    if (! g_profilingEnabled)
+        return false;
+    
     return g_profileAllFunctions || g_functionsToProfile.contains(funcAddress);
 }
 

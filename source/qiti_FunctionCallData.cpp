@@ -16,6 +16,7 @@
 #include "qiti_FunctionCallData.hpp"
 
 #include "qiti_FunctionCallData_Impl.hpp"
+#include "qiti_Profile.hpp"
 #include "qiti_ScopedNoHeapAllocations.hpp"
 
 #include <cassert>
@@ -82,6 +83,7 @@ void FunctionCallData::reset() noexcept
 
 uint64_t FunctionCallData::getNumHeapAllocations() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     qiti::ScopedNoHeapAllocations noAlloc;
     
     auto impl = getImpl();
@@ -91,6 +93,7 @@ uint64_t FunctionCallData::getNumHeapAllocations() const noexcept
 
 uint64_t FunctionCallData::getAmountHeapAllocated() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     qiti::ScopedNoHeapAllocations noAlloc;
     
     auto impl = getImpl();
@@ -100,6 +103,9 @@ uint64_t FunctionCallData::getAmountHeapAllocated() const noexcept
 
 uint64_t QITI_API FunctionCallData::getTimeSpentInFunctionCpu_ms() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
     if (getImpl()->timeSpentInFunctionNanosecondsCpu == 0)
         return 0; // prevent dividing by 0
     return getImpl()->timeSpentInFunctionNanosecondsCpu / 1000000;
@@ -107,11 +113,17 @@ uint64_t QITI_API FunctionCallData::getTimeSpentInFunctionCpu_ms() const noexcep
 
 uint64_t QITI_API FunctionCallData::getTimeSpentInFunctionCpu_ns() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
     return getImpl()->timeSpentInFunctionNanosecondsCpu;
 }
 
 uint64_t QITI_API FunctionCallData::getTimeSpentInFunctionWallClock_ms() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
     if (getImpl()->timeSpentInFunctionNanosecondsWallClock == 0)
         return 0; // prevent dividing by 0
     return getImpl()->timeSpentInFunctionNanosecondsWallClock / 1000000;
@@ -119,16 +131,23 @@ uint64_t QITI_API FunctionCallData::getTimeSpentInFunctionWallClock_ms() const n
 
 uint64_t QITI_API FunctionCallData::getTimeSpentInFunctionWallClock_ns() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
     return getImpl()->timeSpentInFunctionNanosecondsWallClock;
 }
 
 std::thread::id QITI_API FunctionCallData::getThreadThatCalledFunction() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
     return getImpl()->callingThread;
 }
 
 const FunctionData* FunctionCallData::getCaller() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     qiti::ScopedNoHeapAllocations noAlloc;
     
     return getImpl()->caller;
@@ -136,6 +155,7 @@ const FunctionData* FunctionCallData::getCaller() const noexcept
 
 bool FunctionCallData::didThrowException() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     qiti::ScopedNoHeapAllocations noAlloc;
     
     return getImpl()->numExceptionsThrown > 0;
@@ -143,6 +163,7 @@ bool FunctionCallData::didThrowException() const noexcept
 
 uint64_t FunctionCallData::getNumExceptionsThrown() const noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     qiti::ScopedNoHeapAllocations noAlloc;
     
     return getImpl()->numExceptionsThrown;

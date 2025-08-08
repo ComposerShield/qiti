@@ -101,6 +101,7 @@ public:
     
     void QITI_API run(std::function<void()> func) noexcept override
     {
+        qiti::Profile::ScopedDisableProfiling disableProfiling;
         qiti::LockHooks::ScopedDisableHooks disableHooks;
         
         constexpr char const* logPrefix = QITI_TSAN_LOG_PATH;
@@ -222,13 +223,22 @@ public:
     
     void run(std::function<void()> func) noexcept override
     {
-        func0->addListener(this);
-        func1->addListener(this);
+        // Disable profiling for setup
+        {
+            qiti::Profile::ScopedDisableProfiling disableProfiling;
+            func0->addListener(this);
+            func1->addListener(this);
+        }
         
+        // Call user function with profiling enabled
         func();
         
-        func0->removeListener(this);
-        func1->removeListener(this);
+        // Disable profiling for cleanup
+        {
+            qiti::Profile::ScopedDisableProfiling disableProfiling;
+            func0->removeListener(this);
+            func1->removeListener(this);
+        }
     }
     
     std::string QITI_API getReport(bool verbose) const noexcept override
@@ -308,9 +318,20 @@ public:
     
     void QITI_API_INTERNAL run(std::function<void()> func) noexcept override
     {
-        LockData::addGlobalListener(this);
+        // Disable profiling for setup
+        {
+            qiti::Profile::ScopedDisableProfiling disableProfiling;
+            LockData::addGlobalListener(this);
+        }
+        
+        // Call user function with profiling enabled
         func();
-        LockData::removeGlobalListener(this);
+        
+        // Disable profiling for cleanup
+        {
+            qiti::Profile::ScopedDisableProfiling disableProfiling;
+            LockData::removeGlobalListener(this);
+        }
     }
 
 private:
@@ -389,11 +410,21 @@ private:
 ThreadSanitizer::ThreadSanitizer() noexcept = default;
 ThreadSanitizer::~ThreadSanitizer() noexcept = default;
 
-bool ThreadSanitizer::passed() noexcept { return _passed.load(std::memory_order_relaxed); }
-bool ThreadSanitizer::failed() noexcept { return ! passed(); }
+bool ThreadSanitizer::passed() noexcept
+{
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
+    return _passed.load(std::memory_order_relaxed);
+}
+
+bool ThreadSanitizer::failed() noexcept
+{
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
+    return ! passed();
+}
 
 void ThreadSanitizer::flagFailed() noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     _passed.store(false, std::memory_order_seq_cst);
     if (onFail != nullptr)
         onFail();
@@ -403,22 +434,29 @@ std::unique_ptr<ThreadSanitizer>
 ThreadSanitizer::createFunctionsCalledInParallelDetector(FunctionData* func0,
                                                          FunctionData* func1) noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     return std::make_unique<ParallelCallDetector>(func0, func1);
 }
 
 std::unique_ptr<ThreadSanitizer>
 ThreadSanitizer::createDataRaceDetector() noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     return std::make_unique<DataRaceDetector>();
 }
 
 std::unique_ptr<ThreadSanitizer>
 ThreadSanitizer::createPotentialDeadlockDetector() noexcept
 {
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
     return std::make_unique<LockOrderInversionDetector>();
 }
 
-std::string ThreadSanitizer::getReport(bool /*verbose*/) const noexcept { return {}; };
+std::string ThreadSanitizer::getReport(bool /*verbose*/) const noexcept 
+{
+    qiti::Profile::ScopedDisableProfiling disableProfiling;
+    return {};
+};
 
 //--------------------------------------------------------------------------
 } // namespace qiti
