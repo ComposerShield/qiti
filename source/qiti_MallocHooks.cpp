@@ -132,7 +132,6 @@ void qiti::MallocHooks::mallocHook(std::size_t size) noexcept
 
 //--------------------------------------------------------------------------
 
-#if defined(__APPLE__) || ! defined(QITI_ENABLE_THREAD_SANITIZER)
 /**
  Memory allocation hook implementation:
  - macOS: Always uses operator new override
@@ -162,6 +161,5 @@ QITI_API void* operator new[](std::size_t size)
  
     throw std::bad_alloc{};
 }
-#endif // defined(__APPLE__) || ! defined(QITI_ENABLE_THREAD_SANITIZER)
 
 //--------------------------------------------------------------------------

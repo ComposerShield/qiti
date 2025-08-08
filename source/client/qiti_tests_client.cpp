@@ -47,18 +47,3 @@ QITI_API const char* __tsan_default_options()
 #undef QITI_TSAN_LOG_PATH
 
 //--------------------------------------------------------------------------
-
-#ifdef QITI_ENABLE_THREAD_SANITIZER
-#if ! defined(__APPLE__)
-// When ThreadSanitizer is enabled, Linux uses __sanitizer_malloc_hook
-__attribute__((no_sanitize_thread))
-extern "C" QITI_API void __sanitizer_malloc_hook(void* /*ptr*/,
-                                        size_t size)
-{
-    qiti::MallocHooks::mallocHook(size);
-}
-#endif // ! defined(__APPLE__)
-// When ThreadSanitizer is disabled, Linux will use operator new override instead (matching macOS implementation)
-#endif // QITI_ENABLE_THREAD_SANITIZER
-
-//--------------------------------------------------------------------------
