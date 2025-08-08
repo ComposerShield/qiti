@@ -43,9 +43,9 @@ struct ScopedNoHeapAllocations
 {
 public:
     /** */
-    ScopedNoHeapAllocations()  noexcept : numHeapAllocationsBefore(Profile::getNumHeapAllocationsOnCurrentThread()) {}
+    QITI_API ScopedNoHeapAllocations()  noexcept : numHeapAllocationsBefore(Profile::getNumHeapAllocationsOnCurrentThread()) {}
     /** */
-    ~ScopedNoHeapAllocations() noexcept
+    QITI_API ~ScopedNoHeapAllocations() noexcept
     {
         [[maybe_unused]] auto numHeapAllocationsAfter = Profile::getNumHeapAllocationsOnCurrentThread();
         assert(numHeapAllocationsBefore == numHeapAllocationsAfter);
