@@ -113,7 +113,30 @@ bool Profile::isProfilingFunction(const void* funcAddress) noexcept
     if (! g_profilingEnabled)
         return false;
     
-    return g_profileAllFunctions || g_functionsToProfile.contains(funcAddress);
+    if (g_functionsToProfile.contains(funcAddress))
+        return true;
+    
+    if (! g_profileAllFunctions)
+        return false;
+    
+    // When profiling all functions, skip templated functions that use qiti types as
+    // template parameters (e.g. std::vector<qiti::FunctionData*>)
+    Dl_info info;
+    if (dladdr(funcAddress, &info) && info.dli_sname)
+    {
+        int status = 0;
+        char* demangled = abi::__cxa_demangle(info.dli_sname, nullptr, nullptr, &status);
+        
+        if (status == 0 && demangled)
+        {
+            bool shouldSkip = strstr(demangled, "<qiti::") != nullptr;
+            free(demangled);
+            if (shouldSkip)
+                return false;
+        }
+    }
+    
+    return true;
 }
 
 void Profile::beginProfilingType(std::type_index /*functionAddress*/) noexcept
