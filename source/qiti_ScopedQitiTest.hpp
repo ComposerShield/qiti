@@ -2,7 +2,7 @@
 /******************************************************************************
  * Qiti — C++ Profiling Library
  *
- * @file     qiti_ScopedNoHeapAllocations.hpp
+ * @file     qiti_ScopedQitiTest.hpp
  *
  * @author   Adam Shield
  * @date     2025-05-16

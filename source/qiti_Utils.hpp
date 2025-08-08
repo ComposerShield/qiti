@@ -2,7 +2,7 @@
 /******************************************************************************
  * Qiti — C++ Profiling Library
  *
- * @file     qiti_utils.hpp
+ * @file     qiti_Utils.hpp
  *
  * @author   Adam Shield
  * @date     2025-05-16
