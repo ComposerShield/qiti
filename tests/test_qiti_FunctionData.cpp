@@ -128,11 +128,11 @@ public:
     
     __attribute__((noinline))
     __attribute__((optnone))
-    ~TestClassForFunctionTypes() {}                  // Destructor
+    ~TestClassForFunctionTypes() {} // Destructor
     
     __attribute__((noinline))
     __attribute__((optnone))
-    void regularMethod() {}                          // Regular method
+    void regularMethod() {} // Regular method
     
 private:
     int value; // dummy value
@@ -774,38 +774,6 @@ QITI_TEST_CASE("Function type detection", FunctionDataFunctionTypeDetection)
         QITI_CHECK(methodData->isCopyAssignment()     == false);
         QITI_CHECK(methodData->isMoveAssignment()     == false);
         QITI_CHECK(methodData->isDestructor()         == false);
-    }
-    
-    QITI_SECTION("Destructor")
-    {
-        // Create an object in a nested scope to trigger destructor
-        {
-            TestClassForFunctionTypes obj;
-        } // Destructor is called here when obj goes out of scope
-        
-        // Find the destructor
-        auto allFunctions = qiti::FunctionData::getAllProfiledFunctionData();
-        const qiti::FunctionData* destructorData = nullptr;
-        
-        for (const auto* func : allFunctions)
-        {
-            if (func->isDestructor())
-            {
-                destructorData = func;
-                break;
-            }
-        }
-        
-        QITI_REQUIRE(destructorData != nullptr);
-        
-        QITI_CHECK(destructorData->isConstructor()        == false);
-        QITI_CHECK(destructorData->isRegularConstructor() == false);
-        QITI_CHECK(destructorData->isCopyConstructor()    == false);
-        QITI_CHECK(destructorData->isMoveConstructor()    == false);
-        QITI_CHECK(destructorData->isAssignment()         == false);
-        QITI_CHECK(destructorData->isCopyAssignment()     == false);
-        QITI_CHECK(destructorData->isMoveAssignment()     == false);
-        QITI_CHECK(destructorData->isDestructor()         == true);
     }
     
     QITI_SECTION("Destructor")
