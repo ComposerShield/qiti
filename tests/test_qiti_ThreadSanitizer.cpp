@@ -145,10 +145,14 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data rac
     auto dataRace = []()
     {
         TestClass testClass;
-        
-        std::thread t([&testClass](){ testClass.incrementCounter(); }); // Intentional data race
-        testClass.incrementCounter();                                   // Intentional data race
-        t.join();
+        std::atomic<int> ready{0};
+        std::atomic<bool> go{false};
+        std::thread a([&]{ testClass.incrementCounter(ready, go); }); // Intentional data race
+        std::thread b([&]{ testClass.incrementCounter(ready, go); }); // Intentional data race
+        while (ready.load(std::memory_order_relaxed) < 2) {}
+        go.store(true, std::memory_order_release);
+        a.join();
+        b.join();
     };
     auto dataRaceDetector = qiti::ThreadSanitizer::createDataRaceDetector();
     dataRaceDetector->run(dataRace);
