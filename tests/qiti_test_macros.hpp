@@ -1,4 +1,6 @@
 
+#include "qiti_API.hpp"
+
 #include <cassert>
 #include <cstring> // for std::strerror
 #include <vector>
@@ -10,6 +12,8 @@
     #define QITI_DEBUG_ASSERT(expression)
 #endif // #if defined (DEBUG) || defined (_DEBUG)
 
+#define NO_INSTRUMENT __attribute__((no_instrument_function))
+
 //--------------------------------------------------------------------------
 // Framework Detection and Abstraction Layer
 //--------------------------------------------------------------------------
@@ -18,18 +22,23 @@
     // GTest implementation with section emulation
     #include <gtest/gtest.h>
     
-    namespace qiti::internal {
-        class SectionManager {
+    namespace qiti::internal
+    {
+        class SectionManager
+        {
             static inline thread_local std::vector<std::string> sections;
             static inline thread_local int current_section = -1;
             
         public:
-            static void registerSection(const char* name) {
+            static void NO_INSTRUMENT registerSection(const char* name)
+            {
                 sections.push_back(name);
             }
             
-            static bool shouldRunSection(const char* name) {
-                if (current_section == -1) {
+            static bool NO_INSTRUMENT shouldRunSection(const char* name)
+            {
+                if (current_section == -1)
+                {
                     // Discovery pass - register but don't run
                     registerSection(name);
                     return false;
@@ -37,12 +46,14 @@
                 return current_section < sections.size() && sections[current_section] == name;
             }
             
-            static bool needsRestart() {
+            static bool NO_INSTRUMENT needsRestart()
+            {
                 current_section++;
                 return current_section < sections.size();
             }
             
-            static void reset() {
+            static void NO_INSTRUMENT reset()
+            {
                 sections.clear();
                 current_section = -1;
             }
