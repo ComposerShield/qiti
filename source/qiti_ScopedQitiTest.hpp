@@ -61,6 +61,8 @@ public:
      -finstrument-functions, not just those explicitly registered.
      This is required for reliable caller tracking functionality.
      
+     Note: Enabling this feature significantly increases profiling overhead.
+     
      @param enable If true, profile all functions; if false, only profile explicitly registered functions
      */
     void QITI_API enableProfilingOnAllFunctions(bool enable) noexcept;

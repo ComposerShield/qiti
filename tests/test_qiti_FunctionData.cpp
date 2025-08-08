@@ -336,7 +336,7 @@ QITI_TEST_CASE("qiti::FunctionData::getMaxTimeSpentInFunctionCpu_ns()", Function
         testFuncWithDelay(1);  // Short
         uint64_t timeAfterFirst = funcData->getMaxTimeSpentInFunctionCpu_ns();
         
-        testFuncWithDelay(5);  // Longer - should become new max
+        testFuncWithDelay(50);  // Longer - should become new max
         uint64_t timeAfterSecond = funcData->getMaxTimeSpentInFunctionCpu_ns();
         
         testFuncWithDelay(2);  // Medium - shouldn't change max

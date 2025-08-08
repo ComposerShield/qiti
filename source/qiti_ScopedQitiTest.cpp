@@ -15,12 +15,15 @@
 
 #include "qiti_ScopedQitiTest.hpp"
 
+#include "qiti_FunctionData.hpp"
 #include "qiti_MallocHooks.hpp"
 #include "qiti_Utils.hpp"
 
 #include <atomic>
 #include <cassert>
 #include <chrono>
+#include <cstring>
+#include <iostream>
 #include <limits>
 #include <memory>
 #include <utility>
@@ -79,6 +82,29 @@ ScopedQitiTest::ScopedQitiTest() noexcept
 
 ScopedQitiTest::~ScopedQitiTest() noexcept
 {
+    // Safety check: Detect if any qiti:: internal functions got instrumented accidentally
+    auto allProfiledFunctions = FunctionData::getAllProfiledFunctionData();
+    for (const auto* func : allProfiledFunctions)
+    {
+        if (func != nullptr && func->getNumTimesCalled() >= 1)
+        {
+            const char* funcName = func->getFunctionName();
+            if (funcName != nullptr && strstr(funcName, "qiti::") != nullptr)
+            {
+                // Don't allow Catch2 templated functions which use qiti functions at template parameters
+                if (strstr(funcName, "Catch::") != nullptr)
+                    continue;
+                
+                // Allow qiti::example:: functions since they're meant to be profiled for testing
+                if (strstr(funcName, "qiti::example::") == nullptr)
+                {
+                    // Found a qiti:: function that was instrumented - this indicates missing QITI_API/QITI_API_INTERNAL attribute
+                    assert(false && "Internal qiti:: function was instrumented - missing QITI_API or QITI_API_INTERNAL attribute");
+                }
+            }
+        }
+    }
+    
     [[maybe_unused]] auto ms = getLengthOfTest_ms();
     assert(ms <= impl->maxLengthOfTest_ms);
     
