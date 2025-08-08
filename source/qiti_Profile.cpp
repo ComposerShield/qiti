@@ -24,6 +24,7 @@
 
 #include <execinfo.h>
 #include <cxxabi.h>
+#include <dlfcn.h>
 #include <unistd.h>
 
 #include <cassert>
