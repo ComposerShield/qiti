@@ -36,7 +36,8 @@ class MallocHooks
 public:
     static thread_local bool bypassMallocHooks;
     static thread_local uint32_t numHeapAllocationsOnCurrentThread;
-    static thread_local uint64_t amountHeapAllocatedOnCurrentThread;
+    static thread_local uint64_t totalAmountHeapAllocatedOnCurrentThread;
+    static thread_local uint64_t currentAmountHeapAllocatedOnCurrentThread;
     static thread_local std::function<void()> onNextHeapAllocation;
     
     struct ScopedBypassMallocHooks

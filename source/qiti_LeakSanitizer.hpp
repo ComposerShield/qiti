@@ -17,6 +17,8 @@
 
 #include "qiti_API.hpp"
 
+#include <functional>
+
 //--------------------------------------------------------------------------
 // Doxygen - Begin Internal Documentation
 /** \cond INTERNAL */
@@ -28,12 +30,14 @@ namespace qiti
 /**
  TODO: Implement
  */
-class [[deprecated("WIP - Not finished implementing.")]]
-LeakSanitizer
+class LeakSanitizer
 {
 public:
     QITI_API LeakSanitizer() noexcept;
     QITI_API ~LeakSanitizer() noexcept;
+    
+    /** */
+    void QITI_API run(std::function<void()> func) noexcept;
     
     /** */
     [[nodiscard]] bool QITI_API passed() noexcept;
@@ -51,6 +55,8 @@ private:
     // Doxygen - Begin Internal Documentation
     /** \cond INTERNAL */
     //--------------------------------------------------------------------------
+    
+    std::atomic<bool> _passed = true;
     
     /** Copy Constructor (deleted) */
     LeakSanitizer(const LeakSanitizer&) = delete;

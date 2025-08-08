@@ -26,6 +26,7 @@
 #include <mutex>
 #include <sstream>        // std::ostringstream
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 //--------------------------------------------------------------------------
@@ -36,8 +37,15 @@ extern bool isQitiTestRunning() noexcept;
 
 thread_local bool qiti::MallocHooks::bypassMallocHooks = false;
 thread_local uint32_t qiti::MallocHooks::numHeapAllocationsOnCurrentThread = 0;
-thread_local uint64_t qiti::MallocHooks::amountHeapAllocatedOnCurrentThread;
+thread_local uint64_t qiti::MallocHooks::totalAmountHeapAllocatedOnCurrentThread = 0;
+thread_local uint64_t qiti::MallocHooks::currentAmountHeapAllocatedOnCurrentThread = 0;;
 thread_local std::function<void()> qiti::MallocHooks::onNextHeapAllocation = nullptr;
+
+// Store size in header before user pointer
+struct AllocationHeader
+{
+    std::size_t size;
+};
 
 /** Functions we never want to count towards heap allocations that we track. */
 static inline const std::array<const char*, 1> blackListedFunctions
@@ -121,12 +129,29 @@ void qiti::MallocHooks::mallocHook(std::size_t size) noexcept
         return;
     
     ++numHeapAllocationsOnCurrentThread;
-    amountHeapAllocatedOnCurrentThread += size;
+    totalAmountHeapAllocatedOnCurrentThread += size;
+    currentAmountHeapAllocatedOnCurrentThread += size;
 
     if (onNextHeapAllocation != nullptr)
     {
         onNextHeapAllocation();
         onNextHeapAllocation = nullptr;
+    }
+}
+
+static void freeHook(void* ptr) noexcept
+{
+    if (! isQitiTestRunning())
+        return;
+    
+    if (qiti::MallocHooks::bypassMallocHooks)
+        return;
+    
+    if (ptr != nullptr)
+    {
+        // Extract size from header
+        AllocationHeader* header = static_cast<AllocationHeader*>(ptr) - 1;
+        currentAmountHeapAllocatedOnCurrentThread -= header->size;
     }
 }
 
@@ -143,11 +168,18 @@ QITI_API void* operator new(std::size_t size)
 {
     qiti::MallocHooks::mallocHook(size);
     
-    // Original implementation
-    if (void* ptr = std::malloc(size))
-        return ptr;
+    // Allocate extra space for header + user data
+    std::size_t totalSize = sizeof(AllocationHeader) + size;
+    void* rawPtr = std::malloc(totalSize);
+    if (! rawPtr)
+        throw std::bad_alloc{};
     
-    throw std::bad_alloc{};
+    // Store size in header
+    AllocationHeader* header = static_cast<AllocationHeader*>(rawPtr);
+    header->size = size;
+    
+    // Return pointer after header
+    return header + 1;
 }
 
 QITI_API void* operator new[](std::size_t size)
@@ -156,12 +188,44 @@ QITI_API void* operator new[](std::size_t size)
     
     if (size == 0)
         ++size; // avoid std::malloc(0) which may return nullptr on success
- 
-    if (void* ptr = std::malloc(size))
-        return ptr;
- 
-    throw std::bad_alloc{};
+    
+    // Allocate extra space for header + user data
+    std::size_t totalSize = sizeof(AllocationHeader) + size;
+    void* rawPtr = std::malloc(totalSize);
+    if (! rawPtr)
+        throw std::bad_alloc{};
+    
+    // Store size in header
+    AllocationHeader* header = static_cast<AllocationHeader*>(rawPtr);
+    header->size = size;
+    
+    // Return pointer after header
+    return header + 1;
 }
 #endif // defined(__APPLE__) || ! defined(QITI_ENABLE_THREAD_SANITIZER)
+
+QITI_API void operator delete(void* ptr) noexcept
+{
+    if (ptr != nullptr)
+    {
+        freeHook(ptr);
+        
+        // Get original allocation by backing up to header
+        AllocationHeader* header = static_cast<AllocationHeader*>(ptr) - 1;
+        std::free(header);
+    }
+}
+
+QITI_API void operator delete[](void* ptr) noexcept
+{
+    if (ptr != nullptr)
+    {
+        freeHook(ptr);
+        
+        // Get original allocation by backing up to header
+        AllocationHeader* header = static_cast<AllocationHeader*>(ptr) - 1;
+        std::free(header);
+    }
+}
 
 //--------------------------------------------------------------------------

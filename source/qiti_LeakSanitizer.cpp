@@ -15,6 +15,8 @@
 
 #include "qiti_LeakSanitizer.hpp"
 
+#include "qiti_MallocHooks.hpp"
+
 namespace qiti
 {
 LeakSanitizer::LeakSanitizer() noexcept
@@ -25,6 +27,19 @@ LeakSanitizer::LeakSanitizer() noexcept
 LeakSanitizer::~LeakSanitizer() noexcept
 {
     
+}
+
+void LeakSanitizer::run(std::function<void()> func) noexcept
+{
+    auto amountHeapAllocatedBefore = qiti::MallocHooks::totalAmountHeapAllocatedOnCurrentThread;
+    
+    if (func != nullptr)
+        func();
+    
+    auto amountHeapAllocatedAfter = qiti::MallocHooks::totalAmountHeapAllocatedOnCurrentThread;
+    
+    if (amountHeapAllocatedAfter != amountHeapAllocatedBefore)
+        _passed = false;
 }
 
 bool LeakSanitizer::passed() noexcept
