@@ -43,6 +43,9 @@ public:
         const FunctionData* function = nullptr;  ///< The function identified as a hotspot
         double score = 0.0;                      ///< Hotspot score (higher = more significant)
         std::string reason;                      ///< Human-readable explanation of why this is a hotspot
+
+        // Explicitly define destructor to prevent instrumentation
+        QITI_API ~Hotspot() noexcept = default;
     };
     
     /**
