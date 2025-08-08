@@ -22,13 +22,13 @@
 #include "qiti_MallocHooks.hpp"
 #include "qiti_ScopedNoHeapAllocations.hpp"
 
-#include <cstring>
 #include <execinfo.h>
 #include <cxxabi.h>
 #include <dlfcn.h>
 #include <unistd.h>
 
 #include <cassert>
+#include <cstring>
 #include <exception>
 #include <iostream>
 #include <memory>
