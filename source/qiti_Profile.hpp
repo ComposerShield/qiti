@@ -19,10 +19,15 @@
 
 #include <array>
 #include <cstdint>
+#include <stack>
 #include <string>
 #include <type_traits>
 #include <typeindex>
 #include <typeinfo>
+
+// Forward declaration for external access
+namespace qiti { class FunctionData; }
+extern thread_local std::stack<qiti::FunctionData*> g_callStack;
 
 namespace qiti
 {

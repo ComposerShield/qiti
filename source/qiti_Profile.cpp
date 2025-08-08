@@ -43,7 +43,7 @@ inline std::unordered_set<const void*> g_functionsToProfile;
 bool g_profileAllFunctions = false;
 
 // Thread-local call stack to track caller relationships
-static thread_local std::stack<qiti::FunctionData*> g_callStack;
+thread_local std::stack<qiti::FunctionData*> g_callStack;
 
 struct Init_g_functionsToProfile
 {
@@ -149,10 +149,6 @@ void Profile::updateFunctionDataOnEnter(const void* this_fn) noexcept
     lastCallImpl->numHeapAllocationsBeforeFunctionCall = MallocHooks::numHeapAllocationsOnCurrentThread;
     lastCallImpl->amountHeapAllocatedBeforeFunctionCall = MallocHooks::amountHeapAllocatedOnCurrentThread;
     
-    // Track initial exception state
-    lastCallImpl->initialUncaughtExceptions = std::uncaught_exceptions();
-    lastCallImpl->didThrowUncaughtException = false;
-    
     // Grab starting times last without doing additional work after
     lastCallImpl->startTimeWallClock = std::chrono::steady_clock::now();
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &lastCallImpl->startTimeCpu); // last to be most precise
@@ -184,14 +180,6 @@ void Profile::updateFunctionDataOnExit(const void* this_fn) noexcept
     callImpl->timeSpentInFunctionNanosecondsCpu = cpuElapsed_ns;
     callImpl->numHeapAllocationsAfterFunctionCall = MallocHooks::numHeapAllocationsOnCurrentThread;
     callImpl->amountHeapAllocatedAfterFunctionCall = MallocHooks::amountHeapAllocatedOnCurrentThread;
-    
-    // Check for uncaught exceptions
-    const int currentUncaughtExceptions = std::uncaught_exceptions();
-    if (currentUncaughtExceptions > callImpl->initialUncaughtExceptions)
-    {
-        callImpl->didThrowUncaughtException = true;
-        impl->numUncaughtExceptionsThrown++;
-    }
     
     // Update listeners
     for (auto* listener : impl->listeners)

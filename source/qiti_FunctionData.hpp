@@ -159,14 +159,13 @@ public:
     [[nodiscard]] std::vector<const FunctionData*> QITI_API getCallers() const noexcept;
     
     /**
-     @returns The total number of uncaught exceptions thrown by this function.
+     @returns The total number of exceptions thrown by this function.
      
-     Counts exceptions that were thrown and not caught within this function
-     during its execution. This includes exceptions thrown by functions called
-     within this function that were not caught before returning.
-     @returns 0 if no uncaught exceptions have been detected.
+     Counts the number of times this specific function executed a throw statement.
+     This does not include exceptions thrown by other functions that this function calls.
+     @returns 0 if no exceptions have been thrown by this function.
      */
-    [[nodiscard]] uint64_t QITI_API getNumUncaughtExceptionsThrown() const noexcept;
+    [[nodiscard]] uint64_t QITI_API getNumExceptionsThrown() const noexcept;
     
     //--------------------------------------------------------------------------
     // Doxygen - Begin Internal Documentation

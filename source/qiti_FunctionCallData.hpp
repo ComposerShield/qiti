@@ -86,13 +86,24 @@ public:
     [[nodiscard]] const FunctionData* QITI_API getCaller() const noexcept;
     
     /**
-     @returns True if this function call threw an uncaught exception during execution.
+     @returns True if this function call threw an exception during execution.
      
-     Indicates whether an exception was thrown during this function call that was
-     not caught within the function before it returned. This includes exceptions
-     thrown by functions called within this function.
+     Indicates whether this specific function executed a throw statement during
+     this call. This does not include exceptions thrown by other functions that
+     this function called.
      */
-    [[nodiscard]] bool QITI_API didThrowUncaughtException() const noexcept;
+    [[nodiscard]] bool QITI_API didThrowException() const noexcept;
+    
+    /**
+     @returns The total number of exceptions thrown during this specific function call.
+     
+     Counts the number of times this specific function executed a throw statement
+     during this particular call. This does not include exceptions thrown by other 
+     profiled functions that this function called. A function can potentially throw multiple
+     exceptions during a single call (e.g., in loops or exception handling code).
+     @returns 0 if no exceptions were thrown during this call.
+     */
+    [[nodiscard]] uint64_t QITI_API getNumExceptionsThrown() const noexcept;
     
     //--------------------------------------------------------------------------
     // Doxygen - Begin Internal Documentation

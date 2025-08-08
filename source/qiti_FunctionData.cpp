@@ -185,11 +185,11 @@ std::vector<const FunctionData*> FunctionData::getCallers() const noexcept
     return result;
 }
 
-uint64_t FunctionData::getNumUncaughtExceptionsThrown() const noexcept
+uint64_t FunctionData::getNumExceptionsThrown() const noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     
-    return getImpl()->numUncaughtExceptionsThrown;
+    return getImpl()->numExceptionsThrown;
 }
 
 void FunctionData::functionCalled() noexcept

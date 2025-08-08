@@ -54,7 +54,7 @@ public:
     std::unordered_set<FunctionData::Listener*> listeners{};
     std::unordered_set<const FunctionData*> callers{};
     
-    uint64_t numUncaughtExceptionsThrown = 0;
+    uint64_t numExceptionsThrown = 0;
     
     FunctionCallData lastCallData{};
 };

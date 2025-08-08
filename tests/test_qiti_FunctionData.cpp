@@ -475,33 +475,32 @@ QITI_TEST_CASE("Exception tracking", FunctionDataExceptionTracking)
     
     const auto* funcDataThrows = qiti::FunctionData::getFunctionData<testFuncThrowsException>();
     const auto* funcDataCatches = qiti::FunctionData::getFunctionData<testFuncCatchesException>();
-    const auto* funcDataUncaught = qiti::FunctionData::getFunctionData<testFuncThrowsUncaughtException>();
+    const auto* funcDataPropagates = qiti::FunctionData::getFunctionData<testFuncThrowsUncaughtException>();
     
     QITI_SECTION("No exceptions initially")
     {
-        QITI_CHECK(funcDataThrows->getNumUncaughtExceptionsThrown() == 0);
-        QITI_CHECK(funcDataCatches->getNumUncaughtExceptionsThrown() == 0);
-        QITI_CHECK(funcDataUncaught->getNumUncaughtExceptionsThrown() == 0);
+        QITI_CHECK(funcDataThrows->getNumExceptionsThrown() == 0);
+        QITI_CHECK(funcDataCatches->getNumExceptionsThrown() == 0);
+        QITI_CHECK(funcDataPropagates->getNumExceptionsThrown() == 0);
     }
     
-    QITI_SECTION("Caught exception")
+    QITI_SECTION("Function that throws and catches")
     {
         testFuncCatchesException();
         
-        // The exception was thrown but caught, so it should be counted as uncaught
-        // for the inner function but not the outer function
-        QITI_CHECK(funcDataThrows->getNumUncaughtExceptionsThrown() == 1);
-        QITI_CHECK(funcDataCatches->getNumUncaughtExceptionsThrown() == 0);
+        // Only the function that actually executes throw should be marked as throwing
+        QITI_CHECK(funcDataThrows->getNumExceptionsThrown() == 1);
+        QITI_CHECK(funcDataCatches->getNumExceptionsThrown() == 0); // This function catches, doesn't throw
         
         // Check the call data
         auto lastCallThrows = funcDataThrows->getLastFunctionCall();
         auto lastCallCatches = funcDataCatches->getLastFunctionCall();
         
-        QITI_CHECK(lastCallThrows.didThrowUncaughtException() == true);
-        QITI_CHECK(lastCallCatches.didThrowUncaughtException() == false);
+        QITI_CHECK(lastCallThrows.getNumExceptionsThrown() > 0);
+        QITI_CHECK(lastCallCatches.getNumExceptionsThrown() == 0);
     }
     
-    QITI_SECTION("Uncaught exception")
+    QITI_SECTION("Exception propagation")
     {
         try
         {
@@ -512,16 +511,16 @@ QITI_TEST_CASE("Exception tracking", FunctionDataExceptionTracking)
             // Catch it here so the test doesn't terminate
         }
         
-        // Both functions should have uncaught exceptions
-        QITI_CHECK(funcDataThrows->getNumUncaughtExceptionsThrown() == 1);
-        QITI_CHECK(funcDataUncaught->getNumUncaughtExceptionsThrown() == 1);
+        // Only the function that actually throws should be marked as throwing
+        QITI_CHECK(funcDataThrows->getNumExceptionsThrown() == 1);
+        QITI_CHECK(funcDataPropagates->getNumExceptionsThrown() == 0); // This function doesn't throw, it just propagates
         
         // Check the call data
         auto lastCallThrows = funcDataThrows->getLastFunctionCall();
-        auto lastCallUncaught = funcDataUncaught->getLastFunctionCall();
+        auto lastCallPropagates = funcDataPropagates->getLastFunctionCall();
         
-        QITI_CHECK(lastCallThrows.didThrowUncaughtException() == true);
-        QITI_CHECK(lastCallUncaught.didThrowUncaughtException() == true);
+        QITI_CHECK(lastCallThrows.didThrowException() == true);
+        QITI_CHECK(lastCallPropagates.didThrowException() == false); // This function doesn't throw, it just propagates
     }
     
     QITI_SECTION("Multiple exceptions")
@@ -532,8 +531,8 @@ QITI_TEST_CASE("Exception tracking", FunctionDataExceptionTracking)
         testFuncCatchesException();
         
         // testFuncThrowsException should have been called 3 times, each throwing
-        QITI_CHECK(funcDataThrows->getNumUncaughtExceptionsThrown() == 3);
-        QITI_CHECK(funcDataCatches->getNumUncaughtExceptionsThrown() == 0);
+        QITI_CHECK(funcDataThrows->getNumExceptionsThrown() == 3);
+        QITI_CHECK(funcDataCatches->getNumExceptionsThrown() == 0);
         QITI_CHECK(funcDataThrows->getNumTimesCalled() == 3);
         QITI_CHECK(funcDataCatches->getNumTimesCalled() == 3);
     }
