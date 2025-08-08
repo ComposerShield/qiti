@@ -138,7 +138,6 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data rac
     }
 }
 
-#if defined(__APPLE__) // Turning off this test in Linux because it is just too brittle in CI
 QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of member variable", ThreadSanitizerDataRaceDetectorMemberVariable)
 {
     qiti::ScopedQitiTest test;
@@ -156,7 +155,6 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data rac
     QITI_REQUIRE(dataRaceDetector->failed());
     QITI_REQUIRE_FALSE(dataRaceDetector->passed());
 }
-#endif
 
 // TODO: remove when createPotentialDeadlockDetector() is fully implemented, not just on Apple
 #if ! defined(__APPLE__)
