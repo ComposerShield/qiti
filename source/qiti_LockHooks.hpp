@@ -35,7 +35,11 @@ class LockHooks
 {
 private:
     struct DummyMutex {};
-    struct DummyLock  { DummyLock(const DummyMutex&) {} };
+    struct DummyLock
+    {
+        QITI_API_INTERNAL DummyLock(const DummyMutex&) {}
+        QITI_API_INTERNAL ~DummyLock() = default;
+    };
     
 public:
     inline static thread_local bool bypassLockHooks = false;
@@ -69,7 +73,8 @@ public:
     struct ScopedDisableHooks
     : public LockBypassingHook<DummyLock, DummyMutex>
     {
-        ScopedDisableHooks() : LockBypassingHook(mutex) {}
+        QITI_API ScopedDisableHooks() : LockBypassingHook(mutex) {}
+        QITI_API ~ScopedDisableHooks() = default;
         
     private:
         DummyMutex mutex;
