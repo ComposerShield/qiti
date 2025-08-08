@@ -25,12 +25,12 @@
 #include <typeindex>
 #include <typeinfo>
 
-// Forward declaration for external access
-namespace qiti { class FunctionData; }
-extern thread_local std::stack<qiti::FunctionData*> g_callStack;
-
 namespace qiti
 {
+class FunctionData;
+// Forward declaration for external access
+extern thread_local std::stack<qiti::FunctionData*> g_callStack;
+
 namespace FunctionNameHelpers
 {
     // A constexpr helper that slices out “FuncPtr = …” from __PRETTY_FUNCTION__.
