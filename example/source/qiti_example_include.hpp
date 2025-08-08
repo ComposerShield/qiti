@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <atomic>
+
 //--------------------------------------------------------------------------
 
 namespace qiti
@@ -57,9 +59,10 @@ void incrementCounter() noexcept;
 class TestClass
 {
 public:
-    void incrementCounter() noexcept;
+    void incrementCounter(std::atomic<int>& ready, std::atomic<bool>& go) noexcept;
+
 private:
-    int _counter = 0;
+    volatile int _counter = 0;
 };
 } // namespace ThreadSanitizer
 

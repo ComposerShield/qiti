@@ -31,22 +31,6 @@
 
 int counter = 0; // Shared global variable
 
-inline static void cpu_pause() noexcept
-{
-    // x86 or x86_64:
-    #if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || defined(_M_IX86)
-        _mm_pause();
-    
-    // AArch64 (Apple Silicon, many ARM64 Linux ports, etc.):
-    #elif defined(__aarch64__) || defined(_M_ARM64) || defined(__arm64__)
-        __asm__ volatile("yield");
-    
-    // Fallback (any other architecture): just yield to scheduler
-    #else
-        std::this_thread::yield(); // hint to scheduler, very short pause
-    #endif
-}
-
 //--------------------------------------------------------------------------
 
 namespace qiti
@@ -133,20 +117,15 @@ void incrementCounter() noexcept
     }
 }
 
-// Despite egregiously being a data race, CI does not always detect it as a data race.
-// So we added some waits to make sure our tests don't intermittently fail
-void TestClass::incrementCounter() noexcept
+void TestClass::incrementCounter(std::atomic<int>& ready, std::atomic<bool>& go) noexcept
 {
-    volatile int dummyInternalVal = 0;
-    for (int i = 0; i < 1'000'000; ++i)
+    ready.fetch_add(1, std::memory_order_relaxed);
+    while (! go.load(std::memory_order_acquire)) { /* spin */ }
+
+    for (int i = 0; i < 5'000'000; ++i)
     {
-        dummyInternalVal += 1;   // prevent re-ordering
-        ++_counter;              // Unsynchronized write
-        if (_counter % 2 == 0)   // Unsynchronized read
-            // spin for a brief moment, forcing both threads to sit in this
-            // branch at the same time more often
-            for (int k = 0; k < 100; ++k)
-                cpu_pause();
+        _counter = counter + 1; // read and write
+        (void)_counter;         // read
     }
 }
 } // namespace ThreadSanitizer
