@@ -71,7 +71,7 @@ QITI_TEST_CASE("qiti::Profile::endProfilingAllFunctions()", ProfileEndProfilingA
     QITI_REQUIRE_FALSE(qiti::Profile::isProfilingFunction<&testFunc>());
 }
 
-QITI_TEST_CASE("qiti::Profile::ScopedDisableProfiling()", ProfileEndProfilingAllFunctions)
+QITI_TEST_CASE("qiti::Profile::ScopedDisableProfiling()", ProfileScopedDisableProfiling)
 {
     qiti::ScopedQitiTest test;
     
