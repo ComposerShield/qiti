@@ -69,7 +69,7 @@ private:
      @param func The function to analyze
      @returns A hotspot score based on total time consumption (calls × average time)
      */
-    [[nodiscard]] static double calculateHotspotScore(const FunctionData* func) noexcept;
+    [[nodiscard]] static double QITI_API_INTERNAL calculateHotspotScore(const FunctionData* func) noexcept;
     
     /**
      Generate a human-readable explanation for why a function is considered a hotspot.
@@ -77,7 +77,7 @@ private:
      @param func The function to analyze
      @returns A descriptive string explaining the hotspot characteristics
      */
-    [[nodiscard]] static std::string getHotspotReason(const FunctionData* func) noexcept;
+    [[nodiscard]] static std::string QITI_API_INTERNAL getHotspotReason(const FunctionData* func) noexcept;
 };
 
 //--------------------------------------------------------------------------
