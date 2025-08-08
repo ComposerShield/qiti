@@ -39,7 +39,7 @@ extern "C"
 __attribute__((visibility("default")))
 __attribute__((no_sanitize("thread")))
 __attribute__((noinline))
-const char* __tsan_default_options()
+QITI_API const char* __tsan_default_options()
 {
     return TSAN_DEFAULT_OPTS;
 }
@@ -52,7 +52,7 @@ const char* __tsan_default_options()
 #if ! defined(__APPLE__)
 // When ThreadSanitizer is enabled, Linux uses __sanitizer_malloc_hook
 __attribute__((no_sanitize_thread))
-extern "C" void __sanitizer_malloc_hook(void* /*ptr*/,
+extern "C" QITI_API void __sanitizer_malloc_hook(void* /*ptr*/,
                                         size_t size)
 {
     qiti::MallocHooks::mallocHook(size);

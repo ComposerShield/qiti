@@ -46,7 +46,7 @@ static inline const std::array<const char*, 1> blackListedFunctions
 };
 
 /** Demangle a C++ ABI symbol name, or return the original on error */
-static std::string demangle(const char* name) noexcept
+static QITI_API_INTERNAL std::string demangle(const char* name) noexcept
 {
     int status = 0;
     std::unique_ptr<char,void(*)(void*)> demangled
@@ -58,7 +58,7 @@ static std::string demangle(const char* name) noexcept
 }
 
 /** Capture the current call stack (skipping the first `skip` frames) */
-static std::vector<std::string> captureStackTrace(int framesToSkip = 1) noexcept
+static QITI_API_INTERNAL std::vector<std::string> captureStackTrace(int framesToSkip = 1) noexcept
 {
     constexpr int MAX_FRAMES = 128;
     void* addrs[MAX_FRAMES];
@@ -87,7 +87,7 @@ static std::vector<std::string> captureStackTrace(int framesToSkip = 1) noexcept
 }
 
 /** Check if the stack trace contains a frame whose demangled name contains the substring `funcName */
-inline static bool stackContainsFunction(const std::string& funcName, int framesToSkip = 1) noexcept
+inline static QITI_API_INTERNAL bool stackContainsFunction(const std::string& funcName, int framesToSkip = 1) noexcept
 {
     auto trace = captureStackTrace(framesToSkip);
     for (auto& frame : trace)
@@ -97,7 +97,7 @@ inline static bool stackContainsFunction(const std::string& funcName, int frames
 }
 
 /** */
-inline static bool stackContainsBlacklistedFunction() noexcept
+inline static QITI_API_INTERNAL bool stackContainsBlacklistedFunction() noexcept
 {
     qiti::MallocHooks::ScopedBypassMallocHooks bypassHooks;
     
@@ -139,7 +139,7 @@ void qiti::MallocHooks::mallocHook(std::size_t size) noexcept
  - Linux with ThreadSanitizer: Uses __sanitizer_malloc_hook (in qiti_tests_client.cpp)
  - Linux without ThreadSanitizer: Uses operator new override (matches macOS implementation)
  */
-void* operator new(std::size_t size)
+QITI_API void* operator new(std::size_t size)
 {
     qiti::MallocHooks::mallocHook(size);
     
@@ -150,7 +150,7 @@ void* operator new(std::size_t size)
     throw std::bad_alloc{};
 }
 
-void* operator new[](std::size_t size)
+QITI_API void* operator new[](std::size_t size)
 {
     qiti::MallocHooks::mallocHook(size);
     

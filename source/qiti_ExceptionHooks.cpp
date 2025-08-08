@@ -35,7 +35,7 @@ extern "C"
 
 
 // Initialize function pointers to original exception functions
-static void initializeExceptionHooks()
+static void QITI_API_INTERNAL initializeExceptionHooks() noexcept
 {
     if (! original_cxa_throw)
     {

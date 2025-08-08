@@ -31,7 +31,7 @@ static thread_local bool g_inHook = false;
 //--------------------------------------------------------------------------
 
 #if defined(__APPLE__) // only supported on MacOS currently
-extern "C" int my_pthread_mutex_lock(pthread_mutex_t* m) noexcept
+extern "C" QITI_API int my_pthread_mutex_lock(pthread_mutex_t* m) noexcept
 {
     if (isQitiTestRunning())
     {
@@ -48,7 +48,7 @@ extern "C" int my_pthread_mutex_lock(pthread_mutex_t* m) noexcept
     return pthread_mutex_lock(m);
 }
 
-extern "C" int my_pthread_mutex_unlock(pthread_mutex_t* m) noexcept
+extern "C" QITI_API int my_pthread_mutex_unlock(pthread_mutex_t* m) noexcept
 {
     if (isQitiTestRunning())
     {
