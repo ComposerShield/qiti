@@ -151,7 +151,7 @@ static void freeHook(void* ptr) noexcept
     {
         // Extract size from header
         AllocationHeader* header = static_cast<AllocationHeader*>(ptr) - 1;
-        currentAmountHeapAllocatedOnCurrentThread -= header->size;
+        qiti::MallocHooks::currentAmountHeapAllocatedOnCurrentThread -= header->size;
     }
 }
 
@@ -175,7 +175,7 @@ QITI_API void* operator new(std::size_t size)
         throw std::bad_alloc{};
     
     // Store size in header
-    AllocationHeader* header = static_cast<AllocationHeader*>(rawPtr);
+    auto* header = static_cast<AllocationHeader*>(rawPtr);
     header->size = size;
     
     // Return pointer after header
@@ -196,13 +196,12 @@ QITI_API void* operator new[](std::size_t size)
         throw std::bad_alloc{};
     
     // Store size in header
-    AllocationHeader* header = static_cast<AllocationHeader*>(rawPtr);
+    auto* header = static_cast<AllocationHeader*>(rawPtr);
     header->size = size;
     
     // Return pointer after header
     return header + 1;
 }
-#endif // defined(__APPLE__) || ! defined(QITI_ENABLE_THREAD_SANITIZER)
 
 QITI_API void operator delete(void* ptr) noexcept
 {
@@ -211,7 +210,7 @@ QITI_API void operator delete(void* ptr) noexcept
         freeHook(ptr);
         
         // Get original allocation by backing up to header
-        AllocationHeader* header = static_cast<AllocationHeader*>(ptr) - 1;
+        auto* header = static_cast<AllocationHeader*>(ptr) - 1;
         std::free(header);
     }
 }
@@ -223,9 +222,11 @@ QITI_API void operator delete[](void* ptr) noexcept
         freeHook(ptr);
         
         // Get original allocation by backing up to header
-        AllocationHeader* header = static_cast<AllocationHeader*>(ptr) - 1;
+        auto* header = static_cast<AllocationHeader*>(ptr) - 1;
         std::free(header);
     }
 }
+
+#endif // defined(__APPLE__) || ! defined(QITI_ENABLE_THREAD_SANITIZER)
 
 //--------------------------------------------------------------------------

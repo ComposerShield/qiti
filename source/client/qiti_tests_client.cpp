@@ -25,6 +25,7 @@
 #include <cstdint>
 #include <functional>
 #include <mutex>
+#include <unordered_map>
 
 //--------------------------------------------------------------------------
 
@@ -50,12 +51,38 @@ QITI_API const char* __tsan_default_options()
 
 #ifdef QITI_ENABLE_THREAD_SANITIZER
 #if ! defined(__APPLE__)
-// When ThreadSanitizer is enabled, Linux uses __sanitizer_malloc_hook
+// For Linux with ThreadSanitizer, track allocations in a map since we use TSan hooks
+static thread_local std::unordered_map<void*, std::size_t> g_allocationSizes;
+
+// When ThreadSanitizer is enabled, Linux uses __sanitizer_malloc_hook instead of
+// operator new because that operator is already used by TSan
 __attribute__((no_sanitize_thread))
-extern "C" QITI_API void __sanitizer_malloc_hook(void* /*ptr*/,
-                                        size_t size)
+extern "C" QITI_API void __sanitizer_malloc_hook(void* ptr, size_t size)
 {
     qiti::MallocHooks::mallocHook(size);
+    
+    // Track allocation for leak detection
+    if (ptr != nullptr)
+    {
+        qiti::MallocHooks::currentAmountHeapAllocatedOnCurrentThread += size;
+        g_allocationSizes[ptr] = size;
+    }
+}
+
+// When ThreadSanitizer is enabled, Linux uses __sanitizer_free_hook instead of
+// operator delete because that operator is already used by TSan
+__attribute__((no_sanitize_thread))
+extern "C" QITI_API void __sanitizer_free_hook(void* ptr)
+{
+    if (ptr != nullptr)
+    {
+        auto it = g_allocationSizes.find(ptr);
+        if (it != g_allocationSizes.end())
+        {
+            qiti::MallocHooks::currentAmountHeapAllocatedOnCurrentThread -= it->second;
+            g_allocationSizes.erase(it);
+        }
+    }
 }
 #endif // ! defined(__APPLE__)
 // When ThreadSanitizer is disabled, Linux will use operator new override instead (matching macOS implementation)
