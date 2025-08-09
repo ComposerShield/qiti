@@ -139,7 +139,7 @@ void qiti::MallocHooks::mallocHook(std::size_t size) noexcept
     }
 }
 
-static void freeHook(void* ptr) noexcept
+[[maybe_unused]] static void freeHook(void* ptr) noexcept
 {
     if (! isQitiTestRunning())
         return;
@@ -166,52 +166,83 @@ static void freeHook(void* ptr) noexcept
  */
 QITI_API void* operator new(std::size_t size)
 {
-    qiti::MallocHooks::mallocHook(size);
-    
-    // Allocate extra space for header + user data
-    std::size_t totalSize = sizeof(AllocationHeader) + size;
-    void* rawPtr = std::malloc(totalSize);
-    if (! rawPtr)
+    if (isQitiTestRunning())
+    {
+        qiti::MallocHooks::mallocHook(size);
+        
+        // Allocate extra space for header + user data
+        std::size_t totalSize = sizeof(AllocationHeader) + size;
+        void* rawPtr = std::malloc(totalSize);
+        if (! rawPtr)
+            throw std::bad_alloc{};
+        
+        // Store size in header
+        auto* header = static_cast<AllocationHeader*>(rawPtr);
+        header->size = size;
+        
+        // Return pointer after header
+        return header + 1;
+    }
+    else
+    {
+        // Standard allocation when not in test
+        if (void* ptr = std::malloc(size))
+            return ptr;
         throw std::bad_alloc{};
-    
-    // Store size in header
-    auto* header = static_cast<AllocationHeader*>(rawPtr);
-    header->size = size;
-    
-    // Return pointer after header
-    return header + 1;
+    }
 }
 
 QITI_API void* operator new[](std::size_t size)
 {
-    qiti::MallocHooks::mallocHook(size);
-    
-    if (size == 0)
-        ++size; // avoid std::malloc(0) which may return nullptr on success
-    
-    // Allocate extra space for header + user data
-    std::size_t totalSize = sizeof(AllocationHeader) + size;
-    void* rawPtr = std::malloc(totalSize);
-    if (! rawPtr)
+    if (isQitiTestRunning())
+    {
+        qiti::MallocHooks::mallocHook(size);
+        
+        if (size == 0)
+            ++size; // avoid std::malloc(0) which may return nullptr on success
+        
+        // Allocate extra space for header + user data
+        std::size_t totalSize = sizeof(AllocationHeader) + size;
+        void* rawPtr = std::malloc(totalSize);
+        if (! rawPtr)
+            throw std::bad_alloc{};
+        
+        // Store size in header
+        auto* header = static_cast<AllocationHeader*>(rawPtr);
+        header->size = size;
+        
+        // Return pointer after header
+        return header + 1;
+    }
+    else
+    {
+        // Standard allocation when not in test
+        if (size == 0)
+            ++size; // avoid std::malloc(0) which may return nullptr on success
+        
+        if (void* ptr = std::malloc(size))
+            return ptr;
         throw std::bad_alloc{};
-    
-    // Store size in header
-    auto* header = static_cast<AllocationHeader*>(rawPtr);
-    header->size = size;
-    
-    // Return pointer after header
-    return header + 1;
+    }
 }
 
 QITI_API void operator delete(void* ptr) noexcept
 {
     if (ptr != nullptr)
     {
-        freeHook(ptr);
-        
-        // Get original allocation by backing up to header
-        auto* header = static_cast<AllocationHeader*>(ptr) - 1;
-        std::free(header);
+        if (isQitiTestRunning())
+        {
+            freeHook(ptr);
+            
+            // Get original allocation by backing up to header
+            auto* header = static_cast<AllocationHeader*>(ptr) - 1;
+            std::free(header);
+        }
+        else
+        {
+            // Standard deallocation when not in test
+            std::free(ptr);
+        }
     }
 }
 
@@ -219,11 +250,19 @@ QITI_API void operator delete[](void* ptr) noexcept
 {
     if (ptr != nullptr)
     {
-        freeHook(ptr);
-        
-        // Get original allocation by backing up to header
-        auto* header = static_cast<AllocationHeader*>(ptr) - 1;
-        std::free(header);
+        if (isQitiTestRunning())
+        {
+            freeHook(ptr);
+            
+            // Get original allocation by backing up to header
+            auto* header = static_cast<AllocationHeader*>(ptr) - 1;
+            std::free(header);
+        }
+        else
+        {
+            // Standard deallocation when not in test
+            std::free(ptr);
+        }
     }
 }
 

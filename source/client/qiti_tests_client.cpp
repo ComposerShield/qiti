@@ -29,6 +29,10 @@
 
 //--------------------------------------------------------------------------
 
+extern bool isQitiTestRunning() noexcept;
+
+//--------------------------------------------------------------------------
+
 #define QITI_TSAN_LOG_PATH "/tmp/tsan.log"
 
 static constexpr const char TSAN_DEFAULT_OPTS[] = "report_thread_leaks=0"
@@ -59,13 +63,16 @@ static thread_local std::unordered_map<void*, std::size_t> g_allocationSizes;
 __attribute__((no_sanitize_thread))
 extern "C" QITI_API void __sanitizer_malloc_hook(void* ptr, size_t size)
 {
-    qiti::MallocHooks::mallocHook(size);
-    
-    // Track allocation for leak detection
-    if (ptr != nullptr)
+    if (isQitiTestRunning())
     {
-        qiti::MallocHooks::currentAmountHeapAllocatedOnCurrentThread += size;
-        g_allocationSizes[ptr] = size;
+        qiti::MallocHooks::mallocHook(size);
+        
+        // Track allocation for leak detection
+        if (ptr != nullptr)
+        {
+            qiti::MallocHooks::currentAmountHeapAllocatedOnCurrentThread += size;
+            g_allocationSizes[ptr] = size;
+        }
     }
 }
 
@@ -74,7 +81,7 @@ extern "C" QITI_API void __sanitizer_malloc_hook(void* ptr, size_t size)
 __attribute__((no_sanitize_thread))
 extern "C" QITI_API void __sanitizer_free_hook(void* ptr)
 {
-    if (ptr != nullptr)
+    if (isQitiTestRunning() && ptr != nullptr)
     {
         auto it = g_allocationSizes.find(ptr);
         if (it != g_allocationSizes.end())
