@@ -254,8 +254,9 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects
             // Signal that main thread is ready to proceed
             mainThreadReady.store(true);
             
-            // Main thread locks B then A, but uses scoped_lock (deadlock-safe)
-            std::scoped_lock lock(mutexB, mutexA);
+            // Main thread locks B then A (unsafe - potential deadlock)
+            std::lock_guard<std::mutex> lockB(mutexB);
+            std::lock_guard<std::mutex> lockA(mutexA);
             
             t.join();
         };
