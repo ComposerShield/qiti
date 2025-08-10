@@ -138,6 +138,9 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data rac
     }
 }
 
+// Disable optimizations to prevent Release mode optimizations from interfering with intentional deadlock
+#pragma clang optimize off
+
 QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of member variable", ThreadSanitizerDataRaceDetectorMemberVariable)
 {
     qiti::ScopedQitiTest test;
@@ -160,11 +163,6 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data rac
     QITI_REQUIRE_FALSE(dataRaceDetector->passed());
 }
 
-// TODO: remove when createPotentialDeadlockDetector() is fully implemented, not just on Apple
-#if ! defined(__APPLE__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated"
-#endif
 QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() does not produce false positive", ThreadSanitizerDeadlockDetectorNoFalsePositive)
 {
     qiti::ScopedQitiTest test;
@@ -212,68 +210,50 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() does no
         QITI_REQUIRE_FALSE(potentialDeadlockDetector->failed());
     }
 }
-#if ! defined(__APPLE__)
-#pragma clang diagnostic pop
-#endif
 
-#if defined(__APPLE__) // TODO: remove when this feature is supported on Linux
 QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects potential deadlock", ThreadSanitizerDeadlockDetectorDetectsDeadlock)
 {
     qiti::ScopedQitiTest test;
     
-    auto potentialDeadlockDetector = qiti::ThreadSanitizer::createPotentialDeadlockDetector();
-    
     QITI_SECTION("Run code that inverts the order of mutex locking which implies a potential deadlock,"
-            "but does not actually deadlock here.")
+                 "but does not actually deadlock here.")
     {
-        auto singleMutexWithNoDeadlock = []()        {
+        auto potentialDeadlockDetector = qiti::ThreadSanitizer::createPotentialDeadlockDetector();
+        
+        auto createLockInversionPattern = []()
+        {
             std::mutex mutexA;
             std::mutex mutexB;
             
-            // More robust synchronization using atomics and barriers
-            std::atomic<bool> threadHasLockA{false};
-            std::atomic<bool> mainThreadReady{false};
-            
-            std::thread t([&]()
+            // First, establish A->B order in one thread
+            std::thread t1([&]()
             {
-                // Thread t locks A then B
                 std::lock_guard<std::mutex> lockA(mutexA);
-                threadHasLockA.store(true);
-                
-                // Wait for main thread to signal it's ready
-                while (! mainThreadReady.load()) {
-                    std::this_thread::yield();
-                }
-                
-                // Small computational work to ensure timing
-                volatile int work = 0;
-                for (int i = 0; i < 10000; ++i) {
-                    work = work + i;
-                }
-                
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
                 std::lock_guard<std::mutex> lockB(mutexB);
+                // TSan sees: A -> B
             });
+            t1.join();
             
-            // Wait for thread to acquire lockA
-            while (! threadHasLockA.load()) {
-                std::this_thread::yield();
-            }
-            
-            // Signal that main thread is ready to proceed
-            mainThreadReady.store(true);
-            
-            // Main thread locks B then A, but uses scoped_lock (deadlock-safe)
-            std::scoped_lock lock(mutexB, mutexA);
-            
-            t.join();
+            // Then, establish B->A order in another thread
+            // This creates the inversion pattern without concurrent access
+            std::thread t2([&]()
+            {
+                std::lock_guard<std::mutex> lockB(mutexB);
+                std::this_thread::sleep_for(std::chrono::milliseconds(1)); 
+                std::lock_guard<std::mutex> lockA(mutexA);
+                // TSan sees: B -> A (creates cycle A->B->A)
+            });
+            t2.join();
         };
         
         // Should fail
-        potentialDeadlockDetector->run(singleMutexWithNoDeadlock);
+        potentialDeadlockDetector->run(createLockInversionPattern);
         QITI_REQUIRE_FALSE(potentialDeadlockDetector->passed());
         QITI_REQUIRE(potentialDeadlockDetector->failed());
     }
 }
-#endif // defined(__APPLE__)
+
+#pragma clang optimize on
 
 #endif // QITI_ENABLE_THREAD_SANITIZER

@@ -84,12 +84,7 @@ public:
      @see run()
      @see passed()
      @see failed()
-     
-     TODO: Implement on Linux
     */
-#if ! defined(__APPLE__)
-    [[deprecated("WIP - Not finished implementing on target. Only supported on MacOS currently.")]]
-#endif
     [[nodiscard]] static std::unique_ptr<ThreadSanitizer> QITI_API createPotentialDeadlockDetector() noexcept;
     
     /**
@@ -145,8 +140,10 @@ protected:
     /** */
     void QITI_API_INTERNAL flagFailed() noexcept;
     
-private:
+protected:
     std::atomic<bool> _passed = true;
+    
+private:
     
     /** Implementation. */
     static std::unique_ptr<ThreadSanitizer> QITI_API createFunctionsCalledInParallelDetector(FunctionData* func0,
