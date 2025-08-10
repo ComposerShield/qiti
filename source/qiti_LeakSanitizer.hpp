@@ -56,7 +56,11 @@ namespace qiti
  assert(lsan.failed());
  @endcode
  */
-class LeakSanitizer
+class
+#if ! defined(__APPLE__) // LSAN only supported on MacOS, TODO: support Linux
+[[deprecated("LeakSanitizer not yet supported on Linux")]]
+#endif
+LeakSanitizer final
 {
 public:
     /** @brief Default constructor. Initializes leak sanitizer in passed state. */
