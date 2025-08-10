@@ -112,7 +112,7 @@ inline static QITI_API_INTERNAL bool stackContainsFunction(const std::string& fu
 }
 
 /** */
-[[maybe_unused]] inline static QITI_API_INTERNAL bool stackContainsBlacklistedFunction() noexcept
+inline static QITI_API_INTERNAL bool stackContainsBlacklistedFunction() noexcept
 {
     qiti::MallocHooks::ScopedBypassMallocHooks bypassHooks;
     
