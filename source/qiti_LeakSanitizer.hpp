@@ -30,7 +30,7 @@ namespace qiti
 {
 //--------------------------------------------------------------------------
 /**
- @brief Memory leak detector that tracks heap allocations during function execution.
+ Memory leak detector that tracks heap allocations during function execution.
  
  LeakSanitizer monitors heap allocations and deallocations during the execution
  of a provided function to detect memory leaks. It compares the amount of heap
@@ -63,14 +63,14 @@ class
 LeakSanitizer final
 {
 public:
-    /** @brief Default constructor. Initializes leak sanitizer in passed state. */
+    /** Default constructor. Initializes leak sanitizer in passed state. */
     QITI_API LeakSanitizer() noexcept;
     
-    /** @brief Destructor. */
+    /** Destructor. */
     QITI_API ~LeakSanitizer() noexcept;
     
     /** 
-     @brief Execute function and check for memory leaks.
+     Execute function and check for memory leaks.
      
      Captures the current heap allocation amount, runs the provided function,
      then checks if the heap allocation amount matches. If there's a difference,
@@ -81,19 +81,19 @@ public:
     void QITI_API run(std::function<void()> func) noexcept;
     
     /** 
-     @brief Check if all leak detection tests passed.
+     Check if all leak detection tests passed.
      @return true if no leaks detected, false if any leaks found
      */
     [[nodiscard]] bool QITI_API passed() const noexcept;
     
     /** 
-     @brief Check if any leak detection tests failed.
+     Check if any leak detection tests failed.
      @return true if any leaks detected, false if all tests passed
      */
     [[nodiscard]] inline bool QITI_API failed() const noexcept { return ! passed(); }
     
     /**
-     @brief Get detailed report of memory allocation during testing.
+     Get detailed report of memory allocation during testing.
      @return String containing allocation/deallocation details and any detected leaks
      */
     [[nodiscard]] std::string QITI_API getReport() const noexcept;
