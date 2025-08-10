@@ -30,7 +30,7 @@ namespace qiti
  Cleans up state when it goes out of scope.
  Can be queried for details regarding the current Qiti-injected unit test.
  */
-class ScopedQitiTest
+class ScopedQitiTest final
 {
 public:
     /**

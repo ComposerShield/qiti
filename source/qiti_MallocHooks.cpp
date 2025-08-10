@@ -26,7 +26,9 @@
 #include <mutex>
 #include <sstream>        // std::ostringstream
 #include <string>
+#include <unordered_map>
 #include <vector>
+
 
 //--------------------------------------------------------------------------
 
@@ -36,8 +38,21 @@ extern bool isQitiTestRunning() noexcept;
 
 thread_local bool qiti::MallocHooks::bypassMallocHooks = false;
 thread_local uint32_t qiti::MallocHooks::numHeapAllocationsOnCurrentThread = 0;
-thread_local uint64_t qiti::MallocHooks::amountHeapAllocatedOnCurrentThread;
+thread_local uint64_t qiti::MallocHooks::totalAmountHeapAllocatedOnCurrentThread = 0;
+thread_local uint64_t qiti::MallocHooks::currentAmountHeapAllocatedOnCurrentThread = 0;;
 thread_local std::function<void()> qiti::MallocHooks::onNextHeapAllocation = nullptr;
+
+// Thread-local allocation tracking for leak detection
+static thread_local std::unordered_map<void*, std::size_t> g_allocationSizes;
+
+static thread_local struct AllocationSizesCleanup final
+{
+    ~AllocationSizesCleanup() noexcept
+    {
+        qiti::MallocHooks::ScopedBypassMallocHooks bypassHooks;
+        g_allocationSizes.clear(); // delete everything without triggering hooks
+    }
+} g_allocationSizesCleanup;
 
 /** Functions we never want to count towards heap allocations that we track. */
 static inline const std::array<const char*, 1> blackListedFunctions
@@ -109,7 +124,7 @@ inline static QITI_API_INTERNAL bool stackContainsBlacklistedFunction() noexcept
 
 //--------------------------------------------------------------------------
 
-void qiti::MallocHooks::mallocHook(std::size_t size) noexcept
+void QITI_API_INTERNAL qiti::MallocHooks::mallocHook(std::size_t size) noexcept
 {
     if (! isQitiTestRunning())
         return;
@@ -121,7 +136,8 @@ void qiti::MallocHooks::mallocHook(std::size_t size) noexcept
         return;
     
     ++numHeapAllocationsOnCurrentThread;
-    amountHeapAllocatedOnCurrentThread += size;
+    totalAmountHeapAllocatedOnCurrentThread += size;
+    currentAmountHeapAllocatedOnCurrentThread += size;
 
     if (onNextHeapAllocation != nullptr)
     {
@@ -130,38 +146,174 @@ void qiti::MallocHooks::mallocHook(std::size_t size) noexcept
     }
 }
 
+[[maybe_unused]] static void QITI_API_INTERNAL freeHook(void* ptr) noexcept
+{
+    if (! isQitiTestRunning())
+        return;
+    
+    if (qiti::MallocHooks::bypassMallocHooks)
+        return;
+    
+    if (ptr != nullptr)
+    {
+        // Use map-based tracking (consistent with other implementations)
+        auto it = g_allocationSizes.find(ptr);
+        if (it != g_allocationSizes.end())
+        {
+            qiti::MallocHooks::ScopedBypassMallocHooks bypassHooks;
+            qiti::MallocHooks::currentAmountHeapAllocatedOnCurrentThread -= it->second;
+            g_allocationSizes.erase(it); // deletes
+        }
+    }
+}
+
+void qiti::MallocHooks::mallocHookWithTracking(void* ptr, std::size_t size) noexcept
+{
+    if (! isQitiTestRunning())
+        return;
+        
+    mallocHook(size);
+    
+    if (ptr != nullptr)
+    {
+        qiti::MallocHooks::ScopedBypassMallocHooks bypassHooks;
+        g_allocationSizes[ptr] = size; // heap allocates
+    }
+}
+
+void qiti::MallocHooks::freeHookWithTracking(void* ptr) noexcept
+{
+    if (! isQitiTestRunning() || ptr == nullptr)
+        return;
+    
+    if (g_allocationSizes.size() > 0)
+    {
+        auto it = g_allocationSizes.find(ptr);
+        if (it != g_allocationSizes.end())
+        {
+            qiti::MallocHooks::ScopedBypassMallocHooks bypassHooks;
+            currentAmountHeapAllocatedOnCurrentThread -= it->second;
+            g_allocationSizes.erase(it); // deletes
+        }
+    }
+}
+
+void qiti::MallocHooks::reallocHookWithTracking(void* oldPtr, void* newPtr, std::size_t oldSize, std::size_t newSize) noexcept
+{
+    if (! isQitiTestRunning())
+        return;
+        
+    // Handle the old allocation
+    if (oldPtr != nullptr)
+    {
+        auto it = g_allocationSizes.find(oldPtr);
+        if (it != g_allocationSizes.end())
+        {
+            qiti::MallocHooks::ScopedBypassMallocHooks bypassHooks;
+            currentAmountHeapAllocatedOnCurrentThread -= it->second;
+            g_allocationSizes.erase(it); // deletes
+        }
+    }
+    
+    // Handle the new allocation
+    if (newPtr != nullptr)
+    {
+        // Only call mallocHook for the net size change
+        if (newSize > oldSize)
+        {
+            mallocHook(newSize - oldSize);
+        }
+        
+        qiti::MallocHooks::ScopedBypassMallocHooks bypassHooks;
+        currentAmountHeapAllocatedOnCurrentThread += newSize;
+        g_allocationSizes[newPtr] = newSize; // heap allocates
+    }
+}
+
+//--------------------------------------------------------------------------
+
+/**
+ Memory allocation hook implementation:
+ - macOS: Uses malloc interposition (implemented below)
+ - Linux with ThreadSanitizer: Uses __sanitizer_malloc_hook (in qiti_tests_client.cpp)  
+ - Linux without ThreadSanitizer: Uses malloc hooks (to be implemented)
+ 
+ Note: No operator new/delete overrides needed since all platforms use malloc-level hooks.
+ */
+
 //--------------------------------------------------------------------------
 
 #if defined(__APPLE__) || ! defined(QITI_ENABLE_THREAD_SANITIZER)
-/**
- Memory allocation hook implementation:
- - macOS: Always uses operator new override
- - Linux with ThreadSanitizer: Uses __sanitizer_malloc_hook (in qiti_tests_client.cpp)
- - Linux without ThreadSanitizer: Uses operator new override (matches macOS implementation)
- */
-QITI_API void* operator new(std::size_t size)
+// macOS operator new/delete overrides for leak detection
+
+void* QITI_API operator new(std::size_t size)
 {
-    qiti::MallocHooks::mallocHook(size);
+    void* ptr = std::malloc(size);
+    if (ptr == nullptr)
+        throw std::bad_alloc{};
     
-    // Original implementation
-    if (void* ptr = std::malloc(size))
-        return ptr;
+    if (! qiti::MallocHooks::bypassMallocHooks)
+        qiti::MallocHooks::mallocHookWithTracking(ptr, size);
     
-    throw std::bad_alloc{};
+    return ptr;
 }
 
-QITI_API void* operator new[](std::size_t size)
+void* QITI_API operator new[](std::size_t size)
 {
-    qiti::MallocHooks::mallocHook(size);
+    void* ptr = std::malloc(size);
+    if (ptr == nullptr)
+        throw std::bad_alloc{};
     
-    if (size == 0)
-        ++size; // avoid std::malloc(0) which may return nullptr on success
- 
-    if (void* ptr = std::malloc(size))
-        return ptr;
- 
-    throw std::bad_alloc{};
+    if (! qiti::MallocHooks::bypassMallocHooks)
+        qiti::MallocHooks::mallocHookWithTracking(ptr, size);
+    
+    return ptr;
+}
+
+void QITI_API operator delete(void* ptr) noexcept
+{
+    if (ptr != nullptr)
+    {
+        if (! qiti::MallocHooks::bypassMallocHooks)
+            qiti::MallocHooks::freeHookWithTracking(ptr);
+        std::free(ptr);
+    }
+}
+
+void QITI_API operator delete[](void* ptr) noexcept
+{
+    if (ptr != nullptr)
+    {
+        if (! qiti::MallocHooks::bypassMallocHooks)
+            qiti::MallocHooks::freeHookWithTracking(ptr);
+        std::free(ptr);
+    }
+}
+
+// Sized delete operators (C++14)
+void QITI_API operator delete(void* ptr, std::size_t /*size*/) noexcept
+{
+    if (ptr != nullptr)
+    {
+        if (! qiti::MallocHooks::bypassMallocHooks)
+            qiti::MallocHooks::freeHookWithTracking(ptr);
+        std::free(ptr);
+    }
+}
+
+void QITI_API operator delete[](void* ptr, std::size_t /*size*/) noexcept
+{
+    if (ptr != nullptr)
+    {
+        if (! qiti::MallocHooks::bypassMallocHooks)
+            qiti::MallocHooks::freeHookWithTracking(ptr);
+        std::free(ptr);
+    }
 }
 #endif // defined(__APPLE__) || ! defined(QITI_ENABLE_THREAD_SANITIZER)
+
+//--------------------------------------------------------------------------
+
+
 
 //--------------------------------------------------------------------------

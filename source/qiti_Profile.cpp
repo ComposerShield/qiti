@@ -80,7 +80,7 @@ void Profile::resetProfiling() noexcept
     g_functionsToProfile.clear();
     g_profileAllFunctions = false;
     MallocHooks::numHeapAllocationsOnCurrentThread  = 0u;
-    MallocHooks::amountHeapAllocatedOnCurrentThread = 0ull;
+    MallocHooks::totalAmountHeapAllocatedOnCurrentThread = 0ull;
 }
 
 void Profile::beginProfilingFunction(const void* functionAddress, const char* functionName) noexcept
@@ -157,7 +157,7 @@ uint64_t Profile::getNumHeapAllocationsOnCurrentThread() noexcept
 
 uint64_t Profile::getAmountHeapAllocatedOnCurrentThread() noexcept
 {
-    return MallocHooks::amountHeapAllocatedOnCurrentThread;
+    return MallocHooks::totalAmountHeapAllocatedOnCurrentThread;
 }
 
 void Profile::updateFunctionDataOnEnter(const void* this_fn) noexcept
@@ -192,7 +192,7 @@ void Profile::updateFunctionDataOnEnter(const void* this_fn) noexcept
     lastCallImpl->caller = caller;
     lastCallImpl->callingThread = std::this_thread::get_id();
     lastCallImpl->numHeapAllocationsBeforeFunctionCall = MallocHooks::numHeapAllocationsOnCurrentThread;
-    lastCallImpl->amountHeapAllocatedBeforeFunctionCall = MallocHooks::amountHeapAllocatedOnCurrentThread;
+    lastCallImpl->amountHeapAllocatedBeforeFunctionCall = MallocHooks::totalAmountHeapAllocatedOnCurrentThread;
     
     // Grab starting times last without doing additional work after
     lastCallImpl->startTimeWallClock = std::chrono::steady_clock::now();
@@ -224,7 +224,7 @@ void Profile::updateFunctionDataOnExit(const void* this_fn) noexcept
     callImpl->timeSpentInFunctionNanosecondsWallClock = static_cast<uint64_t>(clockElapsed_ns.count());
     callImpl->timeSpentInFunctionNanosecondsCpu = cpuElapsed_ns;
     callImpl->numHeapAllocationsAfterFunctionCall = MallocHooks::numHeapAllocationsOnCurrentThread;
-    callImpl->amountHeapAllocatedAfterFunctionCall = MallocHooks::amountHeapAllocatedOnCurrentThread;
+    callImpl->amountHeapAllocatedAfterFunctionCall = MallocHooks::totalAmountHeapAllocatedOnCurrentThread;
     
     // Update listeners
     for (auto* listener : impl->listeners)

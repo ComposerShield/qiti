@@ -169,20 +169,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install LLVM 16 & Ninja
+      - name: Install LLVM 17 & Ninja
         run: |
           apt-get update
-          apt-get install -y clang-16 ninja-build cmake git
-          echo "CC=clang-16" >> $GITHUB_ENV
-          echo "CXX=clang++-16" >> $GITHUB_ENV
+          apt-get install -y clang-17 ninja-build cmake git
+          echo "CC=clang-17" >> $GITHUB_ENV
+          echo "CXX=clang++-17" >> $GITHUB_ENV
 
       - name: Configure CMake (Ninja, LLVM Clang)
         run: |
           cmake . -B build \
             -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_C_COMPILER=clang-16 \
-            -DCMAKE_CXX_COMPILER=clang++-16 \
+            -DCMAKE_C_COMPILER=clang-17 \
+            -DCMAKE_CXX_COMPILER=clang++-17 \
             -DQITI_ENABLE_THREAD_SANITIZER=ON
 
       - name: Build Tests

@@ -36,10 +36,11 @@ class MallocHooks
 public:
     static thread_local bool bypassMallocHooks;
     static thread_local uint32_t numHeapAllocationsOnCurrentThread;
-    static thread_local uint64_t amountHeapAllocatedOnCurrentThread;
+    static thread_local uint64_t totalAmountHeapAllocatedOnCurrentThread;
+    static thread_local uint64_t currentAmountHeapAllocatedOnCurrentThread;
     static thread_local std::function<void()> onNextHeapAllocation;
     
-    struct ScopedBypassMallocHooks
+    struct ScopedBypassMallocHooks final
     {
         /** Temporarily disable malloc hooks for the current thread for however long this object is in scope. */
         inline QITI_API_INTERNAL ScopedBypassMallocHooks() noexcept
@@ -55,7 +56,7 @@ public:
      Hook invoked on each malloc call.
      
      More specifically,
-     macOs: on every call to `operator new` or `operator new[]`
+     macOS: on every call to malloc via malloc zone hooks
      Linux: on every call to `__sanitizer_malloc_hook` (called from TSan)
      
      Records the allocation size, updates thread-local counters, and executes
@@ -64,6 +65,35 @@ public:
      Custom implementation details ignored if not currently in a Qiti test.
      */
     static void QITI_API mallocHook(std::size_t size) noexcept;
+    
+    /**
+     Hook invoked on each malloc call with pointer tracking for leak detection.
+     
+     @param ptr Pointer returned by malloc (nullptr if allocation failed)
+     @param size Size of allocation
+     */
+    static void QITI_API mallocHookWithTracking(void* ptr, std::size_t size) noexcept;
+    
+    /**
+     Hook invoked on each free call for leak detection.
+     
+     @param ptr Pointer to free
+     */
+    static void QITI_API freeHookWithTracking(void* ptr) noexcept;
+    
+    /**
+     Hook invoked on each realloc call for leak detection.
+     
+     @param oldPtr Original pointer (may be nullptr)
+     @param newPtr New pointer returned by realloc (may be nullptr if failed)
+     @param oldSize Size of original allocation (0 if oldPtr was nullptr)
+     @param newSize New size requested
+     */
+    static void QITI_API reallocHookWithTracking(void* oldPtr,
+                                                 void* newPtr,
+                                                 std::size_t oldSize,
+                                                 std::size_t newSize) noexcept;
+    
 
 private:
     MallocHooks() = delete;
