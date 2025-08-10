@@ -15,9 +15,11 @@
 
 // Qiti Shared API
 #include "../../source/qiti_MallocHooks.hpp"
+#include "../../source/qiti_LockHooks.hpp"
 
 // TSAN
 #include <sanitizer/common_interface_defs.h>
+#include <sanitizer/tsan_interface.h>
 
 #include <stdlib.h>
 
@@ -84,6 +86,32 @@ extern "C" QITI_API void __sanitizer_free_hook(void* ptr)
     
     g_insideTSanHook = false;
 }
+
+// TSan mutex hooks for lock ordering detection on Linux
+__attribute__((no_sanitize_thread))
+extern "C" QITI_API void __tsan_mutex_pre_lock(void* addr, unsigned flags)
+{
+    if (g_insideTSanHook)
+        return;
+    g_insideTSanHook = true;
+    
+    qiti::LockHooks::lockAcquireHook(static_cast<const pthread_mutex_t*>(addr));
+    
+    g_insideTSanHook = false;
+}
+
+__attribute__((no_sanitize_thread))
+extern "C" QITI_API void __tsan_mutex_post_unlock(void* addr, unsigned flags)
+{
+    if (g_insideTSanHook)
+        return;
+    g_insideTSanHook = true;
+    
+    qiti::LockHooks::lockReleaseHook(static_cast<const pthread_mutex_t*>(addr));
+    
+    g_insideTSanHook = false;
+}
+
 #endif // ! defined(__APPLE__)
 // When ThreadSanitizer is disabled, Linux will use operator new override instead (matching macOS implementation)
 #endif // QITI_ENABLE_THREAD_SANITIZER
