@@ -215,11 +215,11 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects
 {
     qiti::ScopedQitiTest test;
     
-    auto potentialDeadlockDetector = qiti::ThreadSanitizer::createPotentialDeadlockDetector();
-    
     QITI_SECTION("Run code that inverts the order of mutex locking which implies a potential deadlock,"
                  "but does not actually deadlock here.")
     {
+        auto potentialDeadlockDetector = qiti::ThreadSanitizer::createPotentialDeadlockDetector();
+        
         auto singleMutexWithNoDeadlock = []()
         {
             std::mutex mutexA;
