@@ -172,6 +172,9 @@ void qiti::MallocHooks::mallocHookWithTracking(void* ptr, std::size_t size) noex
     if (! isQitiTestRunning())
         return;
         
+    if (qiti::MallocHooks::bypassMallocHooks)
+        return;
+        
     mallocHook(size);
     
     if (ptr != nullptr)
@@ -184,6 +187,9 @@ void qiti::MallocHooks::mallocHookWithTracking(void* ptr, std::size_t size) noex
 void qiti::MallocHooks::freeHookWithTracking(void* ptr) noexcept
 {
     if (! isQitiTestRunning() || ptr == nullptr)
+        return;
+        
+    if (qiti::MallocHooks::bypassMallocHooks)
         return;
     
     if (g_allocationSizes.size() > 0)

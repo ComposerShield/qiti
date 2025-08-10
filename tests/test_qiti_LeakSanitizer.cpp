@@ -15,7 +15,6 @@
 
 //--------------------------------------------------------------------------
 
-#if __APPLE__ // LSAN only supported on MacOS, TODO: support Linux
 QITI_TEST_CASE("qiti::LeakSanitizer::defaultConstructor", LeakSanitizerDefaultConstructor)
 {
     qiti::ScopedQitiTest test;
@@ -214,6 +213,5 @@ QITI_TEST_CASE("qiti::LeakSanitizer::moveAssignment", LeakSanitizerMoveAssignmen
     lsan2 = std::move(lsan1);
     QITI_REQUIRE(lsan2.failed()); // Should now be failed
 }
-#endif // __APPLE__
 
 #pragma clang optimize on

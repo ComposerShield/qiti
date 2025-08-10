@@ -59,17 +59,16 @@ QITI_API const char* __tsan_default_options()
 __attribute__((no_sanitize_thread))
 extern "C" QITI_API void __sanitizer_malloc_hook([[maybe_unused]] void* ptr, size_t size)
 {
-//    qiti::MallocHooks::mallocHookWithTracking(ptr, size); // TODO: support LSan on Linux w/ ThreadSanitizer
-    qiti::MallocHooks::mallocHook(size);
+    qiti::MallocHooks::mallocHookWithTracking(ptr, size);
 }
 
 // When ThreadSanitizer is enabled, Linux uses __sanitizer_free_hook instead of
 // operator delete because that operator is already used by TSan
-//__attribute__((no_sanitize_thread))
-//extern "C" QITI_API void __sanitizer_free_hook(void* ptr)
-//{
-//    qiti::MallocHooks::freeHookWithTracking(ptr); // TODO: support LSan on Linux w/ ThreadSanitizer
-//}
+__attribute__((no_sanitize_thread))
+extern "C" QITI_API void __sanitizer_free_hook(void* ptr)
+{
+    qiti::MallocHooks::freeHookWithTracking(ptr);
+}
 #endif // ! defined(__APPLE__)
 // When ThreadSanitizer is disabled, Linux will use operator new override instead (matching macOS implementation)
 #endif // QITI_ENABLE_THREAD_SANITIZER
