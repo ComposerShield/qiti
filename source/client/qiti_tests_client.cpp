@@ -60,7 +60,7 @@ __attribute__((no_sanitize_thread))
 extern "C" QITI_API void __sanitizer_malloc_hook([[maybe_unused]] void* ptr, size_t size)
 {
 //    qiti::MallocHooks::mallocHookWithTracking(ptr, size); // TODO: support LSan on Linux w/ ThreadSanitizer
-    mallocHook(size);
+    qiti::MallocHooks::mallocHook(size);
 }
 
 // When ThreadSanitizer is enabled, Linux uses __sanitizer_free_hook instead of
