@@ -132,9 +132,8 @@ void QITI_API_INTERNAL qiti::MallocHooks::mallocHook(std::size_t size) noexcept
     if (qiti::MallocHooks::bypassMallocHooks)
         return;
     
-    // Temporarily disable stack checking to debug Linux TSan issues
-    // if (stackContainsBlacklistedFunction())
-    //     return;
+    if (stackContainsBlacklistedFunction())
+        return;
     
     ++numHeapAllocationsOnCurrentThread;
     totalAmountHeapAllocatedOnCurrentThread += size;
