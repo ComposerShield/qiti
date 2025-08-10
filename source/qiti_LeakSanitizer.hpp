@@ -19,6 +19,7 @@
 
 #include <atomic>
 #include <functional>
+#include <string>
 
 //--------------------------------------------------------------------------
 // Doxygen - Begin Internal Documentation
@@ -79,13 +80,19 @@ public:
      @brief Check if all leak detection tests passed.
      @return true if no leaks detected, false if any leaks found
      */
-    [[nodiscard]] bool QITI_API passed() noexcept;
+    [[nodiscard]] bool QITI_API passed() const noexcept;
     
     /** 
      @brief Check if any leak detection tests failed.
      @return true if any leaks detected, false if all tests passed
      */
-    [[nodiscard]] inline bool QITI_API failed() noexcept { return ! passed(); }
+    [[nodiscard]] inline bool QITI_API failed() const noexcept { return ! passed(); }
+    
+    /**
+     @brief Get detailed report of memory allocation during testing.
+     @return String containing allocation/deallocation details and any detected leaks
+     */
+    [[nodiscard]] std::string QITI_API getReport() const noexcept;
 
     /** Move Constructor */
     QITI_API LeakSanitizer(LeakSanitizer&& other) noexcept;
@@ -99,6 +106,9 @@ private:
     //--------------------------------------------------------------------------
     
     std::atomic<bool> _passed = true;
+    uint64_t _totalAllocated = 0;
+    uint64_t _totalDeallocated = 0;
+    uint64_t _netLeak = 0;
     
     /** Copy Constructor (deleted) */
     LeakSanitizer(const LeakSanitizer&) = delete;
