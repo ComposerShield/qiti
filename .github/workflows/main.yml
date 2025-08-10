@@ -169,10 +169,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install LLVM 16 & Ninja
+      - name: Install LLVM 17 & Ninja
         run: |
           apt-get update
-          apt-get install -y clang-16 ninja-build cmake git
+          apt-get install -y clang-17 ninja-build cmake git
           echo "CC=clang-16" >> $GITHUB_ENV
           echo "CXX=clang++-16" >> $GITHUB_ENV
 
