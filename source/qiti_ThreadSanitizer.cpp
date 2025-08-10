@@ -436,31 +436,36 @@ public:
     
     void QITI_API_INTERNAL run(std::function<void()> func) noexcept override
     {
-        // Reset state from previous runs
-        shortReport.clear();
-        verboseReport.clear();
-        _passed.store(true, std::memory_order_relaxed);
-        
-        qiti::Profile::ScopedDisableProfiling disableProfiling;
-        qiti::LockHooks::ScopedDisableHooks disableHooks;
-        
         constexpr char const* logPrefix = QITI_TSAN_LOG_PATH;
+        const char* oldTsanOptions;
         
-        // Enable TSan deadlock detection for this run
-        const char* oldTsanOptions = getenv("TSAN_OPTIONS");
-        std::string newTsanOptions = "detect_deadlocks=1:abort_on_error=0:log_path=";
-        newTsanOptions += logPrefix;
-        if (oldTsanOptions)
         {
-            newTsanOptions += ":";
-            newTsanOptions += oldTsanOptions;
+            qiti::Profile::ScopedDisableProfiling disableProfiling;
+            qiti::LockHooks::ScopedDisableHooks disableHooks;
+            
+            // Reset state from previous runs
+            shortReport.clear();
+            verboseReport.clear();
+            _passed.store(true, std::memory_order_relaxed);
+            
+            // Enable TSan deadlock detection for this run
+            oldTsanOptions = getenv("TSAN_OPTIONS");
+            std::string newTsanOptions = "detect_deadlocks=1:abort_on_error=0:log_path=";
+            newTsanOptions += logPrefix;
+            if (oldTsanOptions)
+            {
+                newTsanOptions += ":";
+                newTsanOptions += oldTsanOptions;
+            }
+            setenv("TSAN_OPTIONS", newTsanOptions.c_str(), 1);
+            
+            // wipe any old logs
+            std::system(("rm -f " + std::string(logPrefix) + "*").c_str());
+            
         }
-        setenv("TSAN_OPTIONS", newTsanOptions.c_str(), 1);
-        
-        // wipe any old logs
-        std::system(("rm -f " + std::string(logPrefix) + "*").c_str());
         
         // fork & exec the helper that runs the potential deadlock
+        // Call user function with profiling enabled
         pid_t pid = fork();
         assert(pid >= 0);
         if (pid == 0)
@@ -469,8 +474,6 @@ public:
             func();
             _exit(0);
         }
-        
-        MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
         
         // Parent: wait for child to exit
         int status = 0;
@@ -483,6 +486,10 @@ public:
             while (w == -1 && errno == EINTR);
             assert(w == pid);
         }
+        
+        qiti::Profile::ScopedDisableProfiling disableProfiling;
+        qiti::LockHooks::ScopedDisableHooks disableHooks;
+        qiti::MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
         
         // Restore old TSAN_OPTIONS
         if (oldTsanOptions)
