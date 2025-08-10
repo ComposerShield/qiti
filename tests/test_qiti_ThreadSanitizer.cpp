@@ -138,6 +138,9 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data rac
     }
 }
 
+// Disable optimizations to prevent Release mode optimizations from interfering with intentional deadlock
+#pragma clang optimize off
+
 QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of member variable", ThreadSanitizerDataRaceDetectorMemberVariable)
 {
     qiti::ScopedQitiTest test;
@@ -264,5 +267,7 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects
         QITI_REQUIRE(potentialDeadlockDetector->failed());
     }
 }
+
+#pragma clang optimize on
 
 #endif // QITI_ENABLE_THREAD_SANITIZER
