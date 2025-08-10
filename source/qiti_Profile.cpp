@@ -236,7 +236,9 @@ void Profile::updateFunctionDataOnExit(const void* this_fn) noexcept
     else
     {
         const auto currentAverage = impl->averageTimeSpentInFunctionNanosecondsWallClock;
-        auto effectiveTotal = currentAverage * (impl->numTimesCalled-1);
+        auto effectiveTotal = (impl->numTimesCalled > 1) 
+                              ? (currentAverage * (impl->numTimesCalled-1))
+                              : 0;
         effectiveTotal += callImpl->timeSpentInFunctionNanosecondsWallClock;
         const auto newAverage = (impl->numTimesCalled > 0) // prevent divide by zero
                                 ? (effectiveTotal / impl->numTimesCalled)
@@ -249,7 +251,9 @@ void Profile::updateFunctionDataOnExit(const void* this_fn) noexcept
     else
     {
         const auto currentAverage = impl->averageTimeSpentInFunctionNanosecondsCpu;
-        auto effectiveTotal = currentAverage * (impl->numTimesCalled-1);
+        auto effectiveTotal = (impl->numTimesCalled > 1) 
+                              ? (currentAverage * (impl->numTimesCalled-1))
+                              : 0;
         effectiveTotal += callImpl->timeSpentInFunctionNanosecondsCpu;
         const auto newAverage = (impl->numTimesCalled > 0) // prevent divide by zero
                                 ? (effectiveTotal / impl->numTimesCalled)
