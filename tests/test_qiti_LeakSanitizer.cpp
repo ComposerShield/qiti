@@ -214,4 +214,89 @@ QITI_TEST_CASE("qiti::LeakSanitizer::moveAssignment", LeakSanitizerMoveAssignmen
     QITI_REQUIRE(lsan2.failed()); // Should now be failed
 }
 
+QITI_TEST_CASE("qiti::LeakSanitizer::getReport", LeakSanitizerGetReport)
+{
+    qiti::ScopedQitiTest test;
+    
+    QITI_SECTION("Report with no allocations")
+    {
+        qiti::LeakSanitizer lsan;
+        lsan.run([]()
+        {
+            // No allocations
+            int x = 42;
+            (void)x;
+        });
+        
+        std::string report = lsan.getReport();
+        QITI_REQUIRE(report.find("LeakSanitizer Report:") != std::string::npos);
+        QITI_REQUIRE(report.find("Total allocated: 0 bytes") != std::string::npos);
+        QITI_REQUIRE(report.find("Total deallocated: 0 bytes") != std::string::npos);
+        QITI_REQUIRE(report.find("Net leak: 0 bytes") != std::string::npos);
+        QITI_REQUIRE(report.find("Status: PASSED") != std::string::npos);
+    }
+    
+    QITI_SECTION("Report with proper allocation/deallocation")
+    {
+        qiti::LeakSanitizer lsan;
+        lsan.run([]()
+        {
+            int* ptr = new int(42);
+            delete ptr;
+        });
+        
+        std::string report = lsan.getReport();
+        QITI_REQUIRE(report.find("LeakSanitizer Report:") != std::string::npos);
+        QITI_REQUIRE(report.find("Total allocated:") != std::string::npos);
+        QITI_REQUIRE(report.find("Total deallocated:") != std::string::npos);
+        QITI_REQUIRE(report.find("Net leak: 0 bytes") != std::string::npos);
+        QITI_REQUIRE(report.find("Status: PASSED") != std::string::npos);
+    }
+    
+    QITI_SECTION("Report with memory leak")
+    {
+        qiti::LeakSanitizer lsan;
+        lsan.run([]()
+        {
+            int* ptr = new int(42);
+            // Intentional leak
+            (void)ptr;
+        });
+        
+        std::string report = lsan.getReport();
+        QITI_REQUIRE(report.find("LeakSanitizer Report:") != std::string::npos);
+        QITI_REQUIRE(report.find("Total allocated:") != std::string::npos);
+        QITI_REQUIRE(report.find("Total deallocated: 0 bytes") != std::string::npos);
+        QITI_REQUIRE(report.find("Status: FAILED") != std::string::npos);
+        QITI_REQUIRE(report.find("Memory leak detected") != std::string::npos);
+        
+        // Net leak should be positive (greater than 0)
+        QITI_REQUIRE(report.find("Net leak: 0 bytes") == std::string::npos);
+    }
+    
+    QITI_SECTION("Report with multiple allocations and partial leak")
+    {
+        qiti::LeakSanitizer lsan;
+        lsan.run([]()
+        {
+            int* ptr1 = new int(1);
+            int* ptr2 = new int[10]; // Larger allocation
+            int* ptr3 = new int(3);
+            
+            delete ptr1;
+            delete ptr3;
+            // ptr2 is leaked
+            (void)ptr2;
+        });
+        
+        std::string report = lsan.getReport();
+        QITI_REQUIRE(report.find("LeakSanitizer Report:") != std::string::npos);
+        QITI_REQUIRE(report.find("Status: FAILED") != std::string::npos);
+        QITI_REQUIRE(report.find("Memory leak detected") != std::string::npos);
+        
+        // Should show that some memory was deallocated (ptr1 and ptr3) but not all
+        QITI_REQUIRE(report.find("Total deallocated: 0 bytes") == std::string::npos);
+    }
+}
+
 #pragma clang optimize on
