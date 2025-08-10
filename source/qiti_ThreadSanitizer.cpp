@@ -407,6 +407,132 @@ private:
 
 //--------------------------------------------------------------------------
 
+/** Linux deadlock detector that uses TSan's built-in deadlock detection */
+class TSanDeadlockDetector final : public ThreadSanitizer
+{
+public:
+    QITI_API_INTERNAL TSanDeadlockDetector() noexcept = default;
+    QITI_API_INTERNAL ~TSanDeadlockDetector() noexcept override = default;
+    
+    void QITI_API run(std::function<void()> func) noexcept override
+    {
+        qiti::Profile::ScopedDisableProfiling disableProfiling;
+        qiti::LockHooks::ScopedDisableHooks disableHooks;
+        
+        constexpr char const* logPrefix = QITI_TSAN_LOG_PATH;
+        
+        // Enable TSan deadlock detection for this run
+        const char* oldTsanOptions = getenv("TSAN_OPTIONS");
+        std::string newTsanOptions = "detect_deadlocks=1:abort_on_error=0:log_path=";
+        newTsanOptions += logPrefix;
+        if (oldTsanOptions) {
+            newTsanOptions += ":";
+            newTsanOptions += oldTsanOptions;
+        }
+        setenv("TSAN_OPTIONS", newTsanOptions.c_str(), 1);
+        
+        // wipe any old logs
+        std::system(("rm -f " + std::string(logPrefix) + "*").c_str());
+        
+        // fork & exec the helper that runs the potential deadlock
+        pid_t pid = fork();
+        assert(pid >= 0);
+        if (pid == 0)
+        {
+            // Child: run the function with TSan deadlock detection
+            func();
+            _exit(0);
+        }
+        
+        MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
+        
+        // Parent: wait for child to exit
+        int status = 0;
+        {
+            pid_t w;
+            do
+            {
+                w = waitpid(pid, &status, 0);
+            }
+            while (w == -1 && errno == EINTR);
+            assert(w == pid);
+        }
+        
+        // Restore old TSAN_OPTIONS
+        if (oldTsanOptions) {
+            setenv("TSAN_OPTIONS", oldTsanOptions, 1);
+        } else {
+            unsetenv("TSAN_OPTIONS");
+        }
+        
+        if (WIFEXITED(status))
+        {
+            auto statusCode = WEXITSTATUS(status);
+            std::cout << "[qiti::TSanDeadlockDetector] Child Status Code: " << statusCode << "\n";
+        }
+        else if (WIFSIGNALED(status))
+        {
+            int sig = WTERMSIG(status);
+            std::cout << "[qiti::TSanDeadlockDetector] Child killed by signal " << sig << " (" << strsignal(sig) << ")\n";
+        }
+        else
+        {
+            std::terminate();
+        }
+        
+        // Read the TSan log for deadlock reports
+        auto logPath = findLatestLog(logPrefix);
+        
+        if (logPath.has_value())
+        {
+            std::cout << "[qiti::TSanDeadlockDetector] Reading TSan log at: " << *logPath << "\n";
+            verboseReport = slurpFile(*logPath);
+            
+            // Look for deadlock-related messages
+            static const std::regex deadlock_rx(R"(deadlock|lock.order.inversion|potential.deadlock)",
+                                               std::regex_constants::icase);
+            
+            if (std::regex_search(verboseReport, deadlock_rx))
+            {
+                flagFailed();
+                std::cout << "[qiti::TSanDeadlockDetector] Potential deadlock detected!\n";
+
+                static const std::regex summary_rx(R"(^.*SUMMARY:.*$)",
+                                                   std::regex_constants::multiline);
+                std::smatch sm;
+                if (std::regex_search(verboseReport, sm, summary_rx))
+                    shortReport = sm.str();
+                else
+                    shortReport = "Potential deadlock detected (no SUMMARY found).";
+                
+                std::cout << "[qiti::TSanDeadlockDetector] " << shortReport << "\n";
+            }
+            else
+            {
+                std::cout << "[qiti::TSanDeadlockDetector] No deadlock detected.\n";
+            }
+        }
+        else
+        {
+            std::cout << "[qiti::TSanDeadlockDetector] No TSan log produced. Likely no deadlock detected.\n";
+        }
+        
+        // cleanup
+        std::system(("rm -f " + std::string(logPrefix) + "*").c_str());
+    }
+    
+    std::string QITI_API getReport(bool verbose) const noexcept override
+    {
+        return verbose ? verboseReport : shortReport;
+    }
+    
+private:
+    std::string shortReport{};
+    std::string verboseReport{};
+};
+
+//--------------------------------------------------------------------------
+
 ThreadSanitizer::ThreadSanitizer() noexcept = default;
 ThreadSanitizer::~ThreadSanitizer() noexcept = default;
 
@@ -449,7 +575,12 @@ std::unique_ptr<ThreadSanitizer>
 ThreadSanitizer::createPotentialDeadlockDetector() noexcept
 {
     qiti::Profile::ScopedDisableProfiling disableProfiling;
+#if defined(__APPLE__)
     return std::make_unique<LockOrderInversionDetector>();
+#else
+    // Linux: Use TSan's built-in deadlock detection
+    return std::make_unique<TSanDeadlockDetector>();
+#endif
 }
 
 std::string ThreadSanitizer::getReport(bool /*verbose*/) const noexcept 
