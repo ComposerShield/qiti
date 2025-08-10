@@ -39,7 +39,7 @@ namespace qiti
  
  @note This class works by leveraging Qiti's malloc hooks to track allocations
  on the current thread. It will only detect leaks from allocations made through
- operator new/delete or malloc/free that are instrumented by Qiti.
+ operator new/delete (macOS) or malloc/free (Linux) that are instrumented by Qiti.
  
  @code{.cpp}
  qiti::LeakSanitizer lsan;

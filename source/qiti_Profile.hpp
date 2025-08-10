@@ -80,7 +80,7 @@ class Profile
 {
 public:
     /** RAII Object for disabling Profiling for the duration of a qiti function */
-    struct ScopedDisableProfiling
+    struct ScopedDisableProfiling final
     {
         QITI_API ScopedDisableProfiling() noexcept;
         QITI_API ~ScopedDisableProfiling() noexcept;

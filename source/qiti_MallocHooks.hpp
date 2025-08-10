@@ -40,7 +40,7 @@ public:
     static thread_local uint64_t currentAmountHeapAllocatedOnCurrentThread;
     static thread_local std::function<void()> onNextHeapAllocation;
     
-    struct ScopedBypassMallocHooks
+    struct ScopedBypassMallocHooks final
     {
         /** Temporarily disable malloc hooks for the current thread for however long this object is in scope. */
         inline QITI_API_INTERNAL ScopedBypassMallocHooks() noexcept
