@@ -160,11 +160,6 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data rac
     QITI_REQUIRE_FALSE(dataRaceDetector->passed());
 }
 
-// TODO: remove when createPotentialDeadlockDetector() is fully implemented, not just on Apple
-#if ! defined(__APPLE__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated"
-#endif
 QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() does not produce false positive", ThreadSanitizerDeadlockDetectorNoFalsePositive)
 {
     qiti::ScopedQitiTest test;
@@ -212,11 +207,7 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() does no
         QITI_REQUIRE_FALSE(potentialDeadlockDetector->failed());
     }
 }
-#if ! defined(__APPLE__)
-#pragma clang diagnostic pop
-#endif
 
-#if defined(__APPLE__) // TODO: remove when this feature is supported on Linux
 QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects potential deadlock", ThreadSanitizerDeadlockDetectorDetectsDeadlock)
 {
     qiti::ScopedQitiTest test;
@@ -226,7 +217,8 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects
     QITI_SECTION("Run code that inverts the order of mutex locking which implies a potential deadlock,"
             "but does not actually deadlock here.")
     {
-        auto singleMutexWithNoDeadlock = []()        {
+        auto singleMutexWithNoDeadlock = []()
+        {
             std::mutex mutexA;
             std::mutex mutexB;
             
@@ -241,9 +233,8 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects
                 threadHasLockA.store(true);
                 
                 // Wait for main thread to signal it's ready
-                while (! mainThreadReady.load()) {
+                while (! mainThreadReady.load())
                     std::this_thread::yield();
-                }
                 
                 // Small computational work to ensure timing
                 volatile int work = 0;
@@ -255,9 +246,8 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects
             });
             
             // Wait for thread to acquire lockA
-            while (! threadHasLockA.load()) {
+            while (! threadHasLockA.load())
                 std::this_thread::yield();
-            }
             
             // Signal that main thread is ready to proceed
             mainThreadReady.store(true);
@@ -274,6 +264,5 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects
         QITI_REQUIRE(potentialDeadlockDetector->failed());
     }
 }
-#endif // defined(__APPLE__)
 
 #endif // QITI_ENABLE_THREAD_SANITIZER
