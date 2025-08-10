@@ -172,12 +172,11 @@ void qiti::MallocHooks::mallocHookWithTracking(void* ptr, std::size_t size) noex
     if (! isQitiTestRunning())
         return;
         
-    if (qiti::MallocHooks::bypassMallocHooks)
-        return;
-        
+    // Always call the basic malloc hook (it has its own bypass check)
     mallocHook(size);
     
-    if (ptr != nullptr)
+    // Only do leak tracking if we're not bypassing and have a valid pointer
+    if (! qiti::MallocHooks::bypassMallocHooks && ptr != nullptr)
     {
         qiti::MallocHooks::ScopedBypassMallocHooks bypassHooks;
         g_allocationSizes[ptr] = size; // heap allocates
@@ -188,11 +187,9 @@ void qiti::MallocHooks::freeHookWithTracking(void* ptr) noexcept
 {
     if (! isQitiTestRunning() || ptr == nullptr)
         return;
-        
-    if (qiti::MallocHooks::bypassMallocHooks)
-        return;
     
-    if (g_allocationSizes.size() > 0)
+    // Only do leak tracking if we're not bypassing
+    if (! qiti::MallocHooks::bypassMallocHooks && g_allocationSizes.size() > 0)
     {
         auto it = g_allocationSizes.find(ptr);
         if (it != g_allocationSizes.end())
