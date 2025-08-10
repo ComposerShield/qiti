@@ -220,49 +220,35 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects
     {
         auto potentialDeadlockDetector = qiti::ThreadSanitizer::createPotentialDeadlockDetector();
         
-        auto singleMutexWithNoDeadlock = []()
+        auto createLockInversionPattern = []()
         {
             std::mutex mutexA;
             std::mutex mutexB;
             
-            // More robust synchronization using atomics and barriers
-            std::atomic<bool> threadHasLockA{false};
-            std::atomic<bool> mainThreadReady{false};
-            
-            std::thread t([&]()
+            // First, establish A->B order in one thread
+            std::thread t1([&]()
             {
-                // Thread t locks A then B
                 std::lock_guard<std::mutex> lockA(mutexA);
-                threadHasLockA.store(true);
-                
-                // Wait for main thread to signal it's ready
-                while (! mainThreadReady.load())
-                    std::this_thread::yield();
-                
-                // Small computational work to ensure timing
-                volatile int work = 0;
-                for (int i = 0; i < 10000; ++i)
-                    work = work + i;
-                
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
                 std::lock_guard<std::mutex> lockB(mutexB);
+                // TSan sees: A -> B
             });
+            t1.join();
             
-            // Wait for thread to acquire lockA
-            while (! threadHasLockA.load())
-                   std::this_thread::yield();
-            
-            // Signal that main thread is ready to proceed
-            mainThreadReady.store(true);
-            
-            // Main thread locks B then A (unsafe - potential deadlock)
-            std::lock_guard<std::mutex> lockB(mutexB);
-            std::lock_guard<std::mutex> lockA(mutexA);
-            
-            t.join();
+            // Then, establish B->A order in another thread
+            // This creates the inversion pattern without concurrent access
+            std::thread t2([&]()
+            {
+                std::lock_guard<std::mutex> lockB(mutexB);
+                std::this_thread::sleep_for(std::chrono::milliseconds(1)); 
+                std::lock_guard<std::mutex> lockA(mutexA);
+                // TSan sees: B -> A (creates cycle A->B->A)
+            });
+            t2.join();
         };
         
         // Should fail
-        potentialDeadlockDetector->run(singleMutexWithNoDeadlock);
+        potentialDeadlockDetector->run(createLockInversionPattern);
         QITI_REQUIRE_FALSE(potentialDeadlockDetector->passed());
         QITI_REQUIRE(potentialDeadlockDetector->failed());
     }
