@@ -218,7 +218,7 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects
     auto potentialDeadlockDetector = qiti::ThreadSanitizer::createPotentialDeadlockDetector();
     
     QITI_SECTION("Run code that inverts the order of mutex locking which implies a potential deadlock,"
-            "but does not actually deadlock here.")
+                 "but does not actually deadlock here.")
     {
         auto singleMutexWithNoDeadlock = []()
         {
@@ -241,16 +241,15 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects
                 
                 // Small computational work to ensure timing
                 volatile int work = 0;
-                for (int i = 0; i < 10000; ++i) {
+                for (int i = 0; i < 10000; ++i)
                     work = work + i;
-                }
                 
                 std::lock_guard<std::mutex> lockB(mutexB);
             });
             
             // Wait for thread to acquire lockA
             while (! threadHasLockA.load())
-                std::this_thread::yield();
+                   std::this_thread::yield();
             
             // Signal that main thread is ready to proceed
             mainThreadReady.store(true);

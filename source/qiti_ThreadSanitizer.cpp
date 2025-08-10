@@ -99,10 +99,15 @@ public:
     /** */
     QITI_API_INTERNAL ~DataRaceDetector() noexcept override = default;
     
-    void QITI_API run(std::function<void()> func) noexcept override
+    void QITI_API_INTERNAL run(std::function<void()> func) noexcept override
     {
         qiti::Profile::ScopedDisableProfiling disableProfiling;
         qiti::LockHooks::ScopedDisableHooks disableHooks;
+        
+        // Reset state from previous runs
+        shortReport.clear();
+        verboseReport.clear();
+        _passed.store(true, std::memory_order_relaxed);
         
         constexpr char const* logPrefix = QITI_TSAN_LOG_PATH;
         
@@ -193,7 +198,7 @@ public:
         std::system(("rm -f " + std::string(logPrefix) + "*").c_str());
     }
     
-    std::string QITI_API getReport(bool verbose) const noexcept override
+    std::string QITI_API_INTERNAL getReport(bool verbose) const noexcept override
     {
         return verbose ? verboseReport : shortReport;
     }
@@ -221,8 +226,15 @@ public:
     /** */
     QITI_API_INTERNAL ~ParallelCallDetector() noexcept override = default;
     
-    void run(std::function<void()> func) noexcept override
+    void QITI_API_INTERNAL run(std::function<void()> func) noexcept override
     {
+        // Reset state from previous runs
+        shortReport.clear();
+        verboseReport.clear();
+        _passed.store(true, std::memory_order_relaxed);
+        numConcurrentFunc0.store(0, std::memory_order_relaxed);
+        numConcurrentFunc1.store(0, std::memory_order_relaxed);
+        
         // Disable profiling for setup
         {
             qiti::Profile::ScopedDisableProfiling disableProfiling;
@@ -241,7 +253,7 @@ public:
         }
     }
     
-    std::string QITI_API getReport(bool verbose) const noexcept override
+    std::string QITI_API_INTERNAL getReport(bool verbose) const noexcept override
     {
         return verbose ? verboseReport : shortReport;
     }
@@ -318,6 +330,14 @@ public:
     
     void QITI_API_INTERNAL run(std::function<void()> func) noexcept override
     {
+        // Reset state from previous runs
+        _passed.store(true, std::memory_order_relaxed);
+        {
+            std::lock_guard _(_graphLock);
+            _edges.clear();
+        }
+        _heldStack.clear();
+        
         // Disable profiling for setup
         {
             qiti::Profile::ScopedDisableProfiling disableProfiling;
@@ -414,8 +434,13 @@ public:
     QITI_API_INTERNAL TSanDeadlockDetector() noexcept = default;
     QITI_API_INTERNAL ~TSanDeadlockDetector() noexcept override = default;
     
-    void QITI_API run(std::function<void()> func) noexcept override
+    void QITI_API_INTERNAL run(std::function<void()> func) noexcept override
     {
+        // Reset state from previous runs
+        shortReport.clear();
+        verboseReport.clear();
+        _passed.store(true, std::memory_order_relaxed);
+        
         qiti::Profile::ScopedDisableProfiling disableProfiling;
         qiti::LockHooks::ScopedDisableHooks disableHooks;
         
@@ -425,7 +450,8 @@ public:
         const char* oldTsanOptions = getenv("TSAN_OPTIONS");
         std::string newTsanOptions = "detect_deadlocks=1:abort_on_error=0:log_path=";
         newTsanOptions += logPrefix;
-        if (oldTsanOptions) {
+        if (oldTsanOptions)
+        {
             newTsanOptions += ":";
             newTsanOptions += oldTsanOptions;
         }
@@ -459,11 +485,10 @@ public:
         }
         
         // Restore old TSAN_OPTIONS
-        if (oldTsanOptions) {
+        if (oldTsanOptions)
             setenv("TSAN_OPTIONS", oldTsanOptions, 1);
-        } else {
+        else
             unsetenv("TSAN_OPTIONS");
-        }
         
         if (WIFEXITED(status))
         {
@@ -521,7 +546,7 @@ public:
         std::system(("rm -f " + std::string(logPrefix) + "*").c_str());
     }
     
-    std::string QITI_API getReport(bool verbose) const noexcept override
+    std::string QITI_API_INTERNAL getReport(bool verbose) const noexcept override
     {
         return verbose ? verboseReport : shortReport;
     }

@@ -140,8 +140,10 @@ protected:
     /** */
     void QITI_API_INTERNAL flagFailed() noexcept;
     
-private:
+protected:
     std::atomic<bool> _passed = true;
+    
+private:
     
     /** Implementation. */
     static std::unique_ptr<ThreadSanitizer> QITI_API createFunctionsCalledInParallelDetector(FunctionData* func0,
