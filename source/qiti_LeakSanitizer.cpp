@@ -19,6 +19,7 @@
 #include "qiti_Profile.hpp"
 
 #include <sstream>
+#include <string>
 
 namespace qiti
 {
