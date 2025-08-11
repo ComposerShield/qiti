@@ -63,7 +63,7 @@ target_link_libraries(my_tests
 )
 ```
 
-## CMake Settings
+### CMake Settings
 
 By linking against `qiti_lib`, Qiti automatically propagates:
 
@@ -86,7 +86,7 @@ In addition, by linking your unit test executable with `qiti_tests_client`, Qiti
 - **Linker flags** (via `INTERFACE`):
   - `-rdynamic`
 
-### Manual Integration (Non-CMake Projects)
+## Manual Integration (Non-CMake Projects)
 
 **⚠️ Note**: Manual integration is untested and you may experience issues. CMake integration is strongly recommended.
 
@@ -149,7 +149,7 @@ Qiti is continuously tested across a comprehensive matrix of platforms, compiler
 
 **Additional CI Validations:**
 - **Code Quality**: CPPLint validation with custom filters
-- **Architecture**: x86_64 (macOS: also arm64 via Universal Binary)
+- **Architecture**: x86_64 (macOS: also arm64)
 - **Build Type**: Release builds across all configurations
 - **C++ Standard**: C++20 compliance validation
 
