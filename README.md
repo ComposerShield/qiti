@@ -85,7 +85,7 @@ You do not need to add these flags yourself—just ensure you are using Clang wi
 
 In addition, by linking your unit test executable with `qiti_tests_client`, Qiti automatically propagates:
 
-- **Object File**: `./source/client/qiti_tests_client.cpp`
+- **Object File**: `./source/client/qiti_client_tsan_integration.cpp`
 - **Linker flags** (via `INTERFACE`):
   - `-rdynamic`
 
