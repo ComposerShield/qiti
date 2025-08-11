@@ -10,9 +10,9 @@ Qiti also provides optional Thread Sanitizer wrapper functionality: when enabled
 
 ## Requirements
 
-- macOS (14 or 15, x86_64 and/or arm64)
-- Linux (tested on Ubuntu, Debian, and Fedora; x86_64)
-- Clang or Apple Clang (additional compiler support TBD)
+- macOS (14 or 15, x86_64 and/or arm64)*
+- Linux (tested on Ubuntu, Debian, and Fedora; x86_64)*
+- Clang or Apple Clang (additional compiler support TBD)*
 - C++20
 - CMake
 - When using ThreadSanitizer functionality, your unit-test executable must be compiled with optimizations disabled (-O0) to ensure accurate sanitization.
@@ -92,6 +92,28 @@ In addition, by linking your unit test executable with `qiti_tests_client`, Qiti
 ## Deployment Target (macOS)
 
 - When compiling on macOS, the deployment target must be 10.15 (Catalina) or later.
+
+## *Platform & Compiler Test Matrix
+
+Qiti is continuously tested across a comprehensive matrix of platforms, compilers, and configurations to ensure reliability and compatibility:
+
+| Platform   | OS Version | Compiler                 | Build System | ThreadSanitizer | Test Frameworks |
+|------------|------------|--------------------------|--------------|-----------------|-----------------|
+| **macOS**  | 14         | Apple Clang (Xcode 15.4) | Xcode        | ✅ Enabled      | Catch2 + GTest  |
+| **macOS**  | 15         | Apple Clang (Xcode 16.2) | Xcode        | ✅ Enabled      | Catch2 + GTest  |
+| **macOS**  | 15         | LLVM Clang 16            | Ninja        | ✅ Enabled      | Catch2 + GTest. |
+| **Ubuntu** | Latest     | LLVM Clang 16            | Ninja        | ✅ Enabled      | Catch2 + GTest  |
+| **Ubuntu** | Latest     | LLVM Clang 16            | Ninja        | ❌ Disabled     | Catch2 + GTest. |
+| **Debian** | Stable     | LLVM Clang 17            | Ninja        | ✅ Enabled      | Catch2 + GTest  |
+| **Fedora** | Latest     | LLVM Clang (latest)      | Ninja        | ✅ Enabled      | Catch2 + GTest. |
+
+**Additional CI Validations:**
+- **Code Quality**: CPPLint validation with custom filters
+- **Architecture**: x86_64 (macOS: also arm64 via Universal Binary)
+- **Build Type**: Release builds across all configurations
+- **C++ Standard**: C++20 compliance validation
+
+This comprehensive testing matrix ensures Qiti works reliably across the development environments and deployment targets most commonly used for C++ unit testing and profiling workflows.
 
 ## Documentation
 
