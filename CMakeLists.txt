@@ -68,7 +68,7 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "lib" FILES ${SOURCES} ${EX
 add_library(qiti_lib SHARED ${SOURCES})
 
 # Force client to compile this file
-add_library(qiti_tests_client OBJECT "source/client/qiti_tests_client.cpp")
+add_library(qiti_tests_client OBJECT "source/client/qiti_client_tsan_integration.cpp")
 
 if(PROJECT_IS_TOP_LEVEL)
     # Internal example app used for testing
