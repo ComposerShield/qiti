@@ -15,8 +15,6 @@ Qiti also provides optional Thread Sanitizer wrapper functionality: when enabled
 - Clang or Apple Clang (additional compiler support TBD)*
 - C++20
 - CMake
-- When using ThreadSanitizer functionality, your unit-test executable must be compiled with optimizations disabled (-O0) to ensure accurate sanitization.
-  - This will be done automatically when linking qiti_lib with `QITI_ENABLE_THREAD_SANITIZER=ON`; however, you must ensure your settings do not override these changes (see "CMake Settings" below).
 - **macOS with ThreadSanitizer**: When building on macOS with `QITI_ENABLE_THREAD_SANITIZER=ON`, do not build universal binaries (arm64 + x86_64). ThreadSanitizer is incompatible with universal binaries. Build for your target architecture only.
 
 ## CMake Integration
@@ -31,7 +29,7 @@ ThreadSanitizer functionality is **optional** and disabled by default. To enable
 cmake -B build . -DQITI_ENABLE_THREAD_SANITIZER=ON
 ```
 
-When enabled, this adds ThreadSanitizer compiler flags (`-fsanitize=thread`, `-fno-inline`, `-O0`) and makes the `qiti::ThreadSanitizer` class available.
+When enabled, this adds ThreadSanitizer compiler flags (`-fsanitize=thread`, `-fno-inline`) and makes the `qiti::ThreadSanitizer` class available.
 
 ### Project Integration
 
@@ -77,17 +75,59 @@ By linking against `qiti_lib`, Qiti automatically propagates:
 - **ThreadSanitizer flags** (when `QITI_ENABLE_THREAD_SANITIZER=ON`):
   - `-fsanitize=thread`            (enable Thread Sanitizer)
   - `-fno-inline`                  (prevent inlining for TSan accuracy)
-  - `-O0`                          (disable optimizations for TSan accuracy)
 - **ThreadSanitizer linker flags** (when enabled):
   - `-fsanitize=thread`
 
-You do not need to add these flags yourself—just ensure you are using Clang with C++20. When ThreadSanitizer is enabled, optimization flags are handled automatically.
+You do not need to add these flags yourself—just ensure you are using Clang with C++20.
 
 In addition, by linking your unit test executable with `qiti_tests_client`, Qiti automatically propagates:
 
 - **Object File**: `./source/client/qiti_client_tsan_integration.cpp`
 - **Linker flags** (via `INTERFACE`):
   - `-rdynamic`
+
+### Manual Integration (Non-CMake Projects)
+
+**⚠️ Note**: Manual integration is untested and you may experience issues. CMake integration is strongly recommended.
+
+For projects not using CMake, you'll need to manually build the Qiti library and configure your build system:
+
+#### Step 1: Build the Qiti Library
+
+```bash
+# Build qiti_lib shared library from all source/qiti_*.cpp files
+clang++ -std=c++20 -shared -fPIC \
+    -finstrument-functions -fno-omit-frame-pointer -g \
+    -I./include -I./source \
+    source/qiti_*.cpp \
+    -o libqiti.so  # or .dylib on macOS
+```
+
+#### Step 2: Configure Your Test Executable Build
+
+**Include in your project:**
+- Add `source/client/qiti_client_tsan_integration.cpp` to your test executable's source files
+
+**Required compiler flags:**
+- `-std=c++20`
+- `-finstrument-functions -fno-omit-frame-pointer -g`
+- `-I./path/to/qiti/include` (for `qiti_include.hpp`)
+
+**Required linker flags:**
+- `-L./path/to/qiti -lqiti` (link the Qiti library)
+- `-rdynamic`
+
+**Optional ThreadSanitizer support:**
+- Add `-fsanitize=thread -fno-inline -DQITI_ENABLE_THREAD_SANITIZER=1` to both compiler and linker flags
+
+#### Requirements Summary:
+- **Clang compiler** (Apple Clang or LLVM Clang)
+- **C++20 standard**
+- **Include qiti_client_tsan_integration.cpp** in your test executable
+- **Link against libqiti** shared library
+- **Apply required compiler/linker flags** above
+
+For complex projects, consider using CMake's `FetchContent` to automatically handle Qiti integration.
 
 ## Deployment Target (macOS)
 

@@ -144,8 +144,6 @@ if(QITI_ENABLE_THREAD_SANITIZER)
         "-fno-inline"
         # Enable Thread Sanitizer
         "-fsanitize=thread"
-        # Disable Optimizations (required for TSan accuracy)
-        "-O0"
     )
     target_compile_definitions(qiti_lib PUBLIC QITI_ENABLE_THREAD_SANITIZER=1)
 endif()
