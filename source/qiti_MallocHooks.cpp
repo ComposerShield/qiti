@@ -68,7 +68,7 @@ static inline const std::array<const char*, 1> blackListedFunctions
 };
 
 /** Demangle a C++ ABI symbol name, or return the original on error */
-static QITI_API_INTERNAL std::string demangle(const char* name) noexcept
+QITI_API_INTERNAL static std::string demangle(const char* name) noexcept
 {
     int status = 0;
     std::unique_ptr<char,void(*)(void*)> demangled
@@ -80,7 +80,7 @@ static QITI_API_INTERNAL std::string demangle(const char* name) noexcept
 }
 
 /** Capture the current call stack (skipping the first `skip` frames) */
-static QITI_API_INTERNAL std::vector<std::string> captureStackTrace(int framesToSkip = 1) noexcept
+QITI_API_INTERNAL static std::vector<std::string> captureStackTrace(int framesToSkip = 1) noexcept
 {
     constexpr int MAX_FRAMES = 128;
     void* addrs[MAX_FRAMES];
@@ -109,7 +109,7 @@ static QITI_API_INTERNAL std::vector<std::string> captureStackTrace(int framesTo
 }
 
 /** Check if the stack trace contains a frame whose demangled name contains the substring `funcName */
-inline static QITI_API_INTERNAL bool stackContainsFunction(const std::string& funcName, int framesToSkip = 1) noexcept
+QITI_API_INTERNAL inline static bool stackContainsFunction(const std::string& funcName, int framesToSkip = 1) noexcept
 {
     auto trace = captureStackTrace(framesToSkip);
     for (auto& frame : trace)
@@ -119,7 +119,7 @@ inline static QITI_API_INTERNAL bool stackContainsFunction(const std::string& fu
 }
 
 /** */
-inline static QITI_API_INTERNAL bool stackContainsBlacklistedFunction() noexcept
+QITI_API_INTERNAL inline static bool stackContainsBlacklistedFunction() noexcept
 {
     qiti::MallocHooks::ScopedBypassMallocHooks bypassHooks;
     
@@ -153,7 +153,7 @@ void QITI_API_INTERNAL qiti::MallocHooks::mallocHook(std::size_t size) noexcept
     }
 }
 
-[[maybe_unused]] static void QITI_API_INTERNAL freeHook(void* ptr) noexcept
+QITI_API_INTERNAL [[maybe_unused]] static void freeHook(void* ptr) noexcept
 {
     if (! isQitiTestRunning())
         return;

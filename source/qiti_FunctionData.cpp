@@ -46,7 +46,7 @@ static std::atomic<size_t>                  g_nextThreadIndex{0};
 static std::array<std::thread::id, MAX_THREADS> g_threadIds;
 
 // lookup only (returns NOT_FOUND if we've never seen this id)
-inline static QITI_API_INTERNAL size_t threadIdToIndex(const std::thread::id& tid) noexcept
+QITI_API_INTERNAL inline static size_t threadIdToIndex(const std::thread::id& tid) noexcept
 {
     size_t used = g_nextThreadIndex.load(std::memory_order_acquire);
     for (size_t i = 0; i < used; ++i)
@@ -56,7 +56,7 @@ inline static QITI_API_INTERNAL size_t threadIdToIndex(const std::thread::id& ti
 }
 
 // record & lookup: if unseen, atomically grab a new slot
-inline static QITI_API_INTERNAL size_t threadIdToIndexOrRegister(const std::thread::id& tid) noexcept
+QITI_API_INTERNAL inline static size_t threadIdToIndexOrRegister(const std::thread::id& tid) noexcept
 {
     // check existing
     size_t used = g_nextThreadIndex.load(std::memory_order_acquire);

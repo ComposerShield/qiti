@@ -85,9 +85,9 @@ public:
     };
     
     /** */
-    static void QITI_API lockAcquireHook(const pthread_mutex_t* size) noexcept;
+    QITI_API static void lockAcquireHook(const pthread_mutex_t* size) noexcept;
     /** */
-    static void QITI_API lockReleaseHook(const pthread_mutex_t* size) noexcept;
+    QITI_API static void lockReleaseHook(const pthread_mutex_t* size) noexcept;
 
 private:
     LockHooks() = delete;

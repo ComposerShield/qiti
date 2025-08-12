@@ -74,30 +74,30 @@ public:
      
      @param func Function to execute and monitor for leaks. Can be nullptr (no-op).
      */
-    void QITI_API run(std::function<void()> func) noexcept;
+    QITI_API void run(std::function<void()> func) noexcept;
     
     /** 
      Check if all leak detection tests passed.
      @return true if no leaks detected, false if any leaks found
      */
-    [[nodiscard]] bool QITI_API passed() const noexcept;
+    QITI_API [[nodiscard]] bool passed() const noexcept;
     
     /** 
      Check if any leak detection tests failed.
      @return true if any leaks detected, false if all tests passed
      */
-    [[nodiscard]] inline bool QITI_API failed() const noexcept { return ! passed(); }
+    QITI_API [[nodiscard]] inline bool failed() const noexcept { return ! passed(); }
     
     /**
      Get detailed report of memory allocation during testing.
      @return String containing allocation/deallocation details and any detected leaks
      */
-    [[nodiscard]] std::string QITI_API getReport() const noexcept;
+    QITI_API [[nodiscard]] std::string getReport() const noexcept;
 
     /** Move Constructor */
     QITI_API LeakSanitizer(LeakSanitizer&& other) noexcept;
     /** Move Assignment */
-    LeakSanitizer& QITI_API operator=(LeakSanitizer&& other) noexcept;
+    QITI_API LeakSanitizer& operator=(LeakSanitizer&& other) noexcept;
     
 private:
     //--------------------------------------------------------------------------

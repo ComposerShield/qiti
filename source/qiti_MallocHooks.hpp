@@ -64,7 +64,7 @@ public:
      
      Custom implementation details ignored if not currently in a Qiti test.
      */
-    static void QITI_API mallocHook(std::size_t size) noexcept;
+    QITI_API static void mallocHook(std::size_t size) noexcept;
     
     /**
      Hook invoked on each malloc call with pointer tracking for leak detection.
@@ -72,14 +72,14 @@ public:
      @param ptr Pointer returned by malloc (nullptr if allocation failed)
      @param size Size of allocation
      */
-    static void QITI_API mallocHookWithTracking(void* ptr, std::size_t size) noexcept;
+    QITI_API static void mallocHookWithTracking(void* ptr, std::size_t size) noexcept;
     
     /**
      Hook invoked on each free call for leak detection.
      
      @param ptr Pointer to free
      */
-    static void QITI_API freeHookWithTracking(void* ptr) noexcept;
+    QITI_API static void freeHookWithTracking(void* ptr) noexcept;
     
     /**
      Hook invoked on each realloc call for leak detection.
@@ -89,7 +89,7 @@ public:
      @param oldSize Size of original allocation (0 if oldPtr was nullptr)
      @param newSize New size requested
      */
-    static void QITI_API reallocHookWithTracking(void* oldPtr,
+    QITI_API static void reallocHookWithTracking(void* oldPtr,
                                                  void* newPtr,
                                                  std::size_t oldSize,
                                                  std::size_t newSize) noexcept;

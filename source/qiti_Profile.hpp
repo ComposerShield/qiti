@@ -90,12 +90,12 @@ public:
     };
     
     /** */
-    static void QITI_API resetProfiling() noexcept;
+    QITI_API static void resetProfiling() noexcept;
     
     /** */
     template<auto FuncPtr>
     requires isFreeFunction<FuncPtr>
-    static void QITI_API inline beginProfilingFunction() noexcept
+    QITI_API static void inline beginProfilingFunction() noexcept
     {
         static constexpr auto functionAddress = getFunctionAddress<FuncPtr>();
         static constexpr auto functionName    = getFunctionName<FuncPtr>();
@@ -105,7 +105,7 @@ public:
     /** */
     template<auto FuncPtr>
     requires isMemberFunction<FuncPtr>
-    static void QITI_API inline beginProfilingFunction() noexcept
+    QITI_API static void inline beginProfilingFunction() noexcept
     {
         static constexpr auto functionAddress = getMemberFunctionMockAddress<FuncPtr>();
         static constexpr auto functionName    = getFunctionName<FuncPtr>();
@@ -115,7 +115,7 @@ public:
     /** */
     template <auto FuncPtr>
     requires isFreeFunction<FuncPtr>
-    static void QITI_API inline endProfilingFunction() noexcept
+    QITI_API static void inline endProfilingFunction() noexcept
     {
         endProfilingFunction(reinterpret_cast<const void*>(FuncPtr));
     }
@@ -123,21 +123,21 @@ public:
     /** */
     template <auto FuncPtr>
     requires isMemberFunction<FuncPtr>
-    static void QITI_API inline endProfilingFunction() noexcept
+    QITI_API static void inline endProfilingFunction() noexcept
     {
         endProfilingFunction(getMemberFunctionMockAddress<FuncPtr>());
     }
     
     /** */
-    static void QITI_API beginProfilingAllFunctions() noexcept;
+    QITI_API static void beginProfilingAllFunctions() noexcept;
     
     /** */
-    static void QITI_API endProfilingAllFunctions() noexcept;
+    QITI_API static void endProfilingAllFunctions() noexcept;
     
     /** @returns true if we are currently profling function. */
     template<auto FuncPtr>
     requires isFreeFunction<FuncPtr>
-    [[nodiscard]] static inline bool QITI_API isProfilingFunction() noexcept
+    QITI_API [[nodiscard]] static inline bool isProfilingFunction() noexcept
     {
         return isProfilingFunction(reinterpret_cast<const void*>(FuncPtr));
     }
@@ -148,30 +148,30 @@ public:
      */
     template<auto FuncPtr>
     requires isMemberFunction<FuncPtr>
-    [[nodiscard]] static inline bool QITI_API isProfilingFunction() noexcept
+    QITI_API [[nodiscard]] static inline bool isProfilingFunction() noexcept
     {
         return isProfilingFunction(getMemberFunctionMockAddress<FuncPtr>());
     }
     
     /** */
     template<typename Type>
-    static inline void QITI_API beginProfilingType() noexcept { beginProfilingType( typeid(Type) ); }
+    QITI_API static inline void beginProfilingType() noexcept { beginProfilingType( typeid(Type) ); }
     
     /** */
     template <typename Type>
-    static inline void QITI_API endProfilingType() noexcept { endProfilingType( typeid(Type) ); }
+    QITI_API static inline void endProfilingType() noexcept { endProfilingType( typeid(Type) ); }
     
     /** */
-    [[nodiscard]] static uint64_t QITI_API getNumHeapAllocationsOnCurrentThread() noexcept;
+    QITI_API [[nodiscard]] static uint64_t getNumHeapAllocationsOnCurrentThread() noexcept;
     
     /** */
-    [[nodiscard]] static uint64_t QITI_API getAmountHeapAllocatedOnCurrentThread() noexcept;
+    QITI_API [[nodiscard]] static uint64_t getAmountHeapAllocatedOnCurrentThread() noexcept;
     
     /** */
     template<auto FuncPtr>
     requires isFreeFunction<FuncPtr>
     || isMemberFunction<FuncPtr>
-    [[nodiscard]] static consteval const char* QITI_API getFunctionName() noexcept
+    QITI_API [[nodiscard]] static consteval const char* getFunctionName() noexcept
     {
         return FunctionNameHelpers::functionNameCStr<FuncPtr>;
     }
@@ -190,10 +190,10 @@ private:
     ~Profile() = delete;
     
     /** */
-    static void QITI_API_INTERNAL updateFunctionDataOnEnter(const void* this_fn) noexcept;
+    QITI_API_INTERNAL static void updateFunctionDataOnEnter(const void* this_fn) noexcept;
     
     /** */
-    static void QITI_API_INTERNAL updateFunctionDataOnExit(const void* this_fn) noexcept;
+    QITI_API_INTERNAL static void updateFunctionDataOnExit(const void* this_fn) noexcept;
 
     /** */
     template <auto FuncPtr>
@@ -222,7 +222,7 @@ private:
      */
     template <auto FuncPtr>
     requires isFreeFunction<FuncPtr>
-    [[nodiscard]] static consteval const void* QITI_API getFunctionAddress() noexcept
+    QITI_API [[nodiscard]] static consteval const void* getFunctionAddress() noexcept
     {
         return FunctionAddressHolder<FuncPtr>::value;
     }
@@ -235,7 +235,7 @@ private:
      */
     template <auto FuncPtr>
     requires isMemberFunction<FuncPtr>
-    [[nodiscard]] static consteval const void* QITI_API getMemberFunctionMockAddress() noexcept
+    QITI_API [[nodiscard]] static consteval const void* getMemberFunctionMockAddress() noexcept
     {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wold-style-cast"
@@ -245,21 +245,21 @@ private:
     }
     
     /** */
-    static void QITI_API beginProfilingFunction(const void* functionAddress, const char* functionName = nullptr) noexcept;
+    QITI_API static void beginProfilingFunction(const void* functionAddress, const char* functionName = nullptr) noexcept;
     
     /** */
-    static void QITI_API endProfilingFunction(const void* functionAddress) noexcept;
+    QITI_API static void endProfilingFunction(const void* functionAddress) noexcept;
     
     /** */
-    static void QITI_API beginProfilingType(std::type_index functionAddress) noexcept;
+    QITI_API static void beginProfilingType(std::type_index functionAddress) noexcept;
     
     /** */
-    static void QITI_API endProfilingType(std::type_index functionAddress) noexcept;
+    QITI_API static void endProfilingType(std::type_index functionAddress) noexcept;
     
     /**
      @returns true if we are currently profling function.
      */
-    [[nodiscard]] static bool QITI_API isProfilingFunction(const void* funcAddress) noexcept;
+    QITI_API [[nodiscard]] static bool isProfilingFunction(const void* funcAddress) noexcept;
 }; // class Profile
 }  // namespace qiti
 

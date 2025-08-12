@@ -36,7 +36,7 @@ namespace qiti
 class InstrumentHooks
 {
 public:
-    static void QITI_API_INTERNAL
+    QITI_API_INTERNAL static void
     __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site) noexcept
     {
         if (qiti::Profile::isProfilingFunction(this_fn))
@@ -48,7 +48,7 @@ public:
         }
     }
     
-    static void QITI_API_INTERNAL
+    QITI_API_INTERNAL static void
     __cyg_profile_func_exit(void * this_fn, [[maybe_unused]] void* call_site) noexcept
     {
         if (qiti::Profile::isProfilingFunction(this_fn))

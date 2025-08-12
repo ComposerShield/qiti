@@ -40,7 +40,7 @@ extern "C"
 
 
 // Initialize function pointers to original exception functions
-static void QITI_API_INTERNAL initializeExceptionHooks() noexcept
+QITI_API_INTERNAL static void initializeExceptionHooks() noexcept
 {
     if (! original_cxa_throw)
     {
@@ -64,7 +64,7 @@ static void QITI_API_INTERNAL initializeExceptionHooks() noexcept
 extern "C"
 {
 
-void QITI_API __cxa_throw(void* thrown_object, 
+QITI_API void __cxa_throw(void* thrown_object, 
                          std::type_info* tinfo, 
                          void (*dest)(void*))
 {
@@ -94,7 +94,7 @@ void QITI_API __cxa_throw(void* thrown_object,
     }
 }
 
-void* QITI_API __cxa_begin_catch(void* exceptionObject)
+QITI_API void* __cxa_begin_catch(void* exceptionObject)
 {
     initializeExceptionHooks();
     
@@ -107,7 +107,7 @@ void* QITI_API __cxa_begin_catch(void* exceptionObject)
     return nullptr;
 }
 
-void QITI_API __cxa_end_catch()
+QITI_API void __cxa_end_catch()
 {
     initializeExceptionHooks();
     
