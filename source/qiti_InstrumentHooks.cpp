@@ -15,6 +15,7 @@
 
 #include "qiti_MallocHooks.hpp"
 
+#include "qiti_LockData.hpp" // PC: for pthread_mutex_t
 #include "qiti_LockHooks.hpp"
 #include "qiti_Profile.hpp"
 

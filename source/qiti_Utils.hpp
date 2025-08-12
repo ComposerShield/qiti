@@ -90,7 +90,7 @@ private:
                                                                                  int functionType = -1) noexcept;
     
     /** */
-    [[nodiscard]] static const qiti::FunctionData* QITI_API getFunctionData(const char* demangledFunctionName) noexcept;
+    [[nodiscard]] QITI_API static const qiti::FunctionData* getFunctionData(const char* demangledFunctionName) noexcept;
     
 }; // class Utils
 }  // namespace qiti
