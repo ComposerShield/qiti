@@ -80,19 +80,19 @@ public:
      Check if all leak detection tests passed.
      @return true if no leaks detected, false if any leaks found
      */
-    QITI_API [[nodiscard]] bool passed() const noexcept;
+    [[nodiscard]] QITI_API bool passed() const noexcept;
     
     /** 
      Check if any leak detection tests failed.
      @return true if any leaks detected, false if all tests passed
      */
-    QITI_API [[nodiscard]] inline bool failed() const noexcept { return ! passed(); }
+    [[nodiscard]] QITI_API inline bool failed() const noexcept { return ! passed(); }
     
     /**
      Get detailed report of memory allocation during testing.
      @return String containing allocation/deallocation details and any detected leaks
      */
-    QITI_API [[nodiscard]] std::string getReport() const noexcept;
+    [[nodiscard]] QITI_API std::string getReport() const noexcept;
 
     /** Move Constructor */
     QITI_API LeakSanitizer(LeakSanitizer&& other) noexcept;

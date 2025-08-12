@@ -72,42 +72,42 @@ public:
      
      @returns A string in the format "major.minor.patch" (e.g., "1.0.0")
      */
-    QITI_API [[nodiscard]] static const char* getQitiVersionString() noexcept;
+    [[nodiscard]] QITI_API static const char* getQitiVersionString() noexcept;
     
     /**
      Get the major version number of Qiti.
      
      @returns The major version component (e.g., 1 from "1.0.0")
      */
-    QITI_API [[nodiscard]] static int getQitiVersionMajor() noexcept;
+    [[nodiscard]] QITI_API static int getQitiVersionMajor() noexcept;
     
     /**
      Get the minor version number of Qiti.
      
      @returns The minor version component (e.g., 0 from "1.0.0")
      */
-    QITI_API [[nodiscard]] static int getQitiVersionMinor() noexcept;
+    [[nodiscard]] QITI_API static int getQitiVersionMinor() noexcept;
     
     /**
      Get the patch version number of Qiti.
      
      @returns The patch version component (e.g., 0 from "1.0.0")
      */
-    QITI_API [[nodiscard]] static int getQitiVersionPatch() noexcept;
+    [[nodiscard]] QITI_API static int getQitiVersionPatch() noexcept;
     
     /** 
      Get elapsed length of time since ScopedQitiTest was initialized.
      
      @returns Elapsed time in milliseconds
      */
-    QITI_API [[nodiscard]] uint64_t getLengthOfTest_ms() const noexcept;
+    [[nodiscard]] QITI_API uint64_t getLengthOfTest_ms() const noexcept;
     
     /** 
      Get elapsed length of time since ScopedQitiTest was initialized.
      
      @returns Elapsed time in nanoseconds
      */
-    QITI_API [[nodiscard]] uint64_t getLengthOfTest_ns() const noexcept;
+    [[nodiscard]] QITI_API uint64_t getLengthOfTest_ns() const noexcept;
     
     /** Assert if test exceeds duration specified. */
     QITI_API void setMaximumDurationOfTest_ms(uint64_t ms) noexcept;

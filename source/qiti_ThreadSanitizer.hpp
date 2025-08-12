@@ -52,7 +52,7 @@ public:
      @see passed()
      @see failed()
      */
-    QITI_API [[nodiscard]] static std::unique_ptr<ThreadSanitizer> createDataRaceDetector() noexcept;
+    [[nodiscard]] QITI_API static std::unique_ptr<ThreadSanitizer> createDataRaceDetector() noexcept;
     
     /**
      Factory to create a detector that checks if two functions are called in parallel.
@@ -68,7 +68,7 @@ public:
     template<auto FuncPtr0, auto FuncPtr1>
     requires isFreeFunction<FuncPtr0>
     && isFreeFunction<FuncPtr1>
-    QITI_API [[nodiscard]] static std::unique_ptr<ThreadSanitizer> createFunctionsCalledInParallelDetector() noexcept
+    [[nodiscard]] QITI_API static std::unique_ptr<ThreadSanitizer> createFunctionsCalledInParallelDetector() noexcept
     {
         static_assert(FuncPtr0 != FuncPtr1, "Functions must not be the same function.");
         return createFunctionsCalledInParallelDetector(FunctionData::getFunctionDataMutable<FuncPtr0>(),
@@ -85,7 +85,7 @@ public:
      @see passed()
      @see failed()
     */
-    QITI_API [[nodiscard]] static std::unique_ptr<ThreadSanitizer> createPotentialDeadlockDetector() noexcept;
+    [[nodiscard]] QITI_API static std::unique_ptr<ThreadSanitizer> createPotentialDeadlockDetector() noexcept;
     
     /**
      @param func Function pointer or lambda that is immediately run and tested according to which ThreadSanitizer object you are using.
@@ -103,10 +103,10 @@ public:
      
      @see run()
      */
-    QITI_API [[nodiscard]] bool passed() noexcept;
+    [[nodiscard]] QITI_API bool passed() noexcept;
     
     /** Convenience inverse of passed(). */
-    QITI_API [[nodiscard]] bool failed() noexcept;
+    [[nodiscard]] QITI_API bool failed() noexcept;
     
     /**
      Optional user-provided callback which is called immediately when a test fails.
@@ -118,7 +118,7 @@ public:
     /**
      Returns a report if one is available. Not necessarily supported in every derived class.
      */
-    QITI_API [[nodiscard]] virtual std::string getReport(bool verbose) const noexcept;
+    [[nodiscard]] QITI_API virtual std::string getReport(bool verbose) const noexcept;
     
     //--------------------------------------------------------------------------
     // Doxygen - Begin Internal Documentation
@@ -131,7 +131,7 @@ public:
     /** Move Constructor */
     QITI_API ThreadSanitizer(ThreadSanitizer&& other) noexcept;
     /** Move Assignment */
-    QITI_API [[nodiscard]] ThreadSanitizer& operator=(ThreadSanitizer&& other) noexcept;
+    [[nodiscard]] QITI_API ThreadSanitizer& operator=(ThreadSanitizer&& other) noexcept;
     
 protected:    
     /** */

@@ -55,7 +55,7 @@ public:
      the most execution time based on call frequency and average execution time.
      Functions with higher total time consumption receive higher scores.
      */
-    QITI_API [[nodiscard]] static std::vector<Hotspot> detectHotspots() noexcept;
+    [[nodiscard]] QITI_API static std::vector<Hotspot> detectHotspots() noexcept;
     
     /**
      @returns A vector of detected hotspots above the specified threshold.
@@ -63,7 +63,7 @@ public:
      @param scoreThreshold Minimum score required for a function to be considered a hotspot.
      Functions with scores below this threshold will be filtered out.
      */
-    QITI_API [[nodiscard]] static std::vector<Hotspot> detectHotspots(double scoreThreshold) noexcept;
+    [[nodiscard]] QITI_API static std::vector<Hotspot> detectHotspots(double scoreThreshold) noexcept;
     
 private:
     /**
@@ -72,7 +72,7 @@ private:
      @param func The function to analyze
      @returns A hotspot score based on total time consumption (calls × average time)
      */
-    QITI_API_INTERNAL [[nodiscard]] static double calculateHotspotScore(const FunctionData* func) noexcept;
+    [[nodiscard]] QITI_API_INTERNAL static double calculateHotspotScore(const FunctionData* func) noexcept;
     
     /**
      Generate a human-readable explanation for why a function is considered a hotspot.
@@ -80,7 +80,7 @@ private:
      @param func The function to analyze
      @returns A descriptive string explaining the hotspot characteristics
      */
-    QITI_API_INTERNAL [[nodiscard]] static std::string getHotspotReason(const FunctionData* func) noexcept;
+    [[nodiscard]] QITI_API_INTERNAL static std::string getHotspotReason(const FunctionData* func) noexcept;
 };
 
 //--------------------------------------------------------------------------

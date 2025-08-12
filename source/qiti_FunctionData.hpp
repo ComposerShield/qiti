@@ -57,7 +57,7 @@ public:
     template <auto FuncPtr>
     requires isFreeFunction<FuncPtr>
              || isMemberFunction<FuncPtr>
-    QITI_API [[nodiscard]] static const qiti::FunctionData* getFunctionData() noexcept
+    [[nodiscard]] QITI_API static const qiti::FunctionData* getFunctionData() noexcept
     {
         return getFunctionDataMutable<FuncPtr>(); // wrap in const
     }
@@ -67,14 +67,14 @@ public:
 
      Returns a human-readable name for the function.
      */
-    QITI_API [[nodiscard]] const char* getFunctionName() const noexcept;
+    [[nodiscard]] QITI_API const char* getFunctionName() const noexcept;
     
     /**
      Get the total number of times this function was called.
 
      Returns the count of all recorded invocations that have occurred since we began profiling the function.
      */
-    QITI_API [[nodiscard]] uint64_t getNumTimesCalled() const noexcept;
+    [[nodiscard]] QITI_API uint64_t getNumTimesCalled() const noexcept;
     
     /**
      Returns the average time spent inside this function, in nanoseconds.
@@ -82,7 +82,7 @@ public:
      CPU time is the amount of time the thread actually spent executing
      on the CPU (user + kernel mode), and does ​not​ include time spent off-CPU.
      */
-    QITI_API [[nodiscard]] uint64_t getAverageTimeSpentInFunctionCpu_ns() const noexcept;
+    [[nodiscard]] QITI_API uint64_t getAverageTimeSpentInFunctionCpu_ns() const noexcept;
     
     /**
      Returns the average time spent inside this function, in nanoseconds.
@@ -90,7 +90,7 @@ public:
      Wall-clock time is the real-world elapsed time between entry and exit,
      and so includes any time the thread was preempted or blocked.
      */
-    QITI_API [[nodiscard]] uint64_t getAverageTimeSpentInFunctionWallClock_ns() const noexcept;
+    [[nodiscard]] QITI_API uint64_t getAverageTimeSpentInFunctionWallClock_ns() const noexcept;
     
     /**
      Returns the minimum CPU time spent in any single call to this function, in nanoseconds.
@@ -99,7 +99,7 @@ public:
      on the CPU (user + kernel mode), and does ​not​ include time spent off-CPU.
      Returns 0 if the function has never been called.
      */
-    QITI_API [[nodiscard]] uint64_t getMinTimeSpentInFunctionCpu_ns() const noexcept;
+    [[nodiscard]] QITI_API uint64_t getMinTimeSpentInFunctionCpu_ns() const noexcept;
     
     /**
      Returns the maximum CPU time spent in any single call to this function, in nanoseconds.
@@ -108,7 +108,7 @@ public:
      on the CPU (user + kernel mode), and does ​not​ include time spent off-CPU.
      Returns 0 if the function has never been called.
      */
-    QITI_API [[nodiscard]] uint64_t getMaxTimeSpentInFunctionCpu_ns() const noexcept;
+    [[nodiscard]] QITI_API uint64_t getMaxTimeSpentInFunctionCpu_ns() const noexcept;
     
     /**
      Returns the minimum wall-clock time spent in any single call to this function, in nanoseconds.
@@ -117,7 +117,7 @@ public:
      and so includes any time the thread was preempted or blocked.
      Returns 0 if the function has never been called.
      */
-    QITI_API [[nodiscard]] uint64_t getMinTimeSpentInFunctionWallClock_ns() const noexcept;
+    [[nodiscard]] QITI_API uint64_t getMinTimeSpentInFunctionWallClock_ns() const noexcept;
     
     /**
      Returns the maximum wall-clock time spent in any single call to this function, in nanoseconds.
@@ -126,28 +126,28 @@ public:
      and so includes any time the thread was preempted or blocked.
      Returns 0 if the function has never been called.
      */
-    QITI_API [[nodiscard]] uint64_t getMaxTimeSpentInFunctionWallClock_ns() const noexcept;
+    [[nodiscard]] QITI_API uint64_t getMaxTimeSpentInFunctionWallClock_ns() const noexcept;
     
     /**
      Check if the function was called on a specific thread.
 
      Returns true if any recorded invocation occurred on the thread identified by 'thread'.
      */
-    QITI_API [[nodiscard]] bool wasCalledOnThread(std::thread::id thread) const noexcept;
+    [[nodiscard]] QITI_API bool wasCalledOnThread(std::thread::id thread) const noexcept;
     
     /**
      Retrieve the most recent function call data.
 
      Returns a FunctionCallData object representing the last recorded invocation of this function.
      */
-    QITI_API [[nodiscard]] FunctionCallData getLastFunctionCall() const noexcept;
+    [[nodiscard]] QITI_API FunctionCallData getLastFunctionCall() const noexcept;
     
     /**
      Get all profiled function data.
 
      Returns a vector of pointers to the FunctionData instances for each function currently being profiled.
      */
-    QITI_API [[nodiscard]] static std::vector<const FunctionData*> getAllProfiledFunctionData() noexcept;
+    [[nodiscard]] QITI_API static std::vector<const FunctionData*> getAllProfiledFunctionData() noexcept;
     
     /**
      Get all functions that have called this function.
@@ -158,7 +158,7 @@ public:
      
      Note: This only works reliably when you have called ScopedQitiTest::enableProfilingOnAllFunctions(true).
      */
-    QITI_API [[nodiscard]] std::vector<const FunctionData*> getCallers() const noexcept;
+    [[nodiscard]] QITI_API std::vector<const FunctionData*> getCallers() const noexcept;
     
     /**
      @returns The total number of exceptions thrown by this function.
@@ -167,63 +167,63 @@ public:
      This does not include exceptions thrown by other functions that this function calls.
      @returns 0 if no exceptions have been thrown by this function.
      */
-    QITI_API [[nodiscard]] uint64_t getNumExceptionsThrown() const noexcept;
+    [[nodiscard]] QITI_API uint64_t getNumExceptionsThrown() const noexcept;
     
     /**
      @returns True if this function is any type of constructor.
      
      Example: `MyClass()`, `MyClass(const MyClass&)`, `MyClass(MyClass&&)`
      */
-    QITI_API [[nodiscard]] bool isConstructor() const noexcept;
+    [[nodiscard]] QITI_API bool isConstructor() const noexcept;
 
     /**
      @returns True if this function is a regular (non-copy, non-move) constructor.
      
      Example: `MyClass()`, `MyClass(int x, float y)`
      */
-    QITI_API [[nodiscard]] bool isRegularConstructor() const noexcept;
+    [[nodiscard]] QITI_API bool isRegularConstructor() const noexcept;
 
     /**
      @returns True if this function is a copy constructor.
      
      Example: `MyClass(const MyClass& other)`
      */
-    QITI_API [[nodiscard]] bool isCopyConstructor() const noexcept;
+    [[nodiscard]] QITI_API bool isCopyConstructor() const noexcept;
 
     /**
      @returns True if this function is a move constructor.
      
      Example: `MyClass(MyClass&& other)`
      */
-    QITI_API [[nodiscard]] bool isMoveConstructor() const noexcept;
+    [[nodiscard]] QITI_API bool isMoveConstructor() const noexcept;
 
     /**
      @returns True if this function is any type of assignment operator.
      
      Example: `operator=(const MyClass&)`, `operator=(MyClass&&)`
      */
-    QITI_API [[nodiscard]] bool isAssignment() const noexcept;
+    [[nodiscard]] QITI_API bool isAssignment() const noexcept;
 
     /**
      @returns True if this function is a copy assignment operator.
      
      Example: `MyClass& operator=(const MyClass& other)`
      */
-    QITI_API [[nodiscard]] bool isCopyAssignment() const noexcept;
+    [[nodiscard]] QITI_API bool isCopyAssignment() const noexcept;
 
     /**
      @returns True if this function is a move assignment operator.
      
      Example: `MyClass& operator=(MyClass&& other)`
      */
-    QITI_API [[nodiscard]] bool isMoveAssignment() const noexcept;
+    [[nodiscard]] QITI_API bool isMoveAssignment() const noexcept;
 
     /**
      @returns True if this function is a destructor.
      
      Example: `~MyClass()`
      */
-    QITI_API [[nodiscard]] bool isDestructor() const noexcept;
+    [[nodiscard]] QITI_API bool isDestructor() const noexcept;
     
     //--------------------------------------------------------------------------
     // Doxygen - Begin Internal Documentation
@@ -232,9 +232,9 @@ public:
     
     struct Impl;
     /** */
-    QITI_API_INTERNAL [[nodiscard]] Impl* getImpl() noexcept;
+    [[nodiscard]] QITI_API_INTERNAL Impl* getImpl() noexcept;
     /** */
-    QITI_API_INTERNAL [[nodiscard]] const Impl* getImpl() const noexcept;
+    [[nodiscard]] QITI_API_INTERNAL const Impl* getImpl() const noexcept;
     
     /**
      Listener interface for function entry and exit events.
@@ -265,7 +265,7 @@ public:
     /** Begins profiling for FuncPtr and returns a pointer to the corresponding mutable FunctionData instance. */
     template <auto FuncPtr>
     requires isFreeFunction<FuncPtr>
-    QITI_API_INTERNAL [[nodiscard]] static qiti::FunctionData* getFunctionDataMutable() noexcept
+    [[nodiscard]] QITI_API_INTERNAL static qiti::FunctionData* getFunctionDataMutable() noexcept
     {
         static constexpr auto functionAddress = Profile::getFunctionAddress<FuncPtr>();
         static constexpr auto functionName    = Profile::getFunctionName<FuncPtr>();
@@ -279,7 +279,7 @@ public:
     /** Move Constructor */
     QITI_API_INTERNAL FunctionData(FunctionData&& other) noexcept;
     /** Move Assignment */
-    QITI_API_INTERNAL [[nodiscard]] FunctionData& operator=(FunctionData&& other) noexcept;
+    [[nodiscard]] QITI_API_INTERNAL FunctionData& operator=(FunctionData&& other) noexcept;
     
 private:
     friend class Profile;
@@ -303,7 +303,7 @@ private:
      */
     template <auto FuncPtr>
     requires isMemberFunction<FuncPtr>
-    QITI_API_INTERNAL [[nodiscard]] static qiti::FunctionData* getFunctionDataMutable() noexcept
+    [[nodiscard]] QITI_API_INTERNAL static qiti::FunctionData* getFunctionDataMutable() noexcept
     {
         static constexpr auto functionAddress = Profile::getMemberFunctionMockAddress<FuncPtr>();
         static constexpr auto functionName    = Profile::getFunctionName<FuncPtr>();
@@ -328,7 +328,7 @@ private:
     
     
     /** */
-    QITI_API_INTERNAL [[nodiscard]] static constexpr FunctionType getFunctionType(const char* functionName) noexcept
+    [[nodiscard]] QITI_API_INTERNAL static constexpr FunctionType getFunctionType(const char* functionName) noexcept
     {
         std::string_view func_sv{functionName};
 

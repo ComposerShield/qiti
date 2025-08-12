@@ -59,7 +59,7 @@ public:
     
     template <auto FuncPtr>
     requires isFreeFunction<FuncPtr>
-    QITI_API [[nodiscard]] static const qiti::FunctionData* getFunctionData() noexcept
+    [[nodiscard]] QITI_API static const qiti::FunctionData* getFunctionData() noexcept
     {
         static constexpr auto functionAddress = Profile::getFunctionAddress<FuncPtr>();
         static constexpr auto functionName    = Profile::getFunctionName<FuncPtr>();
@@ -67,7 +67,7 @@ public:
     }
     
     /** */
-    QITI_API [[nodiscard]] static std::vector<const qiti::FunctionData*> getAllFunctionData() noexcept;
+    [[nodiscard]] QITI_API static std::vector<const qiti::FunctionData*> getAllFunctionData() noexcept;
     
     /** demangle a GCC/Clang‐mangled name into a std::string */
     QITI_API_INTERNAL static void demangle(const char* mangled_name,
@@ -85,7 +85,7 @@ private:
     QITI_API_INTERNAL static void* getAddressForMangledFunctionName(const char* mangledName) noexcept;
     
     /** */
-    QITI_API [[nodiscard]] static qiti::FunctionData& getFunctionDataFromAddress(const void* functionAddress,
+    [[nodiscard]] QITI_API static qiti::FunctionData& getFunctionDataFromAddress(const void* functionAddress,
                                                                                  const char* functionName = nullptr,
                                                                                  int functionType = -1) noexcept;
     

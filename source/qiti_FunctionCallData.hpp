@@ -34,10 +34,10 @@ class FunctionCallData
 {
 public:    
     /** Calculates how many allocations occurred between function entry and exit. */
-    QITI_API [[nodiscard]] uint64_t getNumHeapAllocations() const noexcept;
+    [[nodiscard]] QITI_API uint64_t getNumHeapAllocations() const noexcept;
     
     /** Get the total bytes allocated on the heap during this call. */
-    QITI_API [[nodiscard]] uint64_t getAmountHeapAllocated() const noexcept;
+    [[nodiscard]] QITI_API uint64_t getAmountHeapAllocated() const noexcept;
 
     /**
      Returns the CPU time spent inside this function call, in milliseconds.
@@ -45,7 +45,7 @@ public:
      CPU time is the amount of time the thread actually spent executing
      on the CPU (user + kernel mode), and does ​not​ include time spent off-CPU.
      */
-    QITI_API [[nodiscard]] uint64_t getTimeSpentInFunctionCpu_ms() const noexcept;
+    [[nodiscard]] QITI_API uint64_t getTimeSpentInFunctionCpu_ms() const noexcept;
     
     /**
      Returns the CPU time spent inside this function call, in nanoseconds.
@@ -53,7 +53,7 @@ public:
      CPU time is the amount of time the thread actually spent executing
      on the CPU (user + kernel mode), and does ​not​ include time spent off-CPU.
      */
-    QITI_API [[nodiscard]] uint64_t getTimeSpentInFunctionCpu_ns() const noexcept;
+    [[nodiscard]] QITI_API uint64_t getTimeSpentInFunctionCpu_ns() const noexcept;
     
     /**
      Returns the wall-clock time spent inside this function call, in milliseconds.
@@ -61,7 +61,7 @@ public:
      Wall-clock time is the real-world elapsed time between entry and exit,
      and so includes any time the thread was preempted or blocked.
      */
-    QITI_API [[nodiscard]] uint64_t getTimeSpentInFunctionWallClock_ms() const noexcept;
+    [[nodiscard]] QITI_API uint64_t getTimeSpentInFunctionWallClock_ms() const noexcept;
     
     /**
      Returns the wall-clock time spent inside this function call, in nanoseconds.
@@ -69,10 +69,10 @@ public:
      Wall-clock time is the real-world elapsed time between entry and exit,
      and so includes any time the thread was preempted or blocked.
      */
-    QITI_API [[nodiscard]] uint64_t getTimeSpentInFunctionWallClock_ns() const noexcept;
+    [[nodiscard]] QITI_API uint64_t getTimeSpentInFunctionWallClock_ns() const noexcept;
     
     /** Get thread that was responsible for this function call. */
-    QITI_API [[nodiscard]] std::thread::id getThreadThatCalledFunction() const noexcept;
+    [[nodiscard]] QITI_API std::thread::id getThreadThatCalledFunction() const noexcept;
     
     /** 
      Get the function that called this function.
@@ -83,7 +83,7 @@ public:
      
      Note: This only works reliably when you have called ScopedQitiTest::enableProfilingOnAllFunctions(true).
      */
-    QITI_API [[nodiscard]] const FunctionData* getCaller() const noexcept;
+    [[nodiscard]] QITI_API const FunctionData* getCaller() const noexcept;
     
     /**
      @returns True if this function call threw an exception during execution.
@@ -92,7 +92,7 @@ public:
      this call. This does not include exceptions thrown by other functions that
      this function called.
      */
-    QITI_API [[nodiscard]] bool didThrowException() const noexcept;
+    [[nodiscard]] QITI_API bool didThrowException() const noexcept;
     
     /**
      @returns The total number of exceptions thrown during this specific function call.
@@ -103,7 +103,7 @@ public:
      exceptions during a single call (e.g., in loops or exception handling code).
      @returns 0 if no exceptions were thrown during this call.
      */
-    QITI_API [[nodiscard]] uint64_t getNumExceptionsThrown() const noexcept;
+    [[nodiscard]] QITI_API uint64_t getNumExceptionsThrown() const noexcept;
     
     //--------------------------------------------------------------------------
     // Doxygen - Begin Internal Documentation
@@ -117,9 +117,9 @@ public:
     
     struct Impl;
     /** */
-    QITI_API_INTERNAL [[nodiscard]] Impl* getImpl() noexcept;
+    [[nodiscard]] QITI_API_INTERNAL Impl* getImpl() noexcept;
     /** */
-    QITI_API_INTERNAL [[nodiscard]] const Impl* getImpl() const noexcept;
+    [[nodiscard]] QITI_API_INTERNAL const Impl* getImpl() const noexcept;
     
     /**
      Reset this call data to its initial state.
@@ -131,7 +131,7 @@ public:
     /** Move Constructor */
     QITI_API_INTERNAL FunctionCallData(FunctionCallData&& other) noexcept;
     /** Move Assignment */
-    QITI_API_INTERNAL [[nodiscard]] FunctionCallData& operator=(FunctionCallData&& other) noexcept;
+    [[nodiscard]] QITI_API_INTERNAL FunctionCallData& operator=(FunctionCallData&& other) noexcept;
     /** Copy Constructor */
     FunctionCallData(const FunctionCallData&) noexcept;
     /** Copy Assignment */
