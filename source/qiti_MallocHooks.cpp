@@ -17,8 +17,8 @@
 
 #include "qiti_Utils.hpp"
 
-#include <cxxabi.h>       // __cxa_demangle
 #ifndef _WIN32
+#include <cxxabi.h>       // __cxa_demangle
 #include <execinfo.h>     // backtrace(), backtrace_symbols()
 #endif
 #ifdef _WIN32

@@ -37,7 +37,7 @@ TypeData
 {
 public:
     /** */
-    [[nodiscard]] const char* QITI_API getTypeName() const noexcept;
+    [[nodiscard]] QITI_API const char* getTypeName() const noexcept;
     
     //--------------------------------------------------------------------------
     // Doxygen - Begin Internal Documentation
@@ -51,14 +51,14 @@ public:
     
     struct Impl;
     /** */
-    [[nodiscard]] Impl* QITI_API_INTERNAL getImpl() noexcept;
+    [[nodiscard]] QITI_API_INTERNAL Impl* getImpl() noexcept;
     /** */
-    [[nodiscard]] const Impl* QITI_API_INTERNAL getImpl() const noexcept;
+    [[nodiscard]] QITI_API_INTERNAL const Impl* getImpl() const noexcept;
     
     /** Move Constructor */
     QITI_API_INTERNAL TypeData(TypeData&& other) noexcept;
     /** Move Operator */
-    [[nodiscard]] TypeData& QITI_API_INTERNAL operator=(TypeData&& other) noexcept;
+    [[nodiscard]] QITI_API_INTERNAL TypeData& operator=(TypeData&& other) noexcept;
     
 private:
     std::unique_ptr<Impl> pImpl;
