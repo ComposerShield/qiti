@@ -237,3 +237,37 @@ jobs:
 
       - name: Run CPPLint
         run: ./runCpplint.sh
+
+  windows-build-clang-ninja:
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Clang
+        uses: egor-tensin/setup-clang@v1
+        with:
+          version: 16
+          
+      - name: Install Ninja
+        run: |
+          choco install ninja
+
+      - name: Configure CMake (Ninja, Clang)
+        run: |
+          cmake . -B build `
+            -G Ninja `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_C_COMPILER=clang `
+            -DCMAKE_CXX_COMPILER=clang++
+
+      - name: Build Tests
+        run: |
+          cmake --build build --target qiti_tests_catch2
+          cmake --build build --target qiti_tests_gtest
+
+      - name: Run Unit Tests
+        run: |
+          cd build
+          ctest -C Release --verbose

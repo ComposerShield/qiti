@@ -11,7 +11,8 @@ Qiti also provides optional Thread Sanitizer wrapper functionality: when enabled
 ## Requirements
 
 - macOS (14 or 15, x86_64 and/or arm64)*
-- Linux (tested on Ubuntu, Debian, and Fedora; x86_64)*
+- Linux (tested on Ubuntu, Debian, and Fedora; x86_64)*  
+- Windows (tested on Windows Latest with Clang; x86_64, ThreadSanitizer features not supported)*
 - Clang or Apple Clang (additional compiler support TBD)*
 - C++20
 - CMake
@@ -146,6 +147,7 @@ Qiti is continuously tested across a comprehensive matrix of platforms, compiler
 | **Ubuntu** | Latest     | LLVM Clang 16            | Ninja        | ❌ Disabled     | Catch2 + GTest  |
 | **Debian** | Stable     | LLVM Clang 17            | Ninja        | ✅ Enabled      | Catch2 + GTest  |
 | **Fedora** | Latest     | LLVM Clang (latest)      | Ninja        | ✅ Enabled      | Catch2 + GTest  |
+| **Windows** | Latest     | LLVM Clang 16            | Ninja        | ❌ Disabled     | Catch2 + GTest  |
 
 **Additional CI Validations:**
 - **Code Quality**: CPPLint validation with custom filters
