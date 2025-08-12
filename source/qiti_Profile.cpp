@@ -22,10 +22,17 @@
 #include "qiti_MallocHooks.hpp"
 #include "qiti_ScopedNoHeapAllocations.hpp"
 
+#ifndef _WIN32
 #include <execinfo.h>
-#include <cxxabi.h>
-#include <dlfcn.h>
 #include <unistd.h>
+#endif
+#include <cxxabi.h>
+#ifdef _WIN32
+#include <windows.h>
+#include <dbghelp.h>
+#else
+#include <dlfcn.h>
+#endif
 
 #include <cassert>
 #include <cstring>

@@ -15,7 +15,13 @@
 
 #pragma once
 
+#ifdef _WIN32
+#include <windows.h>
+// Windows mutex type alias
+using pthread_mutex_t = CRITICAL_SECTION;
+#else
 #include <pthread.h>
+#endif
 
 #include "qiti_API.hpp"
 

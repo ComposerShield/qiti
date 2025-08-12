@@ -18,8 +18,15 @@
 #include "qiti_Utils.hpp"
 
 #include <cxxabi.h>       // __cxa_demangle
+#ifndef _WIN32
 #include <execinfo.h>     // backtrace(), backtrace_symbols()
+#endif
+#ifdef _WIN32
+#include <windows.h>
+#include <dbghelp.h>
+#else
 #include <dlfcn.h>        // dladdr()
+#endif
 
 #include <array>
 #include <memory>

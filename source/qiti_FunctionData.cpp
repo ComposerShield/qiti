@@ -20,7 +20,12 @@
 #include "qiti_Profile.hpp"
 #include "qiti_ScopedNoHeapAllocations.hpp"
 
+#ifdef _WIN32
+#include <windows.h>
+#include <dbghelp.h>
+#else
 #include <dlfcn.h>
+#endif
 
 #include <array>
 #include <cassert>

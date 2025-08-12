@@ -21,7 +21,12 @@
 #include "qiti_MallocHooks.hpp"
 
 #include <cxxabi.h>
+#ifdef _WIN32
+#include <windows.h>
+#include <dbghelp.h>
+#else
 #include <dlfcn.h>
+#endif
 
 #include <algorithm>
 #include <cassert>
@@ -39,6 +44,36 @@
 #include <vector>
 
 //--------------------------------------------------------------------------
+
+#ifdef _WIN32
+// Windows implementation of dladdr
+int dladdr(const void* addr, Dl_info* info)
+{
+    if (!info) return 0;
+    
+    HMODULE hModule;
+    if (!GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | 
+                            GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                            (LPCSTR)addr, &hModule))
+    {
+        return 0;
+    }
+    
+    // Get module filename
+    static char moduleFilename[MAX_PATH];
+    if (!GetModuleFileNameA(hModule, moduleFilename, MAX_PATH))
+    {
+        return 0;
+    }
+    
+    info->dli_fname = moduleFilename;
+    info->dli_fbase = hModule;
+    info->dli_sname = nullptr;  // Symbol name lookup would require DbgHelp
+    info->dli_saddr = nullptr;
+    
+    return 1;
+}
+#endif
 
 /** */
 [[nodiscard]] static auto& getFunctionMap() noexcept

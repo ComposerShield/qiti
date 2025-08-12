@@ -17,7 +17,11 @@
 
 #include "qiti_API.hpp"
 
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <pthread.h>
+#endif
 
 #include <memory>
 

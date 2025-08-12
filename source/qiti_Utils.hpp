@@ -19,7 +19,21 @@
 
 #include "qiti_Profile.hpp"
 
+#ifdef _WIN32
+#include <windows.h>
+#include <dbghelp.h>
+// Windows equivalent of dladdr
+struct Dl_info 
+{
+    const char* dli_fname;  // Pathname of shared library
+    void* dli_fbase;        // Base address of shared library
+    const char* dli_sname;  // Name of nearest symbol
+    void* dli_saddr;        // Address of nearest symbol
+};
+int dladdr(const void* addr, Dl_info* info);
+#else
 #include <dlfcn.h>
+#endif
 
 #include <cstdint>
 #include <string>
