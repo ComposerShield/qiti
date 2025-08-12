@@ -54,7 +54,7 @@ static thread_local std::unordered_map<void*, std::size_t> g_allocationSizes;
 
 static thread_local struct AllocationSizesCleanup final
 {
-    ~AllocationSizesCleanup() noexcept
+    QITI_API_INTERNAL ~AllocationSizesCleanup() noexcept
     {
         qiti::MallocHooks::ScopedBypassMallocHooks bypassHooks;
         g_allocationSizes.clear(); // delete everything without triggering hooks
@@ -109,7 +109,7 @@ QITI_API_INTERNAL static std::vector<std::string> captureStackTrace(int framesTo
 }
 
 /** Check if the stack trace contains a frame whose demangled name contains the substring `funcName */
-QITI_API_INTERNAL inline static bool stackContainsFunction(const std::string& funcName, int framesToSkip = 1) noexcept
+[[nodiscard]] QITI_API_INTERNAL inline static bool stackContainsFunction(const std::string& funcName, int framesToSkip = 1) noexcept
 {
     auto trace = captureStackTrace(framesToSkip);
     for (auto& frame : trace)
@@ -131,7 +131,7 @@ QITI_API_INTERNAL inline static bool stackContainsBlacklistedFunction() noexcept
 
 //--------------------------------------------------------------------------
 
-void QITI_API_INTERNAL qiti::MallocHooks::mallocHook(std::size_t size) noexcept
+QITI_API_INTERNAL void qiti::MallocHooks::mallocHook(std::size_t size) noexcept
 {
     if (! isQitiTestRunning())
         return;
@@ -153,7 +153,7 @@ void QITI_API_INTERNAL qiti::MallocHooks::mallocHook(std::size_t size) noexcept
     }
 }
 
-QITI_API_INTERNAL [[maybe_unused]] static void freeHook(void* ptr) noexcept
+[[maybe_unused]] QITI_API_INTERNAL static void freeHook(void* ptr) noexcept
 {
     if (! isQitiTestRunning())
         return;
@@ -256,7 +256,7 @@ void qiti::MallocHooks::reallocHookWithTracking(void* oldPtr, void* newPtr, std:
 #if defined(__APPLE__) || ! defined(QITI_ENABLE_THREAD_SANITIZER)
 // macOS operator new/delete overrides for leak detection
 
-void* QITI_API operator new(std::size_t size)
+QITI_API void* operator new(std::size_t size)
 {
     void* ptr = std::malloc(size);
     if (ptr == nullptr)
@@ -268,7 +268,7 @@ void* QITI_API operator new(std::size_t size)
     return ptr;
 }
 
-void* QITI_API operator new[](std::size_t size)
+QITI_API void* operator new[](std::size_t size)
 {
     void* ptr = std::malloc(size);
     if (ptr == nullptr)
@@ -280,7 +280,7 @@ void* QITI_API operator new[](std::size_t size)
     return ptr;
 }
 
-void QITI_API operator delete(void* ptr) noexcept
+QITI_API void operator delete(void* ptr) noexcept
 {
     if (ptr != nullptr)
     {
@@ -290,7 +290,7 @@ void QITI_API operator delete(void* ptr) noexcept
     }
 }
 
-void QITI_API operator delete[](void* ptr) noexcept
+QITI_API void operator delete[](void* ptr) noexcept
 {
     if (ptr != nullptr)
     {
@@ -301,7 +301,7 @@ void QITI_API operator delete[](void* ptr) noexcept
 }
 
 // Sized delete operators (C++14)
-void QITI_API operator delete(void* ptr, std::size_t /*size*/) noexcept
+QITI_API void operator delete(void* ptr, std::size_t /*size*/) noexcept
 {
     if (ptr != nullptr)
     {
@@ -311,7 +311,7 @@ void QITI_API operator delete(void* ptr, std::size_t /*size*/) noexcept
     }
 }
 
-void QITI_API operator delete[](void* ptr, std::size_t /*size*/) noexcept
+QITI_API void operator delete[](void* ptr, std::size_t /*size*/) noexcept
 {
     if (ptr != nullptr)
     {
