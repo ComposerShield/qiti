@@ -35,7 +35,7 @@ namespace FunctionNameHelpers
 {
     // A constexpr helper that slices out “FuncPtr = …” from __PRETTY_FUNCTION__.
     template <auto FuncPtr>
-    QITI_API_INTERNAL consteval auto makeFunctionNameArray() noexcept
+    QITI_API_INLINE consteval auto makeFunctionNameArray() noexcept
     {
         constexpr const char* fullFuncName = __PRETTY_FUNCTION__;
         constexpr std::string_view pretty = fullFuncName;
@@ -95,7 +95,7 @@ public:
     /** */
     template<auto FuncPtr>
     requires isFreeFunction<FuncPtr>
-    QITI_API static void inline beginProfilingFunction() noexcept
+    QITI_API_INLINE static void inline beginProfilingFunction() noexcept
     {
         static constexpr auto functionAddress = getFunctionAddress<FuncPtr>();
         static constexpr auto functionName    = getFunctionName<FuncPtr>();
@@ -105,7 +105,7 @@ public:
     /** */
     template<auto FuncPtr>
     requires isMemberFunction<FuncPtr>
-    QITI_API static void inline beginProfilingFunction() noexcept
+    QITI_API_INLINE static void inline beginProfilingFunction() noexcept
     {
         static constexpr auto functionAddress = getMemberFunctionMockAddress<FuncPtr>();
         static constexpr auto functionName    = getFunctionName<FuncPtr>();
@@ -115,7 +115,7 @@ public:
     /** */
     template <auto FuncPtr>
     requires isFreeFunction<FuncPtr>
-    QITI_API static void inline endProfilingFunction() noexcept
+    QITI_API_INLINE static void inline endProfilingFunction() noexcept
     {
         endProfilingFunction(reinterpret_cast<const void*>(FuncPtr));
     }
@@ -123,7 +123,7 @@ public:
     /** */
     template <auto FuncPtr>
     requires isMemberFunction<FuncPtr>
-    QITI_API static void inline endProfilingFunction() noexcept
+    QITI_API_INLINE static void inline endProfilingFunction() noexcept
     {
         endProfilingFunction(getMemberFunctionMockAddress<FuncPtr>());
     }
@@ -137,7 +137,7 @@ public:
     /** @returns true if we are currently profling function. */
     template<auto FuncPtr>
     requires isFreeFunction<FuncPtr>
-    [[nodiscard]] QITI_API static inline bool isProfilingFunction() noexcept
+    [[nodiscard]] QITI_API_INLINE static inline bool isProfilingFunction() noexcept
     {
         return isProfilingFunction(reinterpret_cast<const void*>(FuncPtr));
     }
@@ -148,18 +148,18 @@ public:
      */
     template<auto FuncPtr>
     requires isMemberFunction<FuncPtr>
-    [[nodiscard]] QITI_API static inline bool isProfilingFunction() noexcept
+    [[nodiscard]] QITI_API_INLINE static inline bool isProfilingFunction() noexcept
     {
         return isProfilingFunction(getMemberFunctionMockAddress<FuncPtr>());
     }
     
     /** */
     template<typename Type>
-    QITI_API static inline void beginProfilingType() noexcept { beginProfilingType( typeid(Type) ); }
+    QITI_API_INLINE static inline void beginProfilingType() noexcept { beginProfilingType( typeid(Type) ); }
     
     /** */
     template <typename Type>
-    QITI_API static inline void endProfilingType() noexcept { endProfilingType( typeid(Type) ); }
+    QITI_API_INLINE static inline void endProfilingType() noexcept { endProfilingType( typeid(Type) ); }
     
     /** */
     [[nodiscard]] QITI_API static uint64_t getNumHeapAllocationsOnCurrentThread() noexcept;
@@ -171,7 +171,7 @@ public:
     template<auto FuncPtr>
     requires isFreeFunction<FuncPtr>
     || isMemberFunction<FuncPtr>
-    [[nodiscard]] QITI_API static consteval const char* getFunctionName() noexcept
+    [[nodiscard]] QITI_API_INLINE static consteval const char* getFunctionName() noexcept
     {
         return FunctionNameHelpers::functionNameCStr<FuncPtr>;
     }
@@ -222,7 +222,7 @@ private:
      */
     template <auto FuncPtr>
     requires isFreeFunction<FuncPtr>
-    [[nodiscard]] QITI_API static consteval const void* getFunctionAddress() noexcept
+    [[nodiscard]] QITI_API_INLINE static consteval const void* getFunctionAddress() noexcept
     {
         return FunctionAddressHolder<FuncPtr>::value;
     }
@@ -235,7 +235,7 @@ private:
      */
     template <auto FuncPtr>
     requires isMemberFunction<FuncPtr>
-    [[nodiscard]] QITI_API static consteval const void* getMemberFunctionMockAddress() noexcept
+    [[nodiscard]] QITI_API_INLINE static consteval const void* getMemberFunctionMockAddress() noexcept
     {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wold-style-cast"

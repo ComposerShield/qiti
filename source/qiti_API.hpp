@@ -18,13 +18,12 @@
 #include <type_traits>
 
 /**
- \internal
  Marks functions to be excluded from instrumentation.
  
  When applied, this attribute tells the compiler (e.g., GCC or Clang)
  not to insert profiling or instrumentation hooks into the annotated
- functions. This is useful for performance‐critical internal routines
- or to avoid recursive instrumentation in low‐level utilities.
+ functions. It is important that we do not instrument our own
+ instrumentation code.
  
  Usage:
  \code
@@ -38,13 +37,29 @@
 #endif
 
 /**
- \internal
+ Marks functions to be excluded from instrumentation (same as QITI_API_INTERNAL).
+ 
+ This is intended to be used for inlined functions, most notably templates, which do not
+ require the visibility setting in QITI_API below.
+ 
+ Usage:
+ \code
+ QITI_API_INLINE void myFunc();
+ \endcode
+ 
+ Not intended for use in client code.
+ */
+#ifndef QITI_API_INLINE
+  #define QITI_API_INLINE __attribute__((no_instrument_function))
+#endif
+
+/**
  Controls symbol export/import and visibility.
  Always includes QITI_API_INTERNAL.
  
  Usage:
  \code
- void QITI_API myFunc();
+ QITI_API void myFunc();
  \endcode
  
  Not intended for use in client code.
