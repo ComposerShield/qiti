@@ -31,13 +31,23 @@ namespace qiti
 struct TypeData::Impl
 {
 public:
-    QITI_API_INTERNAL Impl(const std::type_info& info) : typeInfo(info) {}
+    QITI_API_INTERNAL Impl(const std::type_info& info, const char* name) 
+        : typeInfo(info), typeName(name) {}
     QITI_API_INTERNAL ~Impl() = default;
     
     std::type_index typeInfo;
+    const char* typeName = nullptr;
     
-    uint64_t numTimesConstructed = 0;
-    uint64_t numTimesDestructed  = 0;
+    // Instance tracking
+    uint64_t numConstructions = 0;
+    uint64_t numDestructions = 0;
+    uint64_t currentLiveInstances = 0;
+    uint64_t peakLiveInstances = 0;
+    
+    // Memory tracking
+    uint64_t totalMemoryAllocated = 0;
+    uint64_t currentMemoryUsed = 0;
+    uint64_t peakMemoryUsed = 0;
 };
 } // namespace qiti
 

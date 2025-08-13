@@ -70,6 +70,45 @@ namespace FunctionNameHelpers
     inline static constexpr const char* functionNameCStr = functionNameArray<FuncPtr>.data();
 } // namespace FunctionNameHelpers
 
+//--------------------------------------------------------------------------
+
+namespace TypeNameHelpers
+{
+    // A constexpr helper that extracts type name from __PRETTY_FUNCTION__
+    template <typename T>
+    QITI_API_INLINE consteval auto makeTypeNameArray() noexcept
+    {
+        constexpr const char* fullFuncName = __PRETTY_FUNCTION__;
+        constexpr std::string_view pretty = fullFuncName;
+        
+        constexpr std::string_view marker = "T = ";
+        constexpr std::size_t start = pretty.find(marker) + marker.size();
+        constexpr std::size_t end   = pretty.rfind(']');
+        static_assert(start != std::string_view::npos, "Could not find T = marker");
+        static_assert(end   != std::string_view::npos, "Could not find trailing ']'");
+        
+        constexpr std::string_view typeString = pretty.substr(start, end - start);
+        
+        std::array<char, typeString.size() + 1> tmp = {};
+        for (std::size_t i = 0; i < typeString.size(); ++i)
+        {
+            tmp[i] = typeString[i];
+        }
+        tmp[typeString.size()] = '\0';
+        return tmp;
+    }
+    
+    // Each type T gets exactly one array-of-chars at namespace scope:
+    template <typename T>
+    inline static constexpr auto typeNameArray = makeTypeNameArray<T>();
+    
+    // Constexpr pointer into that array:
+    template <typename T>
+    inline static constexpr const char* typeNameCStr = typeNameArray<T>.data();
+} // namespace TypeNameHelpers
+
+//--------------------------------------------------------------------------
+
 /**
  Utility class for runtime profiling of functions and types.
  
@@ -174,6 +213,13 @@ public:
     [[nodiscard]] QITI_API_INLINE static consteval const char* getFunctionName() noexcept
     {
         return FunctionNameHelpers::functionNameCStr<FuncPtr>;
+    }
+    
+    /** Get the compile-time demangled name of a type */
+    template<typename T>
+    [[nodiscard]] QITI_API_INLINE static consteval const char* getTypeName() noexcept
+    {
+        return TypeNameHelpers::typeNameCStr<T>;
     }
     
 private:

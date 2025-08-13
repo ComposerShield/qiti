@@ -17,9 +17,19 @@
 
 #include "qiti_TypeData_Impl.hpp"
 #include "qiti_ScopedNoHeapAllocations.hpp"
+#include "qiti_Utils.hpp"
+#include "qiti_Profile.hpp"
 
 #include <memory>
 #include <utility>
+#include <unordered_map>
+#include <typeindex>
+#include <algorithm>
+
+//--------------------------------------------------------------------------
+
+// Global registry for TypeData instances
+static std::unordered_map<std::type_index, std::unique_ptr<qiti::TypeData>> g_typeDataRegistry;
 
 //--------------------------------------------------------------------------
 
@@ -28,11 +38,10 @@ namespace qiti
 TypeData::Impl*       TypeData::getImpl()       noexcept { return pImpl.get(); }
 const TypeData::Impl* TypeData::getImpl() const noexcept { return pImpl.get(); }
 
-TypeData::TypeData(const void* functionAddress) noexcept
-    : pImpl(std::make_unique<Impl>(typeid(void))) // TODO: Implement proper type detection
+TypeData::TypeData(const std::type_info& typeInfo, const char* typeName) noexcept
+    : pImpl(std::make_unique<Impl>(typeInfo, typeName))
 {
     qiti::ScopedNoHeapAllocations noAlloc;
-    (void)functionAddress; // unused parameter for now
 }
 
 TypeData::~TypeData() noexcept = default;
@@ -57,7 +66,117 @@ TypeData& TypeData::operator=(TypeData&& other) noexcept
 const char* TypeData::getTypeName() const noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
-    
-    return getImpl()->typeInfo.name();
+    return getImpl()->typeName;
 }
+
+uint64_t TypeData::getNumConstructions() const noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    return getImpl()->numConstructions;
+}
+
+uint64_t TypeData::getNumDestructions() const noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    return getImpl()->numDestructions;
+}
+
+uint64_t TypeData::getNumLiveInstances() const noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    return getImpl()->currentLiveInstances;
+}
+
+uint64_t TypeData::getPeakLiveInstances() const noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    return getImpl()->peakLiveInstances;
+}
+
+uint64_t TypeData::getTotalMemoryAllocated() const noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    return getImpl()->totalMemoryAllocated;
+}
+
+uint64_t TypeData::getCurrentMemoryUsed() const noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    return getImpl()->currentMemoryUsed;
+}
+
+uint64_t TypeData::getPeakMemoryUsed() const noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    return getImpl()->peakMemoryUsed;
+}
+
+void TypeData::recordConstruction(size_t instanceSize) noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    auto* impl = getImpl();
+    
+    impl->numConstructions++;
+    impl->currentLiveInstances++;
+    impl->peakLiveInstances = std::max(impl->peakLiveInstances, impl->currentLiveInstances);
+    
+    if (instanceSize > 0)
+    {
+        impl->totalMemoryAllocated += instanceSize;
+        impl->currentMemoryUsed += instanceSize;
+        impl->peakMemoryUsed = std::max(impl->peakMemoryUsed, impl->currentMemoryUsed);
+    }
+}
+
+void TypeData::recordDestruction(size_t instanceSize) noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    auto* impl = getImpl();
+    
+    impl->numDestructions++;
+    if (impl->currentLiveInstances > 0)
+    {
+        impl->currentLiveInstances--;
+    }
+    
+    if (instanceSize > 0 && impl->currentMemoryUsed >= instanceSize)
+    {
+        impl->currentMemoryUsed -= instanceSize;
+    }
+}
+
+void TypeData::reset() noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    auto* impl = getImpl();
+    
+    impl->numConstructions = 0;
+    impl->numDestructions = 0;
+    impl->currentLiveInstances = 0;
+    impl->peakLiveInstances = 0;
+    impl->totalMemoryAllocated = 0;
+    impl->currentMemoryUsed = 0;
+    impl->peakMemoryUsed = 0;
+}
+
+TypeData* TypeData::getTypeDataInternal(const std::type_info& typeInfo, const char* typeName) noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    
+    std::type_index typeIndex(typeInfo);
+    
+    auto it = g_typeDataRegistry.find(typeIndex);
+    if (it != g_typeDataRegistry.end())
+    {
+        return it->second.get();
+    }
+    
+    // Create new TypeData instance
+    auto typeData = std::make_unique<TypeData>(typeInfo, typeName);
+    TypeData* result = typeData.get();
+    g_typeDataRegistry[typeIndex] = std::move(typeData);
+    
+    return result;
+}
+
 } // namespace qiti
