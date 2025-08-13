@@ -15,6 +15,7 @@
 
 #include "qiti_TypeData.hpp"
 
+#include "qiti_MallocHooks.hpp"
 #include "qiti_TypeData_Impl.hpp"
 #include "qiti_ScopedNoHeapAllocations.hpp"
 #include "qiti_Utils.hpp"
@@ -28,8 +29,11 @@
 
 //--------------------------------------------------------------------------
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated" // TODO: remove when TypeData is no longer deprecated
 // Global registry for TypeData instances
 static std::unordered_map<std::type_index, std::unique_ptr<qiti::TypeData>> g_typeDataRegistry;
+#pragma clang diagnostic pop
 
 //--------------------------------------------------------------------------
 
@@ -169,7 +173,7 @@ TypeData* TypeData::getTypeDataInternal(const std::type_info& typeInfo,
                                         const char* typeName,
                                         size_t typeSize) noexcept
 {
-    qiti::ScopedNoHeapAllocations noAlloc;
+    qiti::MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
     
     std::type_index typeIndex(typeInfo);
     

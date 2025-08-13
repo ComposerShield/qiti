@@ -36,7 +36,8 @@ namespace qiti
  tracks functions. You can monitor allocations, destructions, and other
  type-specific metrics.
  */
-class TypeData
+class [[deprecated("TypeData implementation is still a work-in-progress.")]] // TODO: remove
+TypeData
 {
 public:
     /** Get the demangled name of the tracked type */
@@ -66,15 +67,6 @@ public:
     /** Get the size of the tracked type (compile-time) */
     [[nodiscard]] QITI_API size_t getTypeSize() const noexcept;
     
-    /** Record a construction of this type */
-    QITI_API void recordConstruction() noexcept;
-    
-    /** Record a destruction of this type */
-    QITI_API void recordDestruction() noexcept;
-    
-    /** Reset all tracking data for this type */
-    QITI_API void reset() noexcept;
-    
     /**
      Template function to get TypeData for a specific type T.
      Similar to FunctionData::getFunctionData<FuncPtr>().
@@ -85,8 +77,7 @@ public:
     template<typename T>
     [[nodiscard]] QITI_API_INLINE static const TypeData* getTypeData() noexcept
     {
-        static constexpr auto typeName = qiti::Profile::getTypeName<T>();
-        return getTypeDataInternal(typeid(T), typeName, sizeof(T));
+        return getTypeDataMutable<T>(); // wrap in const
     }
     
     /**
@@ -96,14 +87,24 @@ public:
     template<typename T>
     [[nodiscard]] QITI_API_INLINE static TypeData* getTypeDataMutable() noexcept
     {
+        static constexpr auto typeName = qiti::Profile::getTypeName<T>();
         qiti::Profile::beginProfilingType<T>();
-        return getTypeData<T>();
+        return getTypeDataInternal(typeid(T), typeName, sizeof(T));
     }
     
     //--------------------------------------------------------------------------
     // Doxygen - Begin Internal Documentation
     /** \cond INTERNAL */
     //--------------------------------------------------------------------------
+    
+    /** Record a construction of this type */
+    QITI_API void recordConstruction() noexcept;
+    
+    /** Record a destruction of this type */
+    QITI_API void recordDestruction() noexcept;
+    
+    /** Reset all tracking data for this type */
+    QITI_API void reset() noexcept;
     
     /** Internal constructor - use getTypeData<T>() instead */
     QITI_API_INTERNAL TypeData(const std::type_info& typeInfo,
