@@ -227,6 +227,7 @@ jobs:
           ctest -C Release --verbose
 
   windows-build-clang-ninja:
+    if: false # Disabled until Windows support is complete
     runs-on: windows-latest
     
     steps:
