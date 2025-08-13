@@ -246,7 +246,7 @@ jobs:
         run: |
           cmake . -B build `
             -G Ninja `
-            -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_BUILD_TYPE=Debug `
             -DCMAKE_C_COMPILER=clang `
             -DCMAKE_CXX_COMPILER=clang++
 
@@ -258,8 +258,34 @@ jobs:
         run: |
           cd build/bin
           Write-Host "About to run Catch2 tests..."
-          .\qiti_tests_catch2.exe --reporter=console --verbosity=high
-          Write-Host "Catch2 finished with exit code: $LASTEXITCODE"
+          
+          # Try to get crash information using Windows Error Reporting
+          $ErrorActionPreference = 'Continue'
+          
+          # Enable crash dumps (if possible)
+          try {
+            # Set environment variable to generate crash dumps
+            $env:QITI_DEBUG = "1"
+            
+            # Run with detailed error reporting
+            .\qiti_tests_catch2.exe --reporter=console --verbosity=high 2>&1 | Tee-Object -FilePath "test_output.log"
+            $exitCode = $LASTEXITCODE
+            Write-Host "Catch2 finished with exit code: $exitCode"
+            
+            if ($exitCode -ne 0) {
+              Write-Host "=== Test output log ==="
+              Get-Content "test_output.log" -ErrorAction SilentlyContinue
+              
+              # Check Windows Event Log for application crashes
+              Write-Host "=== Checking Windows Event Log for crashes ==="
+              Get-WinEvent -FilterHashtable @{LogName='Application'; Id=1000} -MaxEvents 5 -ErrorAction SilentlyContinue | 
+                Where-Object {$_.Message -like "*qiti_tests_catch2*"} | 
+                Select-Object TimeCreated, Message | Format-List
+            }
+          }
+          catch {
+            Write-Host "Error during test execution: $_"
+          }
         shell: powershell
           
   lint:
