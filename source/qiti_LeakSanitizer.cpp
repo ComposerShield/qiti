@@ -23,15 +23,8 @@
 
 namespace qiti
 {
-LeakSanitizer::LeakSanitizer() noexcept
-{
-    
-}
-
-LeakSanitizer::~LeakSanitizer() noexcept
-{
-    
-}
+LeakSanitizer::LeakSanitizer() noexcept = default;
+LeakSanitizer::~LeakSanitizer() noexcept = default;
 
 void LeakSanitizer::run(std::function<void()> func) noexcept
 {
@@ -47,6 +40,9 @@ void LeakSanitizer::run(std::function<void()> func) noexcept
     
     {
         qiti::Profile::ScopedDisableProfiling disableProfiling;
+
+        // Cache function for rerun()
+        _cachedFunction = func;
         
         amountHeapAllocatedBefore = qiti::MallocHooks::getCurrentAmountHeapAllocatedOnCurrentThread();
         totalAllocatedBefore = qiti::MallocHooks::getTotalAmountHeapAllocatedOnCurrentThread();
@@ -72,6 +68,12 @@ void LeakSanitizer::run(std::function<void()> func) noexcept
         if (_netLeak != 0)
             _passed = false;
     }
+}
+
+void LeakSanitizer::rerun() noexcept
+{
+    if (_cachedFunction != nullptr)
+        run(_cachedFunction);
 }
 
 bool LeakSanitizer::passed() const noexcept
