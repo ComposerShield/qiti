@@ -99,6 +99,16 @@ public:
     QITI_API virtual void run(std::function<void()> func) noexcept = 0;
     
     /**
+     Re-run the last function that was passed to run().
+     
+     This method runs the cached function from the previous call to run().
+     If run() has never been called, this method does nothing.
+     
+     @see run()
+     */
+    QITI_API void rerun() noexcept;
+    
+    /**
      Returns true if no errors were detected in the function(s)/lambda(s) called by run().
      
      @see run()
@@ -142,6 +152,7 @@ protected:
     
 protected:
     std::atomic<bool> _passed = true;
+    std::function<void()> _cachedFunction = nullptr;
     
 private:
     
