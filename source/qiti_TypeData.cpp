@@ -29,8 +29,11 @@
 
 //--------------------------------------------------------------------------
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated" // TODO: remove when TypeData is no longer deprecated
 // Global registry for TypeData instances
 static std::unordered_map<std::type_index, std::unique_ptr<qiti::TypeData>> g_typeDataRegistry;
+#pragma clang diagnostic pop
 
 //--------------------------------------------------------------------------
 

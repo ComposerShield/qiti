@@ -34,6 +34,9 @@ struct SmallTestStruct
 
 //--------------------------------------------------------------------------
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated" // TODO: remove when TypeData is no longer deprecated
+
 QITI_TEST_CASE("qiti::TypeData::getTypeData<T>()", TypeDataGetTypeData)
 {
     qiti::ScopedQitiTest test;
@@ -366,3 +369,5 @@ QITI_TEST_CASE("qiti::TypeData::memoryAccounting", TypeDataMemoryAccounting)
         QITI_REQUIRE(typeData->getPeakMemoryUsed() == 4 * instanceSize); // New peak
     }
 }
+
+#pragma clang diagnostic pop
