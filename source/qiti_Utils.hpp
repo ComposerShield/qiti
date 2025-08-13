@@ -59,7 +59,7 @@ public:
     
     template <auto FuncPtr>
     requires isFreeFunction<FuncPtr>
-    [[nodiscard]] QITI_API static const qiti::FunctionData* getFunctionData() noexcept
+    [[nodiscard]] QITI_API_INLINE static const qiti::FunctionData* getFunctionData() noexcept
     {
         static constexpr auto functionAddress = Profile::getFunctionAddress<FuncPtr>();
         static constexpr auto functionName    = Profile::getFunctionName<FuncPtr>();

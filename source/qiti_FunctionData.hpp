@@ -57,7 +57,7 @@ public:
     template <auto FuncPtr>
     requires isFreeFunction<FuncPtr>
              || isMemberFunction<FuncPtr>
-    [[nodiscard]] QITI_API static const qiti::FunctionData* getFunctionData() noexcept
+    [[nodiscard]] QITI_API_INLINE static const qiti::FunctionData* getFunctionData() noexcept
     {
         return getFunctionDataMutable<FuncPtr>(); // wrap in const
     }

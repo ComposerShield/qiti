@@ -68,7 +68,7 @@ public:
     template<auto FuncPtr0, auto FuncPtr1>
     requires isFreeFunction<FuncPtr0>
     && isFreeFunction<FuncPtr1>
-    [[nodiscard]] QITI_API static std::unique_ptr<ThreadSanitizer> createFunctionsCalledInParallelDetector() noexcept
+    [[nodiscard]] QITI_API_INLINE static std::unique_ptr<ThreadSanitizer> createFunctionsCalledInParallelDetector() noexcept
     {
         static_assert(FuncPtr0 != FuncPtr1, "Functions must not be the same function.");
         return createFunctionsCalledInParallelDetector(FunctionData::getFunctionDataMutable<FuncPtr0>(),
