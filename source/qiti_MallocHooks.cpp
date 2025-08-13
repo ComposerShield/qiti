@@ -321,14 +321,11 @@ void qiti::MallocHooks::reallocHookWithTracking(void* oldPtr, void* newPtr, std:
 
 //--------------------------------------------------------------------------
 
-#if defined(__APPLE__) || ! defined(QITI_ENABLE_THREAD_SANITIZER)
-// macOS operator new/delete overrides for leak detection
+#if (defined(__APPLE__) || ! defined(QITI_ENABLE_THREAD_SANITIZER)) && ! defined(_WIN32)
+// macOS/Linux operator new/delete overrides for leak detection
+// Windows overrides are in qiti_client_tsan_integration.cpp (executable-side)
 
-#ifdef _WIN32 // dllexport does not work on this operator on Windows
-void* operator new(std::size_t size)
-#else
 QITI_API void* operator new(std::size_t size)
-#endif
 {
     void* ptr = std::malloc(size);
     if (ptr == nullptr)
@@ -340,11 +337,7 @@ QITI_API void* operator new(std::size_t size)
     return ptr;
 }
 
-#ifdef _WIN32 // dllexport does not work on this operator on Windows
-void* operator new[](std::size_t size)
-#else
 QITI_API void* operator new[](std::size_t size)
-#endif
 {
     void* ptr = std::malloc(size);
     if (ptr == nullptr)
@@ -356,11 +349,7 @@ QITI_API void* operator new[](std::size_t size)
     return ptr;
 }
 
-#ifdef _WIN32 // dllexport does not work on this operator on Windows
-void operator delete(void* ptr) noexcept
-#else
 QITI_API void operator delete(void* ptr) noexcept
-#endif
 {
     if (ptr != nullptr)
     {
@@ -370,11 +359,7 @@ QITI_API void operator delete(void* ptr) noexcept
     }
 }
 
-#ifdef _WIN32 // dllexport does not work on this operator on Windows
-void operator delete[](void* ptr) noexcept
-#else
 QITI_API void operator delete[](void* ptr) noexcept
-#endif
 {
     if (ptr != nullptr)
     {
@@ -385,11 +370,7 @@ QITI_API void operator delete[](void* ptr) noexcept
 }
 
 // Sized delete operators (C++14)
-#ifdef _WIN32 // dllexport does not work on this operator on Windows
-void operator delete(void* ptr, std::size_t /*size*/) noexcept
-#else
 QITI_API void operator delete(void* ptr, std::size_t /*size*/) noexcept
-#endif
 {
     if (ptr != nullptr)
     {
@@ -399,11 +380,7 @@ QITI_API void operator delete(void* ptr, std::size_t /*size*/) noexcept
     }
 }
 
-#ifdef _WIN32 // dllexport does not work on this operator on Windows
-void operator delete[](void* ptr, std::size_t /*size*/) noexcept
-#else
 QITI_API void operator delete[](void* ptr, std::size_t /*size*/) noexcept
-#endif
 {
     if (ptr != nullptr)
     {
@@ -412,7 +389,7 @@ QITI_API void operator delete[](void* ptr, std::size_t /*size*/) noexcept
         std::free(ptr);
     }
 }
-#endif // defined(__APPLE__) || ! defined(QITI_ENABLE_THREAD_SANITIZER)
+#endif // (defined(__APPLE__) || ! defined(QITI_ENABLE_THREAD_SANITIZER)) && ! defined(_WIN32)
 
 //--------------------------------------------------------------------------
 
