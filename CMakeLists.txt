@@ -166,6 +166,8 @@ PUBLIC
 if(WIN32)
     # Do not define "min" and "max" via windows.h
     target_compile_definitions(qiti_lib PRIVATE NOMINMAX)
+    # Link against Windows debugging libraries for symbol resolution
+    target_link_libraries(qiti_lib PRIVATE dbghelp)
 endif()
 
 # ThreadSanitizer-specific link options (only when enabled)
