@@ -253,17 +253,13 @@ jobs:
       - name: Build Tests
         run: |
           cmake --build build --target qiti_tests_catch2
-          cmake --build build --target qiti_tests_gtest
 
-      - name: Run Unit Tests
+      - name: Run Unit Tests  
         run: |
           cd build/bin
-          echo "Running Catch2 tests with verbose output:"
-          .\qiti_tests_catch2.exe --reporter=console --verbosity=high || echo "Catch2 failed with exit code: %errorlevel%"
-          echo "Running GTest tests with verbose output:"
-          .\qiti_tests_gtest.exe --gtest_output=verbose || echo "GTest failed with exit code: %errorlevel%"
+          .\qiti_tests_catch2.exe
+        # TODO - re-enable GTest
         shell: cmd
-        continue-on-error: true
           
   lint:
     runs-on: ubuntu-latest

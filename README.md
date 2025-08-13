@@ -147,7 +147,7 @@ Qiti is continuously tested across a comprehensive matrix of platforms, compiler
 | **Ubuntu** | Latest     | LLVM Clang 16            | Ninja        | ❌ Disabled     | Catch2 + GTest  |
 | **Debian** | Stable     | LLVM Clang 17            | Ninja        | ✅ Enabled      | Catch2 + GTest  |
 | **Fedora** | Latest     | LLVM Clang (latest)      | Ninja        | ✅ Enabled      | Catch2 + GTest  |
-| **Windows** | Latest     | LLVM Clang 16            | Ninja        | ❌ Disabled     | Catch2 + GTest  |
+| **Windows**| Latest     | LLVM Clang 16            | Ninja        | ❌ Disabled     | Catch2          |
 
 **Additional CI Validations:**
 - **Code Quality**: CPPLint validation with custom filters
