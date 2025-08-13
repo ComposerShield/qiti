@@ -255,17 +255,14 @@ jobs:
           cmake --build build --target qiti_tests_catch2
           cmake --build build --target qiti_tests_gtest
 
-      - name: Run Unit Tests Directly
+      - name: Run Unit Tests
         run: |
           cd build/bin
-          echo "Checking for additional dependencies:"
-          dumpbin /dependents qiti_tests_catch2.exe || echo "dumpbin not available"
-          echo "Running Catch2 tests with minimal flags:"
-          .\qiti_tests_catch2.exe --list-tests || echo "List tests failed with: %errorlevel%"
-          echo "Trying to run just one simple test:"
-          .\qiti_tests_catch2.exe --list-test-names-only || echo "List test names failed with: %errorlevel%"
+          echo "Running Catch2 tests:"
+          .\qiti_tests_catch2.exe
+          echo "Running GTest tests:"
+          .\qiti_tests_gtest.exe
         shell: cmd
-        continue-on-error: true
           
   lint:
     runs-on: ubuntu-latest
