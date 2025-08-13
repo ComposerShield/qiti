@@ -259,8 +259,13 @@ jobs:
         run: |
           cd build/bin
           dir
+          echo "Checking system PATH:"
+          echo %PATH%
+          echo "Checking for Visual C++ Redistributable:"
+          where vcruntime140.dll || echo "vcruntime140.dll not found in PATH"
+          where msvcp140.dll || echo "msvcp140.dll not found in PATH"
           echo "Trying to run test executable directly:"
-          .\qiti_tests_catch2.exe --help
+          .\qiti_tests_catch2.exe --help || echo "Exit code: %errorlevel%"
         shell: cmd
         continue-on-error: true
 
