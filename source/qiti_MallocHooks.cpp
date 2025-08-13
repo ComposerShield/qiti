@@ -70,6 +70,15 @@ static inline const std::array<const char*, 1> blackListedFunctions
 /** Demangle a C++ ABI symbol name, or return the original on error */
 QITI_API_INTERNAL static std::string demangle(const char* name) noexcept
 {
+#ifdef _WIN32
+    // Windows: Use UnDecorateSymbolName
+    char buffer[1024];
+    if (UnDecorateSymbolName(name, buffer, sizeof(buffer), UNDNAME_COMPLETE))
+    {
+        return std::string(buffer);
+    }
+    return std::string(name);
+#else
     int status = 0;
     std::unique_ptr<char,void(*)(void*)> demangled
     {
@@ -77,11 +86,46 @@ QITI_API_INTERNAL static std::string demangle(const char* name) noexcept
         std::free
     };
     return (status == 0 && demangled) ? demangled.get() : name;
+#endif
 }
 
 /** Capture the current call stack (skipping the first `skip` frames) */
 QITI_API_INTERNAL static std::vector<std::string> captureStackTrace(int framesToSkip = 1) noexcept
 {
+#ifdef _WIN32
+    constexpr int MAX_FRAMES = 128;
+    void* stack[MAX_FRAMES];
+    WORD frames = CaptureStackBackTrace(static_cast<DWORD>(framesToSkip), MAX_FRAMES - framesToSkip, stack, nullptr);
+    
+    std::vector<std::string> out;
+    out.reserve(frames);
+    
+    HANDLE process = GetCurrentProcess();
+    SymInitialize(process, nullptr, TRUE);
+    
+    char buffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(TCHAR)];
+    PSYMBOL_INFO symbol = (PSYMBOL_INFO)buffer;
+    symbol->MaxNameLen = MAX_SYM_NAME;
+    symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+    
+    for (int i = 0; i < frames; ++i)
+    {
+        DWORD64 address = (DWORD64)(stack[i]);
+        if (SymFromAddr(process, address, nullptr, symbol))
+        {
+            out.push_back(demangle(symbol->Name));
+        }
+        else
+        {
+            std::ostringstream oss;
+            oss << stack[i];
+            out.push_back(oss.str());
+        }
+    }
+    
+    SymCleanup(process);
+    return out;
+#else
     constexpr int MAX_FRAMES = 128;
     void* addrs[MAX_FRAMES];
     int frames = backtrace(addrs, MAX_FRAMES);
@@ -106,6 +150,7 @@ QITI_API_INTERNAL static std::vector<std::string> captureStackTrace(int framesTo
         }
     }
     return out;
+#endif
 }
 
 /** Check if the stack trace contains a frame whose demangled name contains the substring `funcName */
