@@ -140,6 +140,7 @@ QITI_API_INTERNAL static std::vector<std::string> captureStackTrace(int framesTo
     }
     return out;
 #else
+    (void)framesToSkip;
     // Windows: Disable stack tracing temporarily for debugging
     std::vector<std::string> out;
     out.push_back("<stack tracing disabled on Windows>");
