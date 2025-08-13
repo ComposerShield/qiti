@@ -38,16 +38,16 @@ namespace qiti
 TypeData::Impl*       TypeData::getImpl()       noexcept { return pImpl.get(); }
 const TypeData::Impl* TypeData::getImpl() const noexcept { return pImpl.get(); }
 
-TypeData::TypeData(const std::type_info& typeInfo, const char* typeName) noexcept
-    : pImpl(std::make_unique<Impl>(typeInfo, typeName))
-{
-    qiti::ScopedNoHeapAllocations noAlloc;
-}
+TypeData::TypeData(const std::type_info& typeInfo,
+                   const char* typeName,
+                   size_t typeSize) noexcept
+: pImpl(std::make_unique<Impl>(typeInfo, typeName, typeSize))
+{}
 
 TypeData::~TypeData() noexcept = default;
 
 TypeData::TypeData(TypeData&& other) noexcept
-    : pImpl(std::move(other.pImpl))
+: pImpl(std::move(other.pImpl))
 {
     qiti::ScopedNoHeapAllocations noAlloc;
 }
@@ -111,7 +111,14 @@ uint64_t TypeData::getPeakMemoryUsed() const noexcept
     return getImpl()->peakMemoryUsed;
 }
 
-void TypeData::recordConstruction(size_t instanceSize) noexcept
+size_t TypeData::getTypeSize() const noexcept
+{
+    qiti::ScopedNoHeapAllocations noAlloc;
+    // This will be set during getTypeDataInternal call with compile-time sizeof(T)
+    return getImpl()->typeSize;
+}
+
+void TypeData::recordConstruction() noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     auto* impl = getImpl();
@@ -120,15 +127,13 @@ void TypeData::recordConstruction(size_t instanceSize) noexcept
     impl->currentLiveInstances++;
     impl->peakLiveInstances = std::max(impl->peakLiveInstances, impl->currentLiveInstances);
     
-    if (instanceSize > 0)
-    {
-        impl->totalMemoryAllocated += instanceSize;
-        impl->currentMemoryUsed += instanceSize;
-        impl->peakMemoryUsed = std::max(impl->peakMemoryUsed, impl->currentMemoryUsed);
-    }
+    size_t instanceSize = impl->typeSize;
+    impl->totalMemoryAllocated += instanceSize;
+    impl->currentMemoryUsed += instanceSize;
+    impl->peakMemoryUsed = std::max(impl->peakMemoryUsed, impl->currentMemoryUsed);
 }
 
-void TypeData::recordDestruction(size_t instanceSize) noexcept
+void TypeData::recordDestruction() noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     auto* impl = getImpl();
@@ -139,7 +144,8 @@ void TypeData::recordDestruction(size_t instanceSize) noexcept
         impl->currentLiveInstances--;
     }
     
-    if (instanceSize > 0 && impl->currentMemoryUsed >= instanceSize)
+    size_t instanceSize = impl->typeSize;
+    if (impl->currentMemoryUsed >= instanceSize)
     {
         impl->currentMemoryUsed -= instanceSize;
     }
@@ -159,7 +165,9 @@ void TypeData::reset() noexcept
     impl->peakMemoryUsed = 0;
 }
 
-TypeData* TypeData::getTypeDataInternal(const std::type_info& typeInfo, const char* typeName) noexcept
+TypeData* TypeData::getTypeDataInternal(const std::type_info& typeInfo,
+                                        const char* typeName,
+                                        size_t typeSize) noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     
@@ -172,7 +180,7 @@ TypeData* TypeData::getTypeDataInternal(const std::type_info& typeInfo, const ch
     }
     
     // Create new TypeData instance
-    auto typeData = std::make_unique<TypeData>(typeInfo, typeName);
+    auto typeData = std::make_unique<TypeData>(typeInfo, typeName, typeSize);
     TypeData* result = typeData.get();
     g_typeDataRegistry[typeIndex] = std::move(typeData);
     

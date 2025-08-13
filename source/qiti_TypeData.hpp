@@ -63,11 +63,14 @@ public:
     /** Get the peak amount of memory used by instances of this type */
     [[nodiscard]] QITI_API uint64_t getPeakMemoryUsed() const noexcept;
     
-    /** Record a construction of this type with optional size tracking */
-    QITI_API void recordConstruction(size_t instanceSize = 0) noexcept;
+    /** Get the size of the tracked type (compile-time) */
+    [[nodiscard]] QITI_API size_t getTypeSize() const noexcept;
+    
+    /** Record a construction of this type */
+    QITI_API void recordConstruction() noexcept;
     
     /** Record a destruction of this type */
-    QITI_API void recordDestruction(size_t instanceSize = 0) noexcept;
+    QITI_API void recordDestruction() noexcept;
     
     /** Reset all tracking data for this type */
     QITI_API void reset() noexcept;
@@ -80,10 +83,10 @@ public:
      auto* typeData = TypeData::getTypeData<MyClass>();
      */
     template<typename T>
-    [[nodiscard]] QITI_API_INLINE static TypeData* getTypeData() noexcept
+    [[nodiscard]] QITI_API_INLINE static const TypeData* getTypeData() noexcept
     {
         static constexpr auto typeName = qiti::Profile::getTypeName<T>();
-        return getTypeDataInternal(typeid(T), typeName);
+        return getTypeDataInternal(typeid(T), typeName, sizeof(T));
     }
     
     /**
@@ -103,7 +106,9 @@ public:
     //--------------------------------------------------------------------------
     
     /** Internal constructor - use getTypeData<T>() instead */
-    QITI_API_INTERNAL TypeData(const std::type_info& typeInfo, const char* typeName) noexcept;
+    QITI_API_INTERNAL TypeData(const std::type_info& typeInfo,
+                               const char* typeName,
+                               size_t typeSize) noexcept;
     
     /** Destructor */
     QITI_API_INTERNAL ~TypeData() noexcept;
@@ -123,7 +128,9 @@ private:
     std::unique_ptr<Impl> pImpl;
     
     /** Internal implementation for template getTypeData */
-    QITI_API static TypeData* getTypeDataInternal(const std::type_info& typeInfo, const char* typeName) noexcept;
+    QITI_API static TypeData* getTypeDataInternal(const std::type_info& typeInfo,
+                                                  const char* typeName,
+                                                  size_t typeSize) noexcept;
     
     /** Copy Constructor (deleted) */
     TypeData(const TypeData&) = delete;

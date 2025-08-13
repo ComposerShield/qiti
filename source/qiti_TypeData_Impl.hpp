@@ -31,12 +31,16 @@ namespace qiti
 struct TypeData::Impl
 {
 public:
-    QITI_API_INTERNAL Impl(const std::type_info& info, const char* name) 
-        : typeInfo(info), typeName(name) {}
+    QITI_API_INTERNAL Impl(const std::type_info& info, const char* name, size_t size)
+    : typeInfo(info)
+    , typeName(name)
+    , typeSize(size)
+    {}
     QITI_API_INTERNAL ~Impl() = default;
     
-    std::type_index typeInfo;
-    const char* typeName = nullptr;
+    const std::type_index typeInfo;
+    const char* const typeName;
+    const size_t typeSize;
     
     // Instance tracking
     uint64_t numConstructions = 0;
