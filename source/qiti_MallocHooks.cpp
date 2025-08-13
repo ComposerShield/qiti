@@ -93,6 +93,7 @@ QITI_API_INTERNAL static std::string demangle(const char* name) noexcept
 QITI_API_INTERNAL static std::vector<std::string> captureStackTrace(int framesToSkip = 1) noexcept
 {
 #ifdef _WIN32
+#if 0 // Temporarily disabled for debugging Windows initialization issues
     constexpr int MAX_FRAMES = 128;
     void* stack[MAX_FRAMES];
     WORD frames = CaptureStackBackTrace(static_cast<DWORD>(framesToSkip), MAX_FRAMES - framesToSkip, stack, nullptr);
@@ -138,6 +139,12 @@ QITI_API_INTERNAL static std::vector<std::string> captureStackTrace(int framesTo
         }
     }
     return out;
+#else
+    // Windows: Disable stack tracing temporarily for debugging
+    std::vector<std::string> out;
+    out.push_back("<stack tracing disabled on Windows>");
+    return out;
+#endif
 #else
     constexpr int MAX_FRAMES = 128;
     void* addrs[MAX_FRAMES];
