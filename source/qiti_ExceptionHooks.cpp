@@ -42,6 +42,29 @@ extern "C"
 // Initialize function pointers to original exception functions
 QITI_API_INTERNAL static void initializeExceptionHooks() noexcept
 {
+#ifdef _WIN32
+    // Windows: Get exception functions from the C++ runtime
+    HMODULE msvcrt = GetModuleHandleA("msvcr120.dll"); // Or try other versions
+    if (!msvcrt) msvcrt = GetModuleHandleA("msvcr110.dll");
+    if (!msvcrt) msvcrt = GetModuleHandleA("msvcr100.dll");
+    if (!msvcrt) msvcrt = GetModuleHandleA("ucrtbase.dll");
+    
+    if (msvcrt && !original_cxa_throw)
+    {
+        original_cxa_throw = reinterpret_cast<void(*)(void*, std::type_info*, void(*)(void*))>(
+            GetProcAddress(msvcrt, "__cxa_throw"));
+    }
+    if (msvcrt && !original_cxa_begin_catch)
+    {
+        original_cxa_begin_catch = reinterpret_cast<void*(*)(void*)>(
+            GetProcAddress(msvcrt, "__cxa_begin_catch"));
+    }
+    if (msvcrt && !original_cxa_end_catch)
+    {
+        original_cxa_end_catch = reinterpret_cast<void(*)()>(
+            GetProcAddress(msvcrt, "__cxa_end_catch"));
+    }
+#else
     if (! original_cxa_throw)
     {
         original_cxa_throw = reinterpret_cast<void(*)(void*, std::type_info*, void(*)(void*))>(
@@ -57,6 +80,7 @@ QITI_API_INTERNAL static void initializeExceptionHooks() noexcept
         original_cxa_end_catch = reinterpret_cast<void(*)()>(
             dlsym(RTLD_NEXT, "__cxa_end_catch"));
     }
+#endif
 }
 
 //--------------------------------------------------------------------------
