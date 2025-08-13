@@ -173,6 +173,10 @@ if(WIN32)
     target_compile_definitions(qiti_lib PRIVATE NOMINMAX)
     # Link against Windows debugging libraries for symbol resolution
     target_link_libraries(qiti_lib PRIVATE dbghelp)
+    # Put DLL in same directory as test executables
+    set_target_properties(qiti_lib PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+    )
 endif()
 
 # ThreadSanitizer-specific link options (only when enabled)
@@ -271,13 +275,10 @@ if(PROJECT_IS_TOP_LEVEL)
             ${CMAKE_CURRENT_SOURCE_DIR}/example/source
         )
         
-        # On Windows, copy qiti_lib.dll to the test executable directory
+        # On Windows, ensure DLLs and executables are in the same directory
         if(WIN32)
-            add_custom_command(TARGET ${target_name} POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                $<TARGET_FILE:qiti_lib>
-                $<TARGET_FILE_DIR:${target_name}>
-                COMMENT "Copying qiti_lib.dll to test executable directory"
+            set_target_properties(${target_name} PROPERTIES
+                RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
             )
         endif()
     endfunction()
