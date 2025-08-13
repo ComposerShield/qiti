@@ -34,20 +34,21 @@ namespace qiti
 class MallocHooks
 {
 public:
-    QITI_API_VAR static thread_local bool bypassMallocHooks;
-    QITI_API_VAR static thread_local uint32_t numHeapAllocationsOnCurrentThread;
-    QITI_API_VAR static thread_local uint64_t totalAmountHeapAllocatedOnCurrentThread;
-    QITI_API_VAR static thread_local uint64_t currentAmountHeapAllocatedOnCurrentThread;
-    QITI_API_VAR static thread_local std::function<void()> onNextHeapAllocation;
+    // Accessor functions for thread_local variables
+    QITI_API static bool& getBypassMallocHooks() noexcept;
+    QITI_API static uint32_t& getNumHeapAllocationsOnCurrentThread() noexcept;
+    QITI_API static uint64_t& getTotalAmountHeapAllocatedOnCurrentThread() noexcept;
+    QITI_API static uint64_t& getCurrentAmountHeapAllocatedOnCurrentThread() noexcept;
+    QITI_API static std::function<void()>& getOnNextHeapAllocation() noexcept;
     
     struct ScopedBypassMallocHooks final
     {
         /** Temporarily disable malloc hooks for the current thread for however long this object is in scope. */
         inline QITI_API_INTERNAL ScopedBypassMallocHooks() noexcept
-        : previous(bypassMallocHooks) { bypassMallocHooks = true; }
+        : previous(getBypassMallocHooks()) { getBypassMallocHooks() = true; }
         
         /** On destruction, resets bypassMallocHooks to the value saved at construction. */
-        inline QITI_API_INTERNAL ~ScopedBypassMallocHooks() noexcept { bypassMallocHooks = previous; }
+        inline QITI_API_INTERNAL ~ScopedBypassMallocHooks() noexcept { getBypassMallocHooks() = previous; }
     private:
         const bool previous;
     };

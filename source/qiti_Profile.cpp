@@ -114,8 +114,8 @@ void Profile::resetProfiling() noexcept
 {        
     g_functionsToProfile.clear();
     g_profileAllFunctions = false;
-    MallocHooks::numHeapAllocationsOnCurrentThread  = 0u;
-    MallocHooks::totalAmountHeapAllocatedOnCurrentThread = 0ull;
+    qiti::MallocHooks::getNumHeapAllocationsOnCurrentThread() = 0u;
+    qiti::MallocHooks::getTotalAmountHeapAllocatedOnCurrentThread() = 0ull;
 }
 
 void Profile::beginProfilingFunction(const void* functionAddress, const char* functionName) noexcept
@@ -198,12 +198,12 @@ void Profile::endProfilingType(std::type_index /*functionAddress*/) noexcept
 
 uint64_t Profile::getNumHeapAllocationsOnCurrentThread() noexcept
 {
-    return MallocHooks::numHeapAllocationsOnCurrentThread;
+    return qiti::MallocHooks::getNumHeapAllocationsOnCurrentThread();
 }
 
 uint64_t Profile::getAmountHeapAllocatedOnCurrentThread() noexcept
 {
-    return MallocHooks::totalAmountHeapAllocatedOnCurrentThread;
+    return qiti::MallocHooks::getTotalAmountHeapAllocatedOnCurrentThread();
 }
 
 void Profile::updateFunctionDataOnEnter(const void* this_fn) noexcept
@@ -237,8 +237,8 @@ void Profile::updateFunctionDataOnEnter(const void* this_fn) noexcept
     auto* lastCallImpl = impl->lastCallData.getImpl();
     lastCallImpl->caller = caller;
     lastCallImpl->callingThread = std::this_thread::get_id();
-    lastCallImpl->numHeapAllocationsBeforeFunctionCall = MallocHooks::numHeapAllocationsOnCurrentThread;
-    lastCallImpl->amountHeapAllocatedBeforeFunctionCall = MallocHooks::totalAmountHeapAllocatedOnCurrentThread;
+    lastCallImpl->numHeapAllocationsBeforeFunctionCall = qiti::MallocHooks::getNumHeapAllocationsOnCurrentThread();
+    lastCallImpl->amountHeapAllocatedBeforeFunctionCall = qiti::MallocHooks::getTotalAmountHeapAllocatedOnCurrentThread();
     
     // Grab starting times last without doing additional work after
     lastCallImpl->startTimeWallClock = std::chrono::steady_clock::now();
@@ -277,8 +277,8 @@ void Profile::updateFunctionDataOnExit(const void* this_fn) noexcept
     callImpl->endTimeCpu = cpuEndTime;
     callImpl->timeSpentInFunctionNanosecondsWallClock = static_cast<uint64_t>(clockElapsed_ns.count());
     callImpl->timeSpentInFunctionNanosecondsCpu = cpuElapsed_ns;
-    callImpl->numHeapAllocationsAfterFunctionCall = MallocHooks::numHeapAllocationsOnCurrentThread;
-    callImpl->amountHeapAllocatedAfterFunctionCall = MallocHooks::totalAmountHeapAllocatedOnCurrentThread;
+    callImpl->numHeapAllocationsAfterFunctionCall = qiti::MallocHooks::getNumHeapAllocationsOnCurrentThread();
+    callImpl->amountHeapAllocatedAfterFunctionCall = qiti::MallocHooks::getTotalAmountHeapAllocatedOnCurrentThread();
     
     // Update listeners
     for (auto* listener : impl->listeners)

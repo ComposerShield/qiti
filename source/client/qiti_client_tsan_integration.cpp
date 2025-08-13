@@ -107,7 +107,7 @@ void* operator new(std::size_t size)
     if (ptr == nullptr)
         throw std::bad_alloc{};
     
-    if (! qiti::MallocHooks::bypassMallocHooks)
+    if (! qiti::MallocHooks::getBypassMallocHooks())
         qiti::MallocHooks::mallocHookWithTracking(ptr, size);
     
     return ptr;
@@ -119,7 +119,7 @@ void* operator new[](std::size_t size)
     if (ptr == nullptr)
         throw std::bad_alloc{};
     
-    if (! qiti::MallocHooks::bypassMallocHooks)
+    if (! qiti::MallocHooks::getBypassMallocHooks())
         qiti::MallocHooks::mallocHookWithTracking(ptr, size);
     
     return ptr;
@@ -129,7 +129,7 @@ void operator delete(void* ptr) noexcept
 {
     if (ptr != nullptr)
     {
-        if (! qiti::MallocHooks::bypassMallocHooks)
+        if (! qiti::MallocHooks::getBypassMallocHooks())
             qiti::MallocHooks::freeHookWithTracking(ptr);
         std::free(ptr);
     }
@@ -139,7 +139,7 @@ void operator delete[](void* ptr) noexcept
 {
     if (ptr != nullptr)
     {
-        if (! qiti::MallocHooks::bypassMallocHooks)
+        if (! qiti::MallocHooks::getBypassMallocHooks())
             qiti::MallocHooks::freeHookWithTracking(ptr);
         std::free(ptr);
     }
@@ -150,7 +150,7 @@ void operator delete(void* ptr, std::size_t /*size*/) noexcept
 {
     if (ptr != nullptr)
     {
-        if (! qiti::MallocHooks::bypassMallocHooks)
+        if (! qiti::MallocHooks::getBypassMallocHooks())
             qiti::MallocHooks::freeHookWithTracking(ptr);
         std::free(ptr);
     }
@@ -160,7 +160,7 @@ void operator delete[](void* ptr, std::size_t /*size*/) noexcept
 {
     if (ptr != nullptr)
     {
-        if (! qiti::MallocHooks::bypassMallocHooks)
+        if (! qiti::MallocHooks::getBypassMallocHooks())
             qiti::MallocHooks::freeHookWithTracking(ptr);
         std::free(ptr);
     }

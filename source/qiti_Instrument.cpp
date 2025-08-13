@@ -31,14 +31,14 @@ void Instrument::resetInstrumentation() noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     
-    MallocHooks::onNextHeapAllocation = nullptr;
+    MallocHooks::getOnNextHeapAllocation() = nullptr;
 }
 
 void Instrument::onNextHeapAllocation(void (*heapAllocCallback)()) noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     
-    MallocHooks::onNextHeapAllocation = heapAllocCallback;
+    MallocHooks::getOnNextHeapAllocation() = heapAllocCallback;
 }
 
 void Instrument::assertOnNextHeapAllocation() noexcept
