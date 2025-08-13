@@ -219,6 +219,7 @@ if(PROJECT_IS_TOP_LEVEL)
         set(TEST_SOURCES
             "tests/qiti_test_macros.hpp"
             "tests/test_qiti_Utils.cpp"
+            "tests/test_qiti_Instrument.cpp"
         )
     else()
         # Other platforms: Full test set
