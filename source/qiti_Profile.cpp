@@ -59,7 +59,7 @@ QITI_API_INTERNAL static void clock_gettime_windows(timespec& time) noexcept
         
         uint64_t totalTime100ns = userTimeLI.QuadPart + kernelTimeLI.QuadPart;
         time.tv_sec = static_cast<time_t>(totalTime100ns / 10000000ULL);
-        time.tv_nsec = static_cast<long>((totalTime100ns % 10000000ULL) * 100ULL);
+        time.tv_nsec = static_cast<long>((totalTime100ns % 10000000ULL) * 100ULL); // NOLINT
     }
     else
     {
