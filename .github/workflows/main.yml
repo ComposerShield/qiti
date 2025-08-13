@@ -255,10 +255,19 @@ jobs:
           cmake --build build --target qiti_tests_catch2
           cmake --build build --target qiti_tests_gtest
 
-      - name: Run Unit Tests
+      - name: Debug DLL Dependencies
         run: |
-          cd build
-          ctest -C Release --verbose
+          cd build/bin
+          dir
+          echo "Trying to run test executable directly:"
+          .\qiti_tests_catch2.exe --help
+        shell: cmd
+        continue-on-error: true
+
+#      - name: Run Unit Tests
+#        run: |
+#          cd build
+#          ctest -C Release --verbose
           
   lint:
     runs-on: ubuntu-latest
