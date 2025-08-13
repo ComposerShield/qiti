@@ -43,7 +43,10 @@ extern "C"
 __attribute__((visibility("default")))
 __attribute__((no_sanitize("thread")))
 __attribute__((noinline))
-QITI_API const char* __tsan_default_options()
+#if ! defined(_WIN32)
+QITI_API
+#endif
+const char* __tsan_default_options()
 {
     return TSAN_DEFAULT_OPTS;
 }

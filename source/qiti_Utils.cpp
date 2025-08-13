@@ -127,7 +127,7 @@ void* Utils::getAddressForMangledFunctionName(const char* mangledName) noexcept
 #ifdef _WIN32
     // Windows: Use GetProcAddress with current module
     HMODULE hModule = GetModuleHandleA(nullptr); // Current executable
-    return GetProcAddress(hModule, mangledName);
+    return reinterpret_cast<void*>(GetProcAddress(hModule, mangledName));
 #else
     void* addr = dlsym(RTLD_DEFAULT, mangledName);
     return addr;

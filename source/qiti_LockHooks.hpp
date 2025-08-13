@@ -84,10 +84,17 @@ public:
         DummyMutex mutex;
     };
     
+#ifdef _WIN32
+    /** */
+    QITI_API static void lockAcquireHook(const CRITICAL_SECTION* mutex) noexcept;
+    /** */
+    QITI_API static void lockReleaseHook(const CRITICAL_SECTION* mutex) noexcept;
+#else
     /** */
     QITI_API static void lockAcquireHook(const pthread_mutex_t* size) noexcept;
     /** */
     QITI_API static void lockReleaseHook(const pthread_mutex_t* size) noexcept;
+#endif
 
 private:
     LockHooks() = delete;
