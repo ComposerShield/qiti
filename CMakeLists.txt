@@ -270,6 +270,16 @@ if(PROJECT_IS_TOP_LEVEL)
             ${CMAKE_CURRENT_SOURCE_DIR}/source
             ${CMAKE_CURRENT_SOURCE_DIR}/example/source
         )
+        
+        # On Windows, copy qiti_lib.dll to the test executable directory
+        if(WIN32)
+            add_custom_command(TARGET ${target_name} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                $<TARGET_FILE:qiti_lib>
+                $<TARGET_FILE_DIR:${target_name}>
+                COMMENT "Copying qiti_lib.dll to test executable directory"
+            )
+        endif()
     endfunction()
 
     # Catch2 Test Target
