@@ -218,6 +218,8 @@ if(PROJECT_IS_TOP_LEVEL)
         # Windows: Start with minimal test set for debugging
         set(TEST_SOURCES
             "tests/qiti_test_macros.hpp"
+            "tests/test_qiti_Instrument.cpp"
+            "tests/test_qiti_Profile.cpp"
             "tests/test_qiti_Utils.cpp"
         )
     else()
