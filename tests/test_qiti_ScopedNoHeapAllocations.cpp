@@ -12,6 +12,8 @@
 
 //--------------------------------------------------------------------------
 
+#if ! defined(_WIN32)
+
 // "Death Tests"
 
 #include <sys/types.h>  // required for wait.h
@@ -97,3 +99,5 @@ QITI_TEST_CASE("ScopedNoHeapAllocations survives no heap alloc", ScopedNoHeapAll
         [[maybe_unused]] volatile auto dummy = 42; // stack alloc, not heap (safe)
     );
 }
+
+#endif // ! defined(_WIN32)
