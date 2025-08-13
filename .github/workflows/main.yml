@@ -246,7 +246,7 @@ jobs:
         run: |
           cmake . -B build `
             -G Ninja `
-            -DCMAKE_BUILD_TYPE=Debug `
+            -DCMAKE_BUILD_TYPE=Release `
             -DCMAKE_C_COMPILER=clang `
             -DCMAKE_CXX_COMPILER=clang++
 
@@ -254,7 +254,8 @@ jobs:
         run: |
           cmake --build build --target qiti_tests_catch2
 
-      - name: Run Unit Tests with Debugger
+      - name: Run Unit Tests with Debugger (disabled - for future debugging)
+        if: false  # Disabled - enable if debugging Windows crashes is needed
         run: |
           cd build/bin
           Write-Host "About to run Catch2 tests with debugger..."
@@ -314,6 +315,12 @@ jobs:
               Where-Object {$_.Message -like "*qiti_tests_catch2*"} | 
               Select-Object TimeCreated, Message | Format-List
           }
+        shell: powershell
+
+      - name: Run Unit Tests
+        run: |
+          cd build/bin
+          .\qiti_tests_catch2.exe --reporter=console --verbosity=high
         shell: powershell
           
   lint:
