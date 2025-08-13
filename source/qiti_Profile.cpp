@@ -84,6 +84,7 @@ thread_local std::stack<qiti::FunctionData*> g_callStack;
 
 static thread_local bool g_profilingEnabled = true;
 
+#ifndef _WIN32
 struct Init_g_functionsToProfile
 {
     Init_g_functionsToProfile()
@@ -92,6 +93,7 @@ struct Init_g_functionsToProfile
     }
 };
 static const Init_g_functionsToProfile init_g_functionsToProfile;
+#endif
 
 //--------------------------------------------------------------------------
 
