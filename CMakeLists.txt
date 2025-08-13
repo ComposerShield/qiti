@@ -77,7 +77,12 @@ add_library(qiti_tests_client OBJECT "source/client/qiti_client_tsan_integration
 
 if(PROJECT_IS_TOP_LEVEL)
     # Internal example app used for testing
-    add_library(qiti_example_target SHARED ${EXAMPLE_SOURCES})
+    if(WIN32)
+        # Static library on Windows to avoid DLL export issues
+        add_library(qiti_example_target STATIC ${EXAMPLE_SOURCES})
+    else()
+        add_library(qiti_example_target SHARED ${EXAMPLE_SOURCES})
+    endif()
 
     target_link_libraries(qiti_example_target
     PRIVATE
