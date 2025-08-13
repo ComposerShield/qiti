@@ -20,11 +20,11 @@
 #include "qiti_LockData.hpp"
 #include "qiti_MallocHooks.hpp"
 
-#include <cxxabi.h>
 #ifdef _WIN32
 #include <windows.h>
 #include <dbghelp.h>
 #else
+#include <cxxabi.h>
 #include <dlfcn.h>
 #endif
 

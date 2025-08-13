@@ -44,6 +44,34 @@
 #include <utility>
 #include <string>
 
+#ifdef _WIN32
+QITI_API_INTERNAL static void clock_gettime_windows(timespec& time) noexcept
+{
+    // Windows: Use GetThreadTimes for CPU time
+    FILETIME creationTime, exitTime, kernelTime, userTime;
+    if (GetThreadTimes(GetCurrentThread(), &creationTime, &exitTime, &kernelTime, &userTime))
+    {
+        ULARGE_INTEGER userTimeLI, kernelTimeLI;
+        userTimeLI.LowPart = userTime.dwLowDateTime;
+        userTimeLI.HighPart = userTime.dwHighDateTime;
+        kernelTimeLI.LowPart = kernelTime.dwLowDateTime;
+        kernelTimeLI.HighPart = kernelTime.dwHighDateTime;
+        
+        uint64_t totalTime100ns = userTimeLI.QuadPart + kernelTimeLI.QuadPart;
+        time.tv_sec = static_cast<time_t>(totalTime100ns / 10000000ULL);
+        time.tv_nsec = static_cast<long>((totalTime100ns % 10000000ULL) * 100ULL);
+    }
+    else
+    {
+        // fallback: zero out the timespec
+        time.tv_sec = 0;
+        time.tv_nsec = 0;
+        
+        assert(false); // failed to get CPU time
+    }
+}
+#endif
+
 namespace qiti
 {
 //--------------------------------------------------------------------------
@@ -130,6 +158,16 @@ bool Profile::isProfilingFunction(const void* funcAddress) noexcept
     Dl_info info;
     if (dladdr(funcAddress, &info) && info.dli_sname)
     {
+#ifdef _WIN32
+        // Windows: Use UnDecorateSymbolName for demangling
+        char buffer[1024];
+        if (UnDecorateSymbolName(info.dli_sname, buffer, sizeof(buffer), UNDNAME_COMPLETE))
+        {
+            bool shouldSkip = strstr(buffer, "<qiti::") != nullptr;
+            if (shouldSkip)
+                return false;
+        }
+#else
         int status = 0;
         char* demangled = abi::__cxa_demangle(info.dli_sname, nullptr, nullptr, &status);
         
@@ -140,6 +178,7 @@ bool Profile::isProfilingFunction(const void* funcAddress) noexcept
             if (shouldSkip)
                 return false;
         }
+#endif
     }
     
     return true;
@@ -201,7 +240,11 @@ void Profile::updateFunctionDataOnEnter(const void* this_fn) noexcept
     
     // Grab starting times last without doing additional work after
     lastCallImpl->startTimeWallClock = std::chrono::steady_clock::now();
+#ifdef _WIN32
+    clock_gettime_windows(lastCallImpl->startTimeCpu);
+#else
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &lastCallImpl->startTimeCpu); // last to be most precise
+#endif
 }
 
 void Profile::updateFunctionDataOnExit(const void* this_fn) noexcept
@@ -214,7 +257,11 @@ void Profile::updateFunctionDataOnExit(const void* this_fn) noexcept
     timespec cpuEndTime;
     
     // Get end times immediately before doing any other work
+#ifdef _WIN32
+    clock_gettime_windows(cpuEndTime);
+#else
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &cpuEndTime); // first to be most precise
+#endif
     const auto clockEndTime = std::chrono::steady_clock::now();
     
     // Get elapsed times

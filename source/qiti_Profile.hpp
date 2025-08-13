@@ -35,7 +35,7 @@ namespace FunctionNameHelpers
 {
     // A constexpr helper that slices out “FuncPtr = …” from __PRETTY_FUNCTION__.
     template <auto FuncPtr>
-    consteval auto QITI_API_INTERNAL makeFunctionNameArray() noexcept
+    QITI_API_INTERNAL consteval auto makeFunctionNameArray() noexcept
     {
         constexpr const char* fullFuncName = __PRETTY_FUNCTION__;
         constexpr std::string_view pretty = fullFuncName;
