@@ -23,15 +23,8 @@
 
 namespace qiti
 {
-LeakSanitizer::LeakSanitizer() noexcept
-{
-    
-}
-
-LeakSanitizer::~LeakSanitizer() noexcept
-{
-    
-}
+LeakSanitizer::LeakSanitizer() noexcept = default;
+LeakSanitizer::~LeakSanitizer() noexcept = default;
 
 void LeakSanitizer::run(std::function<void()> func) noexcept
 {
@@ -47,12 +40,12 @@ void LeakSanitizer::run(std::function<void()> func) noexcept
     
     {
         qiti::Profile::ScopedDisableProfiling disableProfiling;
-        
+
         // Cache function for rerun()
         _cachedFunction = func;
         
-        amountHeapAllocatedBefore = qiti::MallocHooks::currentAmountHeapAllocatedOnCurrentThread;
-        totalAllocatedBefore = qiti::MallocHooks::totalAmountHeapAllocatedOnCurrentThread;
+        amountHeapAllocatedBefore = qiti::MallocHooks::getCurrentAmountHeapAllocatedOnCurrentThread();
+        totalAllocatedBefore = qiti::MallocHooks::getTotalAmountHeapAllocatedOnCurrentThread();
     } // ScopedDisableProfiling goes out of scope, re-enable profiling during user function execution
     
     if (func != nullptr)
@@ -64,8 +57,8 @@ void LeakSanitizer::run(std::function<void()> func) noexcept
         qiti::Profile::ScopedDisableProfiling disableProfiling;
         
         // Any new heap allocations should be freed by the end of the function so this value should match.
-        amountHeapAllocatedAfter = qiti::MallocHooks::currentAmountHeapAllocatedOnCurrentThread;
-        totalAllocatedAfter = qiti::MallocHooks::totalAmountHeapAllocatedOnCurrentThread;
+        amountHeapAllocatedAfter = qiti::MallocHooks::getCurrentAmountHeapAllocatedOnCurrentThread();
+        totalAllocatedAfter = qiti::MallocHooks::getTotalAmountHeapAllocatedOnCurrentThread();
         
         // Calculate allocations that happened during this run
         _totalAllocated = (totalAllocatedAfter - totalAllocatedBefore);

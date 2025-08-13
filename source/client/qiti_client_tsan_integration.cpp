@@ -96,3 +96,76 @@ extern "C" QITI_API void __sanitizer_free_hook(void* ptr)
 #endif // QITI_ENABLE_THREAD_SANITIZER
 
 //--------------------------------------------------------------------------
+
+#ifdef _WIN32
+// Windows operator new/delete overrides - must be in executable, not DLL
+// to properly override standard library operators
+
+void* operator new(std::size_t size)
+{
+    void* ptr = std::malloc(size);
+    if (ptr == nullptr)
+        throw std::bad_alloc{};
+    
+    if (! qiti::MallocHooks::getBypassMallocHooks())
+        qiti::MallocHooks::mallocHookWithTracking(ptr, size);
+    
+    return ptr;
+}
+
+void* operator new[](std::size_t size)
+{
+    void* ptr = std::malloc(size);
+    if (ptr == nullptr)
+        throw std::bad_alloc{};
+    
+    if (! qiti::MallocHooks::getBypassMallocHooks())
+        qiti::MallocHooks::mallocHookWithTracking(ptr, size);
+    
+    return ptr;
+}
+
+void operator delete(void* ptr) noexcept
+{
+    if (ptr != nullptr)
+    {
+        if (! qiti::MallocHooks::getBypassMallocHooks())
+            qiti::MallocHooks::freeHookWithTracking(ptr);
+        std::free(ptr);
+    }
+}
+
+void operator delete[](void* ptr) noexcept
+{
+    if (ptr != nullptr)
+    {
+        if (! qiti::MallocHooks::getBypassMallocHooks())
+            qiti::MallocHooks::freeHookWithTracking(ptr);
+        std::free(ptr);
+    }
+}
+
+// Sized delete operators (C++14)
+void operator delete(void* ptr, std::size_t /*size*/) noexcept
+{
+    if (ptr != nullptr)
+    {
+        if (! qiti::MallocHooks::getBypassMallocHooks())
+            qiti::MallocHooks::freeHookWithTracking(ptr);
+        std::free(ptr);
+    }
+}
+
+void operator delete[](void* ptr, std::size_t /*size*/) noexcept
+{
+    if (ptr != nullptr)
+    {
+        if (! qiti::MallocHooks::getBypassMallocHooks())
+            qiti::MallocHooks::freeHookWithTracking(ptr);
+        std::free(ptr);
+    }
+}
+
+#endif // _WIN32
+
+//--------------------------------------------------------------------------
