@@ -34,11 +34,11 @@ namespace qiti
 class MallocHooks
 {
 public:
-    static thread_local bool bypassMallocHooks;
-    static thread_local uint32_t numHeapAllocationsOnCurrentThread;
-    static thread_local uint64_t totalAmountHeapAllocatedOnCurrentThread;
-    static thread_local uint64_t currentAmountHeapAllocatedOnCurrentThread;
-    static thread_local std::function<void()> onNextHeapAllocation;
+    QITI_API_VAR static thread_local bool bypassMallocHooks;
+    QITI_API_VAR static thread_local uint32_t numHeapAllocationsOnCurrentThread;
+    QITI_API_VAR static thread_local uint64_t totalAmountHeapAllocatedOnCurrentThread;
+    QITI_API_VAR static thread_local uint64_t currentAmountHeapAllocatedOnCurrentThread;
+    QITI_API_VAR static thread_local std::function<void()> onNextHeapAllocation;
     
     struct ScopedBypassMallocHooks final
     {
