@@ -77,7 +77,12 @@ add_library(qiti_tests_client OBJECT "source/client/qiti_client_tsan_integration
 
 if(PROJECT_IS_TOP_LEVEL)
     # Internal example app used for testing
-    add_library(qiti_example_target SHARED ${EXAMPLE_SOURCES})
+    if(WIN32)
+        # Static library on Windows to avoid DLL export issues
+        add_library(qiti_example_target STATIC ${EXAMPLE_SOURCES})
+    else()
+        add_library(qiti_example_target SHARED ${EXAMPLE_SOURCES})
+    endif()
 
     target_link_libraries(qiti_example_target
     PRIVATE
@@ -166,6 +171,12 @@ PUBLIC
 if(WIN32)
     # Do not define "min" and "max" via windows.h
     target_compile_definitions(qiti_lib PRIVATE NOMINMAX)
+    # Link against Windows debugging libraries for symbol resolution
+    target_link_libraries(qiti_lib PRIVATE dbghelp)
+    # Put DLL in same directory as test executables
+    set_target_properties(qiti_lib PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+    )
 endif()
 
 # ThreadSanitizer-specific link options (only when enabled)
@@ -194,24 +205,39 @@ if(PROJECT_IS_TOP_LEVEL)
         GIT_REPOSITORY https://github.com/google/googletest.git
         GIT_TAG        v1.14.0
     )
+    
+    # Force GTest to use shared runtime on Windows to match our project
+    if(WIN32)
+        set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    endif()
+    
     FetchContent_MakeAvailable(googletest)
 
     # Test sources list
-    set(TEST_SOURCES
-        "tests/qiti_test_macros.hpp"
-        "tests/test_qiti_FunctionCallData.cpp"
-        "tests/test_qiti_FunctionData.cpp"
-        "tests/test_qiti_HotspotDetector.cpp"
-        "tests/test_qiti_Instrument.cpp"
-        "tests/test_qiti_Profile.cpp"
-        "tests/test_qiti_LeakSanitizer.cpp"
-        "tests/test_qiti_LockData.cpp"
-        "tests/test_qiti_ScopedNoHeapAllocations.cpp"
-        "tests/test_qiti_ScopedQitiTest.cpp"
-        "tests/test_qiti_ThreadSanitizer.cpp"
-        "tests/test_qiti_TypeData.cpp"
-        "tests/test_qiti_Utils.cpp"
-    )
+    if(WIN32)
+        # Windows: Start with minimal test set for debugging
+        set(TEST_SOURCES
+            "tests/qiti_test_macros.hpp"
+            "tests/test_qiti_Utils.cpp"
+        )
+    else()
+        # Other platforms: Full test set
+        set(TEST_SOURCES
+            "tests/qiti_test_macros.hpp"
+            "tests/test_qiti_FunctionCallData.cpp"
+            "tests/test_qiti_FunctionData.cpp"
+            "tests/test_qiti_HotspotDetector.cpp"
+            "tests/test_qiti_Instrument.cpp"
+            "tests/test_qiti_Profile.cpp"
+            "tests/test_qiti_LeakSanitizer.cpp"
+            "tests/test_qiti_LockData.cpp"
+            "tests/test_qiti_ScopedNoHeapAllocations.cpp"
+            "tests/test_qiti_ScopedQitiTest.cpp"
+            "tests/test_qiti_ThreadSanitizer.cpp"
+            "tests/test_qiti_TypeData.cpp"
+            "tests/test_qiti_Utils.cpp"
+        )
+    endif()
 
     # Function to configure common test settings
     function(configure_test_target target_name framework_libraries framework_definitions)
@@ -257,6 +283,13 @@ if(PROJECT_IS_TOP_LEVEL)
             ${CMAKE_CURRENT_SOURCE_DIR}/source
             ${CMAKE_CURRENT_SOURCE_DIR}/example/source
         )
+        
+        # On Windows, ensure DLLs and executables are in the same directory
+        if(WIN32)
+            set_target_properties(${target_name} PROPERTIES
+                RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+            )
+        endif()
     endfunction()
 
     # Catch2 Test Target

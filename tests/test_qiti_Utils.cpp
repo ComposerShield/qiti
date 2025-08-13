@@ -12,6 +12,7 @@
 #include <iostream>
 #include <string>
 
+
 //--------------------------------------------------------------------------
 
 using namespace qiti::example::utils;

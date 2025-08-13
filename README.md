@@ -10,13 +10,16 @@ Qiti also provides optional Thread Sanitizer wrapper functionality: when enabled
 
 ## Requirements
 
+- Clang or Apple Clang (no other compiler is supported)*
 - macOS (14 or 15, x86_64 and/or arm64)*
 - Linux (tested on Ubuntu, Debian, and Fedora; x86_64)*  
-- Windows (tested on Windows Latest with Clang; x86_64, ThreadSanitizer features not supported)*
-- Clang or Apple Clang (additional compiler support TBD)*
+- Windows (experimental/work-in-progress; x86_64, ThreadSanitizer features not supported)*
 - C++20
-- CMake
+- CMake**
 - **macOS with ThreadSanitizer**: When building on macOS with `QITI_ENABLE_THREAD_SANITIZER=ON`, do not build universal binaries (arm64 + x86_64). ThreadSanitizer is incompatible with universal binaries. Build for your target architecture only.
+
+*see "Platform & Compiler Test Matrix" below
+**see "Manual Integration" below for instructions to integrate without CMake
 
 ## CMake Integration
 
@@ -134,7 +137,7 @@ For complex projects, consider using CMake's `FetchContent` to automatically han
 
 - When compiling on macOS, the deployment target must be 10.15 (Catalina) or later.
 
-## *Platform & Compiler Test Matrix
+## Platform & Compiler Test Matrix
 
 Qiti is continuously tested across a comprehensive matrix of platforms, compilers, and configurations to ensure reliability and compatibility:
 
@@ -147,7 +150,7 @@ Qiti is continuously tested across a comprehensive matrix of platforms, compiler
 | **Ubuntu** | Latest     | LLVM Clang 16            | Ninja        | ❌ Disabled     | Catch2 + GTest  |
 | **Debian** | Stable     | LLVM Clang 17            | Ninja        | ✅ Enabled      | Catch2 + GTest  |
 | **Fedora** | Latest     | LLVM Clang (latest)      | Ninja        | ✅ Enabled      | Catch2 + GTest  |
-| **Windows** | Latest     | LLVM Clang 16            | Ninja        | ❌ Disabled     | Catch2 + GTest  |
+| **Windows**| Latest     | LLVM Clang 16            | Ninja        | ❌ Disabled     | Catch2          |
 
 **Additional CI Validations:**
 - **Code Quality**: CPPLint validation with custom filters

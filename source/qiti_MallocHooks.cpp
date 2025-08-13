@@ -52,6 +52,7 @@ thread_local std::function<void()> qiti::MallocHooks::onNextHeapAllocation = nul
 // Thread-local allocation tracking for leak detection
 static thread_local std::unordered_map<void*, std::size_t> g_allocationSizes;
 
+#ifndef _WIN32
 static thread_local struct AllocationSizesCleanup final
 {
     QITI_API_INTERNAL ~AllocationSizesCleanup() noexcept
@@ -60,6 +61,7 @@ static thread_local struct AllocationSizesCleanup final
         g_allocationSizes.clear(); // delete everything without triggering hooks
     }
 } g_allocationSizesCleanup;
+#endif
 
 /** Functions we never want to count towards heap allocations that we track. */
 static inline const std::array<const char*, 1> blackListedFunctions
@@ -68,7 +70,7 @@ static inline const std::array<const char*, 1> blackListedFunctions
 };
 
 /** Demangle a C++ ABI symbol name, or return the original on error */
-QITI_API_INTERNAL static std::string demangle(const char* name) noexcept
+[[maybe_unused]] QITI_API_INTERNAL static std::string demangle(const char* name) noexcept
 {
 #ifdef _WIN32
     // Windows: Use UnDecorateSymbolName
@@ -93,6 +95,7 @@ QITI_API_INTERNAL static std::string demangle(const char* name) noexcept
 QITI_API_INTERNAL static std::vector<std::string> captureStackTrace(int framesToSkip = 1) noexcept
 {
 #ifdef _WIN32
+#if 0 // Temporarily disabled for debugging Windows initialization issues
     constexpr int MAX_FRAMES = 128;
     void* stack[MAX_FRAMES];
     WORD frames = CaptureStackBackTrace(static_cast<DWORD>(framesToSkip), MAX_FRAMES - framesToSkip, stack, nullptr);
@@ -101,30 +104,50 @@ QITI_API_INTERNAL static std::vector<std::string> captureStackTrace(int framesTo
     out.reserve(frames);
     
     HANDLE process = GetCurrentProcess();
-    SymInitialize(process, nullptr, TRUE);
+    BOOL symInitResult = SymInitialize(process, nullptr, TRUE);
     
-    char buffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(TCHAR)];
-    auto symbol = reinterpret_cast<PSYMBOL_INFO>(buffer);
-    symbol->MaxNameLen = MAX_SYM_NAME;
-    symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-    
-    for (int i = 0; i < frames; ++i)
+    if (symInitResult)
     {
-        auto address = reinterpret_cast<DWORD64>(stack[i]);
-        if (SymFromAddr(process, address, nullptr, symbol))
+        char buffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(TCHAR)];
+        auto symbol = reinterpret_cast<PSYMBOL_INFO>(buffer);
+        symbol->MaxNameLen = MAX_SYM_NAME;
+        symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+        
+        for (int i = 0; i < frames; ++i)
         {
-            out.push_back(demangle(symbol->Name));
+            auto address = reinterpret_cast<DWORD64>(stack[i]);
+            if (SymFromAddr(process, address, nullptr, symbol))
+            {
+                out.push_back(demangle(symbol->Name));
+            }
+            else
+            {
+                std::ostringstream oss;
+                oss << stack[i];
+                out.push_back(oss.str());
+            }
         }
-        else
+        
+        SymCleanup(process);
+    }
+    else
+    {
+        // Fallback: just show addresses if symbol initialization fails
+        for (int i = 0; i < frames; ++i)
         {
             std::ostringstream oss;
             oss << stack[i];
             out.push_back(oss.str());
         }
     }
-    
-    SymCleanup(process);
     return out;
+#else
+    (void)framesToSkip;
+    // Windows: Disable stack tracing temporarily for debugging
+    std::vector<std::string> out;
+    out.push_back("<stack tracing disabled on Windows>");
+    return out;
+#endif
 #else
     constexpr int MAX_FRAMES = 128;
     void* addrs[MAX_FRAMES];

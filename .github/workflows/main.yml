@@ -227,7 +227,6 @@ jobs:
           ctest -C Release --verbose
 
   windows-build-clang-ninja:
-    if: false # Disabled until Windows support is complete
     runs-on: windows-latest
     
     steps:
@@ -254,12 +253,75 @@ jobs:
       - name: Build Tests
         run: |
           cmake --build build --target qiti_tests_catch2
-          cmake --build build --target qiti_tests_gtest
+
+      - name: Run Unit Tests with Debugger (disabled - for future debugging)
+        if: false  # Disabled - enable if debugging Windows crashes is needed
+        run: |
+          cd build/bin
+          Write-Host "About to run Catch2 tests with debugger..."
+          
+          # Install Windows Debugging Tools if available
+          try {
+            Write-Host "Setting up crash dump collection..."
+            # Enable application crash dumps in registry (if we have permissions)
+            New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting\LocalDumps\qiti_tests_catch2.exe" -Force -ErrorAction SilentlyContinue
+            Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting\LocalDumps\qiti_tests_catch2.exe" -Name "DumpFolder" -Value "$PWD" -ErrorAction SilentlyContinue
+            Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting\LocalDumps\qiti_tests_catch2.exe" -Name "DumpType" -Value 1 -ErrorAction SilentlyContinue
+          }
+          catch {
+            Write-Host "Could not set up crash dumps: $_"
+          }
+          
+          # Try to run with CDB debugger if available
+          $cdbPath = "${env:ProgramFiles(x86)}\Windows Kits\10\Debuggers\x64\cdb.exe"
+          if (Test-Path $cdbPath) {
+            Write-Host "Running with CDB debugger to capture stack trace..."
+            & $cdbPath -c "g; .ecxr; k; q" .\qiti_tests_catch2.exe 2>&1 | Tee-Object -FilePath "debug_output.log"
+            $exitCode = $LASTEXITCODE
+            Write-Host "CDB finished with exit code: $exitCode"
+            
+            Write-Host "=== Debugger output ==="
+            Get-Content "debug_output.log" -ErrorAction SilentlyContinue
+          }
+          else {
+            Write-Host "CDB not found, trying alternative debugging..."
+            
+            # Try to get more info with Dr. Watson style debugging
+            $ErrorActionPreference = 'Continue'
+            
+            # Run the executable and capture any output before crash
+            Write-Host "Running executable directly..."
+            try {
+              .\qiti_tests_catch2.exe --reporter=console --verbosity=high 2>&1 | Tee-Object -FilePath "test_output.log"
+              $exitCode = $LASTEXITCODE
+              Write-Host "Test finished with exit code: $exitCode"
+            }
+            catch {
+              Write-Host "Exception during execution: $_"
+            }
+            
+            Write-Host "=== Test output ==="
+            Get-Content "test_output.log" -ErrorAction SilentlyContinue
+            
+            # Check for any crash dumps created
+            Write-Host "=== Looking for crash dumps ==="
+            Get-ChildItem -Path . -Filter "*.dmp" -ErrorAction SilentlyContinue | ForEach-Object {
+              Write-Host "Found crash dump: $($_.Name)"
+            }
+            
+            # Check Windows Event Log
+            Write-Host "=== Windows Event Log ==="
+            Get-WinEvent -FilterHashtable @{LogName='Application'; Id=1000} -MaxEvents 5 -ErrorAction SilentlyContinue | 
+              Where-Object {$_.Message -like "*qiti_tests_catch2*"} | 
+              Select-Object TimeCreated, Message | Format-List
+          }
+        shell: powershell
 
       - name: Run Unit Tests
         run: |
-          cd build
-          ctest -C Release --verbose
+          cd build/bin
+          .\qiti_tests_catch2.exe --reporter=console --verbosity=high
+        shell: powershell
           
   lint:
     runs-on: ubuntu-latest
