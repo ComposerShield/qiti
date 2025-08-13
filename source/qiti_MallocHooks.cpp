@@ -68,7 +68,7 @@ static inline const std::array<const char*, 1> blackListedFunctions
 };
 
 /** Demangle a C++ ABI symbol name, or return the original on error */
-QITI_API_INTERNAL static std::string demangle(const char* name) noexcept
+[[maybe_unused]] QITI_API_INTERNAL static std::string demangle(const char* name) noexcept
 {
 #ifdef _WIN32
     // Windows: Use UnDecorateSymbolName
