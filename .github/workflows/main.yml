@@ -254,37 +254,65 @@ jobs:
         run: |
           cmake --build build --target qiti_tests_catch2
 
-      - name: Run Unit Tests  
+      - name: Run Unit Tests with Debugger
         run: |
           cd build/bin
-          Write-Host "About to run Catch2 tests..."
+          Write-Host "About to run Catch2 tests with debugger..."
           
-          # Try to get crash information using Windows Error Reporting
-          $ErrorActionPreference = 'Continue'
-          
-          # Enable crash dumps (if possible)
+          # Install Windows Debugging Tools if available
           try {
-            # Set environment variable to generate crash dumps
-            $env:QITI_DEBUG = "1"
-            
-            # Run with detailed error reporting
-            .\qiti_tests_catch2.exe --reporter=console --verbosity=high 2>&1 | Tee-Object -FilePath "test_output.log"
-            $exitCode = $LASTEXITCODE
-            Write-Host "Catch2 finished with exit code: $exitCode"
-            
-            if ($exitCode -ne 0) {
-              Write-Host "=== Test output log ==="
-              Get-Content "test_output.log" -ErrorAction SilentlyContinue
-              
-              # Check Windows Event Log for application crashes
-              Write-Host "=== Checking Windows Event Log for crashes ==="
-              Get-WinEvent -FilterHashtable @{LogName='Application'; Id=1000} -MaxEvents 5 -ErrorAction SilentlyContinue | 
-                Where-Object {$_.Message -like "*qiti_tests_catch2*"} | 
-                Select-Object TimeCreated, Message | Format-List
-            }
+            Write-Host "Setting up crash dump collection..."
+            # Enable application crash dumps in registry (if we have permissions)
+            New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting\LocalDumps\qiti_tests_catch2.exe" -Force -ErrorAction SilentlyContinue
+            Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting\LocalDumps\qiti_tests_catch2.exe" -Name "DumpFolder" -Value "$PWD" -ErrorAction SilentlyContinue
+            Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting\LocalDumps\qiti_tests_catch2.exe" -Name "DumpType" -Value 1 -ErrorAction SilentlyContinue
           }
           catch {
-            Write-Host "Error during test execution: $_"
+            Write-Host "Could not set up crash dumps: $_"
+          }
+          
+          # Try to run with CDB debugger if available
+          $cdbPath = "${env:ProgramFiles(x86)}\Windows Kits\10\Debuggers\x64\cdb.exe"
+          if (Test-Path $cdbPath) {
+            Write-Host "Running with CDB debugger to capture stack trace..."
+            & $cdbPath -c "g; .ecxr; k; q" .\qiti_tests_catch2.exe 2>&1 | Tee-Object -FilePath "debug_output.log"
+            $exitCode = $LASTEXITCODE
+            Write-Host "CDB finished with exit code: $exitCode"
+            
+            Write-Host "=== Debugger output ==="
+            Get-Content "debug_output.log" -ErrorAction SilentlyContinue
+          }
+          else {
+            Write-Host "CDB not found, trying alternative debugging..."
+            
+            # Try to get more info with Dr. Watson style debugging
+            $ErrorActionPreference = 'Continue'
+            
+            # Run the executable and capture any output before crash
+            Write-Host "Running executable directly..."
+            try {
+              .\qiti_tests_catch2.exe --reporter=console --verbosity=high 2>&1 | Tee-Object -FilePath "test_output.log"
+              $exitCode = $LASTEXITCODE
+              Write-Host "Test finished with exit code: $exitCode"
+            }
+            catch {
+              Write-Host "Exception during execution: $_"
+            }
+            
+            Write-Host "=== Test output ==="
+            Get-Content "test_output.log" -ErrorAction SilentlyContinue
+            
+            # Check for any crash dumps created
+            Write-Host "=== Looking for crash dumps ==="
+            Get-ChildItem -Path . -Filter "*.dmp" -ErrorAction SilentlyContinue | ForEach-Object {
+              Write-Host "Found crash dump: $($_.Name)"
+            }
+            
+            # Check Windows Event Log
+            Write-Host "=== Windows Event Log ==="
+            Get-WinEvent -FilterHashtable @{LogName='Application'; Id=1000} -MaxEvents 5 -ErrorAction SilentlyContinue | 
+              Where-Object {$_.Message -like "*qiti_tests_catch2*"} | 
+              Select-Object TimeCreated, Message | Format-List
           }
         shell: powershell
           
