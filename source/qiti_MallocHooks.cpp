@@ -101,29 +101,42 @@ QITI_API_INTERNAL static std::vector<std::string> captureStackTrace(int framesTo
     out.reserve(frames);
     
     HANDLE process = GetCurrentProcess();
-    SymInitialize(process, nullptr, TRUE);
+    BOOL symInitResult = SymInitialize(process, nullptr, TRUE);
     
-    char buffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(TCHAR)];
-    auto symbol = reinterpret_cast<PSYMBOL_INFO>(buffer);
-    symbol->MaxNameLen = MAX_SYM_NAME;
-    symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-    
-    for (int i = 0; i < frames; ++i)
+    if (symInitResult)
     {
-        auto address = reinterpret_cast<DWORD64>(stack[i]);
-        if (SymFromAddr(process, address, nullptr, symbol))
+        char buffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(TCHAR)];
+        auto symbol = reinterpret_cast<PSYMBOL_INFO>(buffer);
+        symbol->MaxNameLen = MAX_SYM_NAME;
+        symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+        
+        for (int i = 0; i < frames; ++i)
         {
-            out.push_back(demangle(symbol->Name));
+            auto address = reinterpret_cast<DWORD64>(stack[i]);
+            if (SymFromAddr(process, address, nullptr, symbol))
+            {
+                out.push_back(demangle(symbol->Name));
+            }
+            else
+            {
+                std::ostringstream oss;
+                oss << stack[i];
+                out.push_back(oss.str());
+            }
         }
-        else
+        
+        SymCleanup(process);
+    }
+    else
+    {
+        // Fallback: just show addresses if symbol initialization fails
+        for (int i = 0; i < frames; ++i)
         {
             std::ostringstream oss;
             oss << stack[i];
             out.push_back(oss.str());
         }
     }
-    
-    SymCleanup(process);
     return out;
 #else
     constexpr int MAX_FRAMES = 128;
