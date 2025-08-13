@@ -85,8 +85,7 @@ public:
     template<typename T>
     [[nodiscard]] QITI_API_INLINE static const TypeData* getTypeData() noexcept
     {
-        static constexpr auto typeName = qiti::Profile::getTypeName<T>();
-        return getTypeDataInternal(typeid(T), typeName, sizeof(T));
+        return getTypeDataMutable<T>(); // wrap in const
     }
     
     /**
@@ -96,8 +95,9 @@ public:
     template<typename T>
     [[nodiscard]] QITI_API_INLINE static TypeData* getTypeDataMutable() noexcept
     {
+        static constexpr auto typeName = qiti::Profile::getTypeName<T>();
         qiti::Profile::beginProfilingType<T>();
-        return getTypeData<T>();
+        return getTypeDataInternal(typeid(T), typeName, sizeof(T));
     }
     
     //--------------------------------------------------------------------------

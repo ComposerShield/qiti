@@ -15,6 +15,7 @@
 
 #include "qiti_TypeData.hpp"
 
+#include "qiti_MallocHooks.hpp"
 #include "qiti_TypeData_Impl.hpp"
 #include "qiti_ScopedNoHeapAllocations.hpp"
 #include "qiti_Utils.hpp"
@@ -169,7 +170,7 @@ TypeData* TypeData::getTypeDataInternal(const std::type_info& typeInfo,
                                         const char* typeName,
                                         size_t typeSize) noexcept
 {
-    qiti::ScopedNoHeapAllocations noAlloc;
+    qiti::MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
     
     std::type_index typeIndex(typeInfo);
     
