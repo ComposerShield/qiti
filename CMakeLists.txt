@@ -18,6 +18,11 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Optional ThreadSanitizer support
 option(QITI_ENABLE_THREAD_SANITIZER "Enable ThreadSanitizer wrapper functionality" OFF)
 
+# Check for unsupported ThreadSanitizer on Windows
+if(QITI_ENABLE_THREAD_SANITIZER AND WIN32)
+    message(FATAL_ERROR "ThreadSanitizer features are not supported on Windows. Please disable QITI_ENABLE_THREAD_SANITIZER.")
+endif()
+
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG -D_DEBUG")
 
 set(SOURCES
@@ -157,6 +162,11 @@ PUBLIC
     QITI_VERSION_PATCH=${PROJECT_VERSION_PATCH}
     QITI_VERSION=\"${PROJECT_VERSION}\" # need the escape-quoted string for a valid C literal:
 )
+
+if(WIN32)
+    # Do not define "min" and "max" via windows.h
+    target_compile_definitions(qiti_lib PRIVATE NOMINMAX)
+endif()
 
 # ThreadSanitizer-specific link options (only when enabled)
 if(QITI_ENABLE_THREAD_SANITIZER)

@@ -52,7 +52,7 @@ public:
      Reset all profiling and instrumentation data.
      Optionally reset start time of the test.
      */
-    void QITI_API reset(bool resetTestStartTime) noexcept;
+    QITI_API void reset(bool resetTestStartTime) noexcept;
     
     /**
      Enable or disable profiling on all instrumented functions.
@@ -65,52 +65,52 @@ public:
      
      @param enable If true, profile all functions; if false, only profile explicitly registered functions
      */
-    void QITI_API enableProfilingOnAllFunctions(bool enable) noexcept;
+    QITI_API void enableProfilingOnAllFunctions(bool enable) noexcept;
     
     /**
      Get the full version string of Qiti.
      
      @returns A string in the format "major.minor.patch" (e.g., "1.0.0")
      */
-    [[nodiscard]] static const char* QITI_API getQitiVersionString() noexcept;
+    [[nodiscard]] QITI_API static const char* getQitiVersionString() noexcept;
     
     /**
      Get the major version number of Qiti.
      
      @returns The major version component (e.g., 1 from "1.0.0")
      */
-    [[nodiscard]] static int QITI_API getQitiVersionMajor() noexcept;
+    [[nodiscard]] QITI_API static int getQitiVersionMajor() noexcept;
     
     /**
      Get the minor version number of Qiti.
      
      @returns The minor version component (e.g., 0 from "1.0.0")
      */
-    [[nodiscard]] static int QITI_API getQitiVersionMinor() noexcept;
+    [[nodiscard]] QITI_API static int getQitiVersionMinor() noexcept;
     
     /**
      Get the patch version number of Qiti.
      
      @returns The patch version component (e.g., 0 from "1.0.0")
      */
-    [[nodiscard]] static int QITI_API getQitiVersionPatch() noexcept;
+    [[nodiscard]] QITI_API static int getQitiVersionPatch() noexcept;
     
     /** 
      Get elapsed length of time since ScopedQitiTest was initialized.
      
      @returns Elapsed time in milliseconds
      */
-    [[nodiscard]] uint64_t QITI_API getLengthOfTest_ms() const noexcept;
+    [[nodiscard]] QITI_API uint64_t getLengthOfTest_ms() const noexcept;
     
     /** 
      Get elapsed length of time since ScopedQitiTest was initialized.
      
      @returns Elapsed time in nanoseconds
      */
-    [[nodiscard]] uint64_t QITI_API getLengthOfTest_ns() const noexcept;
+    [[nodiscard]] QITI_API uint64_t getLengthOfTest_ns() const noexcept;
     
     /** Assert if test exceeds duration specified. */
-    void QITI_API setMaximumDurationOfTest_ms(uint64_t ms) noexcept;
+    QITI_API void setMaximumDurationOfTest_ms(uint64_t ms) noexcept;
     
 private:
     struct Impl;

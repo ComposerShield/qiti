@@ -35,7 +35,7 @@ public:
      Clears any recorded data from previous profiling, returning the
      instrumentation subsystem to its initial state.
      */
-    static void QITI_API resetInstrumentation() noexcept;
+    QITI_API static void resetInstrumentation() noexcept;
     
     /**
      Register a callback to be invoked on the next heap allocation.
@@ -44,14 +44,14 @@ public:
      executed immediately after the next heap allocation occurs. This
      facilitates custom handling or assertions around allocation events.
      */
-    static void QITI_API onNextHeapAllocation(void(*heapAllocCallback)()) noexcept;
+    QITI_API static void onNextHeapAllocation(void(*heapAllocCallback)()) noexcept;
     
     /**
      Triggers an assertion failure when the next heap allocation happens.
      
      Shortcut equivalent to onNextHeapAllocation([]{ assert(false); });
      */
-    static void QITI_API assertOnNextHeapAllocation() noexcept;
+    QITI_API static void assertOnNextHeapAllocation() noexcept;
 
 private:
     Instrument() = delete;

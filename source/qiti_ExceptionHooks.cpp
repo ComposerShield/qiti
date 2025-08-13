@@ -19,7 +19,12 @@
 #include "qiti_Profile.hpp"
 #include "qiti_ScopedNoHeapAllocations.hpp"
 
+#ifdef _WIN32
+#include <windows.h>
+#include <dbghelp.h>
+#else
 #include <dlfcn.h>
+#endif
 
 #include <typeinfo>
 
@@ -35,8 +40,31 @@ extern "C"
 
 
 // Initialize function pointers to original exception functions
-static void QITI_API_INTERNAL initializeExceptionHooks() noexcept
+QITI_API_INTERNAL static void initializeExceptionHooks() noexcept
 {
+#ifdef _WIN32
+    // Windows: Get exception functions from the C++ runtime
+    HMODULE msvcrt = GetModuleHandleA("msvcr120.dll"); // Or try other versions
+    if (!msvcrt) msvcrt = GetModuleHandleA("msvcr110.dll");
+    if (!msvcrt) msvcrt = GetModuleHandleA("msvcr100.dll");
+    if (!msvcrt) msvcrt = GetModuleHandleA("ucrtbase.dll");
+    
+    if (msvcrt && !original_cxa_throw)
+    {
+        original_cxa_throw = reinterpret_cast<void(*)(void*, std::type_info*, void(*)(void*))>(
+            GetProcAddress(msvcrt, "__cxa_throw"));
+    }
+    if (msvcrt && !original_cxa_begin_catch)
+    {
+        original_cxa_begin_catch = reinterpret_cast<void*(*)(void*)>(
+            GetProcAddress(msvcrt, "__cxa_begin_catch"));
+    }
+    if (msvcrt && !original_cxa_end_catch)
+    {
+        original_cxa_end_catch = reinterpret_cast<void(*)()>(
+            GetProcAddress(msvcrt, "__cxa_end_catch"));
+    }
+#else
     if (! original_cxa_throw)
     {
         original_cxa_throw = reinterpret_cast<void(*)(void*, std::type_info*, void(*)(void*))>(
@@ -52,6 +80,7 @@ static void QITI_API_INTERNAL initializeExceptionHooks() noexcept
         original_cxa_end_catch = reinterpret_cast<void(*)()>(
             dlsym(RTLD_NEXT, "__cxa_end_catch"));
     }
+#endif
 }
 
 //--------------------------------------------------------------------------
@@ -59,7 +88,7 @@ static void QITI_API_INTERNAL initializeExceptionHooks() noexcept
 extern "C"
 {
 
-void QITI_API __cxa_throw(void* thrown_object, 
+QITI_API void __cxa_throw(void* thrown_object, 
                          std::type_info* tinfo, 
                          void (*dest)(void*))
 {
@@ -89,7 +118,7 @@ void QITI_API __cxa_throw(void* thrown_object,
     }
 }
 
-void* QITI_API __cxa_begin_catch(void* exceptionObject)
+QITI_API void* __cxa_begin_catch(void* exceptionObject)
 {
     initializeExceptionHooks();
     
@@ -102,7 +131,7 @@ void* QITI_API __cxa_begin_catch(void* exceptionObject)
     return nullptr;
 }
 
-void QITI_API __cxa_end_catch()
+QITI_API void __cxa_end_catch()
 {
     initializeExceptionHooks();
     

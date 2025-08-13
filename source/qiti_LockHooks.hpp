@@ -17,7 +17,11 @@
 
 #include "qiti_API.hpp"
 
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <pthread.h>
+#endif
 
 #include <memory>
 
@@ -80,10 +84,17 @@ public:
         DummyMutex mutex;
     };
     
+#ifdef _WIN32
     /** */
-    static void QITI_API lockAcquireHook(const pthread_mutex_t* size) noexcept;
+    QITI_API static void lockAcquireHook(const CRITICAL_SECTION* mutex) noexcept;
     /** */
-    static void QITI_API lockReleaseHook(const pthread_mutex_t* size) noexcept;
+    QITI_API static void lockReleaseHook(const CRITICAL_SECTION* mutex) noexcept;
+#else
+    /** */
+    QITI_API static void lockAcquireHook(const pthread_mutex_t* size) noexcept;
+    /** */
+    QITI_API static void lockReleaseHook(const pthread_mutex_t* size) noexcept;
+#endif
 
 private:
     LockHooks() = delete;

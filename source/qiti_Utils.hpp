@@ -19,7 +19,21 @@
 
 #include "qiti_Profile.hpp"
 
+#ifdef _WIN32
+#include <windows.h>
+#include <dbghelp.h>
+// Windows equivalent of dladdr
+struct Dl_info 
+{
+    const char* dli_fname;  // Pathname of shared library
+    void* dli_fbase;        // Base address of shared library
+    const char* dli_sname;  // Name of nearest symbol
+    void* dli_saddr;        // Address of nearest symbol
+};
+int dladdr(const void* addr, Dl_info* info);
+#else
 #include <dlfcn.h>
+#endif
 
 #include <cstdint>
 #include <string>
@@ -41,11 +55,11 @@ class Utils
 {
 public:
     /** Reset all profiling and instrumentation data (including function data mapping) */
-    static void QITI_API_INTERNAL resetAll() noexcept;
+    QITI_API_INTERNAL static void resetAll() noexcept;
     
     template <auto FuncPtr>
     requires isFreeFunction<FuncPtr>
-    [[nodiscard]] static const qiti::FunctionData* QITI_API getFunctionData() noexcept
+    [[nodiscard]] QITI_API static const qiti::FunctionData* getFunctionData() noexcept
     {
         static constexpr auto functionAddress = Profile::getFunctionAddress<FuncPtr>();
         static constexpr auto functionName    = Profile::getFunctionName<FuncPtr>();
@@ -53,10 +67,10 @@ public:
     }
     
     /** */
-    [[nodiscard]] static std::vector<const qiti::FunctionData*> QITI_API getAllFunctionData() noexcept;
+    [[nodiscard]] QITI_API static std::vector<const qiti::FunctionData*> getAllFunctionData() noexcept;
     
     /** demangle a GCC/Clang‐mangled name into a std::string */
-    static void QITI_API_INTERNAL demangle(const char* mangled_name,
+    QITI_API_INTERNAL static void demangle(const char* mangled_name,
                                            char* demangled_name,
                                            uint64_t demangled_size) noexcept;
     
@@ -68,15 +82,15 @@ private:
     ~Utils() = delete;
     
     /** Likely never used. */
-    static void* QITI_API_INTERNAL getAddressForMangledFunctionName(const char* mangledName) noexcept;
+    QITI_API_INTERNAL static void* getAddressForMangledFunctionName(const char* mangledName) noexcept;
     
     /** */
-    [[nodiscard]] static qiti::FunctionData& QITI_API getFunctionDataFromAddress(const void* functionAddress,
+    [[nodiscard]] QITI_API static qiti::FunctionData& getFunctionDataFromAddress(const void* functionAddress,
                                                                                  const char* functionName = nullptr,
                                                                                  int functionType = -1) noexcept;
     
     /** */
-    [[nodiscard]] static const qiti::FunctionData* QITI_API getFunctionData(const char* demangledFunctionName) noexcept;
+    [[nodiscard]] QITI_API static const qiti::FunctionData* getFunctionData(const char* demangledFunctionName) noexcept;
     
 }; // class Utils
 }  // namespace qiti

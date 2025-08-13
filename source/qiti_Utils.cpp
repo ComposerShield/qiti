@@ -20,8 +20,13 @@
 #include "qiti_LockData.hpp"
 #include "qiti_MallocHooks.hpp"
 
+#ifdef _WIN32
+#include <windows.h>
+#include <dbghelp.h>
+#else
 #include <cxxabi.h>
 #include <dlfcn.h>
+#endif
 
 #include <algorithm>
 #include <cassert>
@@ -39,6 +44,36 @@
 #include <vector>
 
 //--------------------------------------------------------------------------
+
+#ifdef _WIN32
+// Windows implementation of dladdr
+int dladdr(const void* addr, Dl_info* info)
+{
+    if (!info) return 0;
+    
+    HMODULE hModule;
+    if (!GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | 
+                            GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                            reinterpret_cast<LPCSTR>(addr), &hModule))
+    {
+        return 0;
+    }
+    
+    // Get module filename
+    static char moduleFilename[MAX_PATH];
+    if (!GetModuleFileNameA(hModule, moduleFilename, MAX_PATH))
+    {
+        return 0;
+    }
+    
+    info->dli_fname = moduleFilename;
+    info->dli_fbase = hModule;
+    info->dli_sname = nullptr;  // Symbol name lookup would require DbgHelp
+    info->dli_saddr = nullptr;
+    
+    return 1;
+}
+#endif
 
 /** */
 [[nodiscard]] static auto& getFunctionMap() noexcept
@@ -58,6 +93,16 @@
     if (dladdr(this_fn, &info) && info.dli_sname)
     {
         // Demangle the function name
+#ifdef _WIN32
+        // Windows: Use UnDecorateSymbolName
+        static char buffer[1024];
+        if (UnDecorateSymbolName(info.dli_sname, buffer, sizeof(buffer), UNDNAME_COMPLETE))
+        {
+            functionName = buffer;
+        }
+        else
+            functionName = info.dli_sname; // mangled name
+#else
         int status;
         char* demangled = abi::__cxa_demangle(info.dli_sname, nullptr, nullptr, &status);
         if (status == 0 && demangled)
@@ -67,6 +112,7 @@
         }
         else
             functionName = info.dli_sname; // mangled name
+#endif
     }
     
     return functionName;
@@ -78,8 +124,14 @@ namespace qiti
 {
 void* Utils::getAddressForMangledFunctionName(const char* mangledName) noexcept
 {
+#ifdef _WIN32
+    // Windows: Use GetProcAddress with current module
+    HMODULE hModule = GetModuleHandleA(nullptr); // Current executable
+    return reinterpret_cast<void*>(GetProcAddress(hModule, mangledName));
+#else
     void* addr = dlsym(RTLD_DEFAULT, mangledName);
     return addr;
+#endif
 }
 
 [[nodiscard]] qiti::FunctionData& Utils::getFunctionDataFromAddress(const void* functionAddress,
@@ -142,6 +194,18 @@ std::vector<const qiti::FunctionData*> Utils::getAllFunctionData() noexcept
 
 void Utils::demangle(const char* mangled_name, char* demangled_name, uint64_t demangled_size) noexcept
 {
+#ifdef _WIN32
+    // Windows: Use UnDecorateSymbolName
+    if (UnDecorateSymbolName(mangled_name, demangled_name, static_cast<DWORD>(demangled_size), UNDNAME_COMPLETE))
+    {
+        // Success, demangled_name is already filled
+    }
+    else
+    {
+        // fallback: copy mangled name itself
+        strncpy_s(demangled_name, demangled_size, mangled_name, _TRUNCATE);
+    }
+#else
     int status = 0;
     char* result = abi::__cxa_demangle(mangled_name, nullptr, nullptr, &status);
     
@@ -158,6 +222,7 @@ void Utils::demangle(const char* mangled_name, char* demangled_name, uint64_t de
         std::strncpy(demangled_name, mangled_name, demangled_size - 1);
         demangled_name[demangled_size - 1] = '\0'; // always null-terminate
     }
+#endif
 }
 
 void Utils::resetAll() noexcept

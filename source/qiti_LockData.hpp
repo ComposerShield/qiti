@@ -15,7 +15,13 @@
 
 #pragma once
 
+#ifdef _WIN32
+#include <windows.h>
+// Windows mutex type alias
+using pthread_mutex_t = CRITICAL_SECTION;
+#else
 #include <pthread.h>
+#endif
 
 #include "qiti_API.hpp"
 
@@ -35,25 +41,25 @@ public:
     struct Listener
     {
         QITI_API Listener() noexcept = default;
-        virtual QITI_API ~Listener() noexcept = default;
+        QITI_API virtual ~Listener() noexcept = default;
         /** User provided callback. */
-        virtual void QITI_API onAcquire(const pthread_mutex_t* ld) noexcept = 0;
+        QITI_API virtual void onAcquire(const pthread_mutex_t* ld) noexcept = 0;
         /** User provided callback. */
-        virtual void QITI_API onRelease(const pthread_mutex_t* ld) noexcept = 0;
+        QITI_API virtual void onRelease(const pthread_mutex_t* ld) noexcept = 0;
     };
     
     /** Register for lock/unlock notifications. */
-    static void QITI_API addGlobalListener(Listener* listener) noexcept;
+    QITI_API static void addGlobalListener(Listener* listener) noexcept;
     /** Unregister for lock/unlock notifications. */
-    static void QITI_API removeGlobalListener(Listener* listener) noexcept;
+    QITI_API static void removeGlobalListener(Listener* listener) noexcept;
     
     /** Notify listeners of a lock acquisition */
-    static void QITI_API notifyAcquire(const pthread_mutex_t* lock) noexcept;
+    QITI_API static void notifyAcquire(const pthread_mutex_t* lock) noexcept;
     /** Notify listeners of a lock release */
-    static void QITI_API notifyRelease(const pthread_mutex_t* lock) noexcept;
+    QITI_API static void notifyRelease(const pthread_mutex_t* lock) noexcept;
     
     /** */
-    static void QITI_API_INTERNAL resetAllListeners() noexcept;
+    QITI_API_INTERNAL static void resetAllListeners() noexcept;
     
 private:
     LockData() = delete;

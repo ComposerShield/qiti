@@ -17,9 +17,16 @@
 
 #include "qiti_Utils.hpp"
 
+#ifndef _WIN32
 #include <cxxabi.h>       // __cxa_demangle
 #include <execinfo.h>     // backtrace(), backtrace_symbols()
+#endif
+#ifdef _WIN32
+#include <windows.h>
+#include <dbghelp.h>
+#else
 #include <dlfcn.h>        // dladdr()
+#endif
 
 #include <array>
 #include <memory>
@@ -47,7 +54,7 @@ static thread_local std::unordered_map<void*, std::size_t> g_allocationSizes;
 
 static thread_local struct AllocationSizesCleanup final
 {
-    ~AllocationSizesCleanup() noexcept
+    QITI_API_INTERNAL ~AllocationSizesCleanup() noexcept
     {
         qiti::MallocHooks::ScopedBypassMallocHooks bypassHooks;
         g_allocationSizes.clear(); // delete everything without triggering hooks
@@ -61,8 +68,17 @@ static inline const std::array<const char*, 1> blackListedFunctions
 };
 
 /** Demangle a C++ ABI symbol name, or return the original on error */
-static QITI_API_INTERNAL std::string demangle(const char* name) noexcept
+QITI_API_INTERNAL static std::string demangle(const char* name) noexcept
 {
+#ifdef _WIN32
+    // Windows: Use UnDecorateSymbolName
+    char buffer[1024];
+    if (UnDecorateSymbolName(name, buffer, sizeof(buffer), UNDNAME_COMPLETE))
+    {
+        return std::string(buffer);
+    }
+    return std::string(name);
+#else
     int status = 0;
     std::unique_ptr<char,void(*)(void*)> demangled
     {
@@ -70,11 +86,46 @@ static QITI_API_INTERNAL std::string demangle(const char* name) noexcept
         std::free
     };
     return (status == 0 && demangled) ? demangled.get() : name;
+#endif
 }
 
 /** Capture the current call stack (skipping the first `skip` frames) */
-static QITI_API_INTERNAL std::vector<std::string> captureStackTrace(int framesToSkip = 1) noexcept
+QITI_API_INTERNAL static std::vector<std::string> captureStackTrace(int framesToSkip = 1) noexcept
 {
+#ifdef _WIN32
+    constexpr int MAX_FRAMES = 128;
+    void* stack[MAX_FRAMES];
+    WORD frames = CaptureStackBackTrace(static_cast<DWORD>(framesToSkip), MAX_FRAMES - framesToSkip, stack, nullptr);
+    
+    std::vector<std::string> out;
+    out.reserve(frames);
+    
+    HANDLE process = GetCurrentProcess();
+    SymInitialize(process, nullptr, TRUE);
+    
+    char buffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(TCHAR)];
+    auto symbol = reinterpret_cast<PSYMBOL_INFO>(buffer);
+    symbol->MaxNameLen = MAX_SYM_NAME;
+    symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+    
+    for (int i = 0; i < frames; ++i)
+    {
+        auto address = reinterpret_cast<DWORD64>(stack[i]);
+        if (SymFromAddr(process, address, nullptr, symbol))
+        {
+            out.push_back(demangle(symbol->Name));
+        }
+        else
+        {
+            std::ostringstream oss;
+            oss << stack[i];
+            out.push_back(oss.str());
+        }
+    }
+    
+    SymCleanup(process);
+    return out;
+#else
     constexpr int MAX_FRAMES = 128;
     void* addrs[MAX_FRAMES];
     int frames = backtrace(addrs, MAX_FRAMES);
@@ -99,10 +150,11 @@ static QITI_API_INTERNAL std::vector<std::string> captureStackTrace(int framesTo
         }
     }
     return out;
+#endif
 }
 
 /** Check if the stack trace contains a frame whose demangled name contains the substring `funcName */
-inline static QITI_API_INTERNAL bool stackContainsFunction(const std::string& funcName, int framesToSkip = 1) noexcept
+[[nodiscard]] QITI_API_INTERNAL inline static bool stackContainsFunction(const std::string& funcName, int framesToSkip = 1) noexcept
 {
     auto trace = captureStackTrace(framesToSkip);
     for (auto& frame : trace)
@@ -112,7 +164,7 @@ inline static QITI_API_INTERNAL bool stackContainsFunction(const std::string& fu
 }
 
 /** */
-inline static QITI_API_INTERNAL bool stackContainsBlacklistedFunction() noexcept
+QITI_API_INTERNAL inline static bool stackContainsBlacklistedFunction() noexcept
 {
     qiti::MallocHooks::ScopedBypassMallocHooks bypassHooks;
     
@@ -124,7 +176,7 @@ inline static QITI_API_INTERNAL bool stackContainsBlacklistedFunction() noexcept
 
 //--------------------------------------------------------------------------
 
-void QITI_API_INTERNAL qiti::MallocHooks::mallocHook(std::size_t size) noexcept
+QITI_API_INTERNAL void qiti::MallocHooks::mallocHook(std::size_t size) noexcept
 {
     if (! isQitiTestRunning())
         return;
@@ -146,7 +198,7 @@ void QITI_API_INTERNAL qiti::MallocHooks::mallocHook(std::size_t size) noexcept
     }
 }
 
-[[maybe_unused]] static void QITI_API_INTERNAL freeHook(void* ptr) noexcept
+[[maybe_unused]] QITI_API_INTERNAL static void freeHook(void* ptr) noexcept
 {
     if (! isQitiTestRunning())
         return;
@@ -249,7 +301,11 @@ void qiti::MallocHooks::reallocHookWithTracking(void* oldPtr, void* newPtr, std:
 #if defined(__APPLE__) || ! defined(QITI_ENABLE_THREAD_SANITIZER)
 // macOS operator new/delete overrides for leak detection
 
-void* QITI_API operator new(std::size_t size)
+#ifdef _WIN32 // dllexport does not work on this operator on Windows
+void* operator new(std::size_t size)
+#else
+QITI_API void* operator new(std::size_t size)
+#endif
 {
     void* ptr = std::malloc(size);
     if (ptr == nullptr)
@@ -261,7 +317,11 @@ void* QITI_API operator new(std::size_t size)
     return ptr;
 }
 
-void* QITI_API operator new[](std::size_t size)
+#ifdef _WIN32 // dllexport does not work on this operator on Windows
+void* operator new[](std::size_t size)
+#else
+QITI_API void* operator new[](std::size_t size)
+#endif
 {
     void* ptr = std::malloc(size);
     if (ptr == nullptr)
@@ -273,7 +333,11 @@ void* QITI_API operator new[](std::size_t size)
     return ptr;
 }
 
-void QITI_API operator delete(void* ptr) noexcept
+#ifdef _WIN32 // dllexport does not work on this operator on Windows
+void operator delete(void* ptr) noexcept
+#else
+QITI_API void operator delete(void* ptr) noexcept
+#endif
 {
     if (ptr != nullptr)
     {
@@ -283,7 +347,11 @@ void QITI_API operator delete(void* ptr) noexcept
     }
 }
 
-void QITI_API operator delete[](void* ptr) noexcept
+#ifdef _WIN32 // dllexport does not work on this operator on Windows
+void operator delete[](void* ptr) noexcept
+#else
+QITI_API void operator delete[](void* ptr) noexcept
+#endif
 {
     if (ptr != nullptr)
     {
@@ -294,7 +362,11 @@ void QITI_API operator delete[](void* ptr) noexcept
 }
 
 // Sized delete operators (C++14)
-void QITI_API operator delete(void* ptr, std::size_t /*size*/) noexcept
+#ifdef _WIN32 // dllexport does not work on this operator on Windows
+void operator delete(void* ptr, std::size_t /*size*/) noexcept
+#else
+QITI_API void operator delete(void* ptr, std::size_t /*size*/) noexcept
+#endif
 {
     if (ptr != nullptr)
     {
@@ -304,7 +376,11 @@ void QITI_API operator delete(void* ptr, std::size_t /*size*/) noexcept
     }
 }
 
-void QITI_API operator delete[](void* ptr, std::size_t /*size*/) noexcept
+#ifdef _WIN32 // dllexport does not work on this operator on Windows
+void operator delete[](void* ptr, std::size_t /*size*/) noexcept
+#else
+QITI_API void operator delete[](void* ptr, std::size_t /*size*/) noexcept
+#endif
 {
     if (ptr != nullptr)
     {

@@ -52,7 +52,7 @@ public:
      @see passed()
      @see failed()
      */
-    [[nodiscard]] static std::unique_ptr<ThreadSanitizer> QITI_API createDataRaceDetector() noexcept;
+    [[nodiscard]] QITI_API static std::unique_ptr<ThreadSanitizer> createDataRaceDetector() noexcept;
     
     /**
      Factory to create a detector that checks if two functions are called in parallel.
@@ -68,7 +68,7 @@ public:
     template<auto FuncPtr0, auto FuncPtr1>
     requires isFreeFunction<FuncPtr0>
     && isFreeFunction<FuncPtr1>
-    [[nodiscard]] static std::unique_ptr<ThreadSanitizer> QITI_API createFunctionsCalledInParallelDetector() noexcept
+    [[nodiscard]] QITI_API static std::unique_ptr<ThreadSanitizer> createFunctionsCalledInParallelDetector() noexcept
     {
         static_assert(FuncPtr0 != FuncPtr1, "Functions must not be the same function.");
         return createFunctionsCalledInParallelDetector(FunctionData::getFunctionDataMutable<FuncPtr0>(),
@@ -85,7 +85,7 @@ public:
      @see passed()
      @see failed()
     */
-    [[nodiscard]] static std::unique_ptr<ThreadSanitizer> QITI_API createPotentialDeadlockDetector() noexcept;
+    [[nodiscard]] QITI_API static std::unique_ptr<ThreadSanitizer> createPotentialDeadlockDetector() noexcept;
     
     /**
      @param func Function pointer or lambda that is immediately run and tested according to which ThreadSanitizer object you are using.
@@ -96,17 +96,17 @@ public:
      @see passed()
      @see failed()
      */
-    virtual void QITI_API run(std::function<void()> func) noexcept = 0;
+    QITI_API virtual void run(std::function<void()> func) noexcept = 0;
     
     /**
      Returns true if no errors were detected in the function(s)/lambda(s) called by run().
      
      @see run()
      */
-    [[nodiscard]] bool QITI_API passed() noexcept;
+    [[nodiscard]] QITI_API bool passed() noexcept;
     
     /** Convenience inverse of passed(). */
-    [[nodiscard]] bool QITI_API failed() noexcept;
+    [[nodiscard]] QITI_API bool failed() noexcept;
     
     /**
      Optional user-provided callback which is called immediately when a test fails.
@@ -118,7 +118,7 @@ public:
     /**
      Returns a report if one is available. Not necessarily supported in every derived class.
      */
-    [[nodiscard]] virtual std::string QITI_API getReport(bool verbose) const noexcept;
+    [[nodiscard]] QITI_API virtual std::string getReport(bool verbose) const noexcept;
     
     //--------------------------------------------------------------------------
     // Doxygen - Begin Internal Documentation
@@ -126,19 +126,19 @@ public:
     //--------------------------------------------------------------------------
     
     /** */
-    virtual QITI_API ~ThreadSanitizer() noexcept;
+    QITI_API virtual ~ThreadSanitizer() noexcept;
 
     /** Move Constructor */
     QITI_API ThreadSanitizer(ThreadSanitizer&& other) noexcept;
     /** Move Assignment */
-    [[nodiscard]] ThreadSanitizer& QITI_API operator=(ThreadSanitizer&& other) noexcept;
+    [[nodiscard]] QITI_API ThreadSanitizer& operator=(ThreadSanitizer&& other) noexcept;
     
 protected:    
     /** */
     QITI_API_INTERNAL ThreadSanitizer() noexcept;
     
     /** */
-    void QITI_API_INTERNAL flagFailed() noexcept;
+    QITI_API_INTERNAL void flagFailed() noexcept;
     
 protected:
     std::atomic<bool> _passed = true;
@@ -146,7 +146,7 @@ protected:
 private:
     
     /** Implementation. */
-    static std::unique_ptr<ThreadSanitizer> QITI_API createFunctionsCalledInParallelDetector(FunctionData* func0,
+    QITI_API static std::unique_ptr<ThreadSanitizer> createFunctionsCalledInParallelDetector(FunctionData* func0,
                                                                                              FunctionData* func1) noexcept;
     
     /** Copy Constructor (deleted) */
