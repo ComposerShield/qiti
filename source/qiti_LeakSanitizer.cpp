@@ -48,6 +48,9 @@ void LeakSanitizer::run(std::function<void()> func) noexcept
     {
         qiti::Profile::ScopedDisableProfiling disableProfiling;
         
+        // Cache function for rerun()
+        _cachedFunction = func;
+        
         amountHeapAllocatedBefore = qiti::MallocHooks::currentAmountHeapAllocatedOnCurrentThread;
         totalAllocatedBefore = qiti::MallocHooks::totalAmountHeapAllocatedOnCurrentThread;
     } // ScopedDisableProfiling goes out of scope, re-enable profiling during user function execution
@@ -72,6 +75,12 @@ void LeakSanitizer::run(std::function<void()> func) noexcept
         if (_netLeak != 0)
             _passed = false;
     }
+}
+
+void LeakSanitizer::rerun() noexcept
+{
+    if (_cachedFunction != nullptr)
+        run(_cachedFunction);
 }
 
 bool LeakSanitizer::passed() const noexcept

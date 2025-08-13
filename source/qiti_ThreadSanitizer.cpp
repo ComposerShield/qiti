@@ -104,6 +104,9 @@ public:
         qiti::Profile::ScopedDisableProfiling disableProfiling;
         qiti::LockHooks::ScopedDisableHooks disableHooks;
         
+        // Cache function for rerun()
+        _cachedFunction = func;
+        
         // Reset state from previous runs
         shortReport.clear();
         verboseReport.clear();
@@ -228,16 +231,20 @@ public:
     
     void QITI_API_INTERNAL run(std::function<void()> func) noexcept override
     {
-        // Reset state from previous runs
-        shortReport.clear();
-        verboseReport.clear();
-        _passed.store(true, std::memory_order_relaxed);
-        numConcurrentFunc0.store(0, std::memory_order_relaxed);
-        numConcurrentFunc1.store(0, std::memory_order_relaxed);
-        
         // Disable profiling for setup
         {
             qiti::Profile::ScopedDisableProfiling disableProfiling;
+            
+            // Cache function for rerun()
+            _cachedFunction = func;
+            
+            // Reset state from previous runs
+            shortReport.clear();
+            verboseReport.clear();
+            _passed.store(true, std::memory_order_relaxed);
+            numConcurrentFunc0.store(0, std::memory_order_relaxed);
+            numConcurrentFunc1.store(0, std::memory_order_relaxed);
+            
             func0->addListener(this);
             func1->addListener(this);
         }
@@ -330,17 +337,21 @@ public:
     
     void QITI_API_INTERNAL run(std::function<void()> func) noexcept override
     {
-        // Reset state from previous runs
-        _passed.store(true, std::memory_order_relaxed);
-        {
-            std::lock_guard _(_graphLock);
-            _edges.clear();
-        }
-        _heldStack.clear();
-        
         // Disable profiling for setup
         {
             qiti::Profile::ScopedDisableProfiling disableProfiling;
+            
+            // Cache function for rerun()
+            _cachedFunction = func;
+            
+            // Reset state from previous runs
+            _passed.store(true, std::memory_order_relaxed);
+            {
+                std::lock_guard _(_graphLock);
+                _edges.clear();
+            }
+            _heldStack.clear();
+            
             LockData::addGlobalListener(this);
         }
         
@@ -442,6 +453,9 @@ public:
         {
             qiti::Profile::ScopedDisableProfiling disableProfiling;
             qiti::LockHooks::ScopedDisableHooks disableHooks;
+            
+            // Cache function for rerun()
+            _cachedFunction = func;
             
             // Reset state from previous runs
             shortReport.clear();
@@ -615,7 +629,15 @@ ThreadSanitizer::createPotentialDeadlockDetector() noexcept
 #endif
 }
 
-std::string ThreadSanitizer::getReport(bool /*verbose*/) const noexcept 
+void ThreadSanitizer::rerun() noexcept
+{
+    // Do not disable profiling here since we want profiling when running the cached function
+    
+    if (_cachedFunction != nullptr)
+        run(_cachedFunction);
+}
+
+std::string ThreadSanitizer::getReport(bool /*verbose*/) const noexcept
 {
     qiti::Profile::ScopedDisableProfiling disableProfiling;
     return {};

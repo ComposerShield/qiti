@@ -76,6 +76,16 @@ public:
      */
     QITI_API void run(std::function<void()> func) noexcept;
     
+    /**
+     Re-run the last function that was passed to run().
+     
+     This method runs the cached function from the previous call to run().
+     If run() has never been called, this method does nothing.
+     
+     @see run()
+     */
+    QITI_API void rerun() noexcept;
+    
     /** 
      Check if all leak detection tests passed.
      @return true if no leaks detected, false if any leaks found
@@ -109,6 +119,7 @@ private:
     uint64_t _totalAllocated = 0;
     uint64_t _totalDeallocated = 0;
     uint64_t _netLeak = 0;
+    std::function<void()> _cachedFunction = nullptr;
     
     /** Copy Constructor (deleted) */
     LeakSanitizer(const LeakSanitizer&) = delete;
