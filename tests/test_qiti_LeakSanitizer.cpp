@@ -299,4 +299,48 @@ QITI_TEST_CASE("qiti::LeakSanitizer::getReport", LeakSanitizerGetReport)
     }
 }
 
+QITI_TEST_CASE("qiti::LeakSanitizer::rerun", LeakSanitizerRerun)
+{
+    qiti::ScopedQitiTest test;
+    
+    qiti::LeakSanitizer lsan;
+    
+    // Test that rerun() works without any previous run() call (should be no-op)
+    lsan.rerun();
+    QITI_REQUIRE(lsan.passed());
+    
+    // Run a function that passes
+    int runCount = 0;
+    lsan.run([&runCount]()
+    {
+        runCount++;
+        int* ptr = new int(42);
+        delete ptr; // No leak
+    });
+    QITI_REQUIRE(lsan.passed());
+    QITI_REQUIRE(runCount == 1);
+    
+    // Test rerun() - should run the same function again
+    lsan.rerun();
+    QITI_REQUIRE(lsan.passed());
+    QITI_REQUIRE(runCount == 2);
+    
+    // Run a different function that fails (with leak)
+    int failRunCount = 0;
+    lsan.run([&failRunCount]()
+    {
+        failRunCount++;
+        int* ptr = new int(99);
+        // Intentional leak
+        (void)ptr;
+    });
+    QITI_REQUIRE(lsan.failed());
+    QITI_REQUIRE(failRunCount == 1);
+    
+    // Test rerun() - should run the failing function again
+    lsan.rerun();
+    QITI_REQUIRE(lsan.failed());
+    QITI_REQUIRE(failRunCount == 2);
+}
+
 #pragma clang optimize on
