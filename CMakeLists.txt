@@ -163,6 +163,11 @@ PUBLIC
     QITI_VERSION=\"${PROJECT_VERSION}\" # need the escape-quoted string for a valid C literal:
 )
 
+if(WIN32)
+    # Do not define "min" and "max" via windows.h
+    target_compile_definitions(qiti_lib PRIVATE NOMINMAX)
+endif()
+
 # ThreadSanitizer-specific link options (only when enabled)
 if(QITI_ENABLE_THREAD_SANITIZER)
     target_link_options(qiti_lib INTERFACE "-fsanitize=thread")
