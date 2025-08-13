@@ -52,6 +52,7 @@ thread_local std::function<void()> qiti::MallocHooks::onNextHeapAllocation = nul
 // Thread-local allocation tracking for leak detection
 static thread_local std::unordered_map<void*, std::size_t> g_allocationSizes;
 
+#ifndef _WIN32
 static thread_local struct AllocationSizesCleanup final
 {
     QITI_API_INTERNAL ~AllocationSizesCleanup() noexcept
@@ -60,6 +61,7 @@ static thread_local struct AllocationSizesCleanup final
         g_allocationSizes.clear(); // delete everything without triggering hooks
     }
 } g_allocationSizesCleanup;
+#endif
 
 /** Functions we never want to count towards heap allocations that we track. */
 static inline const std::array<const char*, 1> blackListedFunctions
