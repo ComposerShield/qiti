@@ -219,6 +219,7 @@ if(PROJECT_IS_TOP_LEVEL)
         set(TEST_SOURCES
             "tests/qiti_test_macros.hpp"
             "tests/test_qiti_FunctionCallData.cpp"
+            "tests/test_qiti_FunctionData.cpp"
             "tests/test_qiti_Instrument.cpp"
             "tests/test_qiti_Profile.cpp"
             "tests/test_qiti_LeakSanitizer.cpp"
