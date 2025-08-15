@@ -225,6 +225,7 @@ if(PROJECT_IS_TOP_LEVEL)
             "tests/test_qiti_LeakSanitizer.cpp"
             "tests/test_qiti_ScopedNoHeapAllocations.cpp"
             "tests/test_qiti_ScopedQitiTest.cpp"
+            "tests/test_qiti_TypeData.cpp"
             "tests/test_qiti_Utils.cpp"
         )
     else()
