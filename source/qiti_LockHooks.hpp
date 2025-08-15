@@ -34,6 +34,14 @@ namespace qiti
 {
 //--------------------------------------------------------------------------
 /**
+ Lock operation hook management and instrumentation utilities.
+
+ The LockHooks class provides infrastructure for intercepting mutex lock
+ and unlock operations at runtime. It offers mechanisms to temporarily
+ bypass lock tracking during critical sections and integrates with the
+ LockData notification system for comprehensive lock profiling.
+
+ @note This class is designed for internal use by the Qiti profiling system.
  */
 class LockHooks
 {

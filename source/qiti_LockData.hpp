@@ -34,6 +34,14 @@ namespace qiti
 {
 //--------------------------------------------------------------------------
 /**
+ Lock instrumentation data management and listener notification system.
+
+ The LockData class provides mechanisms for tracking mutex lock acquisitions
+ and releases across the application. It maintains a registry of listeners
+ that can be notified when locks are acquired or released, enabling
+ comprehensive lock profiling and deadlock detection.
+
+ @note This class is designed for internal use by the Qiti profiling system.
  */
 class LockData
 {

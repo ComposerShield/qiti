@@ -360,7 +360,9 @@ if(PROJECT_IS_TOP_LEVEL)
 
         set(DOXYGEN_FILE_PATTERNS "*.h" "*.hpp") # do not process .cpp files
 
+        # Initialize predefined macros list
         set(DOXYGEN_PREDEFINED ${COMPILE_DEFINITIONS})
+        
         set(DOXYGEN_EXTRACT_ALL YES)
         set(DOXYGEN_INTERNAL_DOCS NO)
         set(DOXYGEN_EXTRACT_PRIVATE NO)
@@ -373,6 +375,29 @@ if(PROJECT_IS_TOP_LEVEL)
         set(DOXYGEN_VERBATIM_HEADERS NO)
         set(DOXYGEN_RECURSIVE YES)
         set(DOXYGEN_USE_MDFILE_AS_MAINPAGE ${PROJECT_SOURCE_DIR}/README.md)
+        set(DOXYGEN_MARKDOWN_SUPPORT YES)
+        set(DOXYGEN_AUTOLINK_SUPPORT YES)
+        set(DOXYGEN_IMAGE_PATH ${PROJECT_SOURCE_DIR})
+        set(DOXYGEN_MARKDOWN_ID_STYLE GITHUB)
+        set(DOXYGEN_TOC_INCLUDE_HEADINGS 0)
+        set(DOXYGEN_DISABLE_INDEX YES)
+        set(DOXYGEN_GENERATE_TREEVIEW YES)
+        set(DOXYGEN_FULL_SIDEBAR NO)
+        set(DOXYGEN_HTML_DYNAMIC_MENUS NO)
+        set(DOXYGEN_SOURCE_BROWSER YES)
+        set(DOXYGEN_INLINE_SOURCES NO)
+        set(DOXYGEN_STRIP_CODE_COMMENTS NO)
+        set(DOXYGEN_REFERENCED_BY_RELATION YES)
+        set(DOXYGEN_REFERENCES_RELATION YES)
+        set(DOXYGEN_SEARCH_INCLUDES YES)
+        set(DOXYGEN_VERBATIM_VARS DOXYGEN_ALIASES)
+        set(DOXYGEN_ALIASES 
+            "cpp=\\code{.cpp}"
+            "endcpp=\\endcode"
+            "bash=\\code{.sh}"
+            "endbash=\\endcode"
+            "cmake=\\code{.cmake}"
+            "endcmake=\\endcode")
         set(DOXYGEN_CALL_GRAPH YES)
         set(DOXYGEN_CALLER_GRAPH YES)
         set(DOXYGEN_DOT_GRAPH_MAX_NODES 100)
@@ -382,11 +407,11 @@ if(PROJECT_IS_TOP_LEVEL)
         # completely mute warnings:
         set(DOXYGEN_QUIET              YES)
 
-        # specifically turn off “doc-error” warnings (mismatches between your comments
+        # specifically turn off "doc-error" warnings (mismatches between your comments
         # and the actual code)
         set(DOXYGEN_WARN_IF_DOC_ERROR  NO)
 
-        # if you’ve got stray \param or other tags pointing at non-existent symbols
+        # if you've got stray \param or other tags pointing at non-existent symbols
         # you can silence those too
         set(DOXYGEN_WARN_NO_PARAMDOC   NO)
 
@@ -395,10 +420,11 @@ if(PROJECT_IS_TOP_LEVEL)
         set(DOXYGEN_MACRO_EXPANSION    YES)
         set(DOXYGEN_EXPAND_ONLY_PREDEF YES)
 
-        # force QITI_API* to be “nothing”
+        # Add custom predefined macros for documentation
         list(APPEND DOXYGEN_PREDEFINED
             "QITI_API="
-            "QITI_API_INTERNAL=")
+            "QITI_API_INTERNAL="
+            "QITI_ENABLE_THREAD_SANITIZER=1")
 
         # if your Doxygen is new enough, also skip them entirely
         set(DOXYGEN_SKIP_FUNCTION_MACROS YES)

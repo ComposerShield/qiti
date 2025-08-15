@@ -30,25 +30,47 @@ namespace qiti
 {
 //--------------------------------------------------------------------------
 /**
+ Memory allocation hook management and instrumentation utilities.
+
+ The MallocHooks class provides a centralized interface for intercepting and
+ tracking memory allocations during test execution. It maintains thread-local
+ state for allocation counting and provides mechanisms to temporarily bypass
+ hooks when needed (e.g., during internal Qiti operations).
+
+ @note This class is designed for internal use by the Qiti profiling system.
  */
 class MallocHooks
 {
 public:
-    // Accessor functions for thread_local variables
-    QITI_API static bool& getBypassMallocHooks() noexcept;
-    QITI_API static uint32_t& getNumHeapAllocationsOnCurrentThread() noexcept;
-    QITI_API static uint64_t& getTotalAmountHeapAllocatedOnCurrentThread() noexcept;
-    QITI_API static uint64_t& getCurrentAmountHeapAllocatedOnCurrentThread() noexcept;
-    QITI_API static std::function<void()>& getOnNextHeapAllocation() noexcept;
+    // Accessor functions for global thread_local variables
+    [[nodiscard]] QITI_API static bool& getBypassMallocHooks() noexcept;
+    [[nodiscard]] QITI_API static uint32_t& getNumHeapAllocationsOnCurrentThread() noexcept;
+    [[nodiscard]] QITI_API static uint64_t& getTotalAmountHeapAllocatedOnCurrentThread() noexcept;
+    [[nodiscard]] QITI_API static uint64_t& getCurrentAmountHeapAllocatedOnCurrentThread() noexcept;
+    [[nodiscard]] QITI_API static std::function<void()>& getOnNextHeapAllocation() noexcept;
     
+    /**
+     RAII guard for temporarily disabling malloc hooks on the current thread.
+
+     This class provides a safe mechanism to bypass malloc tracking during
+     critical sections where allocation hooks might interfere with internal
+     operations (e.g., when the hook implementation itself needs to allocate
+     memory for logging or data structures).
+
+     The bypass state is automatically restored when the object goes out of
+     scope, ensuring thread-local state consistency even in the presence of
+     exceptions.
+
+     @note This class is designed for internal use by the Qiti profiling system.
+     */
     struct ScopedBypassMallocHooks final
     {
         /** Temporarily disable malloc hooks for the current thread for however long this object is in scope. */
-        inline QITI_API_INTERNAL ScopedBypassMallocHooks() noexcept
+        QITI_API_INTERNAL ScopedBypassMallocHooks() noexcept
         : previous(getBypassMallocHooks()) { getBypassMallocHooks() = true; }
         
         /** On destruction, resets bypassMallocHooks to the value saved at construction. */
-        inline QITI_API_INTERNAL ~ScopedBypassMallocHooks() noexcept { getBypassMallocHooks() = previous; }
+        QITI_API_INTERNAL ~ScopedBypassMallocHooks() noexcept { getBypassMallocHooks() = previous; }
     private:
         const bool previous;
     };
