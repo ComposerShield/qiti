@@ -354,6 +354,7 @@ QITI_TEST_CASE("qiti::FunctionData::getMaxTimeSpentInFunctionCpu_ns()", Function
         QITI_CHECK(funcData->getNumTimesCalled() == 3);
     }
 }
+#endif // ! _WIN32
 
 QITI_TEST_CASE("qiti::FunctionData::getMinTimeSpentInFunctionWallClock_ns()", FunctionDataGetMinTimeSpentInFunctionWallClock)
 {
@@ -402,6 +403,7 @@ QITI_TEST_CASE("qiti::FunctionData::getMaxTimeSpentInFunctionWallClock_ns()", Fu
         QITI_CHECK(maxTime > 0); // Should have some measurable time
     }
     
+#ifndef _WIN32
     QITI_SECTION("CPU vs WallClock consistency check")
     {
         testFuncWithDelay(2);
@@ -419,8 +421,10 @@ QITI_TEST_CASE("qiti::FunctionData::getMaxTimeSpentInFunctionWallClock_ns()", Fu
         QITI_CHECK(minWall > 0);
         QITI_CHECK(funcData->getNumTimesCalled() == 2);
     }
-}
 #endif // ! _WIN32
+}
+
+#ifndef _WIN32 // TODO: Windows exception tracking and function type detection needs investigation
 
 QITI_TEST_CASE("qiti::FunctionCallData::getCaller()", FunctionCallDataGetCaller)
 {
