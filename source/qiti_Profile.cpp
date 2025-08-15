@@ -47,52 +47,45 @@
 #ifdef _WIN32
 QITI_API_INTERNAL static void clock_gettime_windows(timespec& time) noexcept
 {
-    // Windows: Try GetThreadTimes first for CPU time
-    FILETIME creationTime, exitTime, kernelTime, userTime;
-    if (GetThreadTimes(GetCurrentThread(), &creationTime, &exitTime, &kernelTime, &userTime))
+    // Windows: Use QueryPerformanceCounter for high-resolution timing
+    // GetThreadTimes has insufficient resolution (~15ms) for function-level profiling
+    static LARGE_INTEGER frequency = {{0, 0}};
+    if (frequency.QuadPart == 0)
     {
-        ULARGE_INTEGER userTimeLI, kernelTimeLI;
-        userTimeLI.LowPart = userTime.dwLowDateTime;
-        userTimeLI.HighPart = userTime.dwHighDateTime;
-        kernelTimeLI.LowPart = kernelTime.dwLowDateTime;
-        kernelTimeLI.HighPart = kernelTime.dwHighDateTime;
-        
-        uint64_t totalTime100ns = userTimeLI.QuadPart + kernelTimeLI.QuadPart;
-        time.tv_sec = static_cast<time_t>(totalTime100ns / 10000000ULL);
-        time.tv_nsec = static_cast<long>((totalTime100ns % 10000000ULL) * 100ULL); // NOLINT
+        QueryPerformanceFrequency(&frequency);
+    }
+    
+    LARGE_INTEGER counter;
+    if (QueryPerformanceCounter(&counter) && frequency.QuadPart > 0)
+    {
+        // Convert to nanoseconds - use static_cast to handle sign conversion
+        uint64_t counterValue = static_cast<uint64_t>(counter.QuadPart);
+        uint64_t frequencyValue = static_cast<uint64_t>(frequency.QuadPart);
+        uint64_t totalNs = (counterValue * 1000000000ULL) / frequencyValue;
+        time.tv_sec = static_cast<time_t>(totalNs / 1000000000ULL);
+        time.tv_nsec = static_cast<long>(totalNs % 1000000000ULL); // NOLINT
     }
     else
     {
-        // Fallback: Use QueryPerformanceCounter for high-resolution timing
-        static LARGE_INTEGER frequency = {{0, 0}};
-        if (frequency.QuadPart == 0)
+        // Fallback: Try GetThreadTimes (though it has low resolution)
+        FILETIME creationTime, exitTime, kernelTime, userTime;
+        if (GetThreadTimes(GetCurrentThread(), &creationTime, &exitTime, &kernelTime, &userTime))
         {
-            QueryPerformanceFrequency(&frequency);
-        }
-        
-        LARGE_INTEGER counter;
-        if (QueryPerformanceCounter(&counter) && frequency.QuadPart > 0)
-        {
-            // Convert to nanoseconds
-            uint64_t counterValue = static_cast<uint64_t>(counter.QuadPart);
-            uint64_t frequencyValue = static_cast<uint64_t>(frequency.QuadPart);
-            uint64_t totalNs = (counterValue * 1000000000ULL) / frequencyValue;
-            time.tv_sec = static_cast<time_t>(totalNs / 1000000000ULL);
-            time.tv_nsec = static_cast<long>(totalNs % 1000000000ULL); // NOLINT
+            ULARGE_INTEGER userTimeLI, kernelTimeLI;
+            userTimeLI.LowPart = userTime.dwLowDateTime;
+            userTimeLI.HighPart = userTime.dwHighDateTime;
+            kernelTimeLI.LowPart = kernelTime.dwLowDateTime;
+            kernelTimeLI.HighPart = kernelTime.dwHighDateTime;
+            
+            uint64_t totalTime100ns = userTimeLI.QuadPart + kernelTimeLI.QuadPart;
+            time.tv_sec = static_cast<time_t>(totalTime100ns / 10000000ULL);
+            time.tv_nsec = static_cast<long>((totalTime100ns % 10000000ULL) * 100ULL); // NOLINT
         }
         else
         {
-            // Last resort: use current time (not ideal for CPU time, but better than zero)
-            FILETIME ft;
-            GetSystemTimeAsFileTime(&ft);
-            ULARGE_INTEGER li;
-            li.LowPart = ft.dwLowDateTime;
-            li.HighPart = ft.dwHighDateTime;
-            
-            // Convert from 100ns intervals since Jan 1, 1601 to seconds/nanoseconds
-            uint64_t time100ns = li.QuadPart;
-            time.tv_sec = static_cast<time_t>(time100ns / 10000000ULL);
-            time.tv_nsec = static_cast<long>((time100ns % 10000000ULL) * 100ULL); // NOLINT
+            // Last resort: zero timing
+            time.tv_sec = 0;
+            time.tv_nsec = 0;
         }
     }
 }
