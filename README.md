@@ -86,7 +86,7 @@ You do not need to add these flags yourself—just ensure you are using Clang wi
 
 In addition, by linking your unit test executable with `qiti_tests_client`, Qiti automatically propagates:
 
-- **Object File**: `./source/client/qiti_client_tsan_integration.cpp`
+- **Object File**: `./source/client/qiti_client_executable.cpp`
 - **Linker flags** (via `INTERFACE`):
   - `-rdynamic`
 
@@ -110,7 +110,7 @@ clang++ -std=c++20 -shared -fPIC \
 #### Step 2: Configure Your Test Executable Build
 
 **Include in your project:**
-- Add `source/client/qiti_client_tsan_integration.cpp` to your test executable's source files
+- Add `source/client/qiti_client_executable.cpp` to your test executable's source files
 
 **Required compiler flags:**
 - `-std=c++20`
@@ -127,7 +127,7 @@ clang++ -std=c++20 -shared -fPIC \
 #### Requirements Summary:
 - **Clang compiler** (Apple Clang or LLVM Clang)
 - **C++20 standard**
-- **Include qiti_client_tsan_integration.cpp** in your test executable
+- **Include qiti_client_executable.cpp** in your test executable
 - **Link against libqiti** shared library
 - **Apply required compiler/linker flags** above
 

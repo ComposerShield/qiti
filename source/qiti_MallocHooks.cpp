@@ -350,7 +350,7 @@ void qiti::MallocHooks::reallocHookWithTracking(void* oldPtr, void* newPtr, std:
 
 #if (defined(__APPLE__) || ! defined(QITI_ENABLE_THREAD_SANITIZER)) && ! defined(_WIN32)
 // macOS/Linux operator new/delete overrides for leak detection
-// Windows overrides are in qiti_client_tsan_integration.cpp (executable-side)
+// Windows overrides are in qiti_client_executable.cpp (executable-side)
 
 QITI_API void* operator new(std::size_t size)
 {
