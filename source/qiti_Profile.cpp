@@ -45,6 +45,9 @@
 #include <string>
 
 #ifdef _WIN32
+// Define the Windows debug flag (declared in qiti_API.hpp)
+QITI_API_VAR bool special_debug = false;
+
 QITI_API_INTERNAL static void clock_gettime_windows(timespec& time) noexcept
 {
     // Windows: Use QueryPerformanceCounter for high-resolution timing
