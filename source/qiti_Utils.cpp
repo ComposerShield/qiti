@@ -73,7 +73,7 @@ int dladdr(const void* addr, Dl_info* info)
     
     // Try to get symbol name using DbgHelp
     static char buffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(TCHAR)];
-    PSYMBOL_INFO pSymbol = (PSYMBOL_INFO)buffer;
+    PSYMBOL_INFO pSymbol = reinterpret_cast<PSYMBOL_INFO>(buffer);
     pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
     pSymbol->MaxNameLen = MAX_SYM_NAME;
     
@@ -83,11 +83,11 @@ int dladdr(const void* addr, Dl_info* info)
     // Initialize symbols if not already done
     static bool symInitialized = false;
     if (! symInitialized) {
-        SymInitialize(hProcess, NULL, TRUE);
+        SymInitialize(hProcess, nullptr, TRUE);
         symInitialized = true;
     }
     
-    if (SymFromAddr(hProcess, (DWORD64)addr, &displacement, pSymbol))
+    if (SymFromAddr(hProcess, reinterpret_cast<DWORD64>(addr), &displacement, pSymbol))
     {
         // Store the symbol name - use a static buffer to keep it alive
         static char symbolNameBuffer[MAX_SYM_NAME];
