@@ -76,7 +76,7 @@ namespace TypeNameHelpers
 {
     // A constexpr helper that extracts type name from __PRETTY_FUNCTION__
     template <typename T>
-    QITI_API_INLINE consteval auto makeTypeNameArray() noexcept
+    [[nodiscard]] QITI_API_INLINE consteval auto makeTypeNameArray() noexcept
     {
         constexpr const char* fullFuncName = __PRETTY_FUNCTION__;
         constexpr std::string_view pretty = fullFuncName;
@@ -235,13 +235,40 @@ private:
     Profile() = delete;
     ~Profile() = delete;
     
-    /** */
+    /**
+     Updates profiling data when a function is entered.
+
+     This internal hook is called when function entry is detected through
+     instrumentation. It updates call counts, timing information, and manages
+     the call stack for nested function tracking.
+
+     @param this_fn Pointer to the function being entered
+     @note This function is designed for internal use by the Qiti profiling system.
+     */
     QITI_API_INTERNAL static void updateFunctionDataOnEnter(const void* this_fn) noexcept;
     
-    /** */
+    /**
+     Updates profiling data when a function is exited.
+
+     This internal hook is called when function exit is detected through
+     instrumentation. It finalizes timing measurements, updates call counts,
+     and manages the call stack by removing the current function from tracking.
+
+     @param this_fn Pointer to the function being exited
+     @note This function is designed for internal use by the Qiti profiling system.
+     */
     QITI_API_INTERNAL static void updateFunctionDataOnExit(const void* this_fn) noexcept;
 
-    /** */
+    /**
+     Compile-time storage for free function addresses used in profiling.
+
+     This struct provides a compile-time mechanism to store and retrieve the
+     address of free functions for profiling purposes. Each function pointer
+     gets its own unique instantiation, ensuring that function addresses can
+     be resolved at compile time for efficient runtime profiling.
+
+     @note This struct is designed for internal use by the Qiti profiling system.
+     */
     template <auto FuncPtr>
     requires isFreeFunction<FuncPtr>
     struct FunctionAddressHolder
@@ -252,7 +279,16 @@ private:
 #pragma clang diagnostic pop
     };
     
-    /** */
+    /**
+     Mock address storage for member functions used in profiling.
+
+     Since C++ does not portably allow direct function pointers to member
+     functions, this struct provides a workaround by creating a unique static
+     variable for each member function. The address of this variable serves
+     as a unique identifier for profiling member functions.
+
+     @note This struct is designed for internal use by the Qiti profiling system.
+     */
     template <auto FuncPtr>
     requires isMemberFunction<FuncPtr>
     struct MemberFunctionMockAddressHolder
