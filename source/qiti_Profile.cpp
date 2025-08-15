@@ -64,7 +64,7 @@ QITI_API_INTERNAL static void clock_gettime_windows(timespec& time) noexcept
     else
     {
         // Fallback: Use QueryPerformanceCounter for high-resolution timing
-        static LARGE_INTEGER frequency = {0};
+        static LARGE_INTEGER frequency = {{0, 0}};
         if (frequency.QuadPart == 0)
         {
             QueryPerformanceFrequency(&frequency);
@@ -73,8 +73,10 @@ QITI_API_INTERNAL static void clock_gettime_windows(timespec& time) noexcept
         LARGE_INTEGER counter;
         if (QueryPerformanceCounter(&counter) && frequency.QuadPart > 0)
         {
-            // Convert to nanoseconds
-            uint64_t totalNs = (counter.QuadPart * 1000000000ULL) / frequency.QuadPart;
+            // Convert to nanoseconds - use static_cast to handle sign conversion
+            uint64_t counterValue = static_cast<uint64_t>(counter.QuadPart);
+            uint64_t frequencyValue = static_cast<uint64_t>(frequency.QuadPart);
+            uint64_t totalNs = (counterValue * 1000000000ULL) / frequencyValue;
             time.tv_sec = static_cast<time_t>(totalNs / 1000000000ULL);
             time.tv_nsec = static_cast<long>(totalNs % 1000000000ULL); // NOLINT
         }
