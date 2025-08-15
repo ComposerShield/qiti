@@ -93,7 +93,7 @@ int dladdr(const void* addr, Dl_info* info)
         static char symbolNameBuffer[MAX_SYM_NAME];
         strncpy_s(symbolNameBuffer, sizeof(symbolNameBuffer), pSymbol->Name, _TRUNCATE);
         info->dli_sname = symbolNameBuffer;
-        info->dli_saddr = (void*)pSymbol->Address;
+        info->dli_saddr = reinterpret_cast<void*>(pSymbol->Address);
     }
     
     return 1;
