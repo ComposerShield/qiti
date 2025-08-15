@@ -13,8 +13,9 @@
 
 #include <iostream>
 
+#ifdef _WIN32
 [[maybe_unused]] extern bool special_debug;
-
+#endif
 //--------------------------------------------------------------------------
 
 /** NOT static to purposely allow external linkage and visibility to QITI */

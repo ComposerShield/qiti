@@ -44,7 +44,9 @@
 #include <utility>
 #include <string>
 
-[[maybe_unused]] bool special_debug = false;
+#ifdef _WIN32
+[[maybe_unused]] QITI_API_VAR bool special_debug = false;
+#endif
 
 #ifdef _WIN32
 QITI_API_INTERNAL static void clock_gettime_windows(timespec& time) noexcept
