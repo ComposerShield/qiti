@@ -424,8 +424,6 @@ QITI_TEST_CASE("qiti::FunctionData::getMaxTimeSpentInFunctionWallClock_ns()", Fu
 #endif // ! _WIN32
 }
 
-#ifndef _WIN32 // TODO: Windows exception tracking and function type detection needs investigation
-
 QITI_TEST_CASE("qiti::FunctionCallData::getCaller()", FunctionCallDataGetCaller)
 {
     qiti::ScopedQitiTest test;
