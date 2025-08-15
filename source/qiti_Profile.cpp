@@ -73,7 +73,7 @@ QITI_API_INTERNAL static void clock_gettime_windows(timespec& time) noexcept
         LARGE_INTEGER counter;
         if (QueryPerformanceCounter(&counter) && frequency.QuadPart > 0)
         {
-            // Convert to nanoseconds - use static_cast to handle sign conversion
+            // Convert to nanoseconds
             uint64_t counterValue = static_cast<uint64_t>(counter.QuadPart);
             uint64_t frequencyValue = static_cast<uint64_t>(frequency.QuadPart);
             uint64_t totalNs = (counterValue * 1000000000ULL) / frequencyValue;
