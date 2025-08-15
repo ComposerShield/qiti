@@ -215,7 +215,7 @@ void Profile::updateFunctionDataOnEnter(const void* this_fn) noexcept
     
     // Grab starting times last without doing additional work after
     lastCallImpl->startTimeWallClock = std::chrono::steady_clock::now();
-#ifndefdef _WIN32 // CPU Time feature not supported on Windows
+#ifndef _WIN32 // CPU Time feature not supported on Windows
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &lastCallImpl->startTimeCpu); // last to be most precise
 #endif
 }
