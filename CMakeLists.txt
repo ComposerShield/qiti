@@ -375,6 +375,29 @@ if(PROJECT_IS_TOP_LEVEL)
         set(DOXYGEN_VERBATIM_HEADERS NO)
         set(DOXYGEN_RECURSIVE YES)
         set(DOXYGEN_USE_MDFILE_AS_MAINPAGE ${PROJECT_SOURCE_DIR}/README.md)
+        set(DOXYGEN_MARKDOWN_SUPPORT YES)
+        set(DOXYGEN_AUTOLINK_SUPPORT YES)
+        set(DOXYGEN_IMAGE_PATH ${PROJECT_SOURCE_DIR})
+        set(DOXYGEN_MARKDOWN_ID_STYLE GITHUB)
+        set(DOXYGEN_TOC_INCLUDE_HEADINGS 0)
+        set(DOXYGEN_DISABLE_INDEX YES)
+        set(DOXYGEN_GENERATE_TREEVIEW YES)
+        set(DOXYGEN_FULL_SIDEBAR NO)
+        set(DOXYGEN_HTML_DYNAMIC_MENUS NO)
+        set(DOXYGEN_SOURCE_BROWSER YES)
+        set(DOXYGEN_INLINE_SOURCES NO)
+        set(DOXYGEN_STRIP_CODE_COMMENTS NO)
+        set(DOXYGEN_REFERENCED_BY_RELATION YES)
+        set(DOXYGEN_REFERENCES_RELATION YES)
+        set(DOXYGEN_SEARCH_INCLUDES YES)
+        set(DOXYGEN_VERBATIM_VARS DOXYGEN_ALIASES)
+        set(DOXYGEN_ALIASES 
+            "cpp=\\code{.cpp}"
+            "endcpp=\\endcode"
+            "bash=\\code{.sh}"
+            "endbash=\\endcode"
+            "cmake=\\code{.cmake}"
+            "endcmake=\\endcode")
         set(DOXYGEN_CALL_GRAPH YES)
         set(DOXYGEN_CALLER_GRAPH YES)
         set(DOXYGEN_DOT_GRAPH_MAX_NODES 100)

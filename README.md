@@ -1,6 +1,6 @@
 # qiti
 
-![Your Project Logo](docs/logo.png)
+![](docs/logo.png)
 
 Qiti is a lightweight C++20 library that brings profiling and instrumentation directly into your unit tests. 
 
