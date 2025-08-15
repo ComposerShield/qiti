@@ -126,9 +126,3 @@ namespace qiti
 #endif
     }
 } // namespace qiti
-
-
-#ifdef _WIN32
-// Debug flag for Windows timing investigation - declared here, defined in qiti_Profile.cpp
-[[maybe_unused]] QITI_API_VAR extern bool special_debug;
-#endif

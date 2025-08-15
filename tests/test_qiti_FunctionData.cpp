@@ -286,6 +286,7 @@ QITI_TEST_CASE("qiti::FunctionData::getAllProfiledFunctionData()", FunctionDataG
     QITI_REQUIRE(allFunctionsAfterReset.size() == 0);
 }
 
+#ifdef _WIN32 // CPU time feature not supported on Windows
 QITI_TEST_CASE("qiti::FunctionData::getMinTimeSpentInFunctionCpu_ns()", FunctionDataGetMinTimeSpentInFunctionCpu)
 {
     qiti::ScopedQitiTest test;
@@ -300,13 +301,7 @@ QITI_TEST_CASE("qiti::FunctionData::getMinTimeSpentInFunctionCpu_ns()", Function
     
     QITI_SECTION("Single call")
     {
-#if _WIN32
-        special_debug = true;
-#endif
         testFuncWithVariableLength(1); // Small delay
-#if _WIN32
-        special_debug = false;
-#endif
         
         uint64_t minTime = funcData->getMinTimeSpentInFunctionCpu_ns();
         QITI_CHECK(minTime > 0); // Should have some measurable time
@@ -365,6 +360,8 @@ QITI_TEST_CASE("qiti::FunctionData::getMaxTimeSpentInFunctionCpu_ns()", Function
         QITI_CHECK(funcData->getNumTimesCalled() == 3);
     }
 }
+
+#endif // _WIN32
 
 QITI_TEST_CASE("qiti::FunctionData::getMinTimeSpentInFunctionWallClock_ns()", FunctionDataGetMinTimeSpentInFunctionWallClock)
 {

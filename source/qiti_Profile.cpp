@@ -44,55 +44,6 @@
 #include <utility>
 #include <string>
 
-#ifdef _WIN32
-// Define the Windows debug flag (declared in qiti_API.hpp)
-QITI_API_VAR bool special_debug = false;
-
-QITI_API_INTERNAL static void clock_gettime_windows(timespec& time) noexcept
-{
-    // Windows: Use QueryPerformanceCounter for high-resolution timing
-    // GetThreadTimes has insufficient resolution (~15ms) for function-level profiling
-    static LARGE_INTEGER frequency = {{0, 0}};
-    if (frequency.QuadPart == 0)
-    {
-        QueryPerformanceFrequency(&frequency);
-    }
-    
-    LARGE_INTEGER counter;
-    if (QueryPerformanceCounter(&counter) && frequency.QuadPart > 0)
-    {
-        // Convert to nanoseconds - use static_cast to handle sign conversion
-        uint64_t counterValue = static_cast<uint64_t>(counter.QuadPart);
-        uint64_t frequencyValue = static_cast<uint64_t>(frequency.QuadPart);
-        uint64_t totalNs = (counterValue * 1000000000ULL) / frequencyValue;
-        time.tv_sec = static_cast<time_t>(totalNs / 1000000000ULL);
-        time.tv_nsec = static_cast<long>(totalNs % 1000000000ULL); // NOLINT
-    }
-    else
-    {
-        // Fallback: Try GetThreadTimes (though it has low resolution)
-        FILETIME creationTime, exitTime, kernelTime, userTime;
-        if (GetThreadTimes(GetCurrentThread(), &creationTime, &exitTime, &kernelTime, &userTime))
-        {
-            ULARGE_INTEGER userTimeLI, kernelTimeLI;
-            userTimeLI.LowPart = userTime.dwLowDateTime;
-            userTimeLI.HighPart = userTime.dwHighDateTime;
-            kernelTimeLI.LowPart = kernelTime.dwLowDateTime;
-            kernelTimeLI.HighPart = kernelTime.dwHighDateTime;
-            
-            uint64_t totalTime100ns = userTimeLI.QuadPart + kernelTimeLI.QuadPart;
-            time.tv_sec = static_cast<time_t>(totalTime100ns / 10000000ULL);
-            time.tv_nsec = static_cast<long>((totalTime100ns % 10000000ULL) * 100ULL); // NOLINT
-        }
-        else
-        {
-            // Last resort: zero timing
-            time.tv_sec = 0;
-            time.tv_nsec = 0;
-        }
-    }
-}
-#endif
 
 namespace qiti
 {
@@ -281,9 +232,7 @@ void Profile::updateFunctionDataOnExit(const void* this_fn) noexcept
     timespec cpuEndTime;
     
     // Get end times immediately before doing any other work
-#ifdef _WIN32
-    clock_gettime_windows(cpuEndTime);
-#else
+#if ! defined(_WIN32) // feature not supported on Windows
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &cpuEndTime); // first to be most precise
 #endif
     const auto clockEndTime = std::chrono::steady_clock::now();
@@ -293,19 +242,6 @@ void Profile::updateFunctionDataOnExit(const void* this_fn) noexcept
         (static_cast<uint64_t>(cpuEndTime.tv_sec - callImpl->startTimeCpu.tv_sec) * 1'000'000'000ULL) +
         (static_cast<uint64_t>(cpuEndTime.tv_nsec) - static_cast<uint64_t>(callImpl->startTimeCpu.tv_nsec));
     const auto clockElapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(clockEndTime - callImpl->startTimeWallClock);
-
-#ifdef _WIN32
-    if (special_debug)
-    {
-        // Debug logging for Windows CPU timing investigation
-        std::cout << "DEBUG: Windows CPU timing debug:" << std::endl;
-        std::cout << "  startTimeCpu: tv_sec=" << callImpl->startTimeCpu.tv_sec << ", tv_nsec=" << callImpl->startTimeCpu.tv_nsec << std::endl;
-        std::cout << "  cpuEndTime:   tv_sec=" << cpuEndTime.tv_sec << ", tv_nsec=" << cpuEndTime.tv_nsec << std::endl;
-        std::cout << "  cpuElapsed_ns: " << cpuElapsed_ns << std::endl;
-        std::cout << "  clockElapsed_ns: " << clockElapsed_ns.count() << std::endl;
-        std::cout.flush(); // Force flush to ensure output appears in CI logs
-    }
-#endif
 
     // Update FunctionCallData (before updating listeners in case listeners need that information)
     callImpl->endTimeWallClock = clockEndTime;
