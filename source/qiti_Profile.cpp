@@ -47,7 +47,7 @@
 #ifdef _WIN32
 QITI_API_INTERNAL static void clock_gettime_windows(timespec& time) noexcept
 {
-    // Windows: Use GetThreadTimes for CPU time
+    // Windows: Try GetThreadTimes first for CPU time
     FILETIME creationTime, exitTime, kernelTime, userTime;
     if (GetThreadTimes(GetCurrentThread(), &creationTime, &exitTime, &kernelTime, &userTime))
     {
@@ -63,11 +63,35 @@ QITI_API_INTERNAL static void clock_gettime_windows(timespec& time) noexcept
     }
     else
     {
-        // fallback: zero out the timespec
-        time.tv_sec = 0;
-        time.tv_nsec = 0;
+        // Fallback: Use QueryPerformanceCounter for high-resolution timing
+        static LARGE_INTEGER frequency = {0};
+        if (frequency.QuadPart == 0)
+        {
+            QueryPerformanceFrequency(&frequency);
+        }
         
-        assert(false); // failed to get CPU time
+        LARGE_INTEGER counter;
+        if (QueryPerformanceCounter(&counter) && frequency.QuadPart > 0)
+        {
+            // Convert to nanoseconds
+            uint64_t totalNs = (counter.QuadPart * 1000000000ULL) / frequency.QuadPart;
+            time.tv_sec = static_cast<time_t>(totalNs / 1000000000ULL);
+            time.tv_nsec = static_cast<long>(totalNs % 1000000000ULL); // NOLINT
+        }
+        else
+        {
+            // Last resort: use current time (not ideal for CPU time, but better than zero)
+            FILETIME ft;
+            GetSystemTimeAsFileTime(&ft);
+            ULARGE_INTEGER li;
+            li.LowPart = ft.dwLowDateTime;
+            li.HighPart = ft.dwHighDateTime;
+            
+            // Convert from 100ns intervals since Jan 1, 1601 to seconds/nanoseconds
+            uint64_t time100ns = li.QuadPart;
+            time.tv_sec = static_cast<time_t>(time100ns / 10000000ULL);
+            time.tv_nsec = static_cast<long>((time100ns % 10000000ULL) * 100ULL); // NOLINT
+        }
     }
 }
 #endif
