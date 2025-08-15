@@ -164,13 +164,13 @@ private:
     ThreadSanitizer(const ThreadSanitizer&) = delete;
     /** Copy Assignment (deleted) */
     ThreadSanitizer& operator=(const ThreadSanitizer&) = delete;
+    
+    //--------------------------------------------------------------------------
+    /** \endcond */
+    // Doxygen - End Internal Documentation
+    //--------------------------------------------------------------------------
 };
 
 } // namespace qiti
-
-//--------------------------------------------------------------------------
-/** \endcond */
-// Doxygen - End Internal Documentation
-//--------------------------------------------------------------------------
 
 #endif // QITI_ENABLE_THREAD_SANITIZER

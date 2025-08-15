@@ -104,6 +104,10 @@
 
 namespace qiti
 {
+//--------------------------------------------------------------------------
+// Doxygen - Begin Internal Documentation
+/** \cond INTERNAL */
+//--------------------------------------------------------------------------
     template<auto FuncPtr>
     concept isFreeFunction =
         std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>;
@@ -125,4 +129,8 @@ namespace qiti
         return false;
 #endif
     }
+//--------------------------------------------------------------------------
+/** \endcond */
+// Doxygen - End Internal Documentation
+//--------------------------------------------------------------------------
 } // namespace qiti

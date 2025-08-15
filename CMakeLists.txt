@@ -360,7 +360,9 @@ if(PROJECT_IS_TOP_LEVEL)
 
         set(DOXYGEN_FILE_PATTERNS "*.h" "*.hpp") # do not process .cpp files
 
+        # Initialize predefined macros list
         set(DOXYGEN_PREDEFINED ${COMPILE_DEFINITIONS})
+        
         set(DOXYGEN_EXTRACT_ALL YES)
         set(DOXYGEN_INTERNAL_DOCS NO)
         set(DOXYGEN_EXTRACT_PRIVATE NO)
@@ -382,11 +384,11 @@ if(PROJECT_IS_TOP_LEVEL)
         # completely mute warnings:
         set(DOXYGEN_QUIET              YES)
 
-        # specifically turn off “doc-error” warnings (mismatches between your comments
+        # specifically turn off "doc-error" warnings (mismatches between your comments
         # and the actual code)
         set(DOXYGEN_WARN_IF_DOC_ERROR  NO)
 
-        # if you’ve got stray \param or other tags pointing at non-existent symbols
+        # if you've got stray \param or other tags pointing at non-existent symbols
         # you can silence those too
         set(DOXYGEN_WARN_NO_PARAMDOC   NO)
 
@@ -395,10 +397,11 @@ if(PROJECT_IS_TOP_LEVEL)
         set(DOXYGEN_MACRO_EXPANSION    YES)
         set(DOXYGEN_EXPAND_ONLY_PREDEF YES)
 
-        # force QITI_API* to be “nothing”
+        # Add custom predefined macros for documentation
         list(APPEND DOXYGEN_PREDEFINED
             "QITI_API="
-            "QITI_API_INTERNAL=")
+            "QITI_API_INTERNAL="
+            "QITI_ENABLE_THREAD_SANITIZER=1")
 
         # if your Doxygen is new enough, also skip them entirely
         set(DOXYGEN_SKIP_FUNCTION_MACROS YES)

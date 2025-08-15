@@ -27,15 +27,20 @@
 
 namespace qiti
 {
+//--------------------------------------------------------------------------
+// Doxygen - Begin Internal Documentation
+/** \cond INTERNAL */
+//--------------------------------------------------------------------------
+
 class FunctionData;
 // Forward declaration for external access
 extern thread_local std::stack<qiti::FunctionData*> g_callStack;
 
 namespace FunctionNameHelpers
 {
-    // A constexpr helper that slices out “FuncPtr = …” from __PRETTY_FUNCTION__.
+    /** A constexpr helper that slices out “FuncPtr = …” from __PRETTY_FUNCTION__ */
     template <auto FuncPtr>
-    QITI_API_INLINE consteval auto makeFunctionNameArray() noexcept
+    [[nodiscard]] QITI_API_INLINE consteval auto makeFunctionNameArray() noexcept
     {
         constexpr const char* fullFuncName = __PRETTY_FUNCTION__;
         constexpr std::string_view pretty = fullFuncName;
@@ -74,7 +79,7 @@ namespace FunctionNameHelpers
 
 namespace TypeNameHelpers
 {
-    // A constexpr helper that extracts type name from __PRETTY_FUNCTION__
+    /** A constexpr helper that extracts type name from __PRETTY_FUNCTION__ */
     template <typename T>
     [[nodiscard]] QITI_API_INLINE consteval auto makeTypeNameArray() noexcept
     {
@@ -107,6 +112,9 @@ namespace TypeNameHelpers
     inline static constexpr const char* typeNameCStr = typeNameArray<T>.data();
 } // namespace TypeNameHelpers
 
+//--------------------------------------------------------------------------
+/** \endcond */
+// Doxygen - End Internal Documentation
 //--------------------------------------------------------------------------
 
 /**
@@ -326,6 +334,11 @@ private:
 #pragma clang diagnostic pop
     }
     
+    //--------------------------------------------------------------------------
+    /** \endcond */
+    // Doxygen - End Internal Documentation
+    //--------------------------------------------------------------------------
+    
     /** */
     QITI_API static void beginProfilingFunction(const void* functionAddress, const char* functionName = nullptr) noexcept;
     
@@ -344,8 +357,3 @@ private:
     [[nodiscard]] QITI_API static bool isProfilingFunction(const void* funcAddress) noexcept;
 }; // class Profile
 }  // namespace qiti
-
-//--------------------------------------------------------------------------
-/** \endcond */
-// Doxygen - End Internal Documentation
-//--------------------------------------------------------------------------
