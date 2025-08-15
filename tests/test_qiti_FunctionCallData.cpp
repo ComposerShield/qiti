@@ -94,6 +94,7 @@ QITI_TEST_CASE("qiti::FunctionCallData::getThreadThatCalledFunction()", Function
     }
 }
 
+#ifndef _WIN32 // CPU Time feature not supported on Windows
 QITI_TEST_CASE("qiti::FunctionCallData::getTimeSpentInFunction", FunctionCallDataGetTimeSpentInFunction)
 {
     qiti::ScopedQitiTest test;
@@ -142,3 +143,4 @@ QITI_TEST_CASE("qiti::FunctionCallData::getTimeSpentInFunction", FunctionCallDat
         QITI_REQUIRE(slowWorkTimeSpentClock >= fastWorkTimeSpentClock);
     }
 }
+#endif // ! _WIN32

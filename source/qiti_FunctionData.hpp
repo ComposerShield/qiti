@@ -81,7 +81,12 @@ public:
      
      CPU time is the amount of time the thread actually spent executing
      on the CPU (user + kernel mode), and does ​not​ include time spent off-CPU.
+     
+     Feature is not supported on Windows.
      */
+#ifdef _WIN32
+    [[deprecated("Feature is not supported on Windows")]]
+#endif
     [[nodiscard]] QITI_API uint64_t getAverageTimeSpentInFunctionCpu_ns() const noexcept;
     
     /**
@@ -98,7 +103,12 @@ public:
      CPU time is the amount of time the thread actually spent executing
      on the CPU (user + kernel mode), and does ​not​ include time spent off-CPU.
      Returns 0 if the function has never been called.
+     
+     Feature is not supported on Windows.
      */
+#ifdef _WIN32
+    [[deprecated("Feature is not supported on Windows")]]
+#endif
     [[nodiscard]] QITI_API uint64_t getMinTimeSpentInFunctionCpu_ns() const noexcept;
     
     /**

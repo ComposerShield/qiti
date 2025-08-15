@@ -85,7 +85,11 @@ double HotspotDetector::calculateHotspotScore(const FunctionData* func) noexcept
     
     // Calculate total time spent = number of calls × average time per call
     uint64_t numCalls = func->getNumTimesCalled();
+#ifdef _WIN32 // CPU Time feature not supported on Windows
+    uint64_t avgTime = func->getAverageTimeSpentInFunctionWallClock_ns();
+#else
     uint64_t avgTime = func->getAverageTimeSpentInFunctionCpu_ns();
+#endif
     
     if (numCalls == 0)
         return 0.0;
@@ -107,9 +111,14 @@ std::string HotspotDetector::getHotspotReason(const FunctionData* func) noexcept
     std::ostringstream reason;
     
     uint64_t numCalls = func->getNumTimesCalled();
-    uint64_t avgTimeCpu = func->getAverageTimeSpentInFunctionCpu_ns();
-    uint64_t maxTimeCpu = func->getMaxTimeSpentInFunctionCpu_ns();
-    uint64_t totalTime = numCalls * avgTimeCpu;
+#ifdef _WIN32 // CPU Time feature not supported on Windows
+    uint64_t avgTime = func->getAverageTimeSpentInFunctionWallClock_ns();
+    uint64_t maxTime = func->getMaxTimeSpentInFunctionWallClock_ns();
+#else
+    uint64_t avgTime = func->getAverageTimeSpentInFunctionCpu_ns();
+    uint64_t maxTime = func->getMaxTimeSpentInFunctionCpu_ns();
+#endif
+    uint64_t totalTime = numCalls * avgTime;
     
     // Primary reason - total time consumption
     reason << "Total time: " << (totalTime / 1000000) << "ms";
@@ -119,12 +128,12 @@ std::string HotspotDetector::getHotspotReason(const FunctionData* func) noexcept
     
     if (numCalls > 0)
     {
-        reason << ", avg: " << (avgTimeCpu / 1000) << "μs";
+        reason << ", avg: " << (avgTime / 1000) << "μs";
         
         // Highlight if there's high variance (max >> avg)
-        if (maxTimeCpu > avgTimeCpu * 3)
+        if (maxTime > avgTime * 3)
         {
-            reason << ", max: " << (maxTimeCpu / 1000) << "μs";
+            reason << ", max: " << (maxTime / 1000) << "μs";
         }
     }
     
