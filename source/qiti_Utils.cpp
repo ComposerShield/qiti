@@ -68,8 +68,33 @@ int dladdr(const void* addr, Dl_info* info)
     
     info->dli_fname = moduleFilename;
     info->dli_fbase = hModule;
-    info->dli_sname = nullptr;  // Symbol name lookup would require DbgHelp
+    info->dli_sname = nullptr;
     info->dli_saddr = nullptr;
+    
+    // Try to get symbol name using DbgHelp
+    static char buffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(TCHAR)];
+    PSYMBOL_INFO pSymbol = reinterpret_cast<PSYMBOL_INFO>(buffer);
+    pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+    pSymbol->MaxNameLen = MAX_SYM_NAME;
+    
+    DWORD64 displacement = 0;
+    HANDLE hProcess = GetCurrentProcess();
+    
+    // Initialize symbols if not already done
+    static bool symInitialized = false;
+    if (! symInitialized) {
+        SymInitialize(hProcess, nullptr, TRUE);
+        symInitialized = true;
+    }
+    
+    if (SymFromAddr(hProcess, reinterpret_cast<DWORD64>(addr), &displacement, pSymbol))
+    {
+        // Store the symbol name - use a static buffer to keep it alive
+        static char symbolNameBuffer[MAX_SYM_NAME];
+        strncpy_s(symbolNameBuffer, sizeof(symbolNameBuffer), pSymbol->Name, _TRUNCATE);
+        info->dli_sname = symbolNameBuffer;
+        info->dli_saddr = reinterpret_cast<void*>(pSymbol->Address);
+    }
     
     return 1;
 }
