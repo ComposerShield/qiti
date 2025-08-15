@@ -126,3 +126,8 @@ namespace qiti
 #endif
     }
 } // namespace qiti
+
+
+#ifdef _WIN32
+[[maybe_unused]] QITI_API_VAR inline bool special_debug = false;
+#endif

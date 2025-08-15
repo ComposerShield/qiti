@@ -13,9 +13,6 @@
 
 #include <iostream>
 
-#ifdef _WIN32
-[[maybe_unused]] extern bool special_debug;
-#endif
 //--------------------------------------------------------------------------
 
 /** NOT static to purposely allow external linkage and visibility to QITI */
@@ -303,9 +300,13 @@ QITI_TEST_CASE("qiti::FunctionData::getMinTimeSpentInFunctionCpu_ns()", Function
     
     QITI_SECTION("Single call")
     {
+#if _WIN32
         special_debug = true;
+#endif
         testFuncWithVariableLength(1); // Small delay
+#if _WIN32
         special_debug = false;
+#endif
         
         uint64_t minTime = funcData->getMinTimeSpentInFunctionCpu_ns();
         QITI_CHECK(minTime > 0); // Should have some measurable time
