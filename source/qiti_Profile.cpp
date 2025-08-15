@@ -44,6 +44,8 @@
 #include <utility>
 #include <string>
 
+[[maybe_unused]] bool special_debug = false;
+
 #ifdef _WIN32
 QITI_API_INTERNAL static void clock_gettime_windows(timespec& time) noexcept
 {
@@ -292,13 +294,16 @@ void Profile::updateFunctionDataOnExit(const void* this_fn) noexcept
     const auto clockElapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(clockEndTime - callImpl->startTimeWallClock);
 
 #ifdef _WIN32
-    // Debug logging for Windows CPU timing investigation
-    std::cout << "DEBUG: Windows CPU timing debug:" << std::endl;
-    std::cout << "  startTimeCpu: tv_sec=" << callImpl->startTimeCpu.tv_sec << ", tv_nsec=" << callImpl->startTimeCpu.tv_nsec << std::endl;
-    std::cout << "  cpuEndTime:   tv_sec=" << cpuEndTime.tv_sec << ", tv_nsec=" << cpuEndTime.tv_nsec << std::endl;
-    std::cout << "  cpuElapsed_ns: " << cpuElapsed_ns << std::endl;
-    std::cout << "  clockElapsed_ns: " << clockElapsed_ns.count() << std::endl;
-    std::cout.flush(); // Force flush to ensure output appears in CI logs
+    if (special_debug)
+    {
+        // Debug logging for Windows CPU timing investigation
+        std::cout << "DEBUG: Windows CPU timing debug:" << std::endl;
+        std::cout << "  startTimeCpu: tv_sec=" << callImpl->startTimeCpu.tv_sec << ", tv_nsec=" << callImpl->startTimeCpu.tv_nsec << std::endl;
+        std::cout << "  cpuEndTime:   tv_sec=" << cpuEndTime.tv_sec << ", tv_nsec=" << cpuEndTime.tv_nsec << std::endl;
+        std::cout << "  cpuElapsed_ns: " << cpuElapsed_ns << std::endl;
+        std::cout << "  clockElapsed_ns: " << clockElapsed_ns.count() << std::endl;
+        std::cout.flush(); // Force flush to ensure output appears in CI logs
+    }
 #endif
 
     // Update FunctionCallData (before updating listeners in case listeners need that information)
