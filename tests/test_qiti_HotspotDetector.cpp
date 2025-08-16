@@ -16,6 +16,9 @@ __attribute__((noinline))
 __attribute__((optnone))
 void hotspotTestFuncSlow() noexcept
 {
+    #ifdef _WIN32
+    printf("DEBUG: hotspotTestFuncSlow called\n");
+    #endif
     volatile int sum = 0;
     // Create significant execution time
     for(int i = 0; i < 50000; ++i)
@@ -29,6 +32,9 @@ __attribute__((noinline))
 __attribute__((optnone))
 void hotspotTestFuncFast() noexcept
 {
+    #ifdef _WIN32
+    printf("DEBUG: hotspotTestFuncFast called\n");
+    #endif
     volatile int _ = 42;
 }
 
@@ -155,9 +161,22 @@ QITI_TEST_CASE("qiti::HotspotDetector hotspot scoring", HotspotDetectorScoring)
     // Debug: Check what function names we're actually getting on Windows
     #ifdef _WIN32
     printf("DEBUG: Found %zu hotspots:\n", hotspots.size());
-    for (size_t i = 0; i < hotspots.size() && i < 5; ++i) {
+    for (size_t i = 0; i < hotspots.size() && i < 10; ++i)
+    {
         const char* name = hotspots[i].function->getFunctionName();
-        printf("  [%zu] '%s'\n", i, name ? name : "NULL");
+        printf("  [%zu] '%s' (calls: %llu)\n", i, name ? name : "NULL", 
+               hotspots[i].function->getNumTimesCalled());
+    }
+    
+    // Also check all profiled functions to see if our test functions are there
+    printf("DEBUG: Checking all profiled functions...\n");
+    auto allFunctions = qiti::FunctionData::getAllProfiledFunctionData();
+    printf("DEBUG: Total profiled functions: %zu\n", allFunctions.size());
+    for (size_t i = 0; i < allFunctions.size() && i < 10; ++i)
+    {
+        const char* name = allFunctions[i]->getFunctionName();
+        printf("  Function[%zu] '%s' (calls: %llu)\n", i, name ? name : "NULL",
+               allFunctions[i]->getNumTimesCalled());
     }
     #endif
     
