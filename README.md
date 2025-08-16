@@ -162,8 +162,6 @@ This comprehensive testing matrix ensures Qiti works reliably across the develop
 
 ## Documentation
 
-## Documentation
-
 📖 **API Documentation**
 
 Complete API documentation is included in this repository. To view it:
