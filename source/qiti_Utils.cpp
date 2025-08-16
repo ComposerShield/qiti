@@ -82,7 +82,10 @@ int dladdr(const void* addr, Dl_info* info)
     
     // Initialize symbols if not already done
     static bool symInitialized = false;
-    if (! symInitialized) {
+    if (! symInitialized)
+    {
+        // Set symbol search path and options for better symbol resolution
+        SymSetOptions(SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS | SYMOPT_INCLUDE_32BIT_MODULES);
         SymInitialize(hProcess, nullptr, TRUE);
         symInitialized = true;
     }
@@ -94,6 +97,13 @@ int dladdr(const void* addr, Dl_info* info)
         strncpy_s(symbolNameBuffer, sizeof(symbolNameBuffer), pSymbol->Name, _TRUNCATE);
         info->dli_sname = symbolNameBuffer;
         info->dli_saddr = reinterpret_cast<void*>(pSymbol->Address);
+    }
+    else
+    {
+        // Debug: Try to understand why symbol lookup failed
+        DWORD error = GetLastError();
+        // For now, just ensure dli_sname remains nullptr
+        info->dli_sname = nullptr;
     }
     
     return 1;
@@ -115,8 +125,24 @@ int dladdr(const void* addr, Dl_info* info)
     // Prevent memory leaks, clean up dynamically allocated function name strings
     static std::vector<std::unique_ptr<char>> names;
     
+    #ifdef _WIN32
+    // Debug output for Windows
+    static int debugCount = 0;
+    if (debugCount < 5) // Only print first 5 calls to avoid spam
+    {
+        printf("DEBUG getFunctionName: addr=%p\n", this_fn);
+        debugCount++;
+    }
+    #endif
+    
     if (dladdr(this_fn, &info) && info.dli_sname)
     {
+        #ifdef _WIN32
+        if (debugCount <= 5)
+        {
+            printf("DEBUG getFunctionName: Found symbol '%s'\n", info.dli_sname);
+        }
+        #endif
         // Demangle the function name
 #ifdef _WIN32
         // Windows: Use UnDecorateSymbolName
@@ -138,6 +164,15 @@ int dladdr(const void* addr, Dl_info* info)
         else
             functionName = info.dli_sname; // mangled name
 #endif
+    }
+    else
+    {
+        #ifdef _WIN32
+        if (debugCount <= 5)
+        {
+            printf("DEBUG getFunctionName: dladdr failed or no symbol name for addr=%p\n", this_fn);
+        }
+        #endif
     }
     
     return functionName;
