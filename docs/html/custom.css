@@ -1,0 +1,29 @@
+/* Custom styles for qiti documentation */
+
+/* Make the search box much wider */
+#MSearchField {
+    width: 300px !important;
+    min-width: 300px !important;
+}
+
+/* Ensure the search container has enough space */
+#MSearchBox {
+    width: 320px !important;
+    min-width: 320px !important;
+}
+
+/* Style the search results dropdown to match the wider search box */
+#MSearchResults {
+    width: 300px !important;
+    min-width: 300px !important;
+}
+
+/* Ensure tree items are properly styled */
+#nav-tree .item {
+    cursor: pointer;
+}
+
+/* Add slight highlighting to expanded nodes */
+#nav-tree .item.selected {
+    background-color: #f0f0f0;
+}

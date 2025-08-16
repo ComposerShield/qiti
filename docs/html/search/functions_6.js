@@ -24,7 +24,7 @@ var searchData=
   ['getqitiversionminor_21',['getQitiVersionMinor',['../classqiti_1_1_scoped_qiti_test.html#ac69e95436ac23336dda00c036e51b1d1',1,'qiti::ScopedQitiTest']]],
   ['getqitiversionpatch_22',['getQitiVersionPatch',['../classqiti_1_1_scoped_qiti_test.html#aec6779d00e4ba436ac1d76b8d8a8efde',1,'qiti::ScopedQitiTest']]],
   ['getqitiversionstring_23',['getQitiVersionString',['../classqiti_1_1_scoped_qiti_test.html#a62fe0eb6fb2bfb3dfe8e903fcb1e9973',1,'qiti::ScopedQitiTest']]],
-  ['getreport_24',['getReport',['../classqiti_1_1_thread_sanitizer.html#a11c1414fe1259992c949b02f22c2bc8a',1,'qiti::ThreadSanitizer']]],
+  ['getreport_24',['getReport',['../classqiti_1_1_leak_sanitizer.html#a91ef86ee20b9487e7074fd46bb4f7bcd',1,'qiti::LeakSanitizer::getReport()'],['../classqiti_1_1_thread_sanitizer.html#a11c1414fe1259992c949b02f22c2bc8a',1,'qiti::ThreadSanitizer::getReport()']]],
   ['getthreadthatcalledfunction_25',['getThreadThatCalledFunction',['../classqiti_1_1_function_call_data.html#a002875e83534666f6bc43b7dcf92564d',1,'qiti::FunctionCallData']]],
   ['gettimespentinfunctioncpu_5fms_26',['getTimeSpentInFunctionCpu_ms',['../classqiti_1_1_function_call_data.html#a056d8f3de2b0aa35052911f23eeaee20',1,'qiti::FunctionCallData']]],
   ['gettimespentinfunctioncpu_5fns_27',['getTimeSpentInFunctionCpu_ns',['../classqiti_1_1_function_call_data.html#ac750140cb8460463ca2b5279bcd7255a',1,'qiti::FunctionCallData']]],

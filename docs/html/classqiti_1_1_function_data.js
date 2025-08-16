@@ -10,9 +10,11 @@ var classqiti_1_1_function_data =
       [ "moveAssignment", "classqiti_1_1_function_data.html#aad1029fb26f1a2bbca6c780279e30858a00450daff2d4ce339dd9caf6a19ec9a6", null ],
       [ "unknown", "classqiti_1_1_function_data.html#aad1029fb26f1a2bbca6c780279e30858aad921d60486366258809553a3db49a4a", null ]
     ] ],
+    [ "getAllProfiledFunctionData", "classqiti_1_1_function_data.html#a45aa8e32043bea8fbcdb5461d99b42f2", null ],
     [ "getAverageTimeSpentInFunctionCpu_ns", "classqiti_1_1_function_data.html#a23cd9edd271e80a1259db5ddf925d2d2", null ],
     [ "getAverageTimeSpentInFunctionWallClock_ns", "classqiti_1_1_function_data.html#af6f370cde289a4b227dcd1600a038fd8", null ],
     [ "getCallers", "classqiti_1_1_function_data.html#a50b98a4044b94deda39cb81bb05d34f4", null ],
+    [ "getFunctionData", "classqiti_1_1_function_data.html#a8595d24d707f31b80a933a8b732a6d23", null ],
     [ "getFunctionName", "classqiti_1_1_function_data.html#a35fab7e2fb7d4132610366483f091d70", null ],
     [ "getLastFunctionCall", "classqiti_1_1_function_data.html#ae3811cab42be4872c5decf7f5b1a4819", null ],
     [ "getMaxTimeSpentInFunctionCpu_ns", "classqiti_1_1_function_data.html#a01a13672eb99aa017b95559ff59bd050", null ],

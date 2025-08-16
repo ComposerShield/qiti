@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['onfail_0',['onFail',['../classqiti_1_1_thread_sanitizer.html#a14d8bf94ef335146c3e41a3dc01b6072',1,'qiti::ThreadSanitizer']]],
-  ['onnextheapallocation_1',['onNextHeapAllocation',['../classqiti_1_1_instrument.html#a359de9bc92c1129df2cde3e5b6ecb63d',1,'qiti::Instrument']]]
+  ['moveassignment_0',['moveAssignment',['../classqiti_1_1_function_data.html#aad1029fb26f1a2bbca6c780279e30858a00450daff2d4ce339dd9caf6a19ec9a6',1,'qiti::FunctionData']]],
+  ['moveconstructor_1',['moveConstructor',['../classqiti_1_1_function_data.html#aad1029fb26f1a2bbca6c780279e30858aded81b53c671aac7abdf4f1e63b70d28',1,'qiti::FunctionData']]]
 ];
