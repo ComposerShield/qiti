@@ -162,38 +162,9 @@ This comprehensive testing matrix ensures Qiti works reliably across the develop
 
 ## Documentation
 
-Note: the following directions build documentation for the public API and omit documentation for the implementation details (e.g. private functions and functions not marked as visible to the final executable).
+📖 **[View API Documentation](docs/html/index.html)**
 
-Qiti uses Doxygen (via a custom CMake `doxygen` target) to generate HTML API documentation. To build the docs, ensure Doxygen is installed on your system and then run the following from your project root:
-
-```bash
-cmake -B build-docs . -DQITI_ENABLE_THREAD_SANITIZER=ON
-cmake --build build-docs --target doxygen
-rm -fd build-docs
-open docs/html/index.html 
-```
-
-This will invoke the `doxygen` target defined in `CMakeLists.txt` (which calls `Doxygen(source docs)`) and generate HTML output under `docs/html`. Once complete, open `docs/html/index.html` in your browser to view the documentation.
-
-If Doxygen is not found, the build will fail with a "Doxygen not found" message—please install Doxygen to enable documentation generation.
-
-### Installing Doxygen
-
-- **macOS (via Homebrew)**  
-  ```bash
-  brew install doxygen
-  ```
-
-- **Ubuntu / Debian**  
-  ```bash
-  sudo apt-get update
-  sudo apt-get install doxygen
-  ```
-
-- **Fedora**  
-  ```bash
-  sudo dnf install doxygen
-  ```
+Complete API documentation is included in this repository. Open `docs/html/index.html` in your browser to browse the full API reference, including all classes, functions, and usage examples.
 
 
 ## Quick Start
