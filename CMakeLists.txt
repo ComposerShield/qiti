@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 
 set(QITI_VERSION "0.0.1")
-project(Qiti 
+project(qiti 
     VERSION ${QITI_VERSION} 
     LANGUAGES C CXX
 )
@@ -382,6 +382,9 @@ if(PROJECT_IS_TOP_LEVEL)
         set(DOXYGEN_TOC_INCLUDE_HEADINGS 0)
         set(DOXYGEN_DISABLE_INDEX YES)
         set(DOXYGEN_GENERATE_TREEVIEW YES)
+        # amount to be open to open up the tree to see a list of functions for any 
+        # class and not have any text cut off
+        set(DOXYGEN_TREEVIEW_WIDTH 350)
         set(DOXYGEN_FULL_SIDEBAR NO)
         set(DOXYGEN_HTML_DYNAMIC_MENUS NO)
         set(DOXYGEN_SOURCE_BROWSER YES)
