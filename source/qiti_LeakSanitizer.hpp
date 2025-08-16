@@ -21,11 +21,6 @@
 #include <functional>
 #include <string>
 
-//--------------------------------------------------------------------------
-// Doxygen - Begin Internal Documentation
-/** \cond INTERNAL */
-//--------------------------------------------------------------------------
-
 namespace qiti
 {
 //--------------------------------------------------------------------------
@@ -110,6 +105,11 @@ public:
     QITI_API LeakSanitizer& operator=(LeakSanitizer&& other) noexcept;
     
 private:
+    //--------------------------------------------------------------------------
+    // Doxygen - Begin Internal Documentation
+    /** \cond INTERNAL */
+    //--------------------------------------------------------------------------
+    
     std::atomic<bool> _passed = true;
     uint64_t _totalAllocated = 0;
     uint64_t _totalDeallocated = 0;
@@ -120,10 +120,10 @@ private:
     LeakSanitizer(const LeakSanitizer&) = delete;
     /** Copy Assignment (deleted) */
     LeakSanitizer& operator=(const LeakSanitizer&) = delete;
+    
+    //--------------------------------------------------------------------------
+    /** \endcond */
+    // Doxygen - End Internal Documentation
+    //--------------------------------------------------------------------------
 };
 } // namespace qiti
-
-//--------------------------------------------------------------------------
-/** \endcond */
-// Doxygen - End Internal Documentation
-//--------------------------------------------------------------------------
