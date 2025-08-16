@@ -100,10 +100,7 @@ int dladdr(const void* addr, Dl_info* info)
     }
     else
     {
-        // Debug: Try to understand why symbol lookup failed
-        DWORD error = GetLastError();
-        printf("DEBUG dladdr: SymFromAddr failed, error code: %lu (0x%lx)\n", error, error);
-        // For now, just ensure dli_sname remains nullptr
+        // Symbol lookup failed - likely no debug symbols available
         info->dli_sname = nullptr;
     }
     
@@ -126,24 +123,8 @@ int dladdr(const void* addr, Dl_info* info)
     // Prevent memory leaks, clean up dynamically allocated function name strings
     static std::vector<std::unique_ptr<char>> names;
     
-    #ifdef _WIN32
-    // Debug output for Windows
-    static int debugCount = 0;
-    if (debugCount < 5) // Only print first 5 calls to avoid spam
-    {
-        printf("DEBUG getFunctionName: addr=%p\n", this_fn);
-        debugCount++;
-    }
-    #endif
-    
     if (dladdr(this_fn, &info) && info.dli_sname)
     {
-        #ifdef _WIN32
-        if (debugCount <= 5)
-        {
-            printf("DEBUG getFunctionName: Found symbol '%s'\n", info.dli_sname);
-        }
-        #endif
         // Demangle the function name
 #ifdef _WIN32
         // Windows: Use UnDecorateSymbolName
@@ -168,12 +149,7 @@ int dladdr(const void* addr, Dl_info* info)
     }
     else
     {
-        #ifdef _WIN32
-        if (debugCount <= 5)
-        {
-            printf("DEBUG getFunctionName: dladdr failed or no symbol name for addr=%p\n", this_fn);
-        }
-        #endif
+        // Symbol resolution failed
     }
     
     return functionName;

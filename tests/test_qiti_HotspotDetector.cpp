@@ -150,15 +150,6 @@ QITI_TEST_CASE("qiti::HotspotDetector hotspot scoring", HotspotDetectorScoring)
     }
     
     auto hotspots = qiti::HotspotDetector::detectHotspots();
-    
-    // Debug output for Windows debugging
-    #ifdef _WIN32
-    printf("DEBUG: Found %zu hotspots\n", hotspots.size());
-    for (size_t i = 0; i < hotspots.size(); ++i) {
-        printf("DEBUG: Hotspot %zu: '%s'\n", i, hotspots[i].function->getFunctionName());
-    }
-    #endif
-    
     QITI_REQUIRE(hotspots.size() >= 2);
     
     // Find our test functions in the results
@@ -206,14 +197,6 @@ QITI_TEST_CASE("qiti::HotspotDetector exception tracking in hotspots", HotspotDe
     hotspotTestFuncCatches(); // Call it again
     
     auto hotspots = qiti::HotspotDetector::detectHotspots();
-    
-    // Debug output for Windows debugging
-    #ifdef _WIN32
-    printf("DEBUG Exception test: Found %zu hotspots\n", hotspots.size());
-    for (size_t i = 0; i < hotspots.size(); ++i) {
-        printf("DEBUG Exception test: Hotspot %zu: '%s'\n", i, hotspots[i].function->getFunctionName());
-    }
-    #endif
     
     // Find the function that throws exceptions
     const qiti::HotspotDetector::Hotspot* throwingHotspot = nullptr;
