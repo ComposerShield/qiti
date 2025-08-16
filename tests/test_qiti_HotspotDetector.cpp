@@ -152,6 +152,15 @@ QITI_TEST_CASE("qiti::HotspotDetector hotspot scoring", HotspotDetectorScoring)
     auto hotspots = qiti::HotspotDetector::detectHotspots();
     QITI_REQUIRE(hotspots.size() >= 2);
     
+    // Debug: Check what function names we're actually getting on Windows
+    #ifdef _WIN32
+    printf("DEBUG: Found %zu hotspots:\n", hotspots.size());
+    for (size_t i = 0; i < hotspots.size() && i < 5; ++i) {
+        const char* name = hotspots[i].function->getFunctionName();
+        printf("  [%zu] '%s'\n", i, name ? name : "NULL");
+    }
+    #endif
+    
     // Find our test functions in the results
     const qiti::HotspotDetector::Hotspot* slowHotspot = nullptr;
     const qiti::HotspotDetector::Hotspot* fastHotspot = nullptr;
