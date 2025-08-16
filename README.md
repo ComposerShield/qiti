@@ -162,10 +162,15 @@ This comprehensive testing matrix ensures Qiti works reliably across the develop
 
 ## Documentation
 
-📖 **[View API Documentation](docs/html/index.html)**
+## Documentation
 
-Complete API documentation is included in this repository. Open `docs/html/index.html` in your browser to browse the full API reference, including all classes, functions, and usage examples.
+📖 **API Documentation**
 
+Complete API documentation is included in this repository. To view it:
+
+1. Clone or download this repository  
+2. Open `docs/html/index.html` in your browser
+3. Browse the full API reference, including all classes, functions, and usage examples
 
 ## Quick Start
 
