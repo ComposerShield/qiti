@@ -220,6 +220,7 @@ if(PROJECT_IS_TOP_LEVEL)
             "tests/qiti_test_macros.hpp"
             "tests/test_qiti_FunctionCallData.cpp"
             "tests/test_qiti_FunctionData.cpp"
+            "tests/test_qiti_HotspotDetector.cpp"
             "tests/test_qiti_Instrument.cpp"
             "tests/test_qiti_Profile.cpp"
             "tests/test_qiti_LeakSanitizer.cpp"
