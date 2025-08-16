@@ -53,6 +53,8 @@ public:
      Begins profiling for FuncPtr and returns a pointer to the corresponding FunctionData instance.
      
      FuncPtr can be a free function as well as member function.
+     
+     @note Pointer becomes invalid when ScopedQitiTest goes out of scope or qiti::Profile::resetProfiling() is called.
      */
     template <auto FuncPtr>
     requires isFreeFunction<FuncPtr>
