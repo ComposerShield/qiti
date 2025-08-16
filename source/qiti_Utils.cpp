@@ -102,6 +102,7 @@ int dladdr(const void* addr, Dl_info* info)
     {
         // Debug: Try to understand why symbol lookup failed
         DWORD error = GetLastError();
+        printf("DEBUG dladdr: SymFromAddr failed, error code: %lu (0x%lx)\n", error, error);
         // For now, just ensure dli_sname remains nullptr
         info->dli_sname = nullptr;
     }
