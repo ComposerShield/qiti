@@ -8,6 +8,51 @@
 #include "qiti_HotspotDetector.hpp"
 
 #include <algorithm>
+#include <stdexcept>
+
+//--------------------------------------------------------------------------
+
+// Disable optimizations for test functions to ensure they get instrumented
+#pragma clang optimize off
+
+/** Test function with variable execution time for hotspot testing */
+void hotspotTestFuncSlow() noexcept
+{
+    volatile int sum = 0;
+    // Create significant execution time
+    for(int i = 0; i < 50000; ++i)
+    {
+        sum = sum + i;
+    }
+}
+
+/** Test function with minimal execution time */
+void hotspotTestFuncFast() noexcept
+{
+    volatile int _ = 42;
+}
+
+/** Test function that throws exceptions */
+void hotspotTestFuncThrows()
+{
+    throw std::runtime_error("Test exception");
+}
+
+/** Test function that calls the throwing function */
+void hotspotTestFuncCatches()
+{
+    try
+    {
+        hotspotTestFuncThrows();
+    }
+    catch (const std::exception&)
+    {
+        // Caught the exception
+    }
+}
+
+// Re-enable optimizations
+#pragma clang optimize on
 
 //--------------------------------------------------------------------------
 
@@ -21,9 +66,9 @@ QITI_TEST_CASE("qiti::HotspotDetector::detectHotspots() - no threshold", Hotspot
     QITI_CHECK(initialHotspots.empty());
     
     // Call functions with different performance characteristics
-    qiti::example::HotspotDetector::hotspotTestFuncSlow();   // High execution time
-    qiti::example::HotspotDetector::hotspotTestFuncFast();   // Low execution time
-    qiti::example::HotspotDetector::hotspotTestFuncFast();   // Called twice
+    hotspotTestFuncSlow();   // High execution time
+    hotspotTestFuncFast();   // Low execution time
+    hotspotTestFuncFast();   // Called twice
     
     auto hotspots = qiti::HotspotDetector::detectHotspots();
     
@@ -51,10 +96,10 @@ QITI_TEST_CASE("qiti::HotspotDetector::detectHotspots() - with threshold", Hotsp
     test.enableProfilingOnAllFunctions(true);
     
     // Call functions multiple times to generate different scores
-    qiti::example::HotspotDetector::hotspotTestFuncSlow();   // High execution time
-    qiti::example::HotspotDetector::hotspotTestFuncFast();   // Low execution time
-    qiti::example::HotspotDetector::hotspotTestFuncFast();   // Called again
-    qiti::example::HotspotDetector::hotspotTestFuncFast();   // Called again
+    hotspotTestFuncSlow();   // High execution time
+    hotspotTestFuncFast();   // Low execution time
+    hotspotTestFuncFast();   // Called again
+    hotspotTestFuncFast();   // Called again
     
     // Turn off profiling to prevent additional functions from being profiled during hotspot detection
     test.enableProfilingOnAllFunctions(false);
@@ -97,10 +142,10 @@ QITI_TEST_CASE("qiti::HotspotDetector hotspot scoring", HotspotDetectorScoring)
     test.enableProfilingOnAllFunctions(true);
     
     // Call slow function once and fast function many times
-    qiti::example::HotspotDetector::hotspotTestFuncSlow();
+    hotspotTestFuncSlow();
     for (int i = 0; i < 10; ++i)
     {
-        qiti::example::HotspotDetector::hotspotTestFuncFast();
+        hotspotTestFuncFast();
     }
     
     auto hotspots = qiti::HotspotDetector::detectHotspots();
@@ -168,8 +213,8 @@ QITI_TEST_CASE("qiti::HotspotDetector exception tracking in hotspots", HotspotDe
     test.enableProfilingOnAllFunctions(true);
     
     // Call function that throws exceptions
-    qiti::example::HotspotDetector::hotspotTestFuncCatches(); // This will internally call hotspotTestFuncThrows
-    qiti::example::HotspotDetector::hotspotTestFuncCatches(); // Call it again
+    hotspotTestFuncCatches(); // This will internally call hotspotTestFuncThrows
+    hotspotTestFuncCatches(); // Call it again
     
     auto hotspots = qiti::HotspotDetector::detectHotspots();
     
