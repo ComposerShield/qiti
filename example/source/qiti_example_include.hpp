@@ -74,5 +74,15 @@ void testFunc0() noexcept;
 } // namespace utils
 
 //--------------------------------------------------------------------------
+
+namespace HotspotDetector
+{
+void hotspotTestFuncSlow() noexcept;
+void hotspotTestFuncFast() noexcept;
+void hotspotTestFuncThrows();
+void hotspotTestFuncCatches();
+} // namespace HotspotDetector
+
+//--------------------------------------------------------------------------
 } // namespace example
 } // namespace qiti

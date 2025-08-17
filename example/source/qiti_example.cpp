@@ -20,6 +20,7 @@
 #endif
 
 #include <cmath>
+#include <stdexcept>
 #include <thread>
 
 // Disable optimizations for this entire file to prevent Release mode optimizations
@@ -139,6 +140,43 @@ void testFunc0() noexcept
     volatile int _ = 42;
 }
 } // namespace utils
+
+//--------------------------------------------------------------------------
+
+namespace HotspotDetector
+{
+void hotspotTestFuncSlow() noexcept
+{
+    volatile int sum = 0;
+    // Create significant execution time
+    for(int i = 0; i < 50000; ++i)
+    {
+        sum = sum + i;
+    }
+}
+
+void hotspotTestFuncFast() noexcept
+{
+    volatile int _ = 42;
+}
+
+void hotspotTestFuncThrows()
+{
+    throw std::runtime_error("Test exception");
+}
+
+void hotspotTestFuncCatches()
+{
+    try
+    {
+        hotspotTestFuncThrows();
+    }
+    catch (const std::exception&)
+    {
+        // Caught the exception
+    }
+}
+} // namespace HotspotDetector
 
 //--------------------------------------------------------------------------
 } // namespace example
