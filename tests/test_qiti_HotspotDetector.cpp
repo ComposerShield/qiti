@@ -169,8 +169,29 @@ QITI_TEST_CASE("qiti::HotspotDetector hotspot scoring", HotspotDetectorScoring)
     test.enableProfilingOnAllFunctions(false);
     
     auto hotspots = qiti::HotspotDetector::detectHotspots();
-    QITI_REQUIRE(hotspots.size() >= 2);
     
+#ifdef _WIN32
+    // Debug: Show what hotspots were actually detected
+    printf("DEBUG: Found %zu total hotspots\n", hotspots.size());
+    for (size_t i = 0; i < std::min(hotspots.size(), size_t(10)); ++i) {
+        const char* name = hotspots[i].function->getFunctionName();
+        printf("  [%zu] '%s' score=%.0f calls=%llu\n", 
+               i, name ? name : "(null)", hotspots[i].score,
+               hotspots[i].function->getNumTimesCalled());
+    }
+    
+    // Also check all profiled functions
+    auto allFunctions = qiti::FunctionData::getAllProfiledFunctionData();
+    printf("DEBUG: Total profiled functions: %zu\n", allFunctions.size());
+    for (size_t i = 0; i < std::min(allFunctions.size(), size_t(20)); ++i) {
+        const char* name = allFunctions[i]->getFunctionName();
+        if (name && strstr(name, "hotspotTest") != nullptr) {
+            printf("  TEST FUNC: '%s' calls=%llu\n", name, allFunctions[i]->getNumTimesCalled());
+        }
+    }
+#endif
+    
+    QITI_REQUIRE(hotspots.size() >= 2);
     
     // Find our test functions in the results
     const qiti::HotspotDetector::Hotspot* slowHotspot = nullptr;
