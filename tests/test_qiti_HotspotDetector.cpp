@@ -62,16 +62,21 @@ void hotspotTestFuncCatches()
 QITI_TEST_CASE("qiti::HotspotDetector::detectHotspots() - no threshold", HotspotDetectorDetectHotspotsNoThreshold)
 {
     qiti::ScopedQitiTest test;
-    test.enableProfilingOnAllFunctions(true);
     
     // Initially, no hotspots should be detected
     auto initialHotspots = qiti::HotspotDetector::detectHotspots();
     QITI_CHECK(initialHotspots.empty());
     
+    // Enable profiling
+    test.enableProfilingOnAllFunctions(true);
+    
     // Call functions with different performance characteristics
     hotspotTestFuncSlow();   // High execution time
     hotspotTestFuncFast();   // Low execution time
     hotspotTestFuncFast();   // Called twice
+    
+    // Disable profiling
+    test.enableProfilingOnAllFunctions(false);
     
     auto hotspots = qiti::HotspotDetector::detectHotspots();
     
@@ -96,6 +101,8 @@ QITI_TEST_CASE("qiti::HotspotDetector::detectHotspots() - no threshold", Hotspot
 QITI_TEST_CASE("qiti::HotspotDetector::detectHotspots() - with threshold", HotspotDetectorDetectHotspotsWithThreshold)
 {
     qiti::ScopedQitiTest test;
+    
+    // Enable profiling
     test.enableProfilingOnAllFunctions(true);
     
     // Call functions multiple times to generate different scores
@@ -142,6 +149,8 @@ QITI_TEST_CASE("qiti::HotspotDetector::detectHotspots() - with threshold", Hotsp
 QITI_TEST_CASE("qiti::HotspotDetector hotspot scoring", HotspotDetectorScoring)
 {
     qiti::ScopedQitiTest test;
+    
+    // Enable profiling
     test.enableProfilingOnAllFunctions(true);
     
     // Call slow function multiple times to accumulate significant total time
@@ -155,6 +164,9 @@ QITI_TEST_CASE("qiti::HotspotDetector hotspot scoring", HotspotDetectorScoring)
     {
         hotspotTestFuncFast();
     }
+    
+    // Turn off profiling to prevent additional functions from being profiled during hotspot detection
+    test.enableProfilingOnAllFunctions(false);
     
     auto hotspots = qiti::HotspotDetector::detectHotspots();
     QITI_REQUIRE(hotspots.size() >= 2);
@@ -198,6 +210,8 @@ QITI_TEST_CASE("qiti::HotspotDetector hotspot scoring", HotspotDetectorScoring)
 QITI_TEST_CASE("qiti::HotspotDetector exception tracking in hotspots", HotspotDetectorExceptionTracking)
 {
     qiti::ScopedQitiTest test;
+    
+    // Enable profiling
     test.enableProfilingOnAllFunctions(true);
     
     // Call function that throws exceptions multiple times to accumulate total time
@@ -205,6 +219,9 @@ QITI_TEST_CASE("qiti::HotspotDetector exception tracking in hotspots", HotspotDe
     {
         hotspotTestFuncCatches(); // This will internally call hotspotTestFuncThrows
     }
+    
+    // Turn off profiling to prevent additional functions from being profiled during hotspot detection
+    test.enableProfilingOnAllFunctions(false);
     
     auto hotspots = qiti::HotspotDetector::detectHotspots();
     
@@ -234,6 +251,8 @@ QITI_TEST_CASE("qiti::HotspotDetector exception tracking in hotspots", HotspotDe
 QITI_TEST_CASE("qiti::HotspotDetector constructor/destructor detection", HotspotDetectorConstructorDestructor)
 {
     qiti::ScopedQitiTest test;
+    
+    // Enable profiling
     test.enableProfilingOnAllFunctions(true);
     
     // Create and destroy objects to trigger constructor/destructor profiling
@@ -241,6 +260,9 @@ QITI_TEST_CASE("qiti::HotspotDetector constructor/destructor detection", Hotspot
         std::vector<int> vec1(100, 42);  // Constructor with parameters
         std::vector<int> vec2 = vec1;    // Copy constructor
     } // Destructors called here
+    
+    // Turn off profiling to prevent additional functions from being profiled during hotspot detection
+    test.enableProfilingOnAllFunctions(false);
     
     auto hotspots = qiti::HotspotDetector::detectHotspots();
     
