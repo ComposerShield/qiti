@@ -97,15 +97,6 @@ double HotspotDetector::calculateHotspotScore(const FunctionData* func) noexcept
     // Total time in nanoseconds
     uint64_t totalTime = numCalls * avgTime;
     
-#ifdef _WIN32
-    // Debug timing data for our test functions
-    const char* name = func->getFunctionName();
-    if (name && (strstr(name, "hotspotTestFunc") != nullptr))
-    {
-        printf("DEBUG TIMING: '%s' calls=%llu, avgTime=%llu ns, totalTime=%llu ns, score=%.0f\n",
-               name, numCalls, avgTime, totalTime, static_cast<double>(totalTime));
-    }
-#endif
     
     // Convert to double (score represents total nanoseconds)
     return static_cast<double>(totalTime);

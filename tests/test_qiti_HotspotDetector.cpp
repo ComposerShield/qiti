@@ -23,7 +23,7 @@ void hotspotTestFuncSlow() noexcept
 #endif
     volatile int sum = 0;
     // Create significant execution time
-    for(int i = 0; i < 50000; ++i)
+    for(int i = 0; i < 5000000; ++i)
     {
         sum = sum + i;
     }
@@ -162,26 +162,6 @@ QITI_TEST_CASE("qiti::HotspotDetector hotspot scoring", HotspotDetectorScoring)
     auto hotspots = qiti::HotspotDetector::detectHotspots();
     QITI_REQUIRE(hotspots.size() >= 2);
     
-    // Debug: Print all hotspots on Windows to see what we actually have
-    #ifdef _WIN32
-    printf("DEBUG: Found %zu hotspots after removing optnone:\\n", hotspots.size());
-    for (size_t i = 0; i < hotspots.size(); ++i)
-    {
-        const char* name = hotspots[i].function->getFunctionName();
-        printf("  [%zu] '%s' (calls: %llu)\\n", i, name ? name : "NULL", 
-               hotspots[i].function->getNumTimesCalled());
-    }
-    
-    // Also check all profiled functions
-    auto allFunctions = qiti::FunctionData::getAllProfiledFunctionData();
-    printf("DEBUG: Total profiled functions: %zu\\n", allFunctions.size());
-    for (size_t i = 0; i < allFunctions.size(); ++i)
-    {
-        const char* name = allFunctions[i]->getFunctionName();
-        printf("  Function[%zu] '%s' (calls: %llu)\\n", i, name ? name : "NULL",
-               allFunctions[i]->getNumTimesCalled());
-    }
-    #endif
     
     // Find our test functions in the results
     const qiti::HotspotDetector::Hotspot* slowHotspot = nullptr;
@@ -231,16 +211,6 @@ QITI_TEST_CASE("qiti::HotspotDetector exception tracking in hotspots", HotspotDe
     
     auto hotspots = qiti::HotspotDetector::detectHotspots();
     
-    // Debug: Print all hotspots on Windows for exception test
-    #ifdef _WIN32
-    printf("DEBUG Exception test - Found %zu hotspots:\\n", hotspots.size());
-    for (size_t i = 0; i < hotspots.size(); ++i)
-    {
-        const char* name = hotspots[i].function->getFunctionName();
-        printf("  [%zu] '%s' (calls: %llu)\\n", i, name ? name : "NULL", 
-               hotspots[i].function->getNumTimesCalled());
-    }
-    #endif
     
     // Find the function that throws exceptions
     const qiti::HotspotDetector::Hotspot* throwingHotspot = nullptr;
