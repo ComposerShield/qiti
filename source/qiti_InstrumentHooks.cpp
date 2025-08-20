@@ -79,12 +79,21 @@ private:
 //--------------------------------------------------------------------------
 
 /** Hook exposed by -finstrument-functions called whenever entering instrumented function. */
-extern "C" void QITI_API // Mark “no-instrument” to prevent recursing into itself
+extern "C" void QITI_API // Mark "no-instrument" to prevent recursing into itself
 __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site) noexcept
 {
+#ifdef _WIN32
+    static thread_local int hookCallCount = 0;
+    hookCallCount++;
+    if (hookCallCount <= 5) // Only print first few calls to avoid spam
+    {
+        printf("DEBUG: __cyg_profile_func_enter called (count: %d)\n", hookCallCount);
+    }
+#endif
+    
     if (g_inHook)
         return;       // already in our hook, bail out
-    g_inHook = true;  // mark “in hook” for this thread
+    g_inHook = true;  // mark "in hook" for this thread
     
     qiti::InstrumentHooks::__cyg_profile_func_enter(this_fn, call_site);
     
