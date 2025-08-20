@@ -246,6 +246,16 @@ QITI_TEST_CASE("qiti::HotspotDetector exception tracking in hotspots", HotspotDe
     
     auto hotspots = qiti::HotspotDetector::detectHotspots();
     
+#ifdef _WIN32
+    // Debug: Show what hotspots were detected for exception test
+    printf("DEBUG Exception test: Found %zu hotspots\n", hotspots.size());
+    for (size_t i = 0; i < std::min(hotspots.size(), size_t(10)); ++i) {
+        const char* name = hotspots[i].function->getFunctionName();
+        printf("  [%zu] '%s' score=%.0f calls=%llu\n", 
+               i, name ? name : "(null)", hotspots[i].score,
+               hotspots[i].function->getNumTimesCalled());
+    }
+#endif
     
     // Find the function that throws exceptions
     const qiti::HotspotDetector::Hotspot* throwingHotspot = nullptr;
