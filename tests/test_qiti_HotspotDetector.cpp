@@ -214,8 +214,8 @@ QITI_TEST_CASE("qiti::HotspotDetector hotspot scoring", HotspotDetectorScoring)
     // Reason strings should contain useful information
     QITI_CHECK(slowHotspot->reason.find("Total time:") != std::string::npos);
     QITI_CHECK(fastHotspot->reason.find("Total time:") != std::string::npos);
-    QITI_CHECK(slowHotspot->reason.find("1 calls") != std::string::npos);
-    QITI_CHECK(fastHotspot->reason.find("10 calls") != std::string::npos);
+    QITI_CHECK(slowHotspot->reason.find("5 calls") != std::string::npos);
+    QITI_CHECK(fastHotspot->reason.find("20 calls") != std::string::npos);
 }
 
 QITI_TEST_CASE("qiti::HotspotDetector exception tracking in hotspots", HotspotDetectorExceptionTracking)
