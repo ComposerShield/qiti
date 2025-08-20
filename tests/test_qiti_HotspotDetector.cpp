@@ -18,23 +18,20 @@
 /** Test function with variable execution time for hotspot testing */
 void hotspotTestFuncSlow() noexcept
 {
-#ifdef _WIN32
-    printf("DEBUG: hotspotTestFuncSlow() executing\n");
-#endif
     volatile int sum = 0;
-    // Create significant execution time
+    volatile int temp = 0;
+    // Create significant execution time with actual computational work
     for(int i = 0; i < 5000000; ++i)
     {
         sum = sum + i;
+        temp = sum * i;  // More computation
+        sum = temp % 1000;  // Prevent optimization
     }
 }
 
 /** Test function with minimal execution time */
 void hotspotTestFuncFast() noexcept
 {
-#ifdef _WIN32
-    printf("DEBUG: hotspotTestFuncFast() executing\n");
-#endif
     volatile int _ = 42;
 }
 
