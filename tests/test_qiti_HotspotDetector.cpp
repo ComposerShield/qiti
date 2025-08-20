@@ -147,9 +147,14 @@ QITI_TEST_CASE("qiti::HotspotDetector hotspot scoring", HotspotDetectorScoring)
     qiti::ScopedQitiTest test;
     test.enableProfilingOnAllFunctions(true);
     
-    // Call slow function once and fast function many times
-    hotspotTestFuncSlow();
-    for (int i = 0; i < 10; ++i)
+    // Call slow function multiple times to accumulate significant total time
+    for (int i = 0; i < 5; ++i)
+    {
+        hotspotTestFuncSlow();
+    }
+    
+    // Call fast function many times
+    for (int i = 0; i < 20; ++i)
     {
         hotspotTestFuncFast();
     }
@@ -199,8 +204,8 @@ QITI_TEST_CASE("qiti::HotspotDetector hotspot scoring", HotspotDetectorScoring)
     QITI_REQUIRE(fastHotspot != nullptr);
     
     // Verify the scoring makes sense based on call patterns
-    QITI_CHECK(slowHotspot->function->getNumTimesCalled() == 1);
-    QITI_CHECK(fastHotspot->function->getNumTimesCalled() == 10);
+    QITI_CHECK(slowHotspot->function->getNumTimesCalled() == 5);
+    QITI_CHECK(fastHotspot->function->getNumTimesCalled() == 20);
     
     // Both should have valid scores
     QITI_CHECK(slowHotspot->score > 0.0);
@@ -218,9 +223,11 @@ QITI_TEST_CASE("qiti::HotspotDetector exception tracking in hotspots", HotspotDe
     qiti::ScopedQitiTest test;
     test.enableProfilingOnAllFunctions(true);
     
-    // Call function that throws exceptions
-    hotspotTestFuncCatches(); // This will internally call hotspotTestFuncThrows
-    hotspotTestFuncCatches(); // Call it again
+    // Call function that throws exceptions multiple times to accumulate total time
+    for (int i = 0; i < 10; ++i)
+    {
+        hotspotTestFuncCatches(); // This will internally call hotspotTestFuncThrows
+    }
     
     auto hotspots = qiti::HotspotDetector::detectHotspots();
     
