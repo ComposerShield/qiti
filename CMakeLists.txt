@@ -326,8 +326,13 @@ if(PROJECT_IS_TOP_LEVEL)
         target_link_options(qiti_tests_client INTERFACE "-rdynamic")
     endif()
 
-    enable_testing()
+    if(WIN32)
+        # Do not define "min" and "max" via windows.h
+        target_compile_definitions(qiti_tests_catch2 PRIVATE NOMINMAX)
+        target_compile_definitions(qiti_tests_gtest PRIVATE NOMINMAX)
+    endif()
 
+    enable_testing()
 
     # Test discovery for Catch2 targets
     # Load and use the .cmake file provided by Catch2
