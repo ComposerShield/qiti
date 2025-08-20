@@ -132,9 +132,14 @@ int dladdr(const void* addr, Dl_info* info)
         if (UnDecorateSymbolName(info.dli_sname, buffer, sizeof(buffer), UNDNAME_COMPLETE))
         {
             functionName = buffer;
+            printf("DEBUG: Function name resolved: mangled='%s' -> demangled='%s'\n", 
+                   info.dli_sname, functionName);
         }
         else
+        {
             functionName = info.dli_sname; // mangled name
+            printf("DEBUG: Function name undecorating failed, using mangled: '%s'\n", functionName);
+        }
 #else
         int status;
         char* demangled = abi::__cxa_demangle(info.dli_sname, nullptr, nullptr, &status);
@@ -150,6 +155,9 @@ int dladdr(const void* addr, Dl_info* info)
     else
     {
         // Symbol resolution failed
+#ifdef _WIN32
+        printf("DEBUG: Symbol resolution failed for function address %p\n", this_fn);
+#endif
     }
     
     return functionName;
@@ -192,6 +200,11 @@ void* Utils::getAddressForMangledFunctionName(const char* mangledName) noexcept
         qiti::FunctionData data(functionAddress,
                                 functionName,
                                 functionType);
+        
+#ifdef _WIN32
+        printf("DEBUG: Adding function to map: address=%p, name='%s'\n", 
+               functionAddress, functionName ? functionName : "(null)");
+#endif
         
         auto [insertedIt, success] = g_functionMap.emplace(functionAddress, std::move(data));
         
