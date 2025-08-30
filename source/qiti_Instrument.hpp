@@ -109,9 +109,6 @@ public:
      newly detected thread and executes on that thread. After execution, the 
      callback is automatically removed (one-time use only).
      
-     Detection occurs through thread-local variable initialization, which happens
-     when a new thread first calls any instrumented function.
-     
      @param callback The callback to execute when the next thread is detected,
                     receiving the thread's ID as a parameter
      @note The callback executes on the new thread, not the thread that registered it
