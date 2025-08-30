@@ -29,6 +29,12 @@ namespace qiti
  Abtracts a specific call of a specific function
  
  Tracks per‐call metrics such as heap allocations and bytes allocated.
+ 
+ To obtain a FunctionCallData object, call FunctionData::getLastFunctionCall()
+ on the FunctionData instance for the function you want to analyze.
+ 
+ Note: Qiti currently only stores data for the most recent function call,
+ not historical data for all previous calls.
  */
 class FunctionCallData
 {

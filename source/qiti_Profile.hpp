@@ -136,10 +136,20 @@ public:
         const bool wasProfilingEnabled;
     };
     
-    /** */
+    /**
+     Resets all profiling data and stops profiling all functions.
+     
+     Clears all accumulated profiling data and disables profiling for all functions.
+     Called automatically when ScopedQitiTest goes out of scope.
+     */
     QITI_API static void resetProfiling() noexcept;
     
-    /** */
+    /**
+     Begins profiling for a free function.
+     
+     This function is automatically called by FunctionData::getFunctionData().
+     It is recommended to use getFunctionData() instead of calling this directly.
+     */
     template<auto FuncPtr>
     requires isFreeFunction<FuncPtr>
     QITI_API_INLINE static void inline beginProfilingFunction() noexcept
@@ -149,7 +159,12 @@ public:
         beginProfilingFunction(functionAddress, functionName);
     }
     
-    /** */
+    /**
+     Begins profiling for a member function of a class/struct.
+     
+     This function is automatically called by FunctionData::getFunctionData().
+     It is recommended to use getFunctionData() instead of calling this directly.
+     */
     template<auto FuncPtr>
     requires isMemberFunction<FuncPtr>
     QITI_API_INLINE static void inline beginProfilingFunction() noexcept
@@ -159,7 +174,13 @@ public:
         beginProfilingFunction(functionAddress, functionName);
     }
     
-    /** */
+    /**
+     Ends profiling for a free function.
+     
+     Stops profiling the specified free function. Note that getFunctionData()
+     does not automatically call this - functions remain profiled until
+     resetProfiling() is called or the ScopedQitiTest goes out of scope.
+     */
     template <auto FuncPtr>
     requires isFreeFunction<FuncPtr>
     QITI_API_INLINE static void inline endProfilingFunction() noexcept
@@ -167,7 +188,13 @@ public:
         endProfilingFunction(reinterpret_cast<const void*>(FuncPtr));
     }
     
-    /** */
+    /**
+     Ends profiling for a member function of a class/struct.
+     
+     Stops profiling the specified member function. Note that getFunctionData()
+     does not automatically call this - functions remain profiled until
+     resetProfiling() is called or the ScopedQitiTest goes out of scope.
+     */
     template <auto FuncPtr>
     requires isMemberFunction<FuncPtr>
     QITI_API_INLINE static void inline endProfilingFunction() noexcept
@@ -175,10 +202,21 @@ public:
         endProfilingFunction(getMemberFunctionMockAddress<FuncPtr>());
     }
     
-    /** */
+    /**
+     Enables automatic profiling for all functions.
+     
+     Once called, any time a function is called in your code, it will automatically
+     become profiled by Qiti without needing to explicitly call getFunctionData().
+     This allows for comprehensive profiling of the entire call stack.
+     */
     QITI_API static void beginProfilingAllFunctions() noexcept;
     
-    /** */
+    /**
+     Disables automatic profiling for all functions.
+     
+     Stops the automatic profiling started by beginProfilingAllFunctions().
+     Functions that were already being profiled explicitly will continue to be profiled.
+     */
     QITI_API static void endProfilingAllFunctions() noexcept;
     
     /** @returns true if we are currently profling function. */
@@ -200,21 +238,46 @@ public:
         return isProfilingFunction(getMemberFunctionMockAddress<FuncPtr>());
     }
     
-    /** */
+    /**
+     @internal
+     TODO: Begins profiling for a specific type.
+     
+     This feature is not yet implemented.
+     */
     template<typename Type>
     QITI_API_INLINE static inline void beginProfilingType() noexcept { beginProfilingType( typeid(Type) ); }
     
-    /** */
+    /**
+     @internal
+     TODO: Ends profiling for a specific type.
+     
+     This feature is not yet implemented.
+     */
     template <typename Type>
     QITI_API_INLINE static inline void endProfilingType() noexcept { endProfilingType( typeid(Type) ); }
     
-    /** */
+    /**
+     Gets the total number of heap allocations made on the current thread.
+     
+     @returns The total count of heap allocations (malloc, new, etc.) made
+              on the current thread since profiling began.
+     */
     [[nodiscard]] QITI_API static uint64_t getNumHeapAllocationsOnCurrentThread() noexcept;
     
-    /** */
+    /**
+     Gets the total amount of memory allocated on the heap for the current thread.
+     
+     @returns The total number of bytes allocated on the heap for the current
+              thread since profiling began.
+     */
     [[nodiscard]] QITI_API static uint64_t getAmountHeapAllocatedOnCurrentThread() noexcept;
     
-    /** */
+    /**
+     Gets the compile-time demangled name of a function.
+     
+     @returns A human-readable string containing the function name, extracted
+              at compile-time from compiler intrinsics.
+     */
     template<auto FuncPtr>
     requires isFreeFunction<FuncPtr>
     || isMemberFunction<FuncPtr>
@@ -223,7 +286,12 @@ public:
         return FunctionNameHelpers::functionNameCStr<FuncPtr>;
     }
     
-    /** Get the compile-time demangled name of a type */
+    /**
+     Gets the compile-time demangled name of a type.
+     
+     @returns A human-readable string containing the type name, extracted
+              at compile-time from compiler intrinsics.
+     */
     template<typename T>
     [[nodiscard]] QITI_API_INLINE static consteval const char* getTypeName() noexcept
     {
@@ -334,11 +402,6 @@ private:
 #pragma clang diagnostic pop
     }
     
-    //--------------------------------------------------------------------------
-    /** \endcond */
-    // Doxygen - End Internal Documentation
-    //--------------------------------------------------------------------------
-    
     /** */
     QITI_API static void beginProfilingFunction(const void* functionAddress, const char* functionName = nullptr) noexcept;
     
@@ -355,5 +418,10 @@ private:
      @returns true if we are currently profling function.
      */
     [[nodiscard]] QITI_API static bool isProfilingFunction(const void* funcAddress) noexcept;
+    
+    //--------------------------------------------------------------------------
+    /** \endcond */
+    // Doxygen - End Internal Documentation
+    //--------------------------------------------------------------------------
 }; // class Profile
 }  // namespace qiti

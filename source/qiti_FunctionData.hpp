@@ -32,6 +32,9 @@ namespace qiti
 //--------------------------------------------------------------------------
 /**
  Abtracts a function and its history of use
+ 
+ To obtain a FunctionData object, call FunctionData::getFunctionData<FuncPtr>()
+ where FuncPtr is a pointer to the function you want to profile.
  */
 class FunctionData
 {

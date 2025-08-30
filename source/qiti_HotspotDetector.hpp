@@ -31,6 +31,25 @@ namespace qiti
  
  Uses call frequency and timing data to automatically detect functions that
  contribute most significantly to overall execution time.
+ 
+ @code
+ TEST_CASE("Performance Analysis") {
+     qiti::ScopedQitiTest test;
+     test.enableProfilingOnAllFunctions(true);
+     
+     // Run your normal application code
+     processUserInput();
+     renderFrame();
+     updateDatabase();
+     
+     // Analyze which functions are hotspots
+     auto hotspots = qiti::HotspotDetector::detectHotspots();
+     for (const auto& hotspot : hotspots) {
+         std::cout << "Hotspot: " << hotspot.function->getFunctionName() 
+                   << " (score: " << hotspot.score << ")" << std::endl;
+     }
+ }
+ @endcode
  */
 class HotspotDetector
 {
