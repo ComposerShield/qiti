@@ -29,16 +29,16 @@ Note: Qiti should not be linked in your final release builds. You will likely ne
 Qiti provides the `qiti::ThreadSanitizer` class with multiple detection capabilities:
 
 - **`createFunctionsCalledInParallelDetector()`** - Always available, uses function call tracking
-- **`createPotentialDeadlockDetector()`** - Always available, uses custom lock-order tracking
+- **`createPotentialDeadlockDetector()`** - Uses custom lock-order tracking on macOS, requires Clang ThreadSanitizer on Linux
 - **`createDataRaceDetector()`** - Requires Clang ThreadSanitizer, uses TSan for data race detection
 
-To enable the TSan-dependent `createDataRaceDetector()` functionality, add `-DQITI_ENABLE_CLANG_THREAD_SANITIZER=ON` to your CMake configuration:
+To enable TSan-dependent functionality (`createDataRaceDetector()` and `createPotentialDeadlockDetector()` on Linux), add `-DQITI_ENABLE_CLANG_THREAD_SANITIZER=ON` to your CMake configuration:
 
 ```bash
 cmake -B build . -DQITI_ENABLE_CLANG_THREAD_SANITIZER=ON
 ```
 
-When enabled, this adds ThreadSanitizer compiler flags (`-fsanitize=thread`, `-fno-inline`) and makes `createDataRaceDetector()` available. 
+When enabled, this adds ThreadSanitizer compiler flags (`-fsanitize=thread`, `-fno-inline`) and makes TSan-dependent functionality available. 
 Note: This option is not supported on Windows.
 
 When building on macOS with `QITI_ENABLE_CLANG_THREAD_SANITIZER=ON`, do not build universal binaries (arm64 + x86_64). ThreadSanitizer is incompatible with universal binaries. Build for your target architecture only.

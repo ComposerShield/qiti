@@ -113,6 +113,13 @@ public:
     }
     
     /**
+     Factory to create a lock-order inversion detector.
+     
+     Available on:
+     - macOS: Always available, uses custom lock-order tracking
+     - Linux: Requires QITI_ENABLE_CLANG_THREAD_SANITIZER, uses TSan's deadlock detection
+     - Windows: Not supported
+     
      When calling run(), tracks every mutex-acquire; if two locks are
      ever taken in inverted order on different threads, it flags failure.
      
@@ -137,7 +144,9 @@ public:
      @see passed()
      @see failed()
     */
+#if defined(__APPLE__) || defined(QITI_ENABLE_CLANG_THREAD_SANITIZER)
     [[nodiscard]] QITI_API static std::unique_ptr<ThreadSanitizer> createPotentialDeadlockDetector() noexcept;
+#endif
     
     /**
      @param func Function pointer or lambda that is immediately run and tested according to which ThreadSanitizer object you are using.

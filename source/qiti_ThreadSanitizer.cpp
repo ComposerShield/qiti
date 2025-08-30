@@ -46,7 +46,7 @@
 
 //--------------------------------------------------------------------------
 
-static constexpr const char* QITI_TSAN_LOG_PATH = "/tmp/tsan.log";
+[[maybe_unused]] static constexpr const char* QITI_TSAN_LOG_PATH = "/tmp/tsan.log";
 
 namespace fs = std::filesystem;
 
@@ -56,7 +56,7 @@ namespace fs = std::filesystem;
  @param prefix The log file prefix to search for.
  @returns an optional containing the latest path, or nullopt if none found.
 */
-[[nodiscard]] static std::optional<fs::path> findLatestLog(const std::string& prefix) noexcept
+[[maybe_unused]] [[nodiscard]] static std::optional<fs::path> findLatestLog(const std::string& prefix) noexcept
 {
     std::optional<fs::path> best;
     fs::path dir = fs::path(prefix).parent_path();
@@ -79,7 +79,7 @@ namespace fs = std::filesystem;
  @param path Path of the file to read.
  @returns the file contents; empty string on failure.
 */
-[[nodiscard]] static std::string slurpFile(const fs::path& path) noexcept
+[[maybe_unused]] [[nodiscard]] static std::string slurpFile(const fs::path& path) noexcept
 {
     std::ifstream in(path, std::ios::binary);
     return { std::istreambuf_iterator<char>(in),
@@ -441,6 +441,7 @@ private:
 
 //--------------------------------------------------------------------------
 
+#ifdef QITI_ENABLE_CLANG_THREAD_SANITIZER
 /** Linux deadlock detector that uses TSan's built-in deadlock detection */
 class TSanDeadlockDetector final : public ThreadSanitizer
 {
@@ -579,6 +580,7 @@ private:
     std::string shortReport{};
     std::string verboseReport{};
 };
+#endif // QITI_ENABLE_CLANG_THREAD_SANITIZER
 
 //--------------------------------------------------------------------------
 
@@ -622,6 +624,7 @@ ThreadSanitizer::createDataRaceDetector() noexcept
 }
 #endif // QITI_ENABLE_CLANG_THREAD_SANITIZER
 
+#if defined(__APPLE__) || defined(QITI_ENABLE_CLANG_THREAD_SANITIZER)
 std::unique_ptr<ThreadSanitizer>
 ThreadSanitizer::createPotentialDeadlockDetector() noexcept
 {
@@ -630,9 +633,14 @@ ThreadSanitizer::createPotentialDeadlockDetector() noexcept
     return std::make_unique<LockOrderInversionDetector>();
 #else
     // Linux: Use TSan's built-in deadlock detection
+#if defined(QITI_ENABLE_CLANG_THREAD_SANITIZER)
     return std::make_unique<TSanDeadlockDetector>();
-#endif
+#else
+    return nullptr;
+#endif // defined(QITI_ENABLE_CLANG_THREAD_SANITIZER)
+#endif // defined(__APPLE__)
 }
+#endif // defined(__APPLE__) || defined(QITI_ENABLE_CLANG_THREAD_SANITIZER)
 
 void ThreadSanitizer::rerun() noexcept
 {
