@@ -298,7 +298,6 @@ Here is the call graph for this function:</div>
 </div><div class="memdoc">
 <p>Register a callback to be invoked when the next new thread is detected.</p>
 <p>Schedules the provided callback to be executed when the next new thread accesses Qiti library code. The callback receives the thread ID of the newly detected thread and executes on that thread. After execution, the callback is automatically removed (one-time use only).</p>
-<p>Detection occurs through thread-local variable initialization, which happens when a new thread first calls any instrumented function.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">callback</td><td>The callback to execute when the next thread is detected, receiving the thread's ID as a parameter </td></tr>
