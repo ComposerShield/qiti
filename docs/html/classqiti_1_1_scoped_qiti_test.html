@@ -136,8 +136,17 @@ Static Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Initializes Qiti profiling and other functionality.</p>
-<p>Cleans up state when it goes out of scope. Can be queried for details regarding the current Qiti-injected unit test. </p>
-</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<p>This object should be placed at the top of any test that wishes to use Qiti. It initializes profiling for the test duration and cleans up state when it goes out of scope. Can be queried for details regarding the current Qiti-injected unit test.</p>
+<div class="fragment"><div class="line">TEST_CASE(<span class="stringliteral">&quot;My Test&quot;</span>) {</div>
+<div class="line">    <a class="code hl_class" href="classqiti_1_1_scoped_qiti_test.html">qiti::ScopedQitiTest</a> test;</div>
+<div class="line">    </div>
+<div class="line">    <span class="comment">// Your test code here</span></div>
+<div class="line">    <span class="keyword">auto</span> funcData = qiti::FunctionData::getFunctionData&lt;&amp;myFunction&gt;();</div>
+<div class="line">    myFunction();</div>
+<div class="line">    <span class="keyword">auto</span> lastCall = funcData-&gt;getLastFunctionCall();</div>
+<div class="line">    <span class="comment">// ... assertions</span></div>
+<div class="line">}</div>
+</div><!-- fragment --> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a3bb93188a0914037b4ac82251f6d97e9" name="a3bb93188a0914037b4ac82251f6d97e9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3bb93188a0914037b4ac82251f6d97e9">&#9670;&#160;</a></span>ScopedQitiTest()</h2>
 

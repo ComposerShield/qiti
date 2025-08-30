@@ -120,8 +120,24 @@ Static Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Analyzes profiling data to identify performance hotspots.</p>
-<p>Uses call frequency and timing data to automatically detect functions that contribute most significantly to overall execution time. </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+<p>Uses call frequency and timing data to automatically detect functions that contribute most significantly to overall execution time.</p>
+<div class="fragment"><div class="line">TEST_CASE(<span class="stringliteral">&quot;Performance Analysis&quot;</span>) {</div>
+<div class="line">    <a class="code hl_class" href="classqiti_1_1_scoped_qiti_test.html">qiti::ScopedQitiTest</a> test;</div>
+<div class="line">    test.<a class="code hl_function" href="classqiti_1_1_scoped_qiti_test.html#a61cc82541d91ee11f4ed502f776e4ed6">enableProfilingOnAllFunctions</a>(<span class="keyword">true</span>);</div>
+<div class="line">    </div>
+<div class="line">    <span class="comment">// Run your normal application code</span></div>
+<div class="line">    processUserInput();</div>
+<div class="line">    renderFrame();</div>
+<div class="line">    updateDatabase();</div>
+<div class="line">    </div>
+<div class="line">    <span class="comment">// Analyze which functions are hotspots</span></div>
+<div class="line">    <span class="keyword">auto</span> hotspots = <a class="code hl_function" href="classqiti_1_1_hotspot_detector.html#a18992a4887028b34a99484418a0e3e19">qiti::HotspotDetector::detectHotspots</a>();</div>
+<div class="line">    <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; hotspot : hotspots) {</div>
+<div class="line">        std::cout &lt;&lt; <span class="stringliteral">&quot;Hotspot: &quot;</span> &lt;&lt; hotspot.function-&gt;getFunctionName() </div>
+<div class="line">                  &lt;&lt; <span class="stringliteral">&quot; (score: &quot;</span> &lt;&lt; hotspot.score &lt;&lt; <span class="stringliteral">&quot;)&quot;</span> &lt;&lt; std::endl;</div>
+<div class="line">    }</div>
+<div class="line">}</div>
+</div><!-- fragment --> </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a18992a4887028b34a99484418a0e3e19" name="a18992a4887028b34a99484418a0e3e19"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a18992a4887028b34a99484418a0e3e19">&#9670;&#160;</a></span>detectHotspots() <span class="overload">[1/2]</span></h2>
 

@@ -138,8 +138,20 @@ Public Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Base class for <a class="el" href="classqiti_1_1_thread_sanitizer.html">ThreadSanitizer</a> checks.</p>
-<p>Provides a standardized API for generating different thread safety checks (e.g. running functions in a forked process with <a class="el" href="classqiti_1_1_thread_sanitizer.html">ThreadSanitizer</a> enabled) and querying pass/fail status. </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+<p>Provides a standardized API for generating different thread safety checks (e.g. running functions in a forked process with <a class="el" href="classqiti_1_1_thread_sanitizer.html">ThreadSanitizer</a> enabled) and querying pass/fail status.</p>
+<p>Use the factory functions to create specific types of <a class="el" href="classqiti_1_1_thread_sanitizer.html">ThreadSanitizer</a> detectors:</p><ul>
+<li><a class="el" href="classqiti_1_1_thread_sanitizer.html#a17d877faf475b8fcef8da6f7c2b9ccfa">createDataRaceDetector()</a> - Detects data races in your code</li>
+<li><a class="el" href="classqiti_1_1_thread_sanitizer.html#a0878fe54c8a7cd16b8c056b7da090b2d">createFunctionsCalledInParallelDetector&lt;&amp;func1, &amp;func2&gt;()</a> - Checks if two functions are called in parallel</li>
+<li><a class="el" href="classqiti_1_1_thread_sanitizer.html#a1b31ec3c7f3c7fb7e92135fc6a17b2d8">createPotentialDeadlockDetector()</a> - Detects lock-order inversions (macOS only)</li>
+</ul>
+<div class="fragment"><div class="line"><span class="keyword">auto</span> detector = <a class="code hl_function" href="classqiti_1_1_thread_sanitizer.html#a17d877faf475b8fcef8da6f7c2b9ccfa">ThreadSanitizer::createDataRaceDetector</a>();</div>
+<div class="line">detector-&gt;run([]() {</div>
+<div class="line">    <span class="comment">// Your potentially racy code here</span></div>
+<div class="line">});</div>
+<div class="line"><span class="keywordflow">if</span> (detector-&gt;failed()) {</div>
+<div class="line">    <span class="comment">// Handle race condition</span></div>
+<div class="line">}</div>
+</div><!-- fragment --> </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a17d877faf475b8fcef8da6f7c2b9ccfa" name="a17d877faf475b8fcef8da6f7c2b9ccfa"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a17d877faf475b8fcef8da6f7c2b9ccfa">&#9670;&#160;</a></span>createDataRaceDetector()</h2>
 
@@ -165,7 +177,15 @@ Public Attributes</h2></td></tr>
 <p>Factory to create a detector for data races.</p>
 <dl class="section return"><dt>Returns</dt><dd>a <a class="el" href="classqiti_1_1_thread_sanitizer.html">ThreadSanitizer</a> object that can be queried via <a class="el" href="classqiti_1_1_thread_sanitizer.html#ae71237ed1a23a6d4105c0c362c30943f">passed()</a> or <a class="el" href="classqiti_1_1_thread_sanitizer.html#a00e5043b2e4530a55d8f96ac23b096b7">failed()</a> to determine if any data race occurred within the function/lambda called by <a class="el" href="classqiti_1_1_thread_sanitizer.html#a3f7eda0cb4a998a645b02d844620c471">run()</a>.</dd></dl>
 <p>Function pointer/lambdas are run in a forked process with thread sanitizer enabled.</p>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="classqiti_1_1_thread_sanitizer.html#a3f7eda0cb4a998a645b02d844620c471">run()</a> </dd>
+<div class="fragment"><div class="line"><span class="keyword">auto</span> detector = <a class="code hl_function" href="classqiti_1_1_thread_sanitizer.html#a17d877faf475b8fcef8da6f7c2b9ccfa">ThreadSanitizer::createDataRaceDetector</a>();</div>
+<div class="line">detector-&gt;run([]() {</div>
+<div class="line">    <span class="comment">// Code that might have data races</span></div>
+<div class="line">    std::thread t1([]() { sharedVariable++; });</div>
+<div class="line">    std::thread t2([]() { sharedVariable++; });</div>
+<div class="line">    t1.join(); t2.join();</div>
+<div class="line">});</div>
+<div class="line">REQUIRE(detector-&gt;failed()); <span class="comment">// Should detect race</span></div>
+</div><!-- fragment --><dl class="section see"><dt>See also</dt><dd><a class="el" href="classqiti_1_1_thread_sanitizer.html#a3f7eda0cb4a998a645b02d844620c471">run()</a> </dd>
 <dd>
 <a class="el" href="classqiti_1_1_thread_sanitizer.html#ae71237ed1a23a6d4105c0c362c30943f">passed()</a> </dd>
 <dd>
@@ -200,7 +220,14 @@ requires isFreeFunction&lt;FuncPtr0&gt; &amp;&amp; isFreeFunction&lt;FuncPtr1&gt
 </div><div class="memdoc">
 <p>Factory to create a detector that checks if two functions are called in parallel.</p>
 <dl class="section return"><dt>Returns</dt><dd>a <a class="el" href="classqiti_1_1_thread_sanitizer.html">ThreadSanitizer</a> object that can be queried via <a class="el" href="classqiti_1_1_thread_sanitizer.html#ae71237ed1a23a6d4105c0c362c30943f">passed()</a> or <a class="el" href="classqiti_1_1_thread_sanitizer.html#a00e5043b2e4530a55d8f96ac23b096b7">failed()</a> to determine if the functions were ever called in parallel within the function/lambda called by <a class="el" href="classqiti_1_1_thread_sanitizer.html#a3f7eda0cb4a998a645b02d844620c471">run()</a>.</dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="classqiti_1_1_thread_sanitizer.html#a3f7eda0cb4a998a645b02d844620c471">run()</a> </dd>
+<div class="fragment"><div class="line"><span class="keyword">auto</span> detector = ThreadSanitizer::createFunctionsCalledInParallelDetector&lt;&amp;func1, &amp;func2&gt;();</div>
+<div class="line">detector-&gt;run([]() {</div>
+<div class="line">    std::thread t1([]() { func1(); });</div>
+<div class="line">    std::thread t2([]() { func2(); });</div>
+<div class="line">    t1.join(); t2.join();</div>
+<div class="line">});</div>
+<div class="line">REQUIRE(detector-&gt;passed()); <span class="comment">// Should detect parallel execution</span></div>
+</div><!-- fragment --><dl class="section see"><dt>See also</dt><dd><a class="el" href="classqiti_1_1_thread_sanitizer.html#a3f7eda0cb4a998a645b02d844620c471">run()</a> </dd>
 <dd>
 <a class="el" href="classqiti_1_1_thread_sanitizer.html#ae71237ed1a23a6d4105c0c362c30943f">passed()</a> </dd>
 <dd>
@@ -252,7 +279,21 @@ Here is the caller graph for this function:</div>
 </div><div class="memdoc">
 <p>macOS-only: Factory to create a lock-order inversion detector.</p>
 <p>When calling <a class="el" href="classqiti_1_1_thread_sanitizer.html#a3f7eda0cb4a998a645b02d844620c471">run()</a>, tracks every mutex-acquire; if two locks are ever taken in inverted order on different threads, it flags failure.</p>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="classqiti_1_1_thread_sanitizer.html#a3f7eda0cb4a998a645b02d844620c471">run()</a> </dd>
+<div class="fragment"><div class="line">std::mutex mutex1, mutex2;</div>
+<div class="line"><span class="keyword">auto</span> detector = <a class="code hl_function" href="classqiti_1_1_thread_sanitizer.html#a1b31ec3c7f3c7fb7e92135fc6a17b2d8">ThreadSanitizer::createPotentialDeadlockDetector</a>();</div>
+<div class="line">detector-&gt;run([]() {</div>
+<div class="line">    std::thread t1([&amp;]() {</div>
+<div class="line">        std::lock_guard lock1(mutex1);</div>
+<div class="line">        std::lock_guard lock2(mutex2); <span class="comment">// Order: mutex1 -&gt; mutex2</span></div>
+<div class="line">    });</div>
+<div class="line">    std::thread t2([&amp;]() {</div>
+<div class="line">        std::lock_guard lock2(mutex2);</div>
+<div class="line">        std::lock_guard lock1(mutex1); <span class="comment">// Order: mutex2 -&gt; mutex1 (inversion!)</span></div>
+<div class="line">    });</div>
+<div class="line">    t1.join(); t2.join();</div>
+<div class="line">});</div>
+<div class="line">REQUIRE(detector-&gt;failed()); <span class="comment">// Should detect potential deadlock</span></div>
+</div><!-- fragment --><dl class="section see"><dt>See also</dt><dd><a class="el" href="classqiti_1_1_thread_sanitizer.html#a3f7eda0cb4a998a645b02d844620c471">run()</a> </dd>
 <dd>
 <a class="el" href="classqiti_1_1_thread_sanitizer.html#ae71237ed1a23a6d4105c0c362c30943f">passed()</a> </dd>
 <dd>

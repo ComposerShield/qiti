@@ -187,6 +187,8 @@ requires isFreeFunction&lt;FuncPtr&gt; || isMemberFunction&lt;FuncPtr&gt;</td></
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Enables automatic profiling for all functions.</p>
+<p>Once called, any time a function is called in your code, it will automatically become profiled by Qiti without needing to explicitly call getFunctionData(). This allows for comprehensive profiling of the entire call stack. </p>
 
 </div>
 </div>
@@ -215,6 +217,8 @@ requires isFreeFunction&lt;FuncPtr&gt;</div>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Begins profiling for a free function.</p>
+<p>This function is automatically called by <a class="el" href="classqiti_1_1_function_data.html#a8595d24d707f31b80a933a8b732a6d23">FunctionData::getFunctionData()</a>. It is recommended to use getFunctionData() instead of calling this directly. </p>
 
 <p class="reference">References <a class="el" href="classqiti_1_1_profile.html#a4c60ccee61453c2bd8422d4fd0e7e221">beginProfilingFunction()</a>.</p>
 
@@ -263,6 +267,8 @@ requires isMemberFunction&lt;FuncPtr&gt;</div>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Begins profiling for a member function of a class/struct.</p>
+<p>This function is automatically called by <a class="el" href="classqiti_1_1_function_data.html#a8595d24d707f31b80a933a8b732a6d23">FunctionData::getFunctionData()</a>. It is recommended to use getFunctionData() instead of calling this directly. </p>
 
 <p class="reference">References <a class="el" href="classqiti_1_1_profile.html#a4c60ccee61453c2bd8422d4fd0e7e221">beginProfilingFunction()</a>.</p>
 <div class="dynheader">
@@ -346,6 +352,8 @@ Here is the caller graph for this function:</div>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Disables automatic profiling for all functions.</p>
+<p>Stops the automatic profiling started by <a class="el" href="classqiti_1_1_profile.html#a855bee7f4b68360c771d36c747b02d1a">beginProfilingAllFunctions()</a>. Functions that were already being profiled explicitly will continue to be profiled. </p>
 
 </div>
 </div>
@@ -374,6 +382,8 @@ requires isFreeFunction&lt;FuncPtr&gt;</div>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Ends profiling for a free function.</p>
+<p>Stops profiling the specified free function. Note that getFunctionData() does not automatically call this - functions remain profiled until <a class="el" href="classqiti_1_1_profile.html#a388c8021c97edb3b14becc425e0376cf">resetProfiling()</a> is called or the <a class="el" href="classqiti_1_1_scoped_qiti_test.html">ScopedQitiTest</a> goes out of scope. </p>
 
 <p class="reference">References <a class="el" href="classqiti_1_1_profile.html#a1668c8f1c0cdab9eb0ce8b0c68d9f986">endProfilingFunction()</a>.</p>
 
@@ -422,6 +432,8 @@ requires isMemberFunction&lt;FuncPtr&gt;</div>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Ends profiling for a member function of a class/struct.</p>
+<p>Stops profiling the specified member function. Note that getFunctionData() does not automatically call this - functions remain profiled until <a class="el" href="classqiti_1_1_profile.html#a388c8021c97edb3b14becc425e0376cf">resetProfiling()</a> is called or the <a class="el" href="classqiti_1_1_scoped_qiti_test.html">ScopedQitiTest</a> goes out of scope. </p>
 
 <p class="reference">References <a class="el" href="classqiti_1_1_profile.html#a1668c8f1c0cdab9eb0ce8b0c68d9f986">endProfilingFunction()</a>.</p>
 <div class="dynheader">
@@ -505,6 +517,8 @@ Here is the caller graph for this function:</div>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Gets the total amount of memory allocated on the heap for the current thread.</p>
+<dl class="section return"><dt>Returns</dt><dd>The total number of bytes allocated on the heap for the current thread since profiling began. </dd></dl>
 
 </div>
 </div>
@@ -533,6 +547,8 @@ requires isFreeFunction&lt;FuncPtr&gt; || isMemberFunction&lt;FuncPtr&gt;</div>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Gets the compile-time demangled name of a function.</p>
+<dl class="section return"><dt>Returns</dt><dd>A human-readable string containing the function name, extracted at compile-time from compiler intrinsics. </dd></dl>
 
 </div>
 </div>
@@ -558,6 +574,8 @@ requires isFreeFunction&lt;FuncPtr&gt; || isMemberFunction&lt;FuncPtr&gt;</div>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Gets the total number of heap allocations made on the current thread.</p>
+<dl class="section return"><dt>Returns</dt><dd>The total count of heap allocations (malloc, new, etc.) made on the current thread since profiling began. </dd></dl>
 
 </div>
 </div>
@@ -585,7 +603,8 @@ template&lt;typename T &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Get the compile-time demangled name of a type </p>
+<p>Gets the compile-time demangled name of a type.</p>
+<dl class="section return"><dt>Returns</dt><dd>A human-readable string containing the type name, extracted at compile-time from compiler intrinsics. </dd></dl>
 
 </div>
 </div>
@@ -700,6 +719,8 @@ Here is the call graph for this function:</div>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Resets all profiling data and stops profiling all functions.</p>
+<p>Clears all accumulated profiling data and disables profiling for all functions. Called automatically when <a class="el" href="classqiti_1_1_scoped_qiti_test.html">ScopedQitiTest</a> goes out of scope. </p>
 
 </div>
 </div>
