@@ -52,3 +52,60 @@ QITI_TEST_CASE("qiti::onNextHeapAllocation() is called on next heap allocation",
 
 // Re-enable optimizations for subsequent files
 #pragma clang optimize on
+
+//--------------------------------------------------------------------------
+// Function call instrumentation tests
+//--------------------------------------------------------------------------
+
+// Test function for onNextFunctionCall tests
+__attribute__((noinline))
+__attribute__((optnone))
+static void testTargetFunction()
+{
+    // Empty function for testing purposes
+    [[maybe_unused]] volatile int dummyInt = 42;
+}
+
+QITI_TEST_CASE("qiti::Instrument::onNextFunctionCall() is called on next function call", OnNextFunctionCallIsCalled)
+{
+    qiti::ScopedQitiTest test;
+    
+    int callbackCount = 0;
+    auto incrementCallback = [&callbackCount]()
+    {
+        ++callbackCount;
+    };
+    
+    // Set up callback for testTargetFunction
+    qiti::Instrument::onNextFunctionCall<testTargetFunction>(incrementCallback);
+    
+    // Call the function - should trigger callback
+    testTargetFunction();
+    
+    // Callback should have been executed once
+    QITI_CHECK(callbackCount == 1);
+    
+    // Second call should not trigger callback (one-time only)
+    testTargetFunction();
+    QITI_CHECK(callbackCount == 1);
+}
+
+QITI_TEST_CASE("qiti::Instrument::resetInstrumentation() clears function call hooks", ResetInstrumentationClearsFunctionCallHooks)
+{
+    qiti::ScopedQitiTest test;
+    
+    int callbackCount = 0;
+    auto incrementCallback = [&callbackCount]() { ++callbackCount; };
+    
+    // Set up callback
+    qiti::Instrument::onNextFunctionCall<&testTargetFunction>(incrementCallback);
+    
+    // Reset instrumentation should clear the callback
+    qiti::Instrument::resetInstrumentation();
+    
+    // Call function - callback should not execute
+    testTargetFunction();
+    
+    // Callback should not have been executed
+    QITI_CHECK(callbackCount == 0);
+}

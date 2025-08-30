@@ -109,15 +109,59 @@ $(document).ready(function(){initNavTree('classqiti_1_1_instrument.html',''); in
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a28fd83f2a13c906367e6fd9857fd14a8"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classqiti_1_1_instrument.html#a28fd83f2a13c906367e6fd9857fd14a8">resetInstrumentation</a> () noexcept</td></tr>
 <tr class="separator:a28fd83f2a13c906367e6fd9857fd14a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a359de9bc92c1129df2cde3e5b6ecb63d"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classqiti_1_1_instrument.html#a359de9bc92c1129df2cde3e5b6ecb63d">onNextHeapAllocation</a> (void(*heapAllocCallback)()) noexcept</td></tr>
-<tr class="separator:a359de9bc92c1129df2cde3e5b6ecb63d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4907166300993ee8dfa0eb6763bfda47"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classqiti_1_1_instrument.html#a4907166300993ee8dfa0eb6763bfda47">onNextHeapAllocation</a> (std::function&lt; void()&gt; heapAllocCallback) noexcept</td></tr>
+<tr class="separator:a4907166300993ee8dfa0eb6763bfda47"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a097a98788a3828cb58a320b42cdc37fa"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classqiti_1_1_instrument.html#a097a98788a3828cb58a320b42cdc37fa">assertOnNextHeapAllocation</a> () noexcept</td></tr>
 <tr class="separator:a097a98788a3828cb58a320b42cdc37fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a53b8dea707559ea38a8ca1be31ec0b12"><td class="memTemplParams" colspan="2">template&lt;auto FuncPtr&gt; <br />
+requires isFreeFunction&lt;FuncPtr&gt; || isMemberFunction&lt;FuncPtr&gt;</td></tr>
+<tr class="memitem:a53b8dea707559ea38a8ca1be31ec0b12"><td class="memTemplItemLeft" align="right" valign="top">static QITI_API_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classqiti_1_1_instrument.html#a53b8dea707559ea38a8ca1be31ec0b12">onNextFunctionCall</a> (std::function&lt; void()&gt; callback) noexcept</td></tr>
+<tr class="separator:a53b8dea707559ea38a8ca1be31ec0b12"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7ef1b56894c4b2c62ff11a94639bdbf6"><td class="memTemplParams" colspan="2">template&lt;auto FuncPtr&gt; <br />
+requires isFreeFunction&lt;FuncPtr&gt; || isMemberFunction&lt;FuncPtr&gt;</td></tr>
+<tr class="memitem:a7ef1b56894c4b2c62ff11a94639bdbf6"><td class="memTemplItemLeft" align="right" valign="top">static QITI_API_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classqiti_1_1_instrument.html#a7ef1b56894c4b2c62ff11a94639bdbf6">assertOnNextFunctionCall</a> () noexcept</td></tr>
+<tr class="separator:a7ef1b56894c4b2c62ff11a94639bdbf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Tools for injecting custom logic into the application at runtime.</p>
 <p>The instrument namespace provides functions to hook into the runtime flow, allowing you to insert callbacks and additional logic as needed. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a7ef1b56894c4b2c62ff11a94639bdbf6" name="a7ef1b56894c4b2c62ff11a94639bdbf6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7ef1b56894c4b2c62ff11a94639bdbf6">&#9670;&#160;</a></span>assertOnNextFunctionCall()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;auto FuncPtr&gt; <br />
+requires isFreeFunction&lt;FuncPtr&gt; || isMemberFunction&lt;FuncPtr&gt;</div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static QITI_API_INLINE void qiti::Instrument::assertOnNextFunctionCall </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Triggers an assertion failure when the next call to a specific function happens.</p>
+<p>Shortcut equivalent to onNextFunctionCall&lt;FuncPtr&gt;([]{ assert(false); });</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">FuncPtr</td><td>The function pointer to monitor (free function or member function) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a097a98788a3828cb58a320b42cdc37fa" name="a097a98788a3828cb58a320b42cdc37fa"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a097a98788a3828cb58a320b42cdc37fa">&#9670;&#160;</a></span>assertOnNextHeapAllocation()</h2>
 
@@ -145,8 +189,62 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a359de9bc92c1129df2cde3e5b6ecb63d" name="a359de9bc92c1129df2cde3e5b6ecb63d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a359de9bc92c1129df2cde3e5b6ecb63d">&#9670;&#160;</a></span>onNextHeapAllocation()</h2>
+<a id="a53b8dea707559ea38a8ca1be31ec0b12" name="a53b8dea707559ea38a8ca1be31ec0b12"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a53b8dea707559ea38a8ca1be31ec0b12">&#9670;&#160;</a></span>onNextFunctionCall()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;auto FuncPtr&gt; <br />
+requires isFreeFunction&lt;FuncPtr&gt; || isMemberFunction&lt;FuncPtr&gt;</div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static QITI_API_INLINE void qiti::Instrument::onNextFunctionCall </td>
+          <td>(</td>
+          <td class="paramtype">std::function&lt; void()&gt;&#160;</td>
+          <td class="paramname"><em>callback</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Register a callback to be invoked on the next call to a specific function.</p>
+<p>Schedules the provided callback to be executed immediately after the next invocation of the specified function. This enables custom handling or assertions around specific function calls during testing.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">FuncPtr</td><td>The function pointer to monitor (free function or member function) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">callback</td><td>The callback to execute when the function is called </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="reference">References <a class="el" href="classqiti_1_1_profile.html#a4c60ccee61453c2bd8422d4fd0e7e221">qiti::Profile::beginProfilingFunction()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="classqiti_1_1_instrument_a53b8dea707559ea38a8ca1be31ec0b12_cgraph.png" border="0" usemap="#aclassqiti_1_1_instrument_a53b8dea707559ea38a8ca1be31ec0b12_cgraph" alt=""/></div>
+<map name="aclassqiti_1_1_instrument_a53b8dea707559ea38a8ca1be31ec0b12_cgraph" id="aclassqiti_1_1_instrument_a53b8dea707559ea38a8ca1be31ec0b12_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,164,70"/>
+<area shape="rect" href="classqiti_1_1_profile.html#a4c60ccee61453c2bd8422d4fd0e7e221" title=" " alt="" coords="212,29,381,70"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="a4907166300993ee8dfa0eb6763bfda47" name="a4907166300993ee8dfa0eb6763bfda47"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4907166300993ee8dfa0eb6763bfda47">&#9670;&#160;</a></span>onNextHeapAllocation()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -157,7 +255,7 @@ Static Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">static void qiti::Instrument::onNextHeapAllocation </td>
           <td>(</td>
-          <td class="paramtype">void(*)()&#160;</td>
+          <td class="paramtype">std::function&lt; void()&gt;&#160;</td>
           <td class="paramname"><em>heapAllocCallback</em></td><td>)</td>
           <td></td>
         </tr>

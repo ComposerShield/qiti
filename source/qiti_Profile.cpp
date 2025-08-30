@@ -93,7 +93,7 @@ void Profile::resetProfiling() noexcept
 
 void Profile::beginProfilingFunction(const void* functionAddress, const char* functionName) noexcept
 {
-    g_functionsToProfile.insert(functionAddress);
+    g_functionsToProfile.insert(functionAddress); // automatically skips duplicates
     
     // This adds the function to our function map
     (void)Utils::getFunctionDataFromAddress(functionAddress, functionName);

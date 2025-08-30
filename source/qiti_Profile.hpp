@@ -304,6 +304,7 @@ private:
     /** \cond INTERNAL */
     //--------------------------------------------------------------------------
     
+    friend class Instrument;
     friend class InstrumentHooks;
     friend class FunctionData;
     friend class Utils;

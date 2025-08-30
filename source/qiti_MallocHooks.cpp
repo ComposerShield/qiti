@@ -17,15 +17,13 @@
 
 #include "qiti_Utils.hpp"
 
-#ifndef _WIN32
-#include <cxxabi.h>       // __cxa_demangle
-#include <execinfo.h>     // backtrace(), backtrace_symbols()
-#endif
 #ifdef _WIN32
-#include <windows.h>
-#include <dbghelp.h>
+  #include <windows.h>
+  #include <dbghelp.h>
 #else
-#include <dlfcn.h>        // dladdr()
+  #include <cxxabi.h>     // __cxa_demangle
+  #include <dlfcn.h>      // dladdr()
+  #include <execinfo.h>   // backtrace(), backtrace_symbols()
 #endif
 
 #include <array>
@@ -35,7 +33,6 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-
 
 //--------------------------------------------------------------------------
 
