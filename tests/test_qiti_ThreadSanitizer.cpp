@@ -162,6 +162,8 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data rac
 
 #endif // QITI_ENABLE_CLANG_THREAD_SANITIZER
 
+#if defined(__APPLE__) || defined(QITI_ENABLE_CLANG_THREAD_SANITIZER)
+
 // Disable optimizations to prevent Release mode optimizations from interfering with intentional deadlock
 #pragma clang optimize off
 
@@ -258,3 +260,4 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects
 
 #pragma clang optimize on
 
+#endif // defined(__APPLE__) || defined(QITI_ENABLE_CLANG_THREAD_SANITIZER)
