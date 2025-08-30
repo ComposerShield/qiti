@@ -119,11 +119,11 @@ namespace qiti
     /**
      Check if ThreadSanitizer wrapper functionality is enabled.
 
-     @returns true if QITI_ENABLE_THREAD_SANITIZER was defined during compilation
+     @returns true if QITI_ENABLE_CLANG_THREAD_SANITIZER was defined during compilation
      */
     constexpr bool isThreadSanitizerEnabled() noexcept
     {
-#ifdef QITI_ENABLE_THREAD_SANITIZER
+#ifdef QITI_ENABLE_CLANG_THREAD_SANITIZER
         return true;
 #else
         return false;

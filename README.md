@@ -16,7 +16,6 @@ Qiti also provides optional Thread Sanitizer wrapper functionality: when enabled
 - Windows (experimental/work-in-progress; x86_64, ThreadSanitizer features not supported)*
 - C++20
 - CMake**
-- **macOS with ThreadSanitizer**: When building on macOS with `QITI_ENABLE_THREAD_SANITIZER=ON`, do not build universal binaries (arm64 + x86_64). ThreadSanitizer is incompatible with universal binaries. Build for your target architecture only.
 
 *see "Platform & Compiler Test Matrix" below
 **see "Manual Integration" below for instructions to integrate without CMake
@@ -27,13 +26,22 @@ Note: Qiti should not be linked in your final release builds. You will likely ne
 
 ### ThreadSanitizer Support
 
-ThreadSanitizer functionality is **optional** and disabled by default. To enable it, add `-DQITI_ENABLE_THREAD_SANITIZER=ON` to your CMake configuration:
+Qiti provides the `qiti::ThreadSanitizer` class with multiple detection capabilities:
+
+- **`createFunctionsCalledInParallelDetector()`** - Always available, uses function call tracking
+- **`createPotentialDeadlockDetector()`** - Uses custom lock-order tracking on macOS, requires Clang ThreadSanitizer on Linux
+- **`createDataRaceDetector()`** - Requires Clang ThreadSanitizer, uses TSan for data race detection
+
+To enable TSan-dependent functionality (`createDataRaceDetector()` and `createPotentialDeadlockDetector()` on Linux), add `-DQITI_ENABLE_CLANG_THREAD_SANITIZER=ON` to your CMake configuration:
 
 ```bash
-cmake -B build . -DQITI_ENABLE_THREAD_SANITIZER=ON
+cmake -B build . -DQITI_ENABLE_CLANG_THREAD_SANITIZER=ON
 ```
 
-When enabled, this adds ThreadSanitizer compiler flags (`-fsanitize=thread`, `-fno-inline`) and makes the `qiti::ThreadSanitizer` class available.
+When enabled, this adds ThreadSanitizer compiler flags (`-fsanitize=thread`, `-fno-inline`) and makes TSan-dependent functionality available. 
+Note: This option is not supported on Windows.
+
+When building on macOS with `QITI_ENABLE_CLANG_THREAD_SANITIZER=ON`, do not build universal binaries (arm64 + x86_64). ThreadSanitizer is incompatible with universal binaries. Build for your target architecture only.
 
 ### Project Integration
 
@@ -76,7 +84,7 @@ By linking against `qiti_lib`, Qiti automatically propagates:
   - `-finstrument-functions`       (enable function instrumentation)
   - `-fno-omit-frame-pointer`     (preserve frame pointers)
   - `-g`                           (generate debug symbols)
-- **ThreadSanitizer flags** (when `QITI_ENABLE_THREAD_SANITIZER=ON`):
+- **ThreadSanitizer flags** (when `QITI_ENABLE_CLANG_THREAD_SANITIZER=ON`):
   - `-fsanitize=thread`            (enable Thread Sanitizer)
   - `-fno-inline`                  (prevent inlining for TSan accuracy)
 - **ThreadSanitizer linker flags** (when enabled):
@@ -122,7 +130,7 @@ clang++ -std=c++20 -shared -fPIC \
 - `-rdynamic`
 
 **Optional ThreadSanitizer support:**
-- Add `-fsanitize=thread -fno-inline -DQITI_ENABLE_THREAD_SANITIZER=1` to both compiler and linker flags
+- Add `-fsanitize=thread -fno-inline -DQITI_ENABLE_CLANG_THREAD_SANITIZER=1` to both compiler and linker flags
 
 #### Requirements Summary:
 - **Clang compiler** (Apple Clang or LLVM Clang)
@@ -242,9 +250,9 @@ TEST_CASE("Example Test")
 ```
 
 ### Thread Sanitizer Tests
-Detect data races (requires `QITI_ENABLE_THREAD_SANITIZER=ON`).
+Detect data races (requires `QITI_ENABLE_CLANG_THREAD_SANITIZER=ON`).
 ```c++
-#ifdef QITI_ENABLE_THREAD_SANITIZER
+#ifdef QITI_ENABLE_CLANG_THREAD_SANITIZER
 TEST_CASE("Example Test")
 {
     qiti::ScopedQitiTest test;

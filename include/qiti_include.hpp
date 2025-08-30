@@ -23,7 +23,7 @@
 #include "../source/qiti_FunctionCallData.hpp"
 #include "../source/qiti_ScopedQitiTest.hpp"
 
-#ifdef QITI_ENABLE_THREAD_SANITIZER
+#ifdef QITI_ENABLE_CLANG_THREAD_SANITIZER
 #include "../source/qiti_ThreadSanitizer.hpp"
 #endif
 

@@ -55,7 +55,7 @@ const char* __tsan_default_options()
 
 //--------------------------------------------------------------------------
 
-#ifdef QITI_ENABLE_THREAD_SANITIZER
+#ifdef QITI_ENABLE_CLANG_THREAD_SANITIZER
 #if ! defined(__APPLE__)
 // Linux with ThreadSanitizer uses TSan hooks for allocation tracking
 
@@ -93,7 +93,7 @@ extern "C" QITI_API void __sanitizer_free_hook(void* ptr)
 
 #endif // ! defined(__APPLE__)
 // When ThreadSanitizer is disabled, Linux will use operator new override instead (matching macOS implementation)
-#endif // QITI_ENABLE_THREAD_SANITIZER
+#endif // QITI_ENABLE_CLANG_THREAD_SANITIZER
 
 //--------------------------------------------------------------------------
 

@@ -15,7 +15,6 @@
 
 #include "qiti_ThreadSanitizer.hpp"
 
-#ifdef QITI_ENABLE_THREAD_SANITIZER
 
 #include "qiti_FunctionData.hpp"
 #include "qiti_LockData.hpp"
@@ -25,8 +24,11 @@
 
 #include <string.h>     // for strsignal()
 #include <sys/types.h>  // required for wait.h
+
+#if ! defined(_WIN32)
 #include <sys/wait.h>   // for waitpid
 #include <unistd.h>     // for fork()
+#endif
 
 #include <atomic>
 #include <cassert>
@@ -47,7 +49,7 @@
 
 //--------------------------------------------------------------------------
 
-static constexpr const char* QITI_TSAN_LOG_PATH = "/tmp/tsan.log";
+[[maybe_unused]] static constexpr const char* QITI_TSAN_LOG_PATH = "/tmp/tsan.log";
 
 namespace fs = std::filesystem;
 
@@ -57,7 +59,7 @@ namespace fs = std::filesystem;
  @param prefix The log file prefix to search for.
  @returns an optional containing the latest path, or nullopt if none found.
 */
-[[nodiscard]] static std::optional<fs::path> findLatestLog(const std::string& prefix) noexcept
+[[maybe_unused]] [[nodiscard]] static std::optional<fs::path> findLatestLog(const std::string& prefix) noexcept
 {
     std::optional<fs::path> best;
     fs::path dir = fs::path(prefix).parent_path();
@@ -80,7 +82,7 @@ namespace fs = std::filesystem;
  @param path Path of the file to read.
  @returns the file contents; empty string on failure.
 */
-[[nodiscard]] static std::string slurpFile(const fs::path& path) noexcept
+[[maybe_unused]] [[nodiscard]] static std::string slurpFile(const fs::path& path) noexcept
 {
     std::ifstream in(path, std::ios::binary);
     return { std::istreambuf_iterator<char>(in),
@@ -90,6 +92,8 @@ namespace fs = std::filesystem;
 //--------------------------------------------------------------------------
 namespace qiti
 {
+
+#ifdef QITI_ENABLE_CLANG_THREAD_SANITIZER
 //--------------------------------------------------------------------------
 class DataRaceDetector final : public ThreadSanitizer
 {
@@ -166,11 +170,11 @@ public:
             std::cout << "[qiti::DataRaceDetector] Reading TSan log at: " << *logPath << "\n";
             verboseReport = slurpFile(*logPath);
             
-            // Case‐insensitive “data race” search
+            // Case‐insensitive "data race" search
             static const std::regex data_race_rx(R"(data race)",
                                                  std::regex_constants::icase);
             
-            // Look for “data race” anywhere in the report
+            // Look for "data race" anywhere in the report
             if (std::regex_search(verboseReport, data_race_rx))
             {
                 flagFailed();
@@ -210,6 +214,8 @@ private:
     std::string shortReport{};
     std::string verboseReport{};
 };
+
+#endif // QITI_ENABLE_CLANG_THREAD_SANITIZER
 
 //--------------------------------------------------------------------------
 
@@ -438,6 +444,7 @@ private:
 
 //--------------------------------------------------------------------------
 
+#ifdef QITI_ENABLE_CLANG_THREAD_SANITIZER
 /** Linux deadlock detector that uses TSan's built-in deadlock detection */
 class TSanDeadlockDetector final : public ThreadSanitizer
 {
@@ -576,6 +583,7 @@ private:
     std::string shortReport{};
     std::string verboseReport{};
 };
+#endif // QITI_ENABLE_CLANG_THREAD_SANITIZER
 
 //--------------------------------------------------------------------------
 
@@ -610,13 +618,16 @@ ThreadSanitizer::createFunctionsCalledInParallelDetector(FunctionData* func0,
     return std::make_unique<ParallelCallDetector>(func0, func1);
 }
 
+#ifdef QITI_ENABLE_CLANG_THREAD_SANITIZER
 std::unique_ptr<ThreadSanitizer>
 ThreadSanitizer::createDataRaceDetector() noexcept
 {
     qiti::Profile::ScopedDisableProfiling disableProfiling;
     return std::make_unique<DataRaceDetector>();
 }
+#endif // QITI_ENABLE_CLANG_THREAD_SANITIZER
 
+#if defined(__APPLE__) || defined(QITI_ENABLE_CLANG_THREAD_SANITIZER)
 std::unique_ptr<ThreadSanitizer>
 ThreadSanitizer::createPotentialDeadlockDetector() noexcept
 {
@@ -625,9 +636,14 @@ ThreadSanitizer::createPotentialDeadlockDetector() noexcept
     return std::make_unique<LockOrderInversionDetector>();
 #else
     // Linux: Use TSan's built-in deadlock detection
+#if defined(QITI_ENABLE_CLANG_THREAD_SANITIZER)
     return std::make_unique<TSanDeadlockDetector>();
-#endif
+#else
+    return nullptr;
+#endif // defined(QITI_ENABLE_CLANG_THREAD_SANITIZER)
+#endif // defined(__APPLE__)
 }
+#endif // defined(__APPLE__) || defined(QITI_ENABLE_CLANG_THREAD_SANITIZER)
 
 void ThreadSanitizer::rerun() noexcept
 {
@@ -646,5 +662,3 @@ std::string ThreadSanitizer::getReport(bool /*verbose*/) const noexcept
 //--------------------------------------------------------------------------
 } // namespace qiti
 //--------------------------------------------------------------------------
-
-#endif // QITI_ENABLE_THREAD_SANITIZER

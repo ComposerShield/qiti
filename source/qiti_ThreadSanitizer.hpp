@@ -17,7 +17,6 @@
 
 #include "qiti_API.hpp"
 
-#ifdef QITI_ENABLE_THREAD_SANITIZER
 
 #include "qiti_FunctionData.hpp"
 
@@ -40,7 +39,7 @@ namespace qiti
  Use the factory functions to create specific types of ThreadSanitizer detectors:
  - createDataRaceDetector() - Detects data races in your code
  - createFunctionsCalledInParallelDetector<&func1, &func2>() - Checks if two functions are called in parallel
- - createPotentialDeadlockDetector() - Detects lock-order inversions (macOS only)
+ - createPotentialDeadlockDetector() - Detects lock-order inversions
  
  @code
  auto detector = ThreadSanitizer::createDataRaceDetector();
@@ -78,7 +77,9 @@ public:
      @see passed()
      @see failed()
      */
+#ifdef QITI_ENABLE_CLANG_THREAD_SANITIZER // set by CMake with -DQITI_ENABLE_CLANG_THREAD_SANITIZER=ON
     [[nodiscard]] QITI_API static std::unique_ptr<ThreadSanitizer> createDataRaceDetector() noexcept;
+#endif // QITI_ENABLE_CLANG_THREAD_SANITIZER
     
     /**
      Factory to create a detector that checks if two functions are called in parallel.
@@ -112,8 +113,13 @@ public:
     }
     
     /**
-     macOS-only: Factory to create a lock-order inversion detector.
-    
+     Factory to create a lock-order inversion detector.
+     
+     Available on:
+     - macOS: Always available, uses custom lock-order tracking
+     - Linux: Requires QITI_ENABLE_CLANG_THREAD_SANITIZER, uses TSan's deadlock detection
+     - Windows: Not supported
+     
      When calling run(), tracks every mutex-acquire; if two locks are
      ever taken in inverted order on different threads, it flags failure.
      
@@ -138,7 +144,9 @@ public:
      @see passed()
      @see failed()
     */
+#if defined(__APPLE__) || defined(QITI_ENABLE_CLANG_THREAD_SANITIZER)
     [[nodiscard]] QITI_API static std::unique_ptr<ThreadSanitizer> createPotentialDeadlockDetector() noexcept;
+#endif
     
     /**
      @param func Function pointer or lambda that is immediately run and tested according to which ThreadSanitizer object you are using.
@@ -226,4 +234,3 @@ private:
 
 } // namespace qiti
 
-#endif // QITI_ENABLE_THREAD_SANITIZER

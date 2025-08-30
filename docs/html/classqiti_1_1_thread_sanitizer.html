@@ -142,7 +142,7 @@ Public Attributes</h2></td></tr>
 <p>Use the factory functions to create specific types of <a class="el" href="classqiti_1_1_thread_sanitizer.html">ThreadSanitizer</a> detectors:</p><ul>
 <li><a class="el" href="classqiti_1_1_thread_sanitizer.html#a17d877faf475b8fcef8da6f7c2b9ccfa">createDataRaceDetector()</a> - Detects data races in your code</li>
 <li><a class="el" href="classqiti_1_1_thread_sanitizer.html#a0878fe54c8a7cd16b8c056b7da090b2d">createFunctionsCalledInParallelDetector&lt;&amp;func1, &amp;func2&gt;()</a> - Checks if two functions are called in parallel</li>
-<li><a class="el" href="classqiti_1_1_thread_sanitizer.html#a1b31ec3c7f3c7fb7e92135fc6a17b2d8">createPotentialDeadlockDetector()</a> - Detects lock-order inversions (macOS only)</li>
+<li><a class="el" href="classqiti_1_1_thread_sanitizer.html#a1b31ec3c7f3c7fb7e92135fc6a17b2d8">createPotentialDeadlockDetector()</a> - Detects lock-order inversions</li>
 </ul>
 <div class="fragment"><div class="line"><span class="keyword">auto</span> detector = <a class="code hl_function" href="classqiti_1_1_thread_sanitizer.html#a17d877faf475b8fcef8da6f7c2b9ccfa">ThreadSanitizer::createDataRaceDetector</a>();</div>
 <div class="line">detector-&gt;run([]() {</div>
@@ -277,7 +277,12 @@ Here is the caller graph for this function:</div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>macOS-only: Factory to create a lock-order inversion detector.</p>
+<p>Factory to create a lock-order inversion detector.</p>
+<p>Available on:</p><ul>
+<li>macOS: Always available, uses custom lock-order tracking</li>
+<li>Linux: Requires QITI_ENABLE_CLANG_THREAD_SANITIZER, uses TSan's deadlock detection</li>
+<li>Windows: Not supported</li>
+</ul>
 <p>When calling <a class="el" href="classqiti_1_1_thread_sanitizer.html#a3f7eda0cb4a998a645b02d844620c471">run()</a>, tracks every mutex-acquire; if two locks are ever taken in inverted order on different threads, it flags failure.</p>
 <div class="fragment"><div class="line">std::mutex mutex1, mutex2;</div>
 <div class="line"><span class="keyword">auto</span> detector = <a class="code hl_function" href="classqiti_1_1_thread_sanitizer.html#a1b31ec3c7f3c7fb7e92135fc6a17b2d8">ThreadSanitizer::createPotentialDeadlockDetector</a>();</div>

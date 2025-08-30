@@ -114,15 +114,21 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <li>Windows (experimental/work-in-progress; x86_64, ThreadSanitizer features not supported)*</li>
 <li>C++20</li>
 <li>CMake**</li>
-<li><b>macOS with ThreadSanitizer</b>: When building on macOS with <code>QITI_ENABLE_THREAD_SANITIZER=ON</code>, do not build universal binaries (arm64 + x86_64). ThreadSanitizer is incompatible with universal binaries. Build for your target architecture only.</li>
 </ul>
 <p>*see "Platform &amp; Compiler Test Matrix" below **see "Manual Integration" below for instructions to integrate without CMake</p>
 <h1>CMake Integration</h1>
 <p>Note: Qiti should not be linked in your final release builds. You will likely need to add a flag to your CMake invocation (e.g. -DQiti=1) to only link into your project when building your unit test executable, independent of your regular builds.</p>
 <h2>ThreadSanitizer Support</h2>
-<p>ThreadSanitizer functionality is <b>optional</b> and disabled by default. To enable it, add <code>-DQITI_ENABLE_THREAD_SANITIZER=ON</code> to your CMake configuration:</p>
-<div class="fragment"><div class="line">cmake -B build . -DQITI_ENABLE_THREAD_SANITIZER=ON</div>
-</div><!-- fragment --><p>When enabled, this adds ThreadSanitizer compiler flags (<code>-fsanitize=thread</code>, <code>-fno-inline</code>) and makes the <code><a class="el" href="classqiti_1_1_thread_sanitizer.html">qiti::ThreadSanitizer</a></code> class available.</p>
+<p>Qiti provides the <code><a class="el" href="classqiti_1_1_thread_sanitizer.html">qiti::ThreadSanitizer</a></code> class with multiple detection capabilities:</p>
+<ul>
+<li>**<code>createFunctionsCalledInParallelDetector()</code>** - Always available, uses function call tracking</li>
+<li>**<code>createPotentialDeadlockDetector()</code>** - Uses custom lock-order tracking on macOS, requires Clang ThreadSanitizer on Linux</li>
+<li>**<code>createDataRaceDetector()</code>** - Requires Clang ThreadSanitizer, uses TSan for data race detection</li>
+</ul>
+<p>To enable TSan-dependent functionality (<code>createDataRaceDetector()</code> and <code>createPotentialDeadlockDetector()</code> on Linux), add <code>-DQITI_ENABLE_CLANG_THREAD_SANITIZER=ON</code> to your CMake configuration:</p>
+<div class="fragment"><div class="line">cmake -B build . -DQITI_ENABLE_CLANG_THREAD_SANITIZER=ON</div>
+</div><!-- fragment --><p>When enabled, this adds ThreadSanitizer compiler flags (<code>-fsanitize=thread</code>, <code>-fno-inline</code>) and makes TSan-dependent functionality available. Note: This option is not supported on Windows.</p>
+<p>When building on macOS with <code>QITI_ENABLE_CLANG_THREAD_SANITIZER=ON</code>, do not build universal binaries (arm64 + x86_64). ThreadSanitizer is incompatible with universal binaries. Build for your target architecture only.</p>
 <h2>Project Integration</h2>
 <p>To integrate Qiti into your CMake-based project, add Qiti as a subdirectory and link against the <code>qiti_lib</code> target provided by the library:</p>
 <div class="fragment"><div class="line"># Add Qiti to your project</div>
@@ -160,7 +166,7 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <li><code>-g</code> (generate debug symbols)</li>
 </ul>
 </li>
-<li><b>ThreadSanitizer flags</b> (when <code>QITI_ENABLE_THREAD_SANITIZER=ON</code>):<ul>
+<li><b>ThreadSanitizer flags</b> (when <code>QITI_ENABLE_CLANG_THREAD_SANITIZER=ON</code>):<ul>
 <li><code>-fsanitize=thread</code> (enable Thread Sanitizer)</li>
 <li><code>-fno-inline</code> (prevent inlining for TSan accuracy)</li>
 </ul>
@@ -203,7 +209,7 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <li><code>-rdynamic</code></li>
 </ul>
 <p><b>Optional ThreadSanitizer support:</b></p><ul>
-<li>Add <code>-fsanitize=thread -fno-inline -DQITI_ENABLE_THREAD_SANITIZER=1</code> to both compiler and linker flags</li>
+<li>Add <code>-fsanitize=thread -fno-inline -DQITI_ENABLE_CLANG_THREAD_SANITIZER=1</code> to both compiler and linker flags</li>
 </ul>
 <h3>Requirements Summary:</h3>
 <ul>
@@ -313,8 +319,8 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <div class="line">    REQUIRE(test.getLengthOfTest_ms() &lt; 10);</div>
 <div class="line">}</div>
 </div><!-- fragment --><h2>Thread Sanitizer Tests</h2>
-<p>Detect data races (requires <code>QITI_ENABLE_THREAD_SANITIZER=ON</code>). </p><div class="fragment"><div class="line"> {c++}</div>
-<div class="line">#ifdef QITI_ENABLE_THREAD_SANITIZER</div>
+<p>Detect data races (requires <code>QITI_ENABLE_CLANG_THREAD_SANITIZER=ON</code>). </p><div class="fragment"><div class="line"> {c++}</div>
+<div class="line">#ifdef QITI_ENABLE_CLANG_THREAD_SANITIZER</div>
 <div class="line">TEST_CASE(&quot;Example Test&quot;)</div>
 <div class="line">{</div>
 <div class="line">    qiti::ScopedQitiTest test;</div>
