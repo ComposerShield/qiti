@@ -36,6 +36,21 @@ namespace qiti
 
  Provides a standardized API for generating different thread safety checks (e.g. running functions in a
  forked process with ThreadSanitizer enabled) and querying pass/fail status.
+ 
+ Use the factory functions to create specific types of ThreadSanitizer detectors:
+ - createDataRaceDetector() - Detects data races in your code
+ - createFunctionsCalledInParallelDetector<&func1, &func2>() - Checks if two functions are called in parallel
+ - createPotentialDeadlockDetector() - Detects lock-order inversions (macOS only)
+ 
+ @code
+ auto detector = ThreadSanitizer::createDataRaceDetector();
+ detector->run([]() {
+     // Your potentially racy code here
+ });
+ if (detector->failed()) {
+     // Handle race condition
+ }
+ @endcode
  */
 class ThreadSanitizer
 {
@@ -47,6 +62,17 @@ public:
      determine if any data race occurred within the function/lambda called by run().
      
      Function pointer/lambdas are run in a forked process with thread sanitizer enabled.
+     
+     @code
+     auto detector = ThreadSanitizer::createDataRaceDetector();
+     detector->run([]() {
+         // Code that might have data races
+         std::thread t1([]() { sharedVariable++; });
+         std::thread t2([]() { sharedVariable++; });
+         t1.join(); t2.join();
+     });
+     REQUIRE(detector->failed()); // Should detect race
+     @endcode
      
      @see run()
      @see passed()
@@ -60,6 +86,16 @@ public:
      @returns a ThreadSanitizer object that can be queried via passed() or failed() to
      determine if the functions were ever called in parallel within the function/lambda
      called by run().
+     
+     @code
+     auto detector = ThreadSanitizer::createFunctionsCalledInParallelDetector<&func1, &func2>();
+     detector->run([]() {
+         std::thread t1([]() { func1(); });
+         std::thread t2([]() { func2(); });
+         t1.join(); t2.join();
+     });
+     REQUIRE(detector->passed()); // Should detect parallel execution
+     @endcode
           
      @see run()
      @see passed()
@@ -80,6 +116,23 @@ public:
     
      When calling run(), tracks every mutex-acquire; if two locks are
      ever taken in inverted order on different threads, it flags failure.
+     
+     @code
+     std::mutex mutex1, mutex2;
+     auto detector = ThreadSanitizer::createPotentialDeadlockDetector();
+     detector->run([]() {
+         std::thread t1([&]() {
+             std::lock_guard lock1(mutex1);
+             std::lock_guard lock2(mutex2); // Order: mutex1 -> mutex2
+         });
+         std::thread t2([&]() {
+             std::lock_guard lock2(mutex2);
+             std::lock_guard lock1(mutex1); // Order: mutex2 -> mutex1 (inversion!)
+         });
+         t1.join(); t2.join();
+     });
+     REQUIRE(detector->failed()); // Should detect potential deadlock
+     @endcode
      
      @see run()
      @see passed()

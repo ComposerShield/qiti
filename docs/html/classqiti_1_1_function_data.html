@@ -176,7 +176,8 @@ requires isFreeFunction&lt;FuncPtr&gt; || isMemberFunction&lt;FuncPtr&gt;</td></
 <tr class="separator:a45aa8e32043bea8fbcdb5461d99b42f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Abtracts a function and its history of use </p>
+<div class="textblock"><p>Abtracts a function and its history of use</p>
+<p>To obtain a <a class="el" href="classqiti_1_1_function_data.html">FunctionData</a> object, call <a class="el" href="classqiti_1_1_function_data.html#a8595d24d707f31b80a933a8b732a6d23">FunctionData::getFunctionData&lt;FuncPtr&gt;()</a> where FuncPtr is a pointer to the function you want to profile. </p>
 </div><h2 class="groupheader">Member Enumeration Documentation</h2>
 <a id="aad1029fb26f1a2bbca6c780279e30858" name="aad1029fb26f1a2bbca6c780279e30858"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aad1029fb26f1a2bbca6c780279e30858">&#9670;&#160;</a></span>FunctionType</h2>
@@ -347,7 +348,8 @@ requires isFreeFunction&lt;FuncPtr&gt; || isMemberFunction&lt;FuncPtr&gt;</div>
 </table>
 </div><div class="memdoc">
 <p>Begins profiling for FuncPtr and returns a pointer to the corresponding <a class="el" href="classqiti_1_1_function_data.html">FunctionData</a> instance.</p>
-<p>FuncPtr can be a free function as well as member function. </p>
+<p>FuncPtr can be a free function as well as member function.</p>
+<dl class="section note"><dt>Note</dt><dd>Pointer becomes invalid when <a class="el" href="classqiti_1_1_scoped_qiti_test.html">ScopedQitiTest</a> goes out of scope or <a class="el" href="classqiti_1_1_profile.html#a388c8021c97edb3b14becc425e0376cf">qiti::Profile::resetProfiling()</a> is called. </dd></dl>
 
 </div>
 </div>

@@ -27,8 +27,21 @@ namespace qiti
 /**
  Initializes Qiti profiling and other functionality.
  
- Cleans up state when it goes out of scope.
+ This object should be placed at the top of any test that wishes to use Qiti.
+ It initializes profiling for the test duration and cleans up state when it goes out of scope.
  Can be queried for details regarding the current Qiti-injected unit test.
+ 
+ @code
+ TEST_CASE("My Test") {
+     qiti::ScopedQitiTest test;
+     
+     // Your test code here
+     auto funcData = qiti::FunctionData::getFunctionData<&myFunction>();
+     myFunction();
+     auto lastCall = funcData->getLastFunctionCall();
+     // ... assertions
+ }
+ @endcode
  */
 class ScopedQitiTest final
 {
