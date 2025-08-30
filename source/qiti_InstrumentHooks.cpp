@@ -31,6 +31,8 @@ using LockType = std::scoped_lock<MutexType>;
 static MutexType g_hookLock;
 static thread_local bool g_inHook = false;
 
+extern "C" void qitiEnsureInstrumentTranslationUnitInitialized() noexcept;
+
 //--------------------------------------------------------------------------
 namespace qiti
 {
@@ -51,6 +53,9 @@ public:
     QITI_API_INTERNAL static void
     __cyg_profile_func_enter(void* this_fn, [[maybe_unused]] void* call_site) noexcept
     {
+        // lazy initialize thread_local variables in qiti_Instrument.cpp
+        qitiEnsureInstrumentTranslationUnitInitialized();
+        
         if (qiti::Profile::isProfilingFunction(this_fn))
         {
             qiti::MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;

@@ -20,6 +20,7 @@
 
 #include <cassert>
 #include <functional>
+#include <thread>
 #include <unordered_map>
 #include <utility>
 
@@ -99,6 +100,25 @@ public:
     {
         onNextFunctionCall<FuncPtr>([]{ assert(false); });
     }
+    
+    /**
+     Register a callback to be invoked when the next new thread is detected.
+     
+     Schedules the provided callback to be executed when the next new thread 
+     accesses Qiti library code. The callback receives the thread ID of the 
+     newly detected thread and executes on that thread. After execution, the 
+     callback is automatically removed (one-time use only).
+     
+     Detection occurs through thread-local variable initialization, which happens
+     when a new thread first calls any instrumented function.
+     
+     @param callback The callback to execute when the next thread is detected,
+                    receiving the thread's ID as a parameter
+     @note The callback executes on the new thread, not the thread that registered it
+     @note This is a one-time callback - it will be removed after execution
+     @note Setting a new callback will replace any existing unused callback
+     */
+    QITI_API static void onThreadCreation(std::function<void(std::thread::id threadId)> callback) noexcept;
     
     //--------------------------------------------------------------------------
     // Doxygen - Begin Internal Documentation
