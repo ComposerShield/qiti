@@ -16,29 +16,39 @@
 #include "qiti_Instrument.hpp"
 
 #include "qiti_MallocHooks.hpp"
+#include "qiti_Profile.hpp"
 #include "qiti_ScopedNoHeapAllocations.hpp"
 
 #include <cassert>
 #include <functional>
 #include <mutex>
+#include <unordered_map>
 
 //--------------------------------------------------------------------------
 
-#ifndef QITI_DISABLE_INSTRUMENTS
+// Thread-local storage for function call callbacks
+static thread_local std::unordered_map<const void*, std::function<void()>> g_onNextFunctionCallMap;
+
 namespace qiti
 {
+void Instrument::onNextFunctionCallInternal(std::function<void()> callback, const void* functionAddress) noexcept
+{
+    g_onNextFunctionCallMap[functionAddress] = std::move(callback);
+}
+
 void Instrument::resetInstrumentation() noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     
     MallocHooks::getOnNextHeapAllocation() = nullptr;
+    g_onNextFunctionCallMap.clear();
 }
 
-void Instrument::onNextHeapAllocation(void (*heapAllocCallback)()) noexcept
+void Instrument::onNextHeapAllocation(std::function<void()> heapAllocCallback) noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     
-    MallocHooks::getOnNextHeapAllocation() = heapAllocCallback;
+    MallocHooks::getOnNextHeapAllocation() = std::move(heapAllocCallback);
 }
 
 void Instrument::assertOnNextHeapAllocation() noexcept
@@ -47,5 +57,15 @@ void Instrument::assertOnNextHeapAllocation() noexcept
     
     onNextHeapAllocation([]{ assert(false); });
 }
+
+void Instrument::checkAndExecuteFunctionCallCallback(const void* functionAddress) noexcept
+{
+    auto it = g_onNextFunctionCallMap.find(functionAddress);
+    if (it != g_onNextFunctionCallMap.end()) // callback for function found
+    {
+        it->second(); // Execute callback
+        g_onNextFunctionCallMap.erase(it); // Remove after execution
+    }
+}
+
 } // namespace qiti
-#endif // ! QITI_DISABLE_INSTRUMENTS

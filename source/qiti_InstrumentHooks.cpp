@@ -15,6 +15,7 @@
 
 #include "qiti_MallocHooks.hpp"
 
+#include "qiti_Instrument.hpp"
 #include "qiti_LockData.hpp" // PC: for pthread_mutex_t
 #include "qiti_LockHooks.hpp"
 #include "qiti_Profile.hpp"
@@ -56,6 +57,9 @@ public:
             
             qiti::LockHooks::LockBypassingHook<LockType, MutexType> lock(g_hookLock);
             qiti::Profile::updateFunctionDataOnEnter(this_fn);
+            
+            // Execute any pending function call callbacks
+            qiti::Instrument::checkAndExecuteFunctionCallCallback(this_fn);
         }
     }
     
