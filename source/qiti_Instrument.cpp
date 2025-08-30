@@ -23,6 +23,7 @@
 #include <functional>
 #include <mutex>
 #include <unordered_map>
+#include <utility>
 
 //--------------------------------------------------------------------------
 
