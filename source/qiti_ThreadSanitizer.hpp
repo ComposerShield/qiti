@@ -37,9 +37,9 @@ namespace qiti
  forked process with ThreadSanitizer enabled) and querying pass/fail status.
  
  Use the factory functions to create specific types of ThreadSanitizer detectors:
- - createDataRaceDetector() - Detects data races in your code (requires QITI_ENABLE_CLANG_THREAD_SANITIZER)
+ - createDataRaceDetector() - Detects data races in your code
  - createFunctionsCalledInParallelDetector<&func1, &func2>() - Checks if two functions are called in parallel
- - createPotentialDeadlockDetector() - Detects lock-order inversions (macOS only)
+ - createPotentialDeadlockDetector() - Detects lock-order inversions
  
  @code
  auto detector = ThreadSanitizer::createDataRaceDetector();
