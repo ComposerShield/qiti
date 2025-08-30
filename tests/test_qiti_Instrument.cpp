@@ -9,6 +9,8 @@
 // Qiti Private API - not included in qiti_include.hpp
 #include "qiti_Instrument.hpp"
 
+#include <thread>
+
 //--------------------------------------------------------------------------
 
 QITI_TEST_CASE("qiti::FunctionCallData::resetInstrumentation()", FunctionCallDataResetInstrumentation)
@@ -66,7 +68,8 @@ static void testTargetFunction()
     [[maybe_unused]] volatile int dummyInt = 42;
 }
 
-QITI_TEST_CASE("qiti::Instrument::onNextFunctionCall() is called on next function call", OnNextFunctionCallIsCalled)
+QITI_TEST_CASE("qiti::Instrument::onNextFunctionCall() is called on next function call",
+               OnNextFunctionCallIsCalled)
 {
     qiti::ScopedQitiTest test;
     
@@ -90,7 +93,8 @@ QITI_TEST_CASE("qiti::Instrument::onNextFunctionCall() is called on next functio
     QITI_CHECK(callbackCount == 1);
 }
 
-QITI_TEST_CASE("qiti::Instrument::resetInstrumentation() clears function call hooks", ResetInstrumentationClearsFunctionCallHooks)
+QITI_TEST_CASE("qiti::Instrument::resetInstrumentation() clears function call hooks",
+               ResetInstrumentationClearsFunctionCallHooks)
 {
     qiti::ScopedQitiTest test;
     
@@ -108,4 +112,70 @@ QITI_TEST_CASE("qiti::Instrument::resetInstrumentation() clears function call ho
     
     // Callback should not have been executed
     QITI_CHECK(callbackCount == 0);
+}
+
+//--------------------------------------------------------------------------
+// Thread creation instrumentation tests
+//--------------------------------------------------------------------------
+
+QITI_TEST_CASE("qiti::Instrument::onThreadCreation() detects new thread creation",
+               OnThreadCreationDetectsNewThread)
+{
+    qiti::ScopedQitiTest test;
+    
+    std::thread::id detectedThreadId{};
+    bool callbackExecuted = false;
+    
+    auto threadCallback = [&detectedThreadId, &callbackExecuted](std::thread::id threadId)
+    {
+        detectedThreadId = threadId;
+        callbackExecuted = true;
+    };
+    
+    // Set up thread creation callback
+    qiti::Instrument::onThreadCreation(threadCallback);
+    
+    std::thread::id actualThreadId{};
+    
+    // Create a new thread
+    std::thread newThread([&actualThreadId]()
+    {
+        actualThreadId = std::this_thread::get_id();
+    });
+    
+    newThread.join();
+    
+    // Verify callback was executed and received correct thread ID
+    QITI_CHECK(callbackExecuted);
+    QITI_CHECK(detectedThreadId == actualThreadId);
+}
+
+QITI_TEST_CASE("qiti::Instrument::resetInstrumentation() clears thread creation hooks",
+               ResetInstrumentationClearsThreadHooks)
+{
+    qiti::ScopedQitiTest test;
+    
+    bool callbackExecuted = false;
+    
+    auto threadCallback = [&callbackExecuted](std::thread::id)
+    {
+        callbackExecuted = true;
+    };
+    
+    // Set up thread creation callback
+    qiti::Instrument::onThreadCreation(threadCallback);
+    
+    // Reset instrumentation should clear the callback
+    qiti::Instrument::resetInstrumentation();
+    
+    // Create a new thread - callback should not execute
+    std::thread newThread([]()
+    {
+        // Just accessing this translation unit
+    });
+    
+    newThread.join();
+    
+    // Callback should not have been executed
+    QITI_CHECK(! callbackExecuted);
 }
