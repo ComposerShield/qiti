@@ -121,6 +121,8 @@ requires isFreeFunction&lt;FuncPtr&gt; || isMemberFunction&lt;FuncPtr&gt;</td></
 requires isFreeFunction&lt;FuncPtr&gt; || isMemberFunction&lt;FuncPtr&gt;</td></tr>
 <tr class="memitem:a7ef1b56894c4b2c62ff11a94639bdbf6"><td class="memTemplItemLeft" align="right" valign="top">static QITI_API_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classqiti_1_1_instrument.html#a7ef1b56894c4b2c62ff11a94639bdbf6">assertOnNextFunctionCall</a> () noexcept</td></tr>
 <tr class="separator:a7ef1b56894c4b2c62ff11a94639bdbf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b84a8fea6e3d8e1c1982013824225aa"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classqiti_1_1_instrument.html#a2b84a8fea6e3d8e1c1982013824225aa">onThreadCreation</a> (std::function&lt; void(std::thread::id threadId)&gt; callback) noexcept</td></tr>
+<tr class="separator:a2b84a8fea6e3d8e1c1982013824225aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Tools for injecting custom logic into the application at runtime.</p>
@@ -268,6 +270,46 @@ Here is the call graph for this function:</div>
 </div><div class="memdoc">
 <p>Register a callback to be invoked on the next heap allocation.</p>
 <p>Schedules the provided function pointer 'heapAllocCallback' to be executed immediately after the next heap allocation occurs. This facilitates custom handling or assertions around allocation events. </p>
+
+</div>
+</div>
+<a id="a2b84a8fea6e3d8e1c1982013824225aa" name="a2b84a8fea6e3d8e1c1982013824225aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b84a8fea6e3d8e1c1982013824225aa">&#9670;&#160;</a></span>onThreadCreation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void qiti::Instrument::onThreadCreation </td>
+          <td>(</td>
+          <td class="paramtype">std::function&lt; void(std::thread::id threadId)&gt;&#160;</td>
+          <td class="paramname"><em>callback</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Register a callback to be invoked when the next new thread is detected.</p>
+<p>Schedules the provided callback to be executed when the next new thread accesses Qiti library code. The callback receives the thread ID of the newly detected thread and executes on that thread. After execution, the callback is automatically removed (one-time use only).</p>
+<p>Detection occurs through thread-local variable initialization, which happens when a new thread first calls any instrumented function.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">callback</td><td>The callback to execute when the next thread is detected, receiving the thread's ID as a parameter </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>The callback executes on the new thread, not the thread that registered it </dd>
+<dd>
+This is a one-time callback - it will be removed after execution </dd>
+<dd>
+Setting a new callback will replace any existing unused callback </dd></dl>
 
 </div>
 </div>
