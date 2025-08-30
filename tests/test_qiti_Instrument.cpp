@@ -9,7 +9,14 @@
 // Qiti Private API - not included in qiti_include.hpp
 #include "qiti_Instrument.hpp"
 
-#include <thread>
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <pthread.h>
+#endif
+
+#include <future> // for std::async
+#include <thread> // for std::thread
 
 //--------------------------------------------------------------------------
 
@@ -171,11 +178,143 @@ QITI_TEST_CASE("qiti::Instrument::resetInstrumentation() clears thread creation 
     // Create a new thread - callback should not execute
     std::thread newThread([]()
     {
-        // Just accessing this translation unit
+        // empty
     });
     
     newThread.join();
     
     // Callback should not have been executed
     QITI_CHECK(! callbackExecuted);
+}
+
+QITI_TEST_CASE("qiti::Instrument::onThreadCreation() detects thread without function calls",
+               OnThreadCreationNoFunctionCalls)
+{
+    qiti::ScopedQitiTest test;
+    
+    bool callbackExecuted = false;
+    
+    auto threadCallback = [&callbackExecuted](std::thread::id threadId)
+    {
+        callbackExecuted = true;
+    };
+    
+    // Set up thread creation callback
+    qiti::Instrument::onThreadCreation(threadCallback);
+    
+    // Create a new thread that doesn't call any functions
+    std::thread newThread([]()
+    {
+        // No function calls - just thread creation should be enough to trigger hook
+    });
+    
+    newThread.join();
+    
+    // Verify callback was executed
+    QITI_CHECK(callbackExecuted);
+}
+
+#ifndef _WIN32
+QITI_TEST_CASE("qiti::Instrument::onThreadCreation() detects pthread creation without function calls",
+               OnThreadCreationPthreadNoFunctionCalls)
+{
+    qiti::ScopedQitiTest test;
+    
+    bool callbackExecuted = false;
+    pthread_t threadHandle{};
+    
+    auto threadCallback = [&callbackExecuted](std::thread::id threadId)
+    {
+        callbackExecuted = true;
+    };
+    
+    // Set up thread creation callback
+    qiti::Instrument::onThreadCreation(threadCallback);
+    
+    // Create a new pthread that doesn't call any functions
+    int result = pthread_create(&threadHandle, nullptr, [](void*) -> void*
+    {
+        // Empty pthread function - no function calls
+        return nullptr;
+    }, nullptr);
+    
+    QITI_REQUIRE(result == 0); // pthread_create succeeded
+    
+    pthread_join(threadHandle, nullptr);
+    
+    // Verify callback was executed
+    QITI_CHECK(callbackExecuted);
+}
+#endif // ! _WIN32
+
+#ifdef _WIN32
+QITI_TEST_CASE("qiti::Instrument::onThreadCreation() detects CreateThread creation without function calls",
+               OnThreadCreationCreateThreadNoFunctionCalls)
+{
+    qiti::ScopedQitiTest test;
+    
+    bool callbackExecuted = false;
+    
+    auto threadCallback = [&callbackExecuted](std::thread::id threadId)
+    {
+        callbackExecuted = true;
+    };
+    
+    // Set up thread creation callback
+    qiti::Instrument::onThreadCreation(threadCallback);
+    
+    // Create a new Windows thread that doesn't call any functions
+    HANDLE threadHandle = CreateThread
+    (
+        nullptr,    // default security attributes
+        0,          // default stack size
+        [](LPVOID) -> DWORD
+        {
+            // Empty thread function - no function calls
+            return 0;
+        },
+        nullptr,    // no thread parameter
+        0,          // default creation flags
+        nullptr     // don't need thread ID
+    );
+    
+    QITI_REQUIRE(threadHandle != nullptr); // CreateThread succeeded
+    
+    WaitForSingleObject(threadHandle, INFINITE);
+    CloseHandle(threadHandle);
+    
+    // Verify callback was executed
+    QITI_CHECK(callbackExecuted);
+}
+#endif // _WIN32
+
+QITI_TEST_CASE("qiti::Instrument::onThreadCreation() detects std::async thread creation",
+               OnThreadCreationStdAsync)
+{
+    qiti::ScopedQitiTest test;
+    
+    bool callbackExecuted = false;
+    
+    auto threadCallback = [&callbackExecuted](std::thread::id threadId)
+    {
+        callbackExecuted = true;
+    };
+    
+    // Set up thread creation callback
+    qiti::Instrument::onThreadCreation(threadCallback);
+    
+    // Use std::async with launch::async to force new thread creation
+    // Note: Implementation may still reuse existing thread pool threads
+    auto future = std::async(std::launch::async, []()
+    {
+        // Empty async function - no function calls
+        return 42;
+    });
+    
+    int result = future.get();  // Wait for completion
+    QITI_REQUIRE(result == 42); // async task completed successfully
+    
+    // Verify callback was executed (if a new thread was actually created)
+    // Note: This may not always pass since std::async behavior is implementation-defined
+    QITI_CHECK(callbackExecuted);
 }
