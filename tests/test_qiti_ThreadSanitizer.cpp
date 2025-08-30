@@ -6,8 +6,7 @@
 // Special unit test include
 #include "qiti_test_macros.hpp"
 
-// TSAN must be enabled for these tests
-#ifdef QITI_ENABLE_THREAD_SANITIZER
+#include "qiti_ThreadSanitizer.hpp"
 
 #include <atomic>
 #include <chrono>
@@ -70,6 +69,7 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::functionsNotCalledInParallel", ThreadSani
     QITI_REQUIRE(verboseReport != "");
 }
 
+#ifdef QITI_ENABLE_CLANG_THREAD_SANITIZER
 QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() does not produce false positive", ThreadSanitizerDataRaceDetectorNoFalsePositive)
 {
     qiti::ScopedQitiTest test;
@@ -138,9 +138,6 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data rac
     }
 }
 
-// Disable optimizations to prevent Release mode optimizations from interfering with intentional deadlock
-#pragma clang optimize off
-
 QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data race of member variable", ThreadSanitizerDataRaceDetectorMemberVariable)
 {
     qiti::ScopedQitiTest test;
@@ -162,6 +159,11 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createDataRaceDetector() detects data rac
     QITI_REQUIRE(dataRaceDetector->failed());
     QITI_REQUIRE_FALSE(dataRaceDetector->passed());
 }
+
+#endif // QITI_ENABLE_CLANG_THREAD_SANITIZER
+
+// Disable optimizations to prevent Release mode optimizations from interfering with intentional deadlock
+#pragma clang optimize off
 
 QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() does not produce false positive", ThreadSanitizerDeadlockDetectorNoFalsePositive)
 {
@@ -256,4 +258,3 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects
 
 #pragma clang optimize on
 
-#endif // QITI_ENABLE_THREAD_SANITIZER

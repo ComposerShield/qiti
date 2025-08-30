@@ -23,7 +23,7 @@ jobs:
         run: |
           cmake . -B build \
           -G Xcode \
-          -DQITI_ENABLE_THREAD_SANITIZER=ON
+          -DQITI_ENABLE_CLANG_THREAD_SANITIZER=ON
 
       - name: Build Tests
         run: |
@@ -53,7 +53,7 @@ jobs:
         run: |
           cmake . -B build \
           -G Xcode \
-          -DQITI_ENABLE_THREAD_SANITIZER=ON
+          -DQITI_ENABLE_CLANG_THREAD_SANITIZER=ON
 
       - name: Build Tests
         run: |
@@ -84,7 +84,7 @@ jobs:
              -DCMAKE_BUILD_TYPE=Release \
              -DCMAKE_C_COMPILER=clang \
              -DCMAKE_CXX_COMPILER=clang++ \
-             -DQITI_ENABLE_THREAD_SANITIZER=ON
+             -DQITI_ENABLE_CLANG_THREAD_SANITIZER=ON
 
       - name: Build Tests
         run: |
@@ -117,7 +117,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_COMPILER=clang-16 \
             -DCMAKE_CXX_COMPILER=clang++-16 \
-            -DQITI_ENABLE_THREAD_SANITIZER=ON
+            -DQITI_ENABLE_CLANG_THREAD_SANITIZER=ON
 
       - name: Build Tests
         run: |
@@ -183,7 +183,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_COMPILER=clang-17 \
             -DCMAKE_CXX_COMPILER=clang++-17 \
-            -DQITI_ENABLE_THREAD_SANITIZER=ON
+            -DQITI_ENABLE_CLANG_THREAD_SANITIZER=ON
 
       - name: Build Tests
         run: |
@@ -214,7 +214,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
-            -DQITI_ENABLE_THREAD_SANITIZER=ON
+            -DQITI_ENABLE_CLANG_THREAD_SANITIZER=ON
 
       - name: Build Tests
         run: |

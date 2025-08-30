@@ -15,7 +15,6 @@
 
 #include "qiti_ThreadSanitizer.hpp"
 
-#ifdef QITI_ENABLE_THREAD_SANITIZER
 
 #include "qiti_FunctionData.hpp"
 #include "qiti_LockData.hpp"
@@ -90,6 +89,8 @@ namespace fs = std::filesystem;
 //--------------------------------------------------------------------------
 namespace qiti
 {
+
+#ifdef QITI_ENABLE_CLANG_THREAD_SANITIZER
 //--------------------------------------------------------------------------
 class DataRaceDetector final : public ThreadSanitizer
 {
@@ -166,11 +167,11 @@ public:
             std::cout << "[qiti::DataRaceDetector] Reading TSan log at: " << *logPath << "\n";
             verboseReport = slurpFile(*logPath);
             
-            // Case‐insensitive “data race” search
+            // Case‐insensitive "data race" search
             static const std::regex data_race_rx(R"(data race)",
                                                  std::regex_constants::icase);
             
-            // Look for “data race” anywhere in the report
+            // Look for "data race" anywhere in the report
             if (std::regex_search(verboseReport, data_race_rx))
             {
                 flagFailed();
@@ -210,6 +211,8 @@ private:
     std::string shortReport{};
     std::string verboseReport{};
 };
+
+#endif // QITI_ENABLE_CLANG_THREAD_SANITIZER
 
 //--------------------------------------------------------------------------
 
@@ -610,12 +613,14 @@ ThreadSanitizer::createFunctionsCalledInParallelDetector(FunctionData* func0,
     return std::make_unique<ParallelCallDetector>(func0, func1);
 }
 
+#ifdef QITI_ENABLE_CLANG_THREAD_SANITIZER
 std::unique_ptr<ThreadSanitizer>
 ThreadSanitizer::createDataRaceDetector() noexcept
 {
     qiti::Profile::ScopedDisableProfiling disableProfiling;
     return std::make_unique<DataRaceDetector>();
 }
+#endif // QITI_ENABLE_CLANG_THREAD_SANITIZER
 
 std::unique_ptr<ThreadSanitizer>
 ThreadSanitizer::createPotentialDeadlockDetector() noexcept
@@ -646,5 +651,3 @@ std::string ThreadSanitizer::getReport(bool /*verbose*/) const noexcept
 //--------------------------------------------------------------------------
 } // namespace qiti
 //--------------------------------------------------------------------------
-
-#endif // QITI_ENABLE_THREAD_SANITIZER

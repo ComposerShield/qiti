@@ -17,7 +17,6 @@
 
 #include "qiti_API.hpp"
 
-#ifdef QITI_ENABLE_THREAD_SANITIZER
 
 #include "qiti_FunctionData.hpp"
 
@@ -38,7 +37,7 @@ namespace qiti
  forked process with ThreadSanitizer enabled) and querying pass/fail status.
  
  Use the factory functions to create specific types of ThreadSanitizer detectors:
- - createDataRaceDetector() - Detects data races in your code
+ - createDataRaceDetector() - Detects data races in your code (requires QITI_ENABLE_CLANG_THREAD_SANITIZER)
  - createFunctionsCalledInParallelDetector<&func1, &func2>() - Checks if two functions are called in parallel
  - createPotentialDeadlockDetector() - Detects lock-order inversions (macOS only)
  
@@ -78,7 +77,9 @@ public:
      @see passed()
      @see failed()
      */
+#ifdef QITI_ENABLE_CLANG_THREAD_SANITIZER // set by CMake with -DQITI_ENABLE_CLANG_THREAD_SANITIZER=ON
     [[nodiscard]] QITI_API static std::unique_ptr<ThreadSanitizer> createDataRaceDetector() noexcept;
+#endif // QITI_ENABLE_CLANG_THREAD_SANITIZER
     
     /**
      Factory to create a detector that checks if two functions are called in parallel.
@@ -112,8 +113,6 @@ public:
     }
     
     /**
-     macOS-only: Factory to create a lock-order inversion detector.
-    
      When calling run(), tracks every mutex-acquire; if two locks are
      ever taken in inverted order on different threads, it flags failure.
      
@@ -226,4 +225,3 @@ private:
 
 } // namespace qiti
 
-#endif // QITI_ENABLE_THREAD_SANITIZER

@@ -16,11 +16,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Optional ThreadSanitizer support
-option(QITI_ENABLE_THREAD_SANITIZER "Enable ThreadSanitizer wrapper functionality" OFF)
+option(QITI_ENABLE_CLANG_THREAD_SANITIZER "Enable Clang ThreadSanitizer functionality" OFF)
 
 # Check for unsupported ThreadSanitizer on Windows
-if(QITI_ENABLE_THREAD_SANITIZER AND WIN32)
-    message(FATAL_ERROR "ThreadSanitizer features are not supported on Windows. Please disable QITI_ENABLE_THREAD_SANITIZER.")
+if(QITI_ENABLE_CLANG_THREAD_SANITIZER AND WIN32)
+    message(FATAL_ERROR "Clang ThreadSanitizer features are not supported on Windows. Please disable QITI_ENABLE_CLANG_THREAD_SANITIZER.")
 endif()
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG -D_DEBUG")
@@ -148,14 +148,14 @@ INTERFACE
 )
 
 # ThreadSanitizer-specific options (only when enabled)
-if(QITI_ENABLE_THREAD_SANITIZER)
+if(QITI_ENABLE_CLANG_THREAD_SANITIZER)
     target_compile_options(qiti_lib INTERFACE
         # Prevent inlining which breaks our ability to track memory with TSan
         "-fno-inline"
         # Enable Thread Sanitizer
         "-fsanitize=thread"
     )
-    target_compile_definitions(qiti_lib PUBLIC QITI_ENABLE_THREAD_SANITIZER=1)
+    target_compile_definitions(qiti_lib PUBLIC QITI_ENABLE_CLANG_THREAD_SANITIZER=1)
 endif()
 
 target_compile_definitions(qiti_lib
@@ -180,7 +180,7 @@ if(WIN32)
 endif()
 
 # ThreadSanitizer-specific link options (only when enabled)
-if(QITI_ENABLE_THREAD_SANITIZER)
+if(QITI_ENABLE_CLANG_THREAD_SANITIZER)
     target_link_options(qiti_lib INTERFACE "-fsanitize=thread")
 endif()
 
@@ -277,8 +277,8 @@ if(PROJECT_IS_TOP_LEVEL)
         )
 
         # ThreadSanitizer compile definition for test files
-        if(QITI_ENABLE_THREAD_SANITIZER)
-            target_compile_definitions(${target_name} PRIVATE QITI_ENABLE_THREAD_SANITIZER=1)
+        if(QITI_ENABLE_CLANG_THREAD_SANITIZER)
+            target_compile_definitions(${target_name} PRIVATE QITI_ENABLE_CLANG_THREAD_SANITIZER=1)
         endif()
 
         # Add framework-specific definitions
@@ -313,8 +313,8 @@ if(PROJECT_IS_TOP_LEVEL)
     configure_test_target(qiti_tests "Catch2::Catch2WithMain" "")
 
     # ThreadSanitizer compile definition for qiti_tests_client (shared by all test targets)
-    if(QITI_ENABLE_THREAD_SANITIZER)
-        target_compile_definitions(qiti_tests_client PRIVATE QITI_ENABLE_THREAD_SANITIZER=1)
+    if(QITI_ENABLE_CLANG_THREAD_SANITIZER)
+        target_compile_definitions(qiti_tests_client PRIVATE QITI_ENABLE_CLANG_THREAD_SANITIZER=1)
     endif()
 
     # Linux-specific linker options for qiti_tests_client (shared by all test targets)
@@ -438,7 +438,7 @@ if(PROJECT_IS_TOP_LEVEL)
         list(APPEND DOXYGEN_PREDEFINED
             "QITI_API="
             "QITI_API_INTERNAL="
-            "QITI_ENABLE_THREAD_SANITIZER=1")
+            "QITI_ENABLE_CLANG_THREAD_SANITIZER=1")
 
         # if your Doxygen is new enough, also skip them entirely
         set(DOXYGEN_SKIP_FUNCTION_MACROS YES)
