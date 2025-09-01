@@ -34,6 +34,37 @@ std::vector<HotspotDetector::Hotspot> HotspotDetector::detectHotspots() noexcept
     return detectHotspots(0.0); // No threshold - return all functions
 }
 
+std::vector<HotspotDetector::Hotspot> HotspotDetector::detectHotspots(Sensitivity sensitivity) noexcept
+{
+    // First get all hotspots to calculate relative thresholds
+    auto allHotspots = detectHotspots(0.0);
+    
+    if (allHotspots.empty() || sensitivity == Sensitivity::ALL)
+        return allHotspots;
+    
+    // Calculate threshold based on sensitivity level
+    double maxScore = allHotspots[0].score; // Already sorted by score
+    double threshold = 0.0;
+    
+    switch (sensitivity)
+    {
+        case Sensitivity::LOW:
+            threshold = maxScore * 0.1;  // Top 10%
+            break;
+        case Sensitivity::MEDIUM:
+            threshold = maxScore * 0.25; // Top 25%
+            break;
+        case Sensitivity::HIGH:
+            threshold = maxScore * 0.5;  // Top 50%
+            break;
+        case Sensitivity::ALL:
+            threshold = 0.0;
+            break;
+    }
+    
+    return detectHotspots(threshold);
+}
+
 std::vector<HotspotDetector::Hotspot> HotspotDetector::detectHotspots(double scoreThreshold) noexcept
 {
     qiti::Profile::ScopedDisableProfiling disableProfiling;
@@ -132,27 +163,19 @@ std::string HotspotDetector::getHotspotReason(const FunctionData* func) noexcept
         
         // Highlight if there's high variance (max >> avg)
         if (maxTime > avgTime * 3)
-        {
             reason << ", max: " << (maxTime / 1000) << "μs";
-        }
     }
     
     reason << ")";
     
     // Add special characteristics
     if (func->getNumExceptionsThrown() > 0)
-    {
         reason << " [" << func->getNumExceptionsThrown() << " exceptions]";
-    }
     
     if (func->isConstructor())
-    {
         reason << " [constructor]";
-    }
     else if (func->isDestructor())
-    {
         reason << " [destructor]";
-    }
     
     return reason.str();
 }

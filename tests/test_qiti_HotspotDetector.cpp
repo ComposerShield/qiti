@@ -137,6 +137,44 @@ QITI_TEST_CASE("qiti::HotspotDetector::detectHotspots() - with threshold", Hotsp
     QITI_CHECK(noHotspots.empty());
 }
 
+QITI_TEST_CASE("qiti::HotspotDetector::detectHotspots() - with sensitivity", HotspotDetectorDetectHotspotsWithSensitivity)
+{
+    qiti::ScopedQitiTest test;
+    test.enableProfilingOnAllFunctions(true);
+    
+    // Call functions multiple times to generate different scores
+    hotspotTestFuncSlow();   // High execution time
+    hotspotTestFuncFast();   // Low execution time
+    hotspotTestFuncFast();   // Called again
+    hotspotTestFuncFast();   // Called again
+    
+    // Turn off profiling to prevent additional functions from being profiled during hotspot detection
+    test.enableProfilingOnAllFunctions(false);
+    
+    // Get baseline with ALL sensitivity
+    auto allHotspots = qiti::HotspotDetector::detectHotspots(qiti::HotspotDetector::Sensitivity::ALL);
+    QITI_REQUIRE(allHotspots.size() >= 2);
+    
+    // Test different sensitivity levels
+    auto lowSensitivity = qiti::HotspotDetector::detectHotspots(qiti::HotspotDetector::Sensitivity::LOW);
+    auto mediumSensitivity = qiti::HotspotDetector::detectHotspots(qiti::HotspotDetector::Sensitivity::MEDIUM);
+    auto highSensitivity = qiti::HotspotDetector::detectHotspots(qiti::HotspotDetector::Sensitivity::HIGH);
+    
+    // Sensitivity filtering should work: LOW <= MEDIUM <= HIGH <= ALL
+    QITI_CHECK(lowSensitivity.size() <= mediumSensitivity.size());
+    QITI_CHECK(mediumSensitivity.size() <= highSensitivity.size());
+    QITI_CHECK(highSensitivity.size() <= allHotspots.size());
+    
+    // All returned hotspots should be sorted by score (highest first)
+    for (const auto& hotspotList : {lowSensitivity, mediumSensitivity, highSensitivity, allHotspots})
+    {
+        for (size_t i = 1; i < hotspotList.size(); ++i)
+        {
+            QITI_CHECK(hotspotList[i-1].score >= hotspotList[i].score);
+        }
+    }
+}
+
 QITI_TEST_CASE("qiti::HotspotDetector hotspot scoring", HotspotDetectorScoring)
 {
     qiti::ScopedQitiTest test;

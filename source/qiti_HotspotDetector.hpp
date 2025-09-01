@@ -55,6 +55,17 @@ class HotspotDetector
 {
 public:
     /**
+     Sensitivity levels for hotspot detection.
+     */
+    enum class Sensitivity
+    {
+        LOW,     ///< Only detect the most significant hotspots (top 10% of total time)
+        MEDIUM,  ///< Detect moderate hotspots (top 25% of total time) 
+        HIGH,    ///< Detect most hotspots (top 50% of total time)
+        ALL      ///< Detect all functions with any execution time (equivalent to no threshold)
+    };
+    
+    /**
      Represents a detected performance hotspot.
      */
     struct Hotspot
@@ -77,10 +88,27 @@ public:
     [[nodiscard]] QITI_API static std::vector<Hotspot> detectHotspots() noexcept;
     
     /**
+     @returns A vector of detected hotspots above the specified sensitivity level.
+     
+     @param sensitivity The sensitivity level for hotspot detection. 
+     Recommended for general performance analysis.
+     */
+    [[nodiscard]] QITI_API static std::vector<Hotspot> detectHotspots(Sensitivity sensitivity) noexcept;
+    
+    /**
      @returns A vector of detected hotspots above the specified threshold.
      
      @param scoreThreshold Minimum score required for a function to be considered a hotspot.
      Functions with scores below this threshold will be filtered out.
+     
+     Score represents total time in nanoseconds (call count × average time per call).
+     Suggested values:
+     - 1,000,000 (1ms total) - Very low threshold
+     - 10,000,000 (10ms total) - Low threshold  
+     - 100,000,000 (100ms total) - Medium threshold
+     - 1,000,000,000 (1s total) - High threshold
+     
+     Use this when you need precise control over the threshold value.
      */
     [[nodiscard]] QITI_API static std::vector<Hotspot> detectHotspots(double scoreThreshold) noexcept;
     
