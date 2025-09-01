@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['regular_0',['regular',['../classqiti_1_1_function_data.html#aad1029fb26f1a2bbca6c780279e30858aaf37d08ae228a87dc6b265fd1019c97d',1,'qiti::FunctionData']]]
+  ['high_0',['HIGH',['../classqiti_1_1_hotspot_detector.html#a94f788ec8dd06aa94338d21366155ef9ab89de3b4b81c4facfac906edf29aec8c',1,'qiti::HotspotDetector']]]
 ];
