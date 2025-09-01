@@ -34,6 +34,47 @@ std::vector<HotspotDetector::Hotspot> HotspotDetector::detectHotspots() noexcept
     return detectHotspots(0.0); // No threshold - return all functions
 }
 
+std::vector<HotspotDetector::Hotspot> HotspotDetector::detectHotspots(Sensitivity sensitivity) noexcept
+{
+    // First get all hotspots sorted by score
+    auto allHotspots = detectHotspots(0.0);
+    
+    if (allHotspots.empty() || sensitivity == Sensitivity::ALL)
+        return allHotspots;
+    
+    // Calculate how many functions to return based on sensitivity level
+    size_t numToReturn = 0;
+    
+    switch (sensitivity)
+    {
+        case Sensitivity::LOW:
+            numToReturn = std::max(size_t{1}, allHotspots.size() / 10);  // Top 10% (at least 1)
+            break;
+        case Sensitivity::MEDIUM:
+            numToReturn = std::max(size_t{1}, allHotspots.size() / 4);   // Top 25% (at least 1)
+            break;
+        case Sensitivity::HIGH:
+            numToReturn = std::max(size_t{1}, allHotspots.size() / 2);   // Top 50% (at least 1)
+            break;
+        case Sensitivity::ALL:
+            numToReturn = allHotspots.size();
+            break;
+    }
+    
+    // Return the top N functions
+    if (numToReturn >= allHotspots.size())
+        return allHotspots;
+    
+    std::vector<Hotspot> result;
+    result.reserve(numToReturn);
+    for (size_t i = 0; i < numToReturn; ++i)
+    {
+        result.push_back(allHotspots[i]);
+    }
+    
+    return result;
+}
+
 std::vector<HotspotDetector::Hotspot> HotspotDetector::detectHotspots(double scoreThreshold) noexcept
 {
     qiti::Profile::ScopedDisableProfiling disableProfiling;
@@ -132,27 +173,19 @@ std::string HotspotDetector::getHotspotReason(const FunctionData* func) noexcept
         
         // Highlight if there's high variance (max >> avg)
         if (maxTime > avgTime * 3)
-        {
             reason << ", max: " << (maxTime / 1000) << "μs";
-        }
     }
     
     reason << ")";
     
     // Add special characteristics
     if (func->getNumExceptionsThrown() > 0)
-    {
         reason << " [" << func->getNumExceptionsThrown() << " exceptions]";
-    }
     
     if (func->isConstructor())
-    {
         reason << " [constructor]";
-    }
     else if (func->isDestructor())
-    {
         reason << " [destructor]";
-    }
     
     return reason.str();
 }
