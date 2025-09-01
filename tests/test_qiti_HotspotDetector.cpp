@@ -32,6 +32,30 @@ void hotspotTestFuncFast() noexcept
     volatile int _ = 42;
 }
 
+/** Test function with medium execution time */
+__attribute__((noinline))
+__attribute__((optnone))
+void hotspotTestFuncMedium() noexcept
+{
+    volatile int sum = 0;
+    for(int i = 0; i < 5000; ++i)
+    {
+        sum = sum + i;
+    }
+}
+
+/** Test function with very slow execution time */
+__attribute__((noinline))
+__attribute__((optnone))
+void hotspotTestFuncVerySlow() noexcept
+{
+    volatile int sum = 0;
+    for(int i = 0; i < 200000; ++i)
+    {
+        sum = sum + i;
+    }
+}
+
 /** Test function that throws exceptions */
 __attribute__((noinline))
 __attribute__((optnone))
@@ -122,12 +146,8 @@ QITI_TEST_CASE("qiti::HotspotDetector::detectHotspots() - with threshold", Hotsp
     // Count how many from allHotspots would meet the threshold
     size_t expectedCount = 0;
     for (const auto& hotspot : allHotspots)
-    {
         if (hotspot.score >= threshold)
-        {
             expectedCount++;
-        }
-    }
     
     // Filtered list should have exactly the expected count
     QITI_CHECK(filteredHotspots.size() == expectedCount);
@@ -140,39 +160,69 @@ QITI_TEST_CASE("qiti::HotspotDetector::detectHotspots() - with threshold", Hotsp
 QITI_TEST_CASE("qiti::HotspotDetector::detectHotspots() - with sensitivity", HotspotDetectorDetectHotspotsWithSensitivity)
 {
     qiti::ScopedQitiTest test;
-    test.enableProfilingOnAllFunctions(true);
     
-    // Call functions multiple times to generate different scores
-    hotspotTestFuncSlow();   // High execution time
-    hotspotTestFuncFast();   // Low execution time
-    hotspotTestFuncFast();   // Called again
-    hotspotTestFuncFast();   // Called again
+    // Only profile our specific test functions to avoid interference from optimized framework functions
+    auto verySlow = qiti::FunctionData::getFunctionDataMutable<hotspotTestFuncVerySlow>();
+    auto slow = qiti::FunctionData::getFunctionDataMutable<hotspotTestFuncSlow>();  
+    auto medium = qiti::FunctionData::getFunctionDataMutable<hotspotTestFuncMedium>();
+    auto fast = qiti::FunctionData::getFunctionDataMutable<hotspotTestFuncFast>();
     
-    // Turn off profiling to prevent additional functions from being profiled during hotspot detection
-    test.enableProfilingOnAllFunctions(false);
+    // Create a clear hierarchy of execution times and call patterns
+    // Very slow function called once - should be top hotspot (1 × very_slow_time)
+    hotspotTestFuncVerySlow();
+    
+    // Slow function called multiple times - should be high hotspot (5 × slow_time)
+    for (int i = 0; i < 5; ++i)
+        hotspotTestFuncSlow();
+    
+    // Medium function called many times - should be medium hotspot (20 × medium_time)
+    for (int i = 0; i < 20; ++i)
+        hotspotTestFuncMedium();
+    
+    // Fast function called very many times - should be lower hotspot (100 × fast_time)
+    for (int i = 0; i < 100; ++i)
+        hotspotTestFuncFast();
     
     // Get baseline with ALL sensitivity
     auto allHotspots = qiti::HotspotDetector::detectHotspots(qiti::HotspotDetector::Sensitivity::ALL);
-    QITI_REQUIRE(allHotspots.size() >= 2);
+    QITI_REQUIRE(allHotspots.size() >= 4); // Should have at least our 4 test functions
     
     // Test different sensitivity levels
     auto lowSensitivity = qiti::HotspotDetector::detectHotspots(qiti::HotspotDetector::Sensitivity::LOW);
     auto mediumSensitivity = qiti::HotspotDetector::detectHotspots(qiti::HotspotDetector::Sensitivity::MEDIUM);
     auto highSensitivity = qiti::HotspotDetector::detectHotspots(qiti::HotspotDetector::Sensitivity::HIGH);
     
-    // Sensitivity filtering should work: LOW <= MEDIUM <= HIGH <= ALL
-    QITI_CHECK(lowSensitivity.size() <= mediumSensitivity.size());
-    QITI_CHECK(mediumSensitivity.size() <= highSensitivity.size());
+    // Basic validation: all results should be subsets of ALL
+    QITI_CHECK(lowSensitivity.size() <= allHotspots.size());
+    QITI_CHECK(mediumSensitivity.size() <= allHotspots.size());
     QITI_CHECK(highSensitivity.size() <= allHotspots.size());
+    
+    // LOW sensitivity should be most restrictive
+    QITI_CHECK(lowSensitivity.size() <= mediumSensitivity.size());
+    QITI_CHECK(lowSensitivity.size() <= highSensitivity.size());
     
     // All returned hotspots should be sorted by score (highest first)
     for (const auto& hotspotList : {lowSensitivity, mediumSensitivity, highSensitivity, allHotspots})
-    {
         for (size_t i = 1; i < hotspotList.size(); ++i)
-        {
             QITI_CHECK(hotspotList[i-1].score >= hotspotList[i].score);
+    
+    // Verify sensitivity levels return meaningful results
+    // LOW should capture at least the most expensive operations
+    QITI_CHECK(lowSensitivity.size() >= 1);
+    
+    // Verify that LOW sensitivity captures the most significant hotspots
+    bool foundSignificantHotspot = false;
+    for (const auto& hotspot : lowSensitivity)
+    {
+        const char* name = hotspot.function->getFunctionName();
+        if (strstr(name, "hotspotTestFuncVerySlow") != nullptr || 
+            strstr(name, "hotspotTestFuncSlow") != nullptr)
+        {
+            foundSignificantHotspot = true;
+            break;
         }
     }
+    QITI_CHECK(foundSignificantHotspot);
 }
 
 QITI_TEST_CASE("qiti::HotspotDetector hotspot scoring", HotspotDetectorScoring)

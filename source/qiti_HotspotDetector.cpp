@@ -36,33 +36,43 @@ std::vector<HotspotDetector::Hotspot> HotspotDetector::detectHotspots() noexcept
 
 std::vector<HotspotDetector::Hotspot> HotspotDetector::detectHotspots(Sensitivity sensitivity) noexcept
 {
-    // First get all hotspots to calculate relative thresholds
+    // First get all hotspots sorted by score
     auto allHotspots = detectHotspots(0.0);
     
     if (allHotspots.empty() || sensitivity == Sensitivity::ALL)
         return allHotspots;
     
-    // Calculate threshold based on sensitivity level
-    double maxScore = allHotspots[0].score; // Already sorted by score
-    double threshold = 0.0;
+    // Calculate how many functions to return based on sensitivity level
+    size_t numToReturn = 0;
     
     switch (sensitivity)
     {
         case Sensitivity::LOW:
-            threshold = maxScore * 0.1;  // Top 10%
+            numToReturn = std::max(size_t{1}, allHotspots.size() / 10);  // Top 10% (at least 1)
             break;
         case Sensitivity::MEDIUM:
-            threshold = maxScore * 0.25; // Top 25%
+            numToReturn = std::max(size_t{1}, allHotspots.size() / 4);   // Top 25% (at least 1)
             break;
         case Sensitivity::HIGH:
-            threshold = maxScore * 0.5;  // Top 50%
+            numToReturn = std::max(size_t{1}, allHotspots.size() / 2);   // Top 50% (at least 1)
             break;
         case Sensitivity::ALL:
-            threshold = 0.0;
+            numToReturn = allHotspots.size();
             break;
     }
     
-    return detectHotspots(threshold);
+    // Return the top N functions
+    if (numToReturn >= allHotspots.size())
+        return allHotspots;
+    
+    std::vector<Hotspot> result;
+    result.reserve(numToReturn);
+    for (size_t i = 0; i < numToReturn; ++i)
+    {
+        result.push_back(allHotspots[i]);
+    }
+    
+    return result;
 }
 
 std::vector<HotspotDetector::Hotspot> HotspotDetector::detectHotspots(double scoreThreshold) noexcept
