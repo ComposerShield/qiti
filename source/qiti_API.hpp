@@ -16,6 +16,7 @@
 #pragma once
 
 #include <type_traits>
+#include <concepts>
 
 /**
  Marks functions to be excluded from instrumentation.
@@ -108,13 +109,39 @@ namespace qiti
 // Doxygen - Begin Internal Documentation
 /** \cond INTERNAL */
 //--------------------------------------------------------------------------
+    /**
+     Concept that requires function pointers to be free functions.
+
+     This concept ensures that the provided function pointer is a free function
+     (not a member function). Used for compile-time validation in function
+     profiling templates.
+     */
     template<auto FuncPtr>
     concept isFreeFunction =
         std::is_function_v<std::remove_pointer_t<decltype(FuncPtr)>>;
 
+    /**
+     Concept that requires function pointers to be member functions.
+
+     This concept ensures that the provided function pointer is a member function
+     pointer (not a free function). Used for compile-time validation in member
+     function profiling templates.
+     */
     template<auto FuncPtr>
     concept isMemberFunction =
         std::is_member_function_pointer_v<decltype(FuncPtr)>;
+
+    /**
+     Concept that requires types to have user-defined constructors.
+
+     This concept ensures that only types with user-defined constructors
+     can be profiled by Qiti. Types with only compiler-generated constructors
+     (trivial types, aggregates) are excluded from profiling.
+     */
+    template<typename T>
+    concept hasUserDefinedConstructor = 
+        std::is_constructible_v<T> && 
+        !std::is_trivially_constructible_v<T>;
 
     /**
      Check if ThreadSanitizer wrapper functionality is enabled.

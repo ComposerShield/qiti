@@ -71,25 +71,39 @@ public:
      Template function to get TypeData for a specific type T.
      Similar to FunctionData::getFunctionData<FuncPtr>().
      
+     @note Only types with user-defined constructors can be profiled.
+           This excludes trivial types and aggregates that rely solely
+           on compiler-generated constructors.
+     
      Usage:
      auto* typeData = TypeData::getTypeData<MyClass>();
+     
+     @tparam T Type to get data for. Must satisfy hasUserDefinedConstructor concept.
      */
-    template<typename T>
+    template<typename Type>
+    requires hasUserDefinedConstructor<Type>
     [[nodiscard]] QITI_API_INLINE static const TypeData* getTypeData() noexcept
     {
-        return getTypeDataMutable<T>(); // wrap in const
+        return getTypeDataMutable<Type>(); // wrap in const
     }
     
     /**
      Template function to get mutable TypeData for a specific type T.
      Begins tracking for the type if not already tracked.
+     
+     @note Only types with user-defined constructors can be profiled.
+           This excludes trivial types and aggregates that rely solely
+           on compiler-generated constructors.
+     
+     @tparam T Type to get data for. Must satisfy hasUserDefinedConstructor concept.
      */
-    template<typename T>
+    template<typename Type>
+    requires hasUserDefinedConstructor<Type>
     [[nodiscard]] QITI_API_INLINE static TypeData* getTypeDataMutable() noexcept
     {
-        static constexpr auto typeName = qiti::Profile::getTypeName<T>();
-        qiti::Profile::beginProfilingType<T>();
-        return getTypeDataInternal(typeid(T), typeName, sizeof(T));
+        static constexpr auto typeName = qiti::Profile::getTypeName<Type>();
+        qiti::Profile::beginProfilingType<Type>();
+        return getTypeDataInternal(typeid(Type), typeName, sizeof(Type));
     }
     
     //--------------------------------------------------------------------------

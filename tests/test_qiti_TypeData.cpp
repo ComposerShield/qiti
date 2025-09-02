@@ -9,7 +9,10 @@
 #include "qiti_TypeData.hpp"
 
 #include <string>
+#include <unordered_map>
 #include <vector>
+
+#include <iostream>
 
 //--------------------------------------------------------------------------
 
@@ -51,16 +54,16 @@ QITI_TEST_CASE("qiti::TypeData::getTypeData<T>()", TypeDataGetTypeData)
         QITI_REQUIRE(typeName.find("SimpleTestClass") != std::string::npos);
     }
     
-    QITI_SECTION("Get TypeData for standard types")
+    QITI_SECTION("Get TypeData for standard library types")
     {
-        auto* intData = qiti::TypeData::getTypeData<int>();
-        QITI_REQUIRE(intData != nullptr);
+        auto* mapData = qiti::TypeData::getTypeData<std::unordered_map<void*, int>>();
+        QITI_REQUIRE(mapData != nullptr);
         
         auto* stringData = qiti::TypeData::getTypeData<std::string>();
         QITI_REQUIRE(stringData != nullptr);
         
         // Different types should return different TypeData instances
-        QITI_REQUIRE(intData != stringData);
+        QITI_REQUIRE(mapData != stringData);
     }
     
     QITI_SECTION("Multiple calls return same instance")
@@ -78,9 +81,6 @@ QITI_TEST_CASE("qiti::TypeData::getTypeSize()", TypeDataGetTypeSize)
     
     QITI_SECTION("Verify type sizes")
     {
-        auto* intData = qiti::TypeData::getTypeData<int>();
-        QITI_REQUIRE(intData->getTypeSize() == sizeof(int));
-        
         auto* simpleData = qiti::TypeData::getTypeData<SimpleTestClass>();
         QITI_REQUIRE(simpleData->getTypeSize() == sizeof(SimpleTestClass));
         
@@ -278,42 +278,34 @@ QITI_TEST_CASE("qiti::TypeData::multipleTypes", TypeDataMultipleTypes)
 {
     qiti::ScopedQitiTest test;
     
-    auto* intData = qiti::TypeData::getTypeDataMutable<int>();
     auto* stringData = qiti::TypeData::getTypeDataMutable<std::string>();
     auto* vectorData = qiti::TypeData::getTypeDataMutable<std::vector<int>>();
     
     // Reset all to ensure clean state
-    intData->reset();
     stringData->reset();
     vectorData->reset();
     
     QITI_SECTION("Independent tracking")
     {
-        // Activity on int type
-        intData->recordConstruction();
-        intData->recordConstruction();
-        
         // Activity on string type
         stringData->recordConstruction();
         
         // Verify independence
-        QITI_REQUIRE(intData->getNumConstructions() == 2);
         QITI_REQUIRE(stringData->getNumConstructions() == 1);
         QITI_REQUIRE(vectorData->getNumConstructions() == 0);
         
-        QITI_REQUIRE(intData->getNumLiveInstances() == 2);
         QITI_REQUIRE(stringData->getNumLiveInstances() == 1);
         QITI_REQUIRE(vectorData->getNumLiveInstances() == 0);
+        
+        // Construct a second time
+        stringData->recordConstruction();
+        QITI_REQUIRE(stringData->getNumConstructions() == 2);
     }
     
     QITI_SECTION("Different type sizes")
     {
-        QITI_REQUIRE(intData->getTypeSize() == sizeof(int));
         QITI_REQUIRE(stringData->getTypeSize() == sizeof(std::string));
         QITI_REQUIRE(vectorData->getTypeSize() == sizeof(std::vector<int>));
-        
-        // Sizes should be different (at least int vs string/vector)
-        QITI_REQUIRE(intData->getTypeSize() != stringData->getTypeSize());
     }
 }
 

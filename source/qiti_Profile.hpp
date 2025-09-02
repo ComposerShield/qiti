@@ -292,10 +292,10 @@ public:
      @returns A human-readable string containing the type name, extracted
               at compile-time from compiler intrinsics.
      */
-    template<typename T>
+    template<typename Type>
     [[nodiscard]] QITI_API_INLINE static consteval const char* getTypeName() noexcept
     {
-        return TypeNameHelpers::typeNameCStr<T>;
+        return TypeNameHelpers::typeNameCStr<Type>;
     }
     
 private:
