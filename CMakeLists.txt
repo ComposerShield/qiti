@@ -168,6 +168,11 @@ PUBLIC
     QITI_VERSION=\"${PROJECT_VERSION}\" # need the escape-quoted string for a valid C literal:
 )
 
+# Add compile definition when qiti is built as top-level project
+if(PROJECT_IS_TOP_LEVEL)
+    target_compile_definitions(qiti_lib PUBLIC QITI_TOPLEVEL_PROJECT=1)
+endif()
+
 if(WIN32)
     # Do not define "min" and "max" via windows.h
     target_compile_definitions(qiti_lib PRIVATE NOMINMAX)
