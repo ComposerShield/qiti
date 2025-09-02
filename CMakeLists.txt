@@ -15,6 +15,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# Generate compile_commands.json for clang-tidy and other tools
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Optional ThreadSanitizer support
 option(QITI_ENABLE_CLANG_THREAD_SANITIZER "Enable Clang ThreadSanitizer functionality" OFF)
 
