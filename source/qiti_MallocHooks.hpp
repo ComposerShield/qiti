@@ -117,8 +117,7 @@ public:
                                                  std::size_t oldSize,
                                                  std::size_t newSize) noexcept;
     
-
-private:
+    // Deleted constructors/destructors
     MallocHooks() = delete;
     ~MallocHooks() = delete;
 };

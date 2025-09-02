@@ -125,10 +125,7 @@ public:
     /** Assert if test exceeds duration specified. */
     QITI_API void setMaximumDurationOfTest_ms(uint64_t ms) noexcept;
     
-private:
-    struct Impl;
-    std::unique_ptr<Impl> impl;
-    
+    // Deleted constructors/destructors
     /** Copy Constructor (deleted) */
     ScopedQitiTest(const ScopedQitiTest&) = delete;
     /** Copy Assignment (deleted) */
@@ -137,6 +134,10 @@ private:
     ScopedQitiTest(ScopedQitiTest&& other) noexcept;
     /** Move Assignment (deleted) */
     ScopedQitiTest& operator=(ScopedQitiTest&& other) noexcept;
+    
+private:
+    struct Impl;
+    std::unique_ptr<Impl> impl;
 };
 //--------------------------------------------------------------------------
 } // namespace qiti

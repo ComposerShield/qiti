@@ -103,10 +103,12 @@ public:
     /** */
     QITI_API static void lockReleaseHook(const pthread_mutex_t* size) noexcept;
 #endif
-
-private:
+    
+    // Deleted constructors/destructors
     LockHooks() = delete;
     ~LockHooks() = delete;
+
+private:
 };
 } // namespace qiti
 

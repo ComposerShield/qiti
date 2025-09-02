@@ -51,11 +51,7 @@ public:
         assert(numHeapAllocationsBefore == numHeapAllocationsAfter);
     }
     
-private:
-    /// Heap allocation count at construction time.
-    const uint64_t numHeapAllocationsBefore;
-    
-    // Disabled copy/move constructors/assignment operators
+    // Deleted constructors/destructors
     ScopedNoHeapAllocations(const ScopedNoHeapAllocations&) = delete;
     ScopedNoHeapAllocations& operator=(const ScopedNoHeapAllocations&) = delete;
     ScopedNoHeapAllocations(ScopedNoHeapAllocations&&) = delete;
@@ -64,6 +60,10 @@ private:
     // Prevent this guard itself from being heap‐allocated
     void* operator new(size_t) = delete;
     void* operator new[](size_t) = delete;
+    
+private:
+    /// Heap allocation count at construction time.
+    const uint64_t numHeapAllocationsBefore;
 };
 } // namespace qiti
 

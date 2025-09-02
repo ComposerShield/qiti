@@ -204,6 +204,10 @@ public:
     /** Move Assignment */
     [[nodiscard]] QITI_API ThreadSanitizer& operator=(ThreadSanitizer&& other) noexcept;
     
+    // Deleted constructors/destructors
+    ThreadSanitizer(const ThreadSanitizer&) = delete;
+    ThreadSanitizer& operator=(const ThreadSanitizer&) = delete;
+    
 protected:    
     /** */
     QITI_API_INTERNAL ThreadSanitizer() noexcept;
@@ -220,11 +224,6 @@ private:
     /** Implementation. */
     QITI_API static std::unique_ptr<ThreadSanitizer> createFunctionsCalledInParallelDetector(FunctionData* func0,
                                                                                              FunctionData* func1) noexcept;
-    
-    /** Copy Constructor (deleted) */
-    ThreadSanitizer(const ThreadSanitizer&) = delete;
-    /** Copy Assignment (deleted) */
-    ThreadSanitizer& operator=(const ThreadSanitizer&) = delete;
     
     //--------------------------------------------------------------------------
     /** \endcond */

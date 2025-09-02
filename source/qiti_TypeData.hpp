@@ -139,6 +139,12 @@ public:
     /** Move Assignment */
     [[nodiscard]] QITI_API_INTERNAL TypeData& operator=(TypeData&& other) noexcept;
     
+    // Deleted constructors/destructors
+    /** Copy Constructor (deleted) */
+    TypeData(const TypeData&) = delete;
+    /** Copy Assignment (deleted) */
+    TypeData& operator=(const TypeData&) = delete;
+    
 private:
     std::unique_ptr<Impl> pImpl;
     
@@ -146,11 +152,6 @@ private:
     QITI_API static TypeData* getTypeDataInternal(const std::type_info& typeInfo,
                                                   const char* typeName,
                                                   size_t typeSize) noexcept;
-    
-    /** Copy Constructor (deleted) */
-    TypeData(const TypeData&) = delete;
-    /** Copy Assignment (deleted) */
-    TypeData& operator=(const TypeData&) = delete;
     
     //--------------------------------------------------------------------------
     /** \endcond */
