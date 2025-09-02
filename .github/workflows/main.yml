@@ -334,3 +334,31 @@ jobs:
 
       - name: Run CPPLint
         run: ./runCpplint.sh
+
+  clang-tidy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Install LLVM 16 & Ninja
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-16 clang-tidy-16 ninja-build
+          echo "CC=clang-16" >> $GITHUB_ENV
+          echo "CXX=clang++-16" >> $GITHUB_ENV
+
+      - name: Configure CMake (Ninja, LLVM Clang)
+        run: |
+          cmake . -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=clang-16 \
+            -DCMAKE_CXX_COMPILER=clang++-16 \
+            -DQITI_ENABLE_CLANG_THREAD_SANITIZER=ON
+
+      - name: Build project for clang-tidy
+        run: cmake --build build
+
+      - name: Run clang-tidy
+        run: clang-tidy-16 -p build source/*.cpp source/*.hpp
