@@ -96,7 +96,7 @@ void Profile::beginProfilingFunction(const void* functionAddress, const char* fu
     g_functionsToProfile.insert(functionAddress); // automatically skips duplicates
     
     // This adds the function to our function map
-    (void)Utils::getFunctionDataFromAddress(functionAddress, functionName);
+    (void)FunctionDataUtils::getFunctionDataFromAddress(functionAddress, functionName);
 }
 
 void Profile::endProfilingFunction(const void* functionAddress) noexcept
@@ -182,7 +182,7 @@ uint64_t Profile::getAmountHeapAllocatedOnCurrentThread() noexcept
 void Profile::updateFunctionDataOnEnter(const void* this_fn) noexcept
 {
     // Update FunctionData
-    auto& functionData = Utils::getFunctionDataFromAddress(this_fn);
+    auto& functionData = FunctionDataUtils::getFunctionDataFromAddress(this_fn);
     
     qiti::ScopedNoHeapAllocations noAlloc; // TODO: can we move this up to very top?
     
@@ -224,7 +224,7 @@ void Profile::updateFunctionDataOnExit(const void* this_fn) noexcept
 {
     qiti::ScopedNoHeapAllocations noAlloc;
     
-    auto& functionData = Utils::getFunctionDataFromAddress(this_fn);
+    auto& functionData = FunctionDataUtils::getFunctionDataFromAddress(this_fn);
     auto* impl = functionData.getImpl();
     auto* callImpl = impl->lastCallData.getImpl();
     timespec cpuEndTime;

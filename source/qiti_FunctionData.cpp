@@ -188,7 +188,7 @@ std::vector<const FunctionData*> FunctionData::getAllProfiledFunctionData() noex
     qiti::Profile::ScopedDisableProfiling disableProfiling;
     MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
     
-    return Utils::getAllFunctionData();
+    return FunctionDataUtils::getAllFunctionData();
 }
 
 std::vector<const FunctionData*> FunctionData::getCallers() const noexcept

@@ -2,7 +2,7 @@
 /******************************************************************************
  * Qiti — C++ Profiling Library
  *
- * @file     qiti_Utils.cpp
+ * @file     qiti_FunctionDataUtils.cpp
  *
  * @author   Adam Shield
  * @date     2025-05-16
@@ -13,7 +13,7 @@
  * See LICENSE.txt for license terms.
  ******************************************************************************/
 
-#include <qiti_Utils.hpp>
+#include <qiti_FunctionDataUtils.hpp>
 
 #include "qiti_include.hpp"
 #include "qiti_Instrument.hpp"
@@ -147,19 +147,8 @@ int dladdr(const void* addr, Dl_info* info)
 
 namespace qiti
 {
-void* Utils::getAddressForMangledFunctionName(const char* mangledName) noexcept
-{
-#ifdef _WIN32
-    // Windows: Use GetProcAddress with current module
-    HMODULE hModule = GetModuleHandleA(nullptr); // Current executable
-    return reinterpret_cast<void*>(GetProcAddress(hModule, mangledName));
-#else
-    void* addr = dlsym(RTLD_DEFAULT, mangledName);
-    return addr;
-#endif
-}
 
-[[nodiscard]] qiti::FunctionData& Utils::getFunctionDataFromAddress(const void* functionAddress,
+[[nodiscard]] qiti::FunctionData& FunctionDataUtils::getFunctionDataFromAddress(const void* functionAddress,
                                                                     const char* functionName,
                                                                     int functionTypeInt) noexcept
 {
@@ -189,7 +178,7 @@ void* Utils::getAddressForMangledFunctionName(const char* mangledName) noexcept
     return it->second;
 }
 
-[[nodiscard]] const qiti::FunctionData* Utils::getFunctionData(const char* demangledFunctionName) noexcept
+[[nodiscard]] const qiti::FunctionData* FunctionDataUtils::getFunctionData(const char* demangledFunctionName) noexcept
 {
     auto& g_functionMap = getFunctionMap();
     
@@ -205,7 +194,7 @@ void* Utils::getAddressForMangledFunctionName(const char* mangledName) noexcept
     return &(it->second);
 }
 
-std::vector<const qiti::FunctionData*> Utils::getAllFunctionData() noexcept
+std::vector<const qiti::FunctionData*> FunctionDataUtils::getAllFunctionData() noexcept
 {
     std::vector<const qiti::FunctionData*> output;
     
@@ -217,7 +206,7 @@ std::vector<const qiti::FunctionData*> Utils::getAllFunctionData() noexcept
     return output;
 }
 
-void Utils::demangle(const char* mangled_name, char* demangled_name, uint64_t demangled_size) noexcept
+void FunctionDataUtils::demangle(const char* mangled_name, char* demangled_name, uint64_t demangled_size) noexcept
 {
 #ifdef _WIN32
     // Windows: Use UnDecorateSymbolName
@@ -250,7 +239,7 @@ void Utils::demangle(const char* mangled_name, char* demangled_name, uint64_t de
 #endif
 }
 
-void Utils::resetAll() noexcept
+void FunctionDataUtils::resetAll() noexcept
 {
     getFunctionMap().clear();
     
