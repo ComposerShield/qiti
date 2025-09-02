@@ -2,7 +2,6 @@
 Checks: 'modernize-*,
          -modernize-use-trailing-return-type,
          -modernize-use-designated-initializers,
-         -modernize-use-starts-ends-with,
          -clang-analyzer-security.cert.env.InvalidPtr'
 WarningsAsErrors: ''
 HeaderFilterRegex: 'source/.*\.(h|hpp|cpp)$'

@@ -67,7 +67,7 @@ namespace fs = std::filesystem;
     for (auto& ent : fs::directory_iterator(dir))
     {
         auto fn = ent.path().filename().string();
-        if (fn.rfind(base, 0) == 0)
+        if (fn.starts_with(base))
         {
             if (!best || fs::last_write_time(ent) > fs::last_write_time(*best))
                 best = ent.path();
