@@ -456,6 +456,7 @@ public:
     {
         constexpr char const* logPrefix = QITI_TSAN_LOG_PATH;
         const char* oldTsanOptions;
+        std::string oldTsanOptionsStr;
         
         {
             qiti::Profile::ScopedDisableProfiling disableProfiling;
@@ -471,7 +472,6 @@ public:
             
             // Enable TSan deadlock detection for this run
             oldTsanOptions = getenv("TSAN_OPTIONS");
-            std::string oldTsanOptionsStr;
             if (oldTsanOptions != nullptr)
             {
                 oldTsanOptionsStr = oldTsanOptions;
