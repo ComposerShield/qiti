@@ -1,0 +1,19 @@
+---
+Checks: 'modernize-*,
+         -modernize-use-trailing-return-type,
+         -modernize-use-equals-delete,
+         -modernize-use-ranges,
+         -modernize-use-designated-initializers,
+         -modernize-deprecated-headers,
+         -modernize-use-starts-ends-with,
+         -clang-analyzer-security.cert.env.InvalidPtr'
+WarningsAsErrors: ''
+HeaderFilterRegex: 'source/.*\.(h|hpp|cpp)$'
+FormatStyle: none
+CheckOptions:
+  - key: modernize-loop-convert.MaxCopySize
+    value: '16'
+  - key: modernize-loop-convert.MinConfidence
+    value: reasonable
+  - key: modernize-use-nullptr.NullMacros
+    value: 'NULL'

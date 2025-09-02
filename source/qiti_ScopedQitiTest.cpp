@@ -65,6 +65,33 @@ struct ScopedQitiTest::Impl
     
     uint64_t maxLengthOfTest_ms = std::numeric_limits<uint64_t>::max();
 };
+
+[[maybe_unused]] static void ensureInternalQitiCodeWasNotAccidentallyInstrumented() noexcept
+{
+    const auto allProfiledFunctions = qiti::FunctionData::getAllProfiledFunctionData();
+    for (const auto* func : allProfiledFunctions)
+    {
+        if (func != nullptr && func->getNumTimesCalled() >= 1)
+        {
+            const char* funcName = func->getFunctionName();
+            if (funcName != nullptr && strstr(funcName, "qiti::") != nullptr)
+            {
+                // Don't allow Catch2 templated functions which use qiti functions at template parameters
+                if (strstr(funcName, "Catch::") != nullptr)
+                    continue;
+                
+                // Allow qiti::example:: functions since they're meant to be profiled for testing
+                if (strstr(funcName, "qiti::example::") == nullptr)
+                {
+                    // Found a qiti:: function that was instrumented
+                    std::cout << "Internal qiti:: function was instrumented - "
+                                 "missing QITI_API, QITI_API_INTERNAL or QITI_API_INLINE attribute\n";
+                    std::terminate();
+                }
+            }
+        }
+    }
+}
 //--------------------------------------------------------------------------
 
 ScopedQitiTest::ScopedQitiTest() noexcept
@@ -82,28 +109,9 @@ ScopedQitiTest::ScopedQitiTest() noexcept
 
 ScopedQitiTest::~ScopedQitiTest() noexcept
 {
-    // Safety check: Detect if any qiti:: internal functions got instrumented accidentally
-    auto allProfiledFunctions = FunctionData::getAllProfiledFunctionData();
-    for (const auto* func : allProfiledFunctions)
-    {
-        if (func != nullptr && func->getNumTimesCalled() >= 1)
-        {
-            const char* funcName = func->getFunctionName();
-            if (funcName != nullptr && strstr(funcName, "qiti::") != nullptr)
-            {
-                // Don't allow Catch2 templated functions which use qiti functions at template parameters
-                if (strstr(funcName, "Catch::") != nullptr)
-                    continue;
-                
-                // Allow qiti::example:: functions since they're meant to be profiled for testing
-                if (strstr(funcName, "qiti::example::") == nullptr)
-                {
-                    // Found a qiti:: function that was instrumented - this indicates missing QITI_API/QITI_API_INTERNAL attribute
-                    assert(false && "Internal qiti:: function was instrumented - missing QITI_API or QITI_API_INTERNAL attribute");
-                }
-            }
-        }
-    }
+#if (QITI_TOPLEVEL_PROJECT==1)
+    ensureInternalQitiCodeWasNotAccidentallyInstrumented();
+#endif // (QITI_TOPLEVEL_PROJECT==1)
     
     [[maybe_unused]] auto ms = getLengthOfTest_ms();
     assert(ms <= impl->maxLengthOfTest_ms);
@@ -129,25 +137,25 @@ void ScopedQitiTest::enableProfilingOnAllFunctions(bool enable) noexcept
 
 const char* ScopedQitiTest::getQitiVersionString() noexcept
 {
-    static constexpr const char* version = QITI_VERSION;
+    static constexpr const char* version = QITI_VERSION; // set in CMakeLists.txt or qiti_API.hpp
     return version;
 }
 
 int ScopedQitiTest::getQitiVersionMajor() noexcept
 {
-    static constexpr int version = QITI_VERSION_MAJOR;
+    static constexpr int version = QITI_VERSION_MAJOR;   // set in CMakeLists.txt or qiti_API.hpp
     return version;
 }
 
 int ScopedQitiTest::getQitiVersionMinor() noexcept
 {
-    static constexpr int version = QITI_VERSION_MINOR;
+    static constexpr int version = QITI_VERSION_MINOR;   // set in CMakeLists.txt or qiti_API.hpp
     return version;
 }
 
 int ScopedQitiTest::getQitiVersionPatch() noexcept
 {
-    static constexpr int version = QITI_VERSION_PATCH;
+    static constexpr int version = QITI_VERSION_PATCH;   // set in CMakeLists.txt or qiti_API.hpp
     return version;
 }
 

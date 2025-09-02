@@ -70,6 +70,7 @@ extern "C" QITI_API int my_pthread_mutex_unlock(pthread_mutex_t* m) noexcept
 }
 
 // The interpose array must live in its own section:
+// NOLINTBEGIN(modernize-avoid-c-arrays) - C-style array required for macOS dylib interposition
 __attribute__((used))
 static struct
 {
@@ -82,6 +83,7 @@ __attribute__((section("__DATA,__interpose"))) =
     { reinterpret_cast<const void*>(my_pthread_mutex_lock),   reinterpret_cast<const void*>(pthread_mutex_lock)   },
     { reinterpret_cast<const void*>(my_pthread_mutex_unlock), reinterpret_cast<const void*>(pthread_mutex_unlock) },
 };
+// NOLINTEND(modernize-avoid-c-arrays)
 #endif // defined(__APPLE__)
 
 namespace qiti

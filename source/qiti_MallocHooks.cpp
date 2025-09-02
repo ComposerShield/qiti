@@ -174,8 +174,8 @@ QITI_API_INTERNAL static std::vector<std::string> captureStackTrace(int framesTo
 #endif
 #else
     constexpr int MAX_FRAMES = 128;
-    void* addrs[MAX_FRAMES];
-    int frames = backtrace(addrs, MAX_FRAMES);
+    std::array<void*, MAX_FRAMES> addrs;
+    int frames = backtrace(addrs.data(), MAX_FRAMES);
 
     std::vector<std::string> out;
     out.reserve(static_cast<size_t>(frames - framesToSkip));
@@ -183,7 +183,7 @@ QITI_API_INTERNAL static std::vector<std::string> captureStackTrace(int framesTo
     for (int i = framesToSkip; i < frames; ++i)
     {
         Dl_info info;
-        if (dladdr(addrs[i], &info) && info.dli_sname)
+        if (dladdr(addrs[static_cast<size_t>(i)], &info) && info.dli_sname)
         {
             // demangle the raw symbol
             out.push_back(demangle(info.dli_sname));
@@ -192,7 +192,7 @@ QITI_API_INTERNAL static std::vector<std::string> captureStackTrace(int framesTo
         {
             // fallback: just print the address
             std::ostringstream oss;
-            oss << addrs[i];
+            oss << addrs[static_cast<size_t>(i)];
             out.push_back(oss.str());
         }
     }
