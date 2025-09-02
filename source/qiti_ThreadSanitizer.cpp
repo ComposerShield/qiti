@@ -471,12 +471,17 @@ public:
             
             // Enable TSan deadlock detection for this run
             oldTsanOptions = getenv("TSAN_OPTIONS");
+            std::string oldTsanOptionsStr;
+            if (oldTsanOptions != nullptr)
+            {
+                oldTsanOptionsStr = oldTsanOptions;
+            }
             std::string newTsanOptions = "detect_deadlocks=1:abort_on_error=0:log_path=";
             newTsanOptions += logPrefix;
-            if (oldTsanOptions)
+            if (! oldTsanOptionsStr.empty())
             {
                 newTsanOptions += ":";
-                newTsanOptions += oldTsanOptions;
+                newTsanOptions += oldTsanOptionsStr;
             }
             setenv("TSAN_OPTIONS", newTsanOptions.c_str(), 1);
             
@@ -513,10 +518,14 @@ public:
         qiti::MallocHooks::ScopedBypassMallocHooks bypassMallocHooks;
         
         // Restore old TSAN_OPTIONS
-        if (oldTsanOptions)
-            setenv("TSAN_OPTIONS", oldTsanOptions, 1);
+        if (! oldTsanOptionsStr.empty())
+        {
+            setenv("TSAN_OPTIONS", oldTsanOptionsStr.c_str(), 1);
+        }
         else
+        {
             unsetenv("TSAN_OPTIONS");
+        }
         
         if (WIFEXITED(status))
         {

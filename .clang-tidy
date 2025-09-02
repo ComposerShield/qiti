@@ -1,7 +1,6 @@
 ---
 Checks: 'modernize-*,
-         -modernize-use-trailing-return-type,
-         -clang-analyzer-security.cert.env.InvalidPtr'
+         -modernize-use-trailing-return-type'
 WarningsAsErrors: ''
 HeaderFilterRegex: 'source/.*\.(h|hpp|cpp)$'
 FormatStyle: none
