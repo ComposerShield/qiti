@@ -22,7 +22,7 @@
 #include "qiti_MallocHooks.hpp"
 #include "qiti_Profile.hpp"
 
-#include <string.h>     // for strsignal()
+#include <string.h>     // for strsignal() - NOLINT(modernize-deprecated-headers) POSIX function not in <cstring>
 #include <sys/types.h>  // required for wait.h
 
 #if ! defined(_WIN32)

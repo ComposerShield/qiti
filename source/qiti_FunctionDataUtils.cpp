@@ -37,6 +37,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <ranges>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -182,7 +183,7 @@ namespace qiti
 {
     auto& g_functionMap = getFunctionMap();
     
-    auto it = std::find_if(g_functionMap.begin(), g_functionMap.end(),
+    auto it = std::ranges::find_if(g_functionMap,
                            [demangledFunctionName](const std::pair<const void*, const qiti::FunctionData&>& pair)
                            {
         return pair.second.getFunctionName() == std::string(demangledFunctionName);
