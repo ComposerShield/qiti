@@ -137,25 +137,25 @@ void ScopedQitiTest::enableProfilingOnAllFunctions(bool enable) noexcept
 
 const char* ScopedQitiTest::getQitiVersionString() noexcept
 {
-    static constexpr const char* version = QITI_VERSION;
+    static constexpr const char* version = QITI_VERSION; // set in CMakeLists.txt or qiti_API.hpp
     return version;
 }
 
 int ScopedQitiTest::getQitiVersionMajor() noexcept
 {
-    static constexpr int version = QITI_VERSION_MAJOR;
+    static constexpr int version = QITI_VERSION_MAJOR;   // set in CMakeLists.txt or qiti_API.hpp
     return version;
 }
 
 int ScopedQitiTest::getQitiVersionMinor() noexcept
 {
-    static constexpr int version = QITI_VERSION_MINOR;
+    static constexpr int version = QITI_VERSION_MINOR;   // set in CMakeLists.txt or qiti_API.hpp
     return version;
 }
 
 int ScopedQitiTest::getQitiVersionPatch() noexcept
 {
-    static constexpr int version = QITI_VERSION_PATCH;
+    static constexpr int version = QITI_VERSION_PATCH;   // set in CMakeLists.txt or qiti_API.hpp
     return version;
 }
 
