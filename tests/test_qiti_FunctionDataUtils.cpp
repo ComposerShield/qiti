@@ -7,7 +7,7 @@
 #include "qiti_test_macros.hpp"
 
 // Qiti Private API - not included in qiti_include.hpp
-#include "qiti_Utils.hpp"
+#include "qiti_FunctionDataUtils.hpp"
 
 #include <iostream>
 #include <string>

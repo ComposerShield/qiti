@@ -15,7 +15,7 @@
 
 #include "qiti_MallocHooks.hpp"
 
-#include "qiti_Utils.hpp"
+#include "qiti_FunctionDataUtils.hpp"
 
 #ifdef _WIN32
   #include <windows.h>

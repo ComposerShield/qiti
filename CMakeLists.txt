@@ -34,6 +34,8 @@ set(SOURCES
     "source/qiti_FunctionData_Impl.hpp"
     "source/qiti_FunctionData.hpp"
     "source/qiti_FunctionData.cpp"
+    "source/qiti_FunctionDataUtils.hpp"
+    "source/qiti_FunctionDataUtils.cpp"
     "source/qiti_HotspotDetector.hpp"
     "source/qiti_HotspotDetector.cpp"
     "source/qiti_Instrument.hpp"
@@ -58,8 +60,6 @@ set(SOURCES
     "source/qiti_TypeData_Impl.hpp"
     "source/qiti_TypeData.hpp"
     "source/qiti_TypeData.cpp"
-    "source/qiti_Utils.hpp"
-    "source/qiti_Utils.cpp"
 )
 
 set(EXAMPLE_SOURCES
@@ -220,13 +220,13 @@ if(PROJECT_IS_TOP_LEVEL)
             "tests/qiti_test_macros.hpp"
             "tests/test_qiti_FunctionCallData.cpp"
             "tests/test_qiti_FunctionData.cpp"
+            "tests/test_qiti_FunctionDataUtils.cpp"
             "tests/test_qiti_Instrument.cpp"
             "tests/test_qiti_Profile.cpp"
             "tests/test_qiti_LeakSanitizer.cpp"
             "tests/test_qiti_ScopedNoHeapAllocations.cpp"
             "tests/test_qiti_ScopedQitiTest.cpp"
             "tests/test_qiti_TypeData.cpp"
-            "tests/test_qiti_Utils.cpp"
         )
     else()
         # Other platforms: Full test set
@@ -234,6 +234,7 @@ if(PROJECT_IS_TOP_LEVEL)
             "tests/qiti_test_macros.hpp"
             "tests/test_qiti_FunctionCallData.cpp"
             "tests/test_qiti_FunctionData.cpp"
+            "tests/test_qiti_FunctionDataUtils.cpp"
             "tests/test_qiti_HotspotDetector.cpp"
             "tests/test_qiti_Instrument.cpp"
             "tests/test_qiti_Profile.cpp"
@@ -243,7 +244,6 @@ if(PROJECT_IS_TOP_LEVEL)
             "tests/test_qiti_ScopedQitiTest.cpp"
             "tests/test_qiti_ThreadSanitizer.cpp"
             "tests/test_qiti_TypeData.cpp"
-            "tests/test_qiti_Utils.cpp"
         )
     endif()
 

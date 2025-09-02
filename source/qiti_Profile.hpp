@@ -304,10 +304,10 @@ private:
     /** \cond INTERNAL */
     //--------------------------------------------------------------------------
     
+    friend class FunctionData;
+    friend class FunctionDataUtils;
     friend class Instrument;
     friend class InstrumentHooks;
-    friend class FunctionData;
-    friend class Utils;
 
     Profile() = delete;
     ~Profile() = delete;

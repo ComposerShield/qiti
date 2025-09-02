@@ -15,11 +15,11 @@
 
 #include "qiti_TypeData.hpp"
 
+#include "qiti_FunctionDataUtils.hpp"
 #include "qiti_MallocHooks.hpp"
-#include "qiti_TypeData_Impl.hpp"
-#include "qiti_ScopedNoHeapAllocations.hpp"
-#include "qiti_Utils.hpp"
 #include "qiti_Profile.hpp"
+#include "qiti_ScopedNoHeapAllocations.hpp"
+#include "qiti_TypeData_Impl.hpp"
 
 #include <memory>
 #include <utility>

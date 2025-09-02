@@ -2,7 +2,7 @@
 /******************************************************************************
  * Qiti — C++ Profiling Library
  *
- * @file     qiti_Utils.hpp
+ * @file     qiti_FunctionDataUtils.hpp
  *
  * @author   Adam Shield
  * @date     2025-05-16
@@ -50,8 +50,8 @@ namespace qiti
 //--------------------------------------------------------------------------
 class FunctionData;
 //--------------------------------------------------------------------------
-/** Utility class for function‐metadata utilities and profiling support. */
-class Utils
+/** Internal implementation utilities for FunctionData management and profiling support. */
+class FunctionDataUtils
 {
 public:
     /** Reset all profiling and instrumentation data (including function data mapping) */
@@ -78,11 +78,8 @@ private:
     friend class FunctionData;
     friend class Profile;
     
-    Utils() = delete;
-    ~Utils() = delete;
-    
-    /** Likely never used. */
-    QITI_API_INTERNAL static void* getAddressForMangledFunctionName(const char* mangledName) noexcept;
+    FunctionDataUtils() = delete;
+    ~FunctionDataUtils() = delete;
     
     /** */
     [[nodiscard]] QITI_API static qiti::FunctionData& getFunctionDataFromAddress(const void* functionAddress,
@@ -92,7 +89,7 @@ private:
     /** */
     [[nodiscard]] QITI_API static const qiti::FunctionData* getFunctionData(const char* demangledFunctionName) noexcept;
     
-}; // class Utils
+}; // class FunctionDataUtils
 }  // namespace qiti
 
 //--------------------------------------------------------------------------

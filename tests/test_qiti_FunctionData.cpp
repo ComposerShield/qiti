@@ -151,7 +151,7 @@ QITI_TEST_CASE("qiti::FunctionData::getFunctionName()", FunctionDataGetFunctionN
 
     {
         qiti::Profile::beginProfilingFunction<&testFunc>();
-        auto functionData = qiti::Utils::getFunctionData<&testFunc>();
+        auto functionData = qiti::FunctionDataUtils::getFunctionData<&testFunc>();
         std::string name = functionData->getFunctionName();
 #ifdef _WIN32
         // On Windows, allow either the exact name or a name containing testFunc
@@ -168,7 +168,7 @@ QITI_TEST_CASE("qiti::FunctionData::getNumTimesCalled()", FunctionDataGetNumTime
     
     qiti::Profile::beginProfilingFunction<&testFunc>();
     
-    auto funcData = qiti::Utils::getFunctionData<&testFunc>();
+    auto funcData = qiti::FunctionDataUtils::getFunctionData<&testFunc>();
     QITI_REQUIRE(funcData != nullptr);
     
     QITI_SECTION("Called twice")
@@ -217,7 +217,7 @@ QITI_TEST_CASE("qiti::FunctionData::wasCalledOnThread()", FunctionDataWasCalledO
     
     qiti::Profile::beginProfilingFunction<&testFunc>();
     
-    auto funcData = qiti::Utils::getFunctionData<&testFunc>();
+    auto funcData = qiti::FunctionDataUtils::getFunctionData<&testFunc>();
     QITI_REQUIRE(funcData != nullptr);
     
     QITI_SECTION("Function called on current thread")

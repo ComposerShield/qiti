@@ -16,8 +16,8 @@
 #pragma once
 
 #include "qiti_FunctionCallData.hpp"
+#include "qiti_FunctionDataUtils.hpp"
 #include "qiti_Profile.hpp"
-#include "qiti_Utils.hpp"
 #include "qiti_ScopedNoHeapAllocations.hpp"
 
 #include <cstdint>
@@ -286,7 +286,7 @@ public:
         static constexpr auto functionName    = Profile::getFunctionName<FuncPtr>();
         static constexpr auto functionType    = getFunctionType(functionName);
         qiti::Profile::beginProfilingFunction<FuncPtr>();
-        return &Utils::getFunctionDataFromAddress(functionAddress,
+        return &FunctionDataUtils::getFunctionDataFromAddress(functionAddress,
                                                   functionName,
                                                   static_cast<int>(functionType));
     }
@@ -297,8 +297,8 @@ public:
     [[nodiscard]] QITI_API_INTERNAL FunctionData& operator=(FunctionData&& other) noexcept;
     
 private:
+    friend class FunctionDataUtils;
     friend class Profile;
-    friend class Utils;
     
     std::unique_ptr<Impl> pImpl;
     
@@ -324,7 +324,7 @@ private:
         static constexpr auto functionName    = Profile::getFunctionName<FuncPtr>();
         static constexpr auto functionType    = getFunctionType(functionName);
         qiti::Profile::beginProfilingFunction(functionAddress);
-        return &Utils::getFunctionDataFromAddress(functionAddress,
+        return &FunctionDataUtils::getFunctionDataFromAddress(functionAddress,
                                                   functionName,
                                                   static_cast<int>(functionType));
     }
