@@ -19,6 +19,7 @@
 #include "qiti_ScopedNoHeapAllocations.hpp"
 
 #include <algorithm>
+#include <ranges>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -107,11 +108,11 @@ std::vector<HotspotDetector::Hotspot> HotspotDetector::detectHotspots(double sco
     }
     
     // Sort by score (highest first)
-    std::sort(hotspots.begin(), hotspots.end(), 
-              [](const Hotspot& a, const Hotspot& b)
-              {
-                  return a.score > b.score;
-              });
+    std::ranges::sort(hotspots, 
+                      [](const Hotspot& a, const Hotspot& b)
+                      {
+                          return a.score > b.score;
+                      });
     
     return hotspots;
 }

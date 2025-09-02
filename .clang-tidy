@@ -2,7 +2,6 @@
 Checks: 'modernize-*,
          -modernize-use-trailing-return-type,
          -modernize-use-equals-delete,
-         -modernize-use-ranges,
          -modernize-use-designated-initializers,
          -modernize-deprecated-headers,
          -modernize-use-starts-ends-with,
