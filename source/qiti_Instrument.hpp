@@ -124,12 +124,13 @@ public:
     
     /** */
     QITI_API static void onNextFunctionCallInternal(std::function<void()> callback, const void* functionAddress) noexcept;
+    
+    // Deleted constructors/destructors
+    Instrument() = delete;
+    ~Instrument() = delete;
 
 private:
     friend class InstrumentHooks;
-    
-    Instrument() = delete;
-    ~Instrument() = delete;
     
     /** */
     QITI_API_INTERNAL static void checkAndExecuteFunctionCallCallback(const void* functionAddress) noexcept;

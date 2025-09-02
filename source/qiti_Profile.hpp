@@ -298,6 +298,10 @@ public:
         return TypeNameHelpers::typeNameCStr<Type>;
     }
     
+    // Deleted constructors/destructors
+    Profile() = delete;
+    ~Profile() = delete;
+    
 private:
     //--------------------------------------------------------------------------
     // Doxygen - Begin Internal Documentation
@@ -308,9 +312,6 @@ private:
     friend class FunctionDataUtils;
     friend class Instrument;
     friend class InstrumentHooks;
-
-    Profile() = delete;
-    ~Profile() = delete;
     
     /**
      Updates profiling data when a function is entered.

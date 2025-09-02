@@ -69,7 +69,7 @@ public:
     /** */
     QITI_API_INTERNAL static void resetAllListeners() noexcept;
     
-private:
+    // Deleted constructors/destructors
     LockData() = delete;
     ~LockData() = delete;
 };

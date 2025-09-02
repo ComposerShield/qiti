@@ -79,7 +79,8 @@ public:
             qiti::Profile::updateFunctionDataOnExit(this_fn);
         }
     }
-private:
+
+    // Deleted constructors/destructors
     InstrumentHooks() = delete;
     ~InstrumentHooks() = delete;
 };

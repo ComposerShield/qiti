@@ -74,12 +74,13 @@ public:
                                            char* demangled_name,
                                            uint64_t demangled_size) noexcept;
     
+    // Deleted constructors/destructors
+    FunctionDataUtils() = delete;
+    ~FunctionDataUtils() = delete;
+    
 private:
     friend class FunctionData;
     friend class Profile;
-    
-    FunctionDataUtils() = delete;
-    ~FunctionDataUtils() = delete;
     
     /** */
     [[nodiscard]] QITI_API static qiti::FunctionData& getFunctionDataFromAddress(const void* functionAddress,

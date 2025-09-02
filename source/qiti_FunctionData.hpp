@@ -296,6 +296,10 @@ public:
     /** Move Assignment */
     [[nodiscard]] QITI_API_INTERNAL FunctionData& operator=(FunctionData&& other) noexcept;
     
+    // Deleted constructors/destructors
+    FunctionData(const FunctionData&) = delete;
+    FunctionData& operator=(const FunctionData&) = delete;
+    
 private:
     friend class FunctionDataUtils;
     friend class Profile;
@@ -335,12 +339,6 @@ private:
      Updates internal state to log a new invocation, including timestamp and thread information.
      */
     QITI_API_INTERNAL void functionCalled() noexcept;
-    
-    /** Copy Constructor (deleted) */
-    FunctionData(const FunctionData&) = delete;
-    /** Copy Assignment (deleted) */
-    FunctionData& operator=(const FunctionData&) = delete;
-    
     
     /** */
     [[nodiscard]] QITI_API_INTERNAL static constexpr FunctionType getFunctionType(const char* functionName) noexcept

@@ -104,6 +104,12 @@ public:
     /** Move Assignment */
     QITI_API LeakSanitizer& operator=(LeakSanitizer&& other) noexcept;
     
+    // Deleted constructors/destructors
+    /** Copy Constructor (deleted) */
+    LeakSanitizer(const LeakSanitizer&) = delete;
+    /** Copy Assignment (deleted) */
+    LeakSanitizer& operator=(const LeakSanitizer&) = delete;
+    
 private:
     //--------------------------------------------------------------------------
     // Doxygen - Begin Internal Documentation
@@ -115,11 +121,6 @@ private:
     uint64_t _totalDeallocated = 0;
     uint64_t _netLeak = 0;
     std::function<void()> _cachedFunction = nullptr;
-    
-    /** Copy Constructor (deleted) */
-    LeakSanitizer(const LeakSanitizer&) = delete;
-    /** Copy Assignment (deleted) */
-    LeakSanitizer& operator=(const LeakSanitizer&) = delete;
     
     //--------------------------------------------------------------------------
     /** \endcond */
