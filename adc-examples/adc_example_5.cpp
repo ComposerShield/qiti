@@ -7,7 +7,8 @@
 #include <cstdlib>
 #include <unordered_map>
 
-thread_local std::size_t totalBytesAllocated = 0;
+thread_local std::size_t bytesCurrentlyAllocated = 0;
+thread_local std::size_t numHeapAllocations = 0;
 thread_local std::unordered_map<void*, std::size_t> allocationSizes;
 thread_local bool shouldTrackAllocation = true;
 
@@ -21,7 +22,8 @@ void* operator new(std::size_t size)
     if (shouldTrackAllocation)
     {
         shouldTrackAllocation = false;
-        totalBytesAllocated += size;
+        bytesCurrentlyAllocated += size;
+        numHeapAllocations++;
         allocationSizes[ptr] = size;
         shouldTrackAllocation = true;
     }
@@ -37,7 +39,7 @@ void operator delete(void* ptr) noexcept
         auto it = allocationSizes.find(ptr);
         if (it != allocationSizes.end())
         {
-            totalBytesAllocated -= it->second;
+            bytesCurrentlyAllocated -= it->second;
             allocationSizes.erase(it);
         }
         shouldTrackAllocation = true;
