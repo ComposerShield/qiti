@@ -3,6 +3,9 @@
  * Class-specific operator new/delete overrides
  ******************************************************************************/
 
+#include <new>
+#include <cstdlib>
+
 class AudioBuffer
 {
 public:
