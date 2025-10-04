@@ -1,3 +1,5 @@
 /build/*
 /Testing/*
 /.vscode
+CLAUDE.md
+adc-examples/build
