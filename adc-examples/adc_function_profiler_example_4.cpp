@@ -7,9 +7,6 @@
 #include <unordered_map>
 #include <cstddef>
 
-static std::unordered_map<void*, std::size_t> callCounts;
-static thread_local bool shouldTrackCall = true;
-
 extern "C"
 {
     __attribute__((no_instrument_function))
@@ -18,9 +15,16 @@ extern "C"
         if (! shouldTrackCall)
             return;
         
-        shouldTrackCall = false;
-        callCounts[this_fn]++;
-        shouldTrackCall = true;
+        // ...
+
+        // You could also query:
+        // - average/min/max time spent in each function
+        // - time spent in function the last time it was called
+        // - which thread is calling this function
+        // - how many memory allocations and how much memory allocated
+        // - which function called this function
+        // - which functions are called the most often (hotpath)
+        // - etc.
     }
 
     __attribute__((no_instrument_function))
