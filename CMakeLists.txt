@@ -70,13 +70,18 @@ set(EXAMPLE_SOURCES
     "example/source/qiti_example.cpp"
 )
 
+set(CLIENT_SOURCES
+    "source/client/qiti_client_executable.cpp"
+)
+
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "lib" FILES ${SOURCES} ${EXAMPLE_SOURCES})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/source/client PREFIX "client" FILES ${CLIENT_SOURCES})
 
 # Public Qiti Library
 add_library(qiti_lib SHARED ${SOURCES})
 
 # Force client to compile this file
-add_library(qiti_tests_client OBJECT "source/client/qiti_client_executable.cpp")
+add_library(qiti_tests_client OBJECT ${CLIENT_SOURCES})
 
 if(PROJECT_IS_TOP_LEVEL)
     # Internal example app used for testing
