@@ -1,21 +1,10 @@
 
 /******************************************************************************
- * Using qiti to detect heap allocations
+ * Heap Allocation Tracker - Summary
  ******************************************************************************/
 
-#include <gtest/gtest.h>
-#include <qiti_include.hpp>
-#include "MyPluginProcessor.h"
+// 1. Override operator new/delete
 
-TEST(MemoryTest, NoHeapAllocationsInProcessBlock)
-{
-    qiti::ScopedQitiTest test;
-    
-    auto funcData = qiti::FunctionData::getFunctionData<&MyPluginProcessor::processBlock>();
-    
-    MyPluginProcessor processor;
-    processor.processBlock(/*Audio stuff here*/);
-    
-    auto lastCall = funcData->getLastFunctionCall();
-    EXPECT_EQ(lastCall.getNumHeapAllocations(), 0);
-}
+// 2. Track allocations
+
+// 3. Test pass/fail based on count
