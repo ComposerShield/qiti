@@ -292,17 +292,17 @@ QITI_TEST_CASE("qiti::Instrument::onThreadCreation() detects std::async thread c
                OnThreadCreationStdAsync)
 {
     qiti::ScopedQitiTest test;
-    
+
     bool callbackExecuted = false;
-    
+
     auto threadCallback = [&callbackExecuted](std::thread::id threadId)
     {
         callbackExecuted = true;
     };
-    
+
     // Set up thread creation callback
     qiti::Instrument::onThreadCreation(threadCallback);
-    
+
     // Use std::async with launch::async to force new thread creation
     // Note: Implementation may still reuse existing thread pool threads
     auto future = std::async(std::launch::async, []()
@@ -310,11 +310,38 @@ QITI_TEST_CASE("qiti::Instrument::onThreadCreation() detects std::async thread c
         // Empty async function - no function calls
         return 42;
     });
-    
+
     int result = future.get();  // Wait for completion
     QITI_REQUIRE(result == 42); // async task completed successfully
-    
+
     // Verify callback was executed (if a new thread was actually created)
     // Note: This may not always pass since std::async behavior is implementation-defined
     QITI_CHECK(callbackExecuted);
+}
+
+//--------------------------------------------------------------------------
+// New coverage tests
+//--------------------------------------------------------------------------
+
+QITI_TEST_CASE("qiti::Instrument::assertOnNextHeapAllocation() sets up assertion then is cleared by reset",
+               AssertOnNextHeapAllocationSetupAndReset)
+{
+    qiti::ScopedQitiTest test;
+
+    // Call assertOnNextHeapAllocation() which internally calls
+    // onNextHeapAllocation([]{ assert(false); }). This exercises the
+    // assertOnNextHeapAllocation() code path (lines 89-93).
+    qiti::Instrument::assertOnNextHeapAllocation();
+
+    // Immediately reset instrumentation so that the assert(false) callback
+    // is removed before any heap allocation can trigger it.
+    qiti::Instrument::resetInstrumentation();
+
+    // Now perform a heap allocation. Since we reset, the callback should
+    // not fire and the test should not crash.
+    volatile auto* testAlloc = new int{42};
+    delete testAlloc;
+
+    // If we get here, the reset successfully cleared the assertion callback.
+    QITI_CHECK(true);
 }

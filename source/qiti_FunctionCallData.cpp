@@ -57,13 +57,10 @@ FunctionCallData& FunctionCallData::operator=(FunctionCallData&& other) noexcept
 FunctionCallData::FunctionCallData(const FunctionCallData& other) noexcept
     : pImpl(std::make_unique<Impl>(*other.pImpl))
 {
-    qiti::ScopedNoHeapAllocations noAlloc;
 }
 
-FunctionCallData FunctionCallData::operator=(const FunctionCallData& other) noexcept
+FunctionCallData& FunctionCallData::operator=(const FunctionCallData& other) noexcept
 {
-    qiti::ScopedNoHeapAllocations noAlloc;
-    
     if (this != &other)
     {
         pImpl = std::make_unique<Impl>(*other.pImpl);

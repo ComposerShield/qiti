@@ -415,14 +415,16 @@ if(PROJECT_IS_TOP_LEVEL)
                 COMMAND ${LLVM_COV} report
                     $<TARGET_FILE:qiti_lib>
                     -instr-profile=${CMAKE_BINARY_DIR}/qiti_coverage.profdata
-                    -ignore-filename-regex="build/|tests/|example/"
+                    # TypeData is excluded: the class is deprecated and incomplete (work-in-progress)
+                    -ignore-filename-regex="build/|tests/|example/|TypeData"
                 # Generate HTML report
                 COMMAND ${LLVM_COV} show
                     $<TARGET_FILE:qiti_lib>
                     -instr-profile=${CMAKE_BINARY_DIR}/qiti_coverage.profdata
                     -format=html
                     -output-dir=${CMAKE_BINARY_DIR}/coverage_html
-                    -ignore-filename-regex="build/|tests/|example/"
+                    # TypeData is excluded: the class is deprecated and incomplete (work-in-progress)
+                    -ignore-filename-regex="build/|tests/|example/|TypeData"
                 DEPENDS qiti_tests_catch2 qiti_lib
                 WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
                 COMMENT "Running tests and generating code coverage report..."

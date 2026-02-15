@@ -81,6 +81,7 @@ public:
 private:
     friend class FunctionData;
     friend class Profile;
+    friend struct FunctionDataUtilsTestAccess;
     
     /** */
     [[nodiscard]] QITI_API static qiti::FunctionData& getFunctionDataFromAddress(const void* functionAddress,

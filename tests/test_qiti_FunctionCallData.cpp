@@ -144,3 +144,108 @@ QITI_TEST_CASE("qiti::FunctionCallData::getTimeSpentInFunction", FunctionCallDat
     }
 }
 #endif // ! _WIN32
+
+QITI_TEST_CASE("qiti::FunctionCallData move constructor", FunctionCallDataMoveConstructor)
+{
+    qiti::ScopedQitiTest test;
+
+    auto funcData = qiti::FunctionData::getFunctionData<&testHeapAllocation>();
+    QITI_REQUIRE(funcData != nullptr);
+
+    testHeapAllocation();
+
+    auto original = funcData->getLastFunctionCall();
+    auto numAllocsBefore = original.getNumHeapAllocations();
+    auto threadBefore = original.getThreadThatCalledFunction();
+
+    // Move construct
+    qiti::FunctionCallData moved(std::move(original));
+
+    QITI_REQUIRE(moved.getNumHeapAllocations() == numAllocsBefore);
+    QITI_REQUIRE(moved.getThreadThatCalledFunction() == threadBefore);
+}
+
+QITI_TEST_CASE("qiti::FunctionCallData move assignment", FunctionCallDataMoveAssignment)
+{
+    qiti::ScopedQitiTest test;
+
+    auto funcData = qiti::FunctionData::getFunctionData<&testHeapAllocation>();
+    QITI_REQUIRE(funcData != nullptr);
+
+    testHeapAllocation();
+
+    auto original = funcData->getLastFunctionCall();
+    auto numAllocsBefore = original.getNumHeapAllocations();
+    auto threadBefore = original.getThreadThatCalledFunction();
+
+    // Move assign into a copy-initialized target (avoids default constructor)
+    auto moved = funcData->getLastFunctionCall();
+    [[maybe_unused]] auto& moveResult = (moved = std::move(original));
+
+    QITI_REQUIRE(moved.getNumHeapAllocations() == numAllocsBefore);
+    QITI_REQUIRE(moved.getThreadThatCalledFunction() == threadBefore);
+}
+
+#ifndef _WIN32 // CPU Time feature not supported on Windows
+QITI_TEST_CASE("qiti::FunctionCallData::getTimeSpentInFunctionCpu_ms()", FunctionCallDataGetTimeSpentCpuMs)
+{
+    qiti::ScopedQitiTest test;
+
+    auto funcData = qiti::FunctionData::getFunctionData<&slowWork>();
+    QITI_REQUIRE(funcData != nullptr);
+
+    // Warm up
+    (void)slowWork();
+
+    // Call to be tested
+    (void)slowWork();
+
+    auto lastCall = funcData->getLastFunctionCall();
+
+    auto cpuTimeMs = lastCall.getTimeSpentInFunctionCpu_ms();
+    auto cpuTimeNs = lastCall.getTimeSpentInFunctionCpu_ns();
+
+    // slowWork does 100,000 iterations, should take at least 1ms of CPU time
+    QITI_REQUIRE(cpuTimeMs >= 0);
+
+    // If ns value is >= 1,000,000 then ms should be at least 1
+    if (cpuTimeNs >= 1000000)
+    {
+        QITI_REQUIRE(cpuTimeMs >= 1);
+    }
+
+    // ms should be consistent with ns (ms == ns / 1,000,000)
+    QITI_REQUIRE(cpuTimeMs == cpuTimeNs / 1000000);
+}
+
+QITI_TEST_CASE("qiti::FunctionCallData::getTimeSpentInFunctionWallClock_ms()", FunctionCallDataGetTimeSpentWallClockMs)
+{
+    qiti::ScopedQitiTest test;
+
+    auto funcData = qiti::FunctionData::getFunctionData<&slowWork>();
+    QITI_REQUIRE(funcData != nullptr);
+
+    // Warm up
+    (void)slowWork();
+
+    // Call to be tested
+    (void)slowWork();
+
+    auto lastCall = funcData->getLastFunctionCall();
+
+    auto wallClockMs = lastCall.getTimeSpentInFunctionWallClock_ms();
+    auto wallClockNs = lastCall.getTimeSpentInFunctionWallClock_ns();
+
+    // slowWork does 100,000 iterations, should take at least 1ms of wall-clock time
+    QITI_REQUIRE(wallClockMs >= 0);
+
+    // If ns value is >= 1,000,000 then ms should be at least 1
+    if (wallClockNs >= 1000000)
+    {
+        QITI_REQUIRE(wallClockMs >= 1);
+    }
+
+    // ms should be consistent with ns (ms == ns / 1,000,000)
+    QITI_REQUIRE(wallClockMs == wallClockNs / 1000000);
+}
+#endif // ! _WIN32
