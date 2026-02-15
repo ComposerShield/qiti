@@ -26,6 +26,14 @@ if(QITI_ENABLE_CLANG_THREAD_SANITIZER AND WIN32)
     message(FATAL_ERROR "Clang ThreadSanitizer features are not supported on Windows. Please disable QITI_ENABLE_CLANG_THREAD_SANITIZER.")
 endif()
 
+# Xcode 26+ injects header search paths (DerivedSources, $(CONFIGURATION)/include) that don't
+# exist in CMake-generated projects. Combined with -Werror, -Wmissing-include-dirs becomes fatal.
+# Only disable the warning for Xcode 26+, where the behavior was introduced.
+set(QITI_USE_WMISSING_INCLUDE_DIRS ON)
+if(CMAKE_GENERATOR STREQUAL "Xcode" AND XCODE_VERSION VERSION_GREATER_EQUAL "26.0")
+    set(QITI_USE_WMISSING_INCLUDE_DIRS OFF)
+endif()
+
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG -D_DEBUG")
 
 set(SOURCES
@@ -136,7 +144,7 @@ PRIVATE
     "-Wfloat-conversion"
     "-Wformat=2"
     "-Wimplicit-fallthrough"
-    "-Wmissing-include-dirs"
+    "$<$<BOOL:${QITI_USE_WMISSING_INCLUDE_DIRS}>:-Wmissing-include-dirs>"
     "-Wnon-virtual-dtor"
     "-Wnull-dereference"
     "-Woverloaded-virtual"
