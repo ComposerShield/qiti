@@ -29,7 +29,15 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Optional ThreadSanitizer support
 option(QITI_ENABLE_CLANG_THREAD_SANITIZER "Enable Clang ThreadSanitizer functionality" OFF)
 
+# Optional code coverage support (Clang source-based coverage)
+option(QITI_ENABLE_CODE_COVERAGE "Enable code coverage instrumentation for qiti_lib" OFF)
+
 # Check for unsupported ThreadSanitizer on Windows
+if(QITI_ENABLE_CODE_COVERAGE AND QITI_ENABLE_CLANG_THREAD_SANITIZER)
+    message(WARNING "Code coverage and ThreadSanitizer are both enabled. "
+                    "This combination may produce unreliable coverage results.")
+endif()
+
 if(QITI_ENABLE_CLANG_THREAD_SANITIZER AND WIN32)
     message(FATAL_ERROR "Clang ThreadSanitizer features are not supported on Windows. Please disable QITI_ENABLE_CLANG_THREAD_SANITIZER.")
 endif()
@@ -213,6 +221,19 @@ if(QITI_ENABLE_CLANG_THREAD_SANITIZER)
     target_link_options(qiti_lib INTERFACE "-fsanitize=thread")
 endif()
 
+# Code coverage instrumentation (only when enabled)
+if(QITI_ENABLE_CODE_COVERAGE)
+    # Clang source-based code coverage for qiti_lib.
+    # Uses PRIVATE scope so only qiti_lib code is instrumented (not test code or consumers).
+    target_compile_options(qiti_lib PRIVATE
+        "-fprofile-instr-generate"
+        "-fcoverage-mapping"
+    )
+    target_link_options(qiti_lib PRIVATE
+        "-fprofile-instr-generate"
+    )
+endif()
+
 # =========================
 #       Unit Testing
 # =========================
@@ -364,6 +385,60 @@ if(PROJECT_IS_TOP_LEVEL)
     # When running ctest, you must add a configuration flag, e.g. "ctest -C Debug"
     catch_discover_tests(qiti_tests_catch2 DISCOVERY_MODE PRE_TEST)
     gtest_discover_tests(qiti_tests_gtest DISCOVERY_MODE PRE_TEST)
+
+    # Code coverage report target
+    if(QITI_ENABLE_CODE_COVERAGE)
+        # Find llvm-profdata and llvm-cov (handles both Apple Clang and LLVM Clang)
+        find_program(LLVM_PROFDATA
+            NAMES llvm-profdata llvm-profdata-16 llvm-profdata-17 llvm-profdata-18
+        )
+        find_program(LLVM_COV
+            NAMES llvm-cov llvm-cov-16 llvm-cov-17 llvm-cov-18
+        )
+
+        if(LLVM_PROFDATA AND LLVM_COV)
+            add_custom_target(coverage
+                # Clean previous coverage data
+                COMMAND ${CMAKE_COMMAND} -E rm -f
+                    ${CMAKE_BINARY_DIR}/qiti_coverage.profraw
+                    ${CMAKE_BINARY_DIR}/qiti_coverage.profdata
+                # Run Catch2 tests with coverage output.
+                # GTest runs the same test suite, so Catch2 alone provides full coverage.
+                COMMAND ${CMAKE_COMMAND} -E env
+                    LLVM_PROFILE_FILE=${CMAKE_BINARY_DIR}/qiti_coverage.profraw
+                    $<TARGET_FILE:qiti_tests_catch2>
+                # Merge raw profile data
+                COMMAND ${LLVM_PROFDATA} merge -sparse
+                    ${CMAKE_BINARY_DIR}/qiti_coverage.profraw
+                    -o ${CMAKE_BINARY_DIR}/qiti_coverage.profdata
+                # Print summary report to console
+                COMMAND ${LLVM_COV} report
+                    $<TARGET_FILE:qiti_lib>
+                    -instr-profile=${CMAKE_BINARY_DIR}/qiti_coverage.profdata
+                    -ignore-filename-regex="build/|tests/|example/"
+                # Generate HTML report
+                COMMAND ${LLVM_COV} show
+                    $<TARGET_FILE:qiti_lib>
+                    -instr-profile=${CMAKE_BINARY_DIR}/qiti_coverage.profdata
+                    -format=html
+                    -output-dir=${CMAKE_BINARY_DIR}/coverage_html
+                    -ignore-filename-regex="build/|tests/|example/"
+                DEPENDS qiti_tests_catch2 qiti_lib
+                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                COMMENT "Running tests and generating code coverage report..."
+            )
+
+            # Set Xcode scheme generation for the coverage target
+            if(APPLE)
+                set_target_properties(coverage PROPERTIES
+                    XCODE_GENERATE_SCHEME ON
+                )
+            endif()
+        else()
+            message(WARNING "llvm-profdata or llvm-cov not found. Coverage target will not be available. "
+                            "Install LLVM tools or ensure they are in your PATH.")
+        endif()
+    endif()
 endif()
 
 # =========================
