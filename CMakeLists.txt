@@ -337,10 +337,6 @@ if(PROJECT_IS_TOP_LEVEL)
     add_executable(qiti_tests_gtest ${TEST_SOURCES})
     configure_test_target(qiti_tests_gtest "gtest_main" "QITI_USE_GTEST")
 
-    # Default qiti_tests target (Catch2 for backward compatibility)
-    add_executable(qiti_tests ${TEST_SOURCES})
-    configure_test_target(qiti_tests "Catch2::Catch2WithMain" "")
-
     # ThreadSanitizer compile definition for qiti_tests_client (shared by all test targets)
     if(QITI_ENABLE_CLANG_THREAD_SANITIZER)
         target_compile_definitions(qiti_tests_client PRIVATE QITI_ENABLE_CLANG_THREAD_SANITIZER=1)
