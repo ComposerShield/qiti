@@ -1,8 +1,16 @@
 cmake_minimum_required(VERSION 3.14)
 
 set(QITI_VERSION "0.0.1")
-project(qiti 
-    VERSION ${QITI_VERSION} 
+
+# Set a sensible default deployment target on Apple platforms. Must be set before project()
+# to take effect. CI tests on macOS 14 and 15, so 14.0 covers the widest range.
+# Users can override via -DCMAKE_OSX_DEPLOYMENT_TARGET=<version> on the command line.
+if(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "14.0" CACHE STRING "Minimum macOS deployment target")
+endif()
+
+project(qiti
+    VERSION ${QITI_VERSION}
     LANGUAGES C CXX
 )
 
