@@ -451,13 +451,13 @@ QITI_TEST_CASE("qiti::HotspotDetector high variance max time highlight", Hotspot
     qiti::ScopedQitiTest test;
     test.enableProfilingOnAllFunctions(true);
 
-    // Call the function once with very few iterations (fast) then once with many iterations (slow).
+    // Call the function many times with very few iterations (fast) then once with many iterations (slow).
     // This creates a scenario where maxTime >> avgTime, triggering the variance highlight
     // at line 176-177 of qiti_HotspotDetector.cpp: if (maxTime > avgTime * 3)
-    for (int i = 0; i < 10; ++i)
-        hotspotTestFuncVariableTiming(10);       // Very fast calls
+    for (int i = 0; i < 50; ++i)
+        hotspotTestFuncVariableTiming(1);         // Extremely fast calls
 
-    hotspotTestFuncVariableTiming(500'000);       // One very slow call
+    hotspotTestFuncVariableTiming(5'000'000);     // One very slow call
 
     // Turn off profiling before running detection
     test.enableProfilingOnAllFunctions(false);
@@ -479,8 +479,8 @@ QITI_TEST_CASE("qiti::HotspotDetector high variance max time highlight", Hotspot
 
     QITI_REQUIRE(variableHotspot != nullptr);
 
-    // The function should have been called 11 times (10 fast + 1 slow)
-    QITI_CHECK(variableHotspot->function->getNumTimesCalled() == 11);
+    // The function should have been called 51 times (50 fast + 1 slow)
+    QITI_CHECK(variableHotspot->function->getNumTimesCalled() == 51);
 
     // The reason string should contain "max:" because the max time greatly exceeds the average
     // This exercises line 177 of qiti_HotspotDetector.cpp
