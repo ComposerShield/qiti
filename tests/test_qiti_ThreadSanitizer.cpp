@@ -261,3 +261,133 @@ QITI_TEST_CASE("qiti::ThreadSanitizer::createPotentialDeadlockDetector() detects
 #pragma clang optimize on
 
 #endif // defined(__APPLE__) || defined(QITI_ENABLE_CLANG_THREAD_SANITIZER)
+
+//--------------------------------------------------------------------------
+// New coverage tests
+//--------------------------------------------------------------------------
+
+QITI_TEST_CASE("qiti::ThreadSanitizer::rerun() re-executes cached function", ThreadSanitizerRerun)
+{
+    qiti::ScopedQitiTest test;
+
+    auto tsan = qiti::ThreadSanitizer::createFunctionsCalledInParallelDetector<testFunc0,
+                                                                               testFunc1>();
+
+    // Run a function that calls both functions in parallel
+    tsan->run([]
+    {
+        std::thread t([]
+        {
+            for (auto i = 0; i < 100'000; ++i)
+                testFunc0();
+        });
+
+        for (auto i = 0; i < 100'000; ++i)
+            testFunc1();
+
+        t.join();
+    });
+
+    // Should have failed after run()
+    QITI_REQUIRE(tsan->failed());
+
+    // Now call rerun() which should re-execute the cached function
+    tsan->rerun();
+
+    // Should still be failed after rerun()
+    QITI_REQUIRE(tsan->failed());
+
+    // Report should still be available
+    auto report = tsan->getReport(false);
+    QITI_CHECK(report != "");
+}
+
+QITI_TEST_CASE("qiti::ThreadSanitizer::rerun() does nothing when run() was never called", ThreadSanitizerRerunWithoutRun)
+{
+    qiti::ScopedQitiTest test;
+
+    auto tsan = qiti::ThreadSanitizer::createFunctionsCalledInParallelDetector<testFunc0,
+                                                                               testFunc1>();
+
+    // Should pass initially
+    QITI_CHECK(tsan->passed());
+
+    // rerun() should do nothing since run() was never called
+    tsan->rerun();
+
+    // Should still pass
+    QITI_CHECK(tsan->passed());
+}
+
+QITI_TEST_CASE("qiti::ThreadSanitizer::onFail callback is invoked on failure", ThreadSanitizerOnFailCallback)
+{
+    qiti::ScopedQitiTest test;
+
+    auto tsan = qiti::ThreadSanitizer::createFunctionsCalledInParallelDetector<testFunc0,
+                                                                               testFunc1>();
+
+    // Set up onFail callback
+    std::atomic<int> failCallbackCount{0};
+    tsan->onFail = [&failCallbackCount]()
+    {
+        failCallbackCount.fetch_add(1, std::memory_order_relaxed);
+    };
+
+    // Run functions in parallel to trigger failure
+    tsan->run([]
+    {
+        std::thread t([]
+        {
+            for (auto i = 0; i < 100'000; ++i)
+                testFunc0();
+        });
+
+        for (auto i = 0; i < 100'000; ++i)
+            testFunc1();
+
+        t.join();
+    });
+
+    // Detector should have failed
+    QITI_REQUIRE(tsan->failed());
+
+    // onFail callback should have been called at least once
+    QITI_CHECK(failCallbackCount.load(std::memory_order_relaxed) > 0);
+}
+
+#if defined(__APPLE__)
+
+// Disable optimizations to prevent Release mode optimizations from interfering with lock ordering
+#pragma clang optimize off
+
+QITI_TEST_CASE("qiti::ThreadSanitizer::LockOrderInversionDetector out-of-order release", ThreadSanitizerOutOfOrderRelease)
+{
+    qiti::ScopedQitiTest test;
+
+    auto potentialDeadlockDetector = qiti::ThreadSanitizer::createPotentialDeadlockDetector();
+
+    // Acquire locks A then B, but release A before B (out-of-order release).
+    // This is not a lock inversion (the acquire order is consistent), but it
+    // triggers the out-of-order release path in LockOrderInversionDetector::onRelease().
+    auto outOfOrderRelease = []()
+    {
+        std::mutex mutexA;
+        std::mutex mutexB;
+
+        mutexA.lock();
+        mutexB.lock();
+
+        // Release A first (out-of-order: should release B first since it was acquired last)
+        mutexA.unlock();
+        mutexB.unlock();
+    };
+
+    potentialDeadlockDetector->run(outOfOrderRelease);
+
+    // The out-of-order release should flag failure
+    QITI_REQUIRE(potentialDeadlockDetector->failed());
+}
+
+#pragma clang optimize on
+
+#endif // defined(__APPLE__)

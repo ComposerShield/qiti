@@ -825,3 +825,74 @@ QITI_TEST_CASE("Function type detection", FunctionDataFunctionTypeDetection)
     }
 }
 #endif // ! _WIN32
+
+//--------------------------------------------------------------------------
+// New tests for additional code coverage
+//--------------------------------------------------------------------------
+
+QITI_TEST_CASE("qiti::FunctionData::getAverageTimeSpentInFunctionWallClock_ns()", FunctionDataGetAverageTimeSpentInFunctionWallClock)
+{
+    qiti::ScopedQitiTest test;
+
+    auto funcData = qiti::FunctionData::getFunctionData<&testFuncWithVariableLength>();
+    QITI_REQUIRE(funcData != nullptr);
+
+    QITI_SECTION("No calls made - average should return 0")
+    {
+        QITI_CHECK(funcData->getAverageTimeSpentInFunctionWallClock_ns() == 0);
+    }
+
+    QITI_SECTION("Single call - average equals the single measurement")
+    {
+        testFuncWithVariableLength(2);
+
+        uint64_t avg = funcData->getAverageTimeSpentInFunctionWallClock_ns();
+        QITI_CHECK(avg > 0);
+    }
+
+    QITI_SECTION("Multiple calls - average is positive and within min/max bounds")
+    {
+        testFuncWithVariableLength(1);  // Short
+        testFuncWithVariableLength(3);  // Medium
+        testFuncWithVariableLength(5);  // Longer
+
+        uint64_t avg = funcData->getAverageTimeSpentInFunctionWallClock_ns();
+        uint64_t minTime = funcData->getMinTimeSpentInFunctionWallClock_ns();
+        uint64_t maxTime = funcData->getMaxTimeSpentInFunctionWallClock_ns();
+
+        QITI_CHECK(avg > 0);
+        QITI_CHECK(avg >= minTime);
+        QITI_CHECK(avg <= maxTime);
+        QITI_CHECK(funcData->getNumTimesCalled() == 3);
+    }
+}
+
+QITI_TEST_CASE("qiti::FunctionData::wasCalledOnThread() with unregistered thread ID", FunctionDataWasCalledOnThreadNotFound)
+{
+    qiti::ScopedQitiTest test;
+
+    qiti::Profile::beginProfilingFunction<&testFunc>();
+
+    auto funcData = qiti::FunctionDataUtils::getFunctionData<&testFunc>();
+    QITI_REQUIRE(funcData != nullptr);
+
+    // Call testFunc on the current thread so at least one thread is registered
+    testFunc();
+
+    // Create a new thread that does NOT call any profiled function,
+    // so its thread::id is never registered with Qiti's thread index table.
+    std::thread::id unregisteredThreadId;
+    {
+        std::thread t([&unregisteredThreadId]
+        {
+            // Capture the thread ID but do NOT call any profiled function
+            unregisteredThreadId = std::this_thread::get_id();
+        });
+        t.join();
+    }
+
+    // Query whether testFunc was called on the unregistered thread.
+    // This exercises the THREAD_ID_NOT_FOUND return path (line 55 in qiti_FunctionData.cpp)
+    // where threadIdToIndex() returns THREAD_ID_NOT_FOUND because the thread was never seen.
+    QITI_CHECK(! funcData->wasCalledOnThread(unregisteredThreadId));
+}

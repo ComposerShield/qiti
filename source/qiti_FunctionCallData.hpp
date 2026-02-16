@@ -121,37 +121,38 @@ public:
      */
     [[nodiscard]] QITI_API uint64_t getNumExceptionsThrown() const noexcept;
     
+    /** Move Constructor */
+    QITI_API FunctionCallData(FunctionCallData&& other) noexcept;
+    /** Move Assignment */
+    [[nodiscard]] QITI_API FunctionCallData& operator=(FunctionCallData&& other) noexcept;
+
     //--------------------------------------------------------------------------
     // Doxygen - Begin Internal Documentation
     /** \cond INTERNAL */
     //--------------------------------------------------------------------------
-    
+
     /** */
     QITI_API_INTERNAL FunctionCallData() noexcept;
+
+    /** Copy Constructor */
+    QITI_API_INTERNAL FunctionCallData(const FunctionCallData&) noexcept;
+    /** Copy Assignment */
+    [[nodiscard]] QITI_API_INTERNAL FunctionCallData& operator=(const FunctionCallData&) noexcept;
     /** */
     QITI_API ~FunctionCallData() noexcept;
-    
+
     struct Impl;
     /** */
     [[nodiscard]] QITI_API_INTERNAL Impl* getImpl() noexcept;
     /** */
     [[nodiscard]] QITI_API_INTERNAL const Impl* getImpl() const noexcept;
-    
+
     /**
      Reset this call data to its initial state.
 
      Destroys and reinitializes the internal Impl on the stack.
      */
     QITI_API_INTERNAL void reset() noexcept;
-    
-    /** Move Constructor */
-    QITI_API_INTERNAL FunctionCallData(FunctionCallData&& other) noexcept;
-    /** Move Assignment */
-    [[nodiscard]] QITI_API_INTERNAL FunctionCallData& operator=(FunctionCallData&& other) noexcept;
-    /** Copy Constructor */
-    FunctionCallData(const FunctionCallData&) noexcept;
-    /** Copy Assignment */
-    [[nodiscard]] FunctionCallData operator=(const FunctionCallData&) noexcept;
     
 private:
     std::unique_ptr<Impl> pImpl;

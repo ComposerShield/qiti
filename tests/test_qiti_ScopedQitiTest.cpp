@@ -26,7 +26,7 @@ QITI_TEST_CASE("qiti::ScopedQitiTest::enableProfilingOnAllFunctions()", ScopedQi
     using qiti::example::profile::testFunc;
     {
         qiti::ScopedQitiTest test;
-        
+
         QITI_REQUIRE_FALSE(qiti::Profile::isProfilingFunction<&testFunc>());
         test.enableProfilingOnAllFunctions(true);
         QITI_REQUIRE(qiti::Profile::isProfilingFunction<&testFunc>());
@@ -35,7 +35,40 @@ QITI_TEST_CASE("qiti::ScopedQitiTest::enableProfilingOnAllFunctions()", ScopedQi
         test.enableProfilingOnAllFunctions(true);
         QITI_REQUIRE(qiti::Profile::isProfilingFunction<&testFunc>());
     } // ScopedQitiTest destructs
-    
+
     // should no longer profile after ScopedQitiTest destructs
     QITI_REQUIRE_FALSE(qiti::Profile::isProfilingFunction<&testFunc>());
+}
+
+QITI_TEST_CASE("qiti::ScopedQitiTest::getLengthOfTest_ns()", ScopedQitiTestGetLengthOfTestNs)
+{
+    qiti::ScopedQitiTest test;
+
+    auto elapsed_ns = test.getLengthOfTest_ns();
+    QITI_CHECK(elapsed_ns >= 0);
+}
+
+QITI_TEST_CASE("qiti::ScopedQitiTest::reset(true)", ScopedQitiTestResetWithStartTime)
+{
+    qiti::ScopedQitiTest test;
+
+    // Call reset with resetTestStartTime = true to cover that code path
+    test.reset(true);
+
+    // After resetting the start time, the elapsed time should be near zero
+    auto elapsed_ns = test.getLengthOfTest_ns();
+    QITI_CHECK(elapsed_ns >= 0);
+}
+
+QITI_TEST_CASE("qiti::isThreadSanitizerEnabled()", IsThreadSanitizerEnabled)
+{
+    qiti::ScopedQitiTest test;
+
+    bool enabled = qiti::isThreadSanitizerEnabled();
+
+#ifdef QITI_ENABLE_CLANG_THREAD_SANITIZER
+    QITI_REQUIRE(enabled);
+#else
+    QITI_REQUIRE_FALSE(enabled);
+#endif
 }

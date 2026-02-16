@@ -312,19 +312,19 @@ QITI_TEST_CASE("qiti::HotspotDetector constructor/destructor detection", Hotspot
 {
     qiti::ScopedQitiTest test;
     test.enableProfilingOnAllFunctions(true);
-    
+
     // Create and destroy objects to trigger constructor/destructor profiling
     {
         std::vector<int> vec1(100, 42);  // Constructor with parameters
         std::vector<int> vec2 = vec1;    // Copy constructor
     } // Destructors called here
-    
+
     auto hotspots = qiti::HotspotDetector::detectHotspots();
-    
+
     // Look for hotspots that are constructors or destructors
     bool foundConstructor = false;
     bool foundDestructor = false;
-    
+
     for (const auto& hotspot : hotspots)
     {
         if (hotspot.function->isConstructor())
@@ -338,7 +338,7 @@ QITI_TEST_CASE("qiti::HotspotDetector constructor/destructor detection", Hotspot
             QITI_CHECK(hotspot.reason.find("[destructor]") != std::string::npos);
         }
     }
-    
+
     // Note: These checks may not always pass depending on what gets profiled
     // but if they are found, they should be properly labeled
     if (foundConstructor)
@@ -349,4 +349,140 @@ QITI_TEST_CASE("qiti::HotspotDetector constructor/destructor detection", Hotspot
     {
         QITI_CHECK(foundDestructor == true);
     }
+}
+
+//--------------------------------------------------------------------------
+// New coverage tests
+//--------------------------------------------------------------------------
+
+/** Test class with explicitly noinline/optnone constructor and destructor for hotspot profiling */
+class HotspotTestClass
+{
+public:
+    __attribute__((noinline))
+    __attribute__((optnone))
+    HotspotTestClass() : value(0)
+    {
+        // Do some work so the constructor shows up in profiling
+        volatile int sum = 0;
+        for (int i = 0; i < 1000; ++i)
+            sum = sum + i;
+        value = sum;
+    }
+
+    __attribute__((noinline))
+    __attribute__((optnone))
+    ~HotspotTestClass()
+    {
+        // Do some work so the destructor shows up in profiling
+        volatile int sum = 0;
+        for (int i = 0; i < 1000; ++i)
+            sum = sum + i;
+        value = sum;
+    }
+
+    volatile int value;
+};
+
+QITI_TEST_CASE("qiti::HotspotDetector constructor/destructor reason strings with dedicated class",
+               HotspotDetectorConstructorDestructorReasonStrings)
+{
+    qiti::ScopedQitiTest test;
+    test.enableProfilingOnAllFunctions(true);
+
+    // Create and destroy HotspotTestClass objects to profile constructor and destructor
+    {
+        HotspotTestClass obj1;
+        HotspotTestClass obj2;
+        HotspotTestClass obj3;
+    } // Destructors called here
+
+    // Turn off profiling to prevent additional functions from being profiled during detection
+    test.enableProfilingOnAllFunctions(false);
+
+    auto hotspots = qiti::HotspotDetector::detectHotspots();
+
+    bool foundConstructor = false;
+    bool foundDestructor = false;
+
+    for (const auto& hotspot : hotspots)
+    {
+        const char* name = hotspot.function->getFunctionName();
+        if (name == nullptr)
+            continue;
+
+        // Look for our specific HotspotTestClass constructor/destructor
+        if (strstr(name, "HotspotTestClass") != nullptr)
+        {
+            if (hotspot.function->isConstructor())
+            {
+                foundConstructor = true;
+                // The reason string must contain "[constructor]" (line 187-188 of qiti_HotspotDetector.cpp)
+                QITI_CHECK(hotspot.reason.find("[constructor]") != std::string::npos);
+            }
+            if (hotspot.function->isDestructor())
+            {
+                foundDestructor = true;
+                // The reason string must contain "[destructor]" (line 189 of qiti_HotspotDetector.cpp)
+                QITI_CHECK(hotspot.reason.find("[destructor]") != std::string::npos);
+            }
+        }
+    }
+
+    // We expect our noinline/optnone class to be profiled
+    QITI_CHECK(foundConstructor);
+    QITI_CHECK(foundDestructor);
+}
+
+/** Function with variable execution time to trigger high timing variance */
+__attribute__((noinline))
+__attribute__((optnone))
+void hotspotTestFuncVariableTiming(int iterations) noexcept
+{
+    volatile int sum = 0;
+    for (int i = 0; i < iterations; ++i)
+    {
+        sum = sum + i;
+    }
+}
+
+QITI_TEST_CASE("qiti::HotspotDetector high variance max time highlight", HotspotDetectorHighVarianceMaxTime)
+{
+    qiti::ScopedQitiTest test;
+    test.enableProfilingOnAllFunctions(true);
+
+    // Call the function many times with very few iterations (fast) then once with many iterations (slow).
+    // This creates a scenario where maxTime >> avgTime, triggering the variance highlight
+    // at line 176-177 of qiti_HotspotDetector.cpp: if (maxTime > avgTime * 3)
+    for (int i = 0; i < 50; ++i)
+        hotspotTestFuncVariableTiming(1);         // Extremely fast calls
+
+    hotspotTestFuncVariableTiming(5'000'000);     // One very slow call
+
+    // Turn off profiling before running detection
+    test.enableProfilingOnAllFunctions(false);
+
+    auto hotspots = qiti::HotspotDetector::detectHotspots();
+
+    // Find our variable timing function
+    const qiti::HotspotDetector::Hotspot* variableHotspot = nullptr;
+
+    for (const auto& hotspot : hotspots)
+    {
+        const char* name = hotspot.function->getFunctionName();
+        if (name != nullptr && strstr(name, "hotspotTestFuncVariableTiming") != nullptr)
+        {
+            variableHotspot = &hotspot;
+            break;
+        }
+    }
+
+    QITI_REQUIRE(variableHotspot != nullptr);
+
+    // The function should have been called 51 times (50 fast + 1 slow)
+    QITI_CHECK(variableHotspot->function->getNumTimesCalled() == 51);
+
+    // The reason string should contain "max:" because the max time greatly exceeds the average
+    // This exercises line 177 of qiti_HotspotDetector.cpp
+    QITI_CHECK(variableHotspot->reason.find("max:") != std::string::npos);
 }
